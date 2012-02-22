@@ -61,9 +61,9 @@ strcat_offset	macro src,dest
 	do_strcat	dest
 	endm
 
-save_ptr_stack	macro _seg,_off,_dest
+save_ptr_stack	macro _segment,_off,_dest
 	mov	word ptr [bp+_dest], _off
-	mov	word ptr [bp+_dest+2], _seg
+	mov	word ptr [bp+_dest+2], _segment
 	endm
 
 push_imm	macro _imm

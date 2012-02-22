@@ -9,7 +9,8 @@ include macros.h
 ;
 ; Check the monster breath effects are correct. e.g. "Frozen for xx" instead of "Burned for xx"
 ;
-; Fizzle spells when cast on an anti-magic square like BT1 and BT2.
+;
+; Levels with 0x20 are "outdoor" levels. This means no light and a different background
 
 
 ; Still Testing
@@ -36,6 +37,7 @@ include macros.h
 ; Lights now stay on when hitting an anti-magic square. 
 ; Fixed Sorcerer Sight spell to detect more than just trap squares.
 ; Fixed monster rosters for levels. 
+; Fizzle spells when cast on an anti-magic square like BT1 and BT2.
 
 .686p
 .mmx
@@ -48,7 +50,6 @@ seg000 segment byte public 'CODE' use16
 	; Attributes: bp-based frame
 
 _main proc far
-
 	var_6= word ptr	-6
 	var_4= word ptr	-4
 	var_2= word ptr	-2
@@ -622,13 +623,13 @@ dunMainLoop proc far
 	var_6= word ptr	-6
 	levP= dword ptr	-4
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 26h	
-	call	someStackOperation
+	func_enter
+	_chkstk		26h
 	push	si
+
 	mov	word ptr [bp+levP], offset characterIOBuf
 	mov	word ptr [bp+levP+2], seg seg022
+
 	mov	ax, offset characterIOBuf
 	mov	dx, seg	seg022
 	push	dx
@@ -655,13 +656,11 @@ dunMainLoop proc far
 	push	ax
 	call	readMonsterFile
 	add	sp, 2
-	lea	ax, [bp+var_1E]
-	push	ss
-	push	ax
-	push	word ptr [bp+levP+2]
-	push	word ptr [bp+levP]
-	call	decryptName
-	add	sp, 8
+
+	push_ss_string	var_1E
+	push_ptr_stack	levP
+	std_call	decryptName, 8
+
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t._width]
 	mov	dunWidth, al
@@ -1543,10 +1542,8 @@ map_enterBuilding proc far
 	var_2= word ptr	-2
 	square=	word ptr  6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	func_enter
+	_chkstk		2
 	mov	ax, [bp+square]
 	mov	cl, 4
 	sar	ax, cl
@@ -1645,10 +1642,8 @@ bigpic_buildViewMaybe proc far
 	sqEast=	word ptr  6
 	sqNorth= word ptr  8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 3Eh	
-	call	someStackOperation
+	func_enter
+	_chkstk		3Eh
 	push	si
 	mov	[bp+gbuf], offset graphicsBuf
 	mov	[bp+gseg], seg seg023
@@ -2234,7 +2229,7 @@ seg000 ends
 seg001 segment word public 'CODE' use16
 	assume cs:seg001
 ;org 0Bh
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_1173B:
 align 2
 ; Attributes: bp-based frame
@@ -3669,7 +3664,7 @@ seg001 ends
 seg002 segment byte public 'CODE' use16
 	assume cs:seg002
 ;org 6
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Attributes: bp-based frame
 
 camp_addMember proc far
@@ -8274,7 +8269,7 @@ seg002 ends
 ; Segment type:	Pure code
 seg003 segment byte public 'CODE' use16
 	assume cs:seg003
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Attributes: bp-based frame
 
 sub_14D90 proc far
@@ -13286,7 +13281,7 @@ seg003 ends
 seg004 segment word public 'CODE' use16
 	assume cs:seg004
 ;org 7
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_17737:
 align 2
 ; Attributes: bp-based frame
@@ -13508,7 +13503,7 @@ seg004 ends
 ; Segment type:	Pure code
 seg005 segment byte public 'CODE' use16
 	assume cs:seg005
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Attributes: bp-based frame
 
 sub_17920 proc far
@@ -13764,7 +13759,7 @@ seg005 ends
 seg006 segment word public 'CODE' use16
 	assume cs:seg006
 ;org 9
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_17B89:
 align 2
 ; Attributes: bp-based frame
@@ -16046,7 +16041,7 @@ seg006 ends
 seg007 segment word public 'CODE' use16
 	assume cs:seg007
 ;org 0Dh
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_191CD:
 align 2
 ; This function	sets the direction facing in the
@@ -19709,7 +19704,7 @@ seg007 ends
 seg008 segment byte public 'CODE' use16
 	assume cs:seg008
 ;org 0Ah
-	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Entry	point for a battle
 ; Attributes: bp-based frame
 
@@ -25353,7 +25348,7 @@ seg008 ends
 seg009 segment word public 'CODE' use16
 	assume cs:seg009
 ;org 9
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_1E959:
 align 2
 ; Attributes: bp-based frame
@@ -27283,7 +27278,7 @@ seg009 ends
 seg010 segment word public 'CODE' use16
 	assume cs:seg010
 ;org 9
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_1FC89:
 align 2
 ; Attributes: bp-based frame
@@ -27365,7 +27360,6 @@ loc_1FD2C:
 	jge	short loc_1FD4F
 	sub	ax, ax
 	jmp	short loc_1FD8A
-	jmp	short loc_1FD5A
 loc_1FD4F:
 	mov	al, byte ptr [bp+var_2]
 	mov	gs:bat_curTarget, al
@@ -27640,16 +27634,22 @@ loc_1FFA8:
 	call	near ptr _sp_checkSPPT
 	add	sp, 4
 	or	ax, ax
-	jnz	short loc_20000
-	mov	ax, offset aButItFizzled
-	push	ds
-	push	ax
-	push	word ptr [bp+var_8+2]
-	push	word ptr [bp+var_8]
-	call	_strcat
-	add	sp, 8
-	mov	word ptr [bp+var_8], ax
-	mov	word ptr [bp+var_8+2], dx
+	jz	short loc_doCastSpell_fizzled
+	mov	al, gs:sq_antiMagicFlag
+	sub	ah, ah
+	or	ax, ax
+	jz	short loc_20000
+
+loc_doCastSpell_fizzled:
+;	mov	ax, offset aButItFizzled
+;	push	ds
+;	push	ax
+;	push	word ptr [bp+var_8+2]
+;	push	word ptr [bp+var_8]
+;	call	_strcat
+;	add	sp, 8
+;	mov	word ptr [bp+var_8], ax
+;	mov	word ptr [bp+var_8+2], dx
 	lfs	bx, [bp+var_8]
 	inc	word ptr [bp+var_8]
 	mov	byte ptr fs:[bx], 0
@@ -27658,7 +27658,9 @@ loc_1FFA8:
 	push	ax
 	call	printString
 	add	sp, 4
-	wait4IO
+
+	call	printSpellFizzled
+
 	sub	ax, ax
 	jmp	short loc_20023
 loc_20000:
@@ -32006,7 +32008,7 @@ seg010 ends
 seg011 segment word public 'CODE' use16
 	assume cs:seg011
 ;org 1
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_229C1:
 align 2
 ; Attributes: bp-based frame
@@ -32624,7 +32626,7 @@ seg011 ends
 seg012 segment byte public 'CODE' use16
 	assume cs:seg012
 ;org 0Eh
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; This function	is useless....
 ; Attributes: bp-based frame
 _returnValueOrFFFF proc	far
@@ -35888,7 +35890,7 @@ seg012 ends
 seg013 segment byte public 'CODE' use16
 	assume cs:seg013
 ;org 4
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Attributes: bp-based frame
 
 dunsq_battleCheck proc far
@@ -36188,7 +36190,7 @@ dunsq_antiMagic	proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	inc	gs:byte_42454
+	inc	gs:sq_antiMagicFlag
 
 	; Change to 1 to skip over lightDuration
 	mov	[bp+var_2], 1
@@ -36537,7 +36539,7 @@ dun_doSpecialSquare proc far
 	sub	al, al
 	mov	gs:byte_4229B, al
 	mov	gs:stuckFlag, al
-	mov	gs:byte_42454, al
+	mov	gs:sq_antiMagicFlag, al
 	mov	gs:regenSpptSq,	al
 	mov	byte_4EECC, al
 	mov	bx, [bp+sqNorth]
@@ -37381,7 +37383,7 @@ seg013 ends
 seg014 segment byte public 'CODE' use16
 	assume cs:seg014
 ;org 8
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Attributes: bp-based frame
 
 bards_enter proc far
@@ -37781,7 +37783,7 @@ seg014 ends
 seg015 segment word public 'CODE' use16
 	assume cs:seg015
 ;org 0Dh
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_25E6D:
 align 2
 ; Attributes: bp-based frame
@@ -38248,7 +38250,7 @@ seg015 ends
 seg016 segment byte public 'CODE' use16
 	assume cs:seg016
 ;org 0Eh
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Attributes: bp-based frame
 
 sub_2625E proc far
@@ -38429,7 +38431,7 @@ seg016 ends
 seg017 segment word public 'CODE' use16
 	assume cs:seg017
 ;org 3
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 algn_263E3:
 align 2
 ; Attributes: bp-based frame
@@ -39649,7 +39651,7 @@ seg017 ends
 seg018 segment byte public 'CODE' use16
 	assume cs:seg018
 ;org 0Ch
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
 ; Attributes: bp-based frame
 geomancerSomething proc	far
 
@@ -40054,7 +40056,7 @@ seg018 ends
 seg019 segment word public 'CODE' use16
 	assume cs:seg019
 ;org 3
-	assume es:seg027, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
+	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
 byte_27433 db 90h, 10h dup(0)
 ; Attributes: bp-based frame
 
@@ -50671,7 +50673,7 @@ byte_4244E db 0
 align 2
 word_42450 dw 0
 breakAfterFunc dw 0
-byte_42454 db 0
+sq_antiMagicFlag		db 0
 align 2
 word_42456 dw 0
 byte_42458 db 0
