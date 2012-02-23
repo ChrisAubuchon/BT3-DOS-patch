@@ -38,6 +38,8 @@ include macros.h
 ; Fixed Sorcerer Sight spell to detect more than just trap squares.
 ; Fixed monster rosters for levels. 
 ; Fizzle spells when cast on an anti-magic square like BT1 and BT2.
+; Print full spell name under "Known Spells" screen of a magic user
+; Removed wait4IO from dunsq_doTrap
 
 .686p
 .mmx
@@ -637,8 +639,7 @@ dunMainLoop proc far
 	mov	ax, dunLevelIndex
 	add	ax, 10
 	push	ax
-	call	readLevelData
-	add	sp, 6
+	func_readLevelData
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.levFlags]
 	sub	ah, ah
@@ -648,14 +649,12 @@ dunMainLoop proc far
 	add	ax, 3
 	mov	[bp+var_22], ax
 	push	ax
-	call	readGraphicsMaybe
-	add	sp, 2
+	func_readGraphicsMaybe
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.monIndex]
 	sub	ah, ah
 	push	ax
-	call	readMonsterFile
-	add	sp, 2
+	func_readMonsterFile
 
 	push_ss_string	var_1E
 	push_ptr_stack	levP
@@ -723,7 +722,8 @@ loc_1074B:
 	add	ax, 22h	
 	mov	gs:mapDataOff, ax
 	mov	gs:mapDataSeg, dx
-loc_10761:
+
+loc_dunMainLoop_wander_check:
 	call	_random
 	test	al, 0FCh
 	jnz	short loc_1076F
@@ -743,25 +743,17 @@ loc_1076F:
 loc_107A8:
 	call	bat_init
 	or	ax, ax
-	jz	short loc_107B9
+	jz	short loc_107BE
 	mov	ax, 5
-	jmp	loc_10B38
-	jmp	short loc_107BE
-loc_107B9:
-	call	clearTextWindow
+	jmp	loc_dunMainLoop_exit
 loc_107BE:
+	call	clearTextWindow
 	push	sq_north
 	push	sq_east
-	mov	ax, offset rowOffset
-	mov	dx, seg	seg027
-	push	dx
-	push	ax
-	call	dun_doSpecialSquare
-	add	sp, 8
-	mov	ax, offset graphicsBuf
-	mov	dx, seg	seg023
-	push	dx
-	push	ax
+	push_seg_ptr	seg027, rowOffset
+	std_call	dun_doSpecialSquare, 8
+
+	push_seg_ptr	seg023, graphicsBuf
 	push	sq_north
 	push	sq_east
 	push	cs
@@ -804,7 +796,7 @@ loc_10886:
 	cmp	buildingRvalMaybe, 0
 	jz	short loc_10899
 	mov	ax, buildingRvalMaybe
-	jmp	loc_10B38
+	jmp	loc_dunMainLoop_exit
 loc_10899:
 	mov	ax, 0A000h
 	push	ax
@@ -819,9 +811,7 @@ loc_10899:
 	jz	short loc_1090B
 	mov	byte ptr word_44166,	0
 	cmp	buildingRvalMaybe, 0
-	jz	short loc_108D5
-	mov	ax, buildingRvalMaybe
-	jmp	loc_10B38
+	jnz	loc_dunMainLoop_return_bldg_rval
 loc_108D5:
 	mov	ax, offset graphicsBuf
 	mov	dx, seg	seg023
@@ -851,7 +841,7 @@ loc_1091A:
 	or	ax, ax
 	jz	short loc_10929
 	mov	ax, 0FFh
-	jmp	loc_10B38
+	jmp	loc_dunMainLoop_exit
 loc_10929:
 	jmp	loc_10B23
 loc_1092C:
@@ -879,7 +869,7 @@ loc_10966:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	sub_15526
+	call	dun_doMiniMap
 	add	sp, 0Ch
 	jmp	loc_10B23
 loc_1099A:
@@ -932,7 +922,6 @@ loc_10AC0:
 	mov	gs:wallIsPhased, 0
 loc_10ADA:
 	jmp	short loc_10B23
-	jmp	short loc_10B23
 loc_10ADE:
 	cmp	ax, 'Q'
 	jnz	short loc_10AE6
@@ -970,12 +959,14 @@ loc_10B12:
 	jmp	short loc_10ADA
 loc_10B23:
 	cmp	buildingRvalMaybe, 0
-	jz	short loc_10B35
-	mov	ax, buildingRvalMaybe
-	jmp	short loc_10B38
+	jnz	short loc_dunMainLoop_return_bldg_rval
 loc_10B35:
-	jmp	loc_10761
-loc_10B38:
+	jmp	loc_dunMainLoop_wander_check
+
+loc_dunMainLoop_return_bldg_rval:
+	mov	ax, buildingRvalMaybe
+
+loc_dunMainLoop_exit:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -2197,32 +2188,6 @@ sub_11706 proc far
 	retf
 sub_11706 endp
 
-;printCharName	proc far
-
-;	var_14= word ptr -14h
-;	charNumber= word ptr 6
-
-;	func_enter
-;	_chkStk	14h
-;	push_imm	10h
-;	lea	ax, [bp+var_14]
-;	push	ss
-;	push	ax
-;	getCharP [bp+charNumber], bx
-;	lea	ax, roster._name[bx]
-;	mov	dx, seg seg027
-;	push	dx
-;	push	ax
-;	func_strncpy
-;	lea ax, [bp+var_14]
-;	push ss
-;	push ax
-;	func_printString
-;	func_exit
-;	retf
-;printCharName endp
-
-
 seg000 ends
 
 ; Segment type:	Pure code
@@ -2268,6 +2233,7 @@ loc_txt_castSpell_toupper_start:
 	sub	ah, ah
 	push	ax
 	std_call	_str_capitalize,2
+
 	mov	bx, [bp+counter]
 	mov	ss:[si+bx], al
 	inc	[bp+counter]
@@ -2314,10 +2280,11 @@ loc_txt_castSpell_notLearned:
 
 loc_txt_castSpell_fail:
 	func_printString
+
 	push_imm	2
-	call		getIOwithDelay
-	add		sp, 2
-	mov	ax, 0FFFFh
+	std_call	getIOwithDelay, 2
+
+	func_return	0FFFFh
 
 loc_txt_castSpell_exit:
 	pop	si
@@ -2340,8 +2307,7 @@ getKeyboardCmd proc far
 	push	[bp+arg_0]
 	call	castSpell
 	add	sp, 2
-	mov	ax, 1
-	jmp	loc_11868
+	jmp	loc_getKeyboardCmd_success
 loc_11765:
 	cmp	[bp+arg_0], 31h	
 	jl	short loc_11786
@@ -2352,8 +2318,7 @@ loc_11765:
 	push	ax
 	call	printCharacter
 	add	sp, 2
-	mov	ax, 1
-	jmp	loc_11868
+	jmp	loc_getKeyboardCmd_success
 	
 loc_11786:
 	mov	ax, [bp+arg_0]
@@ -2361,71 +2326,52 @@ loc_11786:
 l_printHelp:
 	push	cs
 	call	near ptr printCommandHelp
-	mov	ax, 1
-	jmp	loc_11868
+	jmp	loc_getKeyboardCmd_success
 l_castSpell:
 	sub	ax, ax
 	push	ax
 	call	castSpell
 	add	sp, 2
-	mov	ax, 1
-	jmp	loc_11868
+	jmp	loc_getKeyboardCmd_success
 	
 l_reorderParty:
-	push	cs
-	call	near ptr reorderParty
-	mov	ax, 1
-	jmp	loc_11868
+	call	reorderParty
+	jmp	loc_getKeyboardCmd_success
 	
 l_saveGame:
-	push	cs
-	call	near ptr saveGame
-	mov	ax, 1
-	jmp	loc_11868
+	call	saveGame
+	jmp	loc_getKeyboardCmd_success
 	
 l_singBardSong:
 	call	song_getNonCombatSinger
-	mov	ax, 1
-	jmp	loc_11868
+	jmp	loc_getKeyboardCmd_success
 l_dropMember:
-	push	cs
-	call	near ptr dropPartyMember
-	mov	ax, 1
-	jmp	loc_11868
+	call	dropPartyMember
+	jmp	loc_getKeyboardCmd_success
 l_pauseGame:
 	cmp	gs:byte_42296, 0FFh
 	jnz	short loc_117E1
-	sub	ax, ax
-	jmp	loc_11868
+	jmp	loc_getKeyboardCmd_fail
 loc_117E1:
 	mov	gs:word_42450, 1
 	mov	ax, offset aPausing
 	push	ds
 	push	ax
-	push	cs
-	call	near ptr anotherPrintString
+	call	anotherPrintString
 	add	sp, 4
 	mov	gs:word_42450, 0
-	mov	ax, 1
-	jmp	short loc_11868
+	jmp	loc_getKeyboardCmd_success
 l_partyAttack:
 	mov	partyAttackFlag, 1
-	sub	ax, ax
-	jmp	short loc_11868
+	jmp	loc_getKeyboardCmd_fail
 l_useItem:
-	push	cs
-	call	near ptr useItem
-	mov	ax, 1
-	jmp	short loc_11868
+	call	useItem
+	jmp	loc_getKeyboardCmd_success
 l_toggleSound:
-	push	cs
-	call	near ptr snd_toggle
-	mov	ax, 1
-	jmp	short loc_11868
+	call	snd_toggle
+	jmp	loc_getKeyboardCmd_success
 loc_11828:
-	sub	ax, ax
-	jmp	short loc_11868
-	jmp	short loc_11868
+	jmp	loc_getKeyboardCmd_fail
 loc_1182E:
 	sub	ax, 42h	
 	cmp	ax, 14h
@@ -2454,7 +2400,15 @@ dw offset l_saveGame
 dw offset l_pauseGame	
 dw offset l_useItem	
 dw offset l_toggleSound	
-loc_11868:
+
+loc_getKeyboardCmd_fail:
+	xor	ax, ax
+	jmp	loc_getKeyboardCmd_exit
+
+loc_getKeyboardCmd_success:
+	mov	ax, 1
+
+loc_getKeyboardCmd_exit:
 	mov	sp, bp
 	pop	bp
 	retf
@@ -2708,10 +2662,7 @@ party_swapMembers proc far
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	func_enter
 	mov	ax, offset newCharBuffer
 	mov	dx, seg	seg027
 	push	dx
@@ -2945,15 +2896,11 @@ useItem	proc far
 	var_32=	word ptr -32h
 	var_2= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 0FAh 
-	call	someStackOperation
-	mov	ax, offset aWhoWillUseAnItem
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	func_enter
+	_chkstk 0FAh
+
+	push_ds_string	aWhoWillUseAnItem
+	std_call	printStringWClear, 4
 	call	getCharNumber
 	mov	[bp+var_2], ax
 	or	ax, ax
@@ -2970,30 +2917,21 @@ loc_11D18:
 	jb	short loc_11D2B
 	jmp	loc_11E03
 loc_11D2B:
-	lea	ax, [bp+var_32]
-	push	ss
-	push	ax
-	lea	ax, [bp+var_FA]
-	push	ss
-	push	ax
-	push	[bp+var_2]
-	call	sub_188E8
-	add	sp, 0Ah
+	push_ss_string	var_32
+	push_ss_string	var_FA
+	push_var_stack	var_2
+	std_call	sub_188E8, 0Ah
+
 	mov	[bp+var_36], ax
 	or	ax, ax
 	jnz	short loc_11D4B
 	jmp	loc_11DE7
 loc_11D4B:
-	push	ax
-	lea	ax, [bp+var_32]
-	push	ss
-	push	ax
-	mov	ax, offset aWhichItem?_0
-	mov	dx, seg	dseg
-	push	dx
-	push	ax
-	call	printStringGetInput
-	add	sp, 0Ah
+	push_reg	ax
+	push_ss_string	var_32
+	push_ds_string	aWhichItem?_0
+	std_call	printStringGetInput, 0Ah
+
 	mov	[bp+var_34], ax
 	or	ax, ax
 	jge	short loc_11D6B
@@ -3628,23 +3566,16 @@ dropPartyMember	endp
 ; Attributes: bp-based frame
 
 quitGame proc far
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	mov	ax, offset aQuitTheGame?
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	func_enter
+
+	push_ds_string	aQuitTheGame?
+	std_call	printStringWClear, 4
+
 	call	getYesNo
 	or	ax, ax
 	jz	short loc_123FE
-	mov	ax, offset aYouWillLoseYou
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	push_ds_string	aYouWillLoseYou
+	std_call	printStringWClear, 4
 	call	getYesNo
 	jmp	short loc_12402
 	jmp	short loc_12402
@@ -9094,7 +9025,7 @@ getIOwithDelay endp
 
 ; Attributes: bp-based frame
 
-sub_15526 proc far
+dun_doMiniMap proc far
 
 	var_18=	dword ptr -18h
 	var_14=	word ptr -14h
@@ -9367,7 +9298,7 @@ loc_15761:
 	mov	sp, bp
 	pop	bp
 	retf
-sub_15526 endp
+dun_doMiniMap endp
 
 ; Attributes: bp-based frame
 
@@ -13532,7 +13463,7 @@ loc_1794E:
 	mov	gs:byte_41E61, al
 	jmp	short loc_1798C
 loc_17962:
-	mov	byte_4EEC2, 0
+	mov	detectType, 0
 	jmp	short loc_1798C
 loc_1796E:
 	mov	byte_4EECB, 0
@@ -15881,8 +15812,8 @@ loc_1906B:
 	mov	bx, [bp+var_4]
 	mov	cl, 3
 	shl	bx, cl
-	mov	ax, word ptr spellString.abbreviation[bx]
-	mov	dx, word ptr (spellString.abbreviation+2)[bx]
+	mov	ax, word ptr spellString.fullName[bx]
+	mov	dx, word ptr (spellString.fullName+2)[bx]
 	mov	si, [bp+var_6]
 	inc	[bp+var_6]
 	shl	si, 1
@@ -29761,7 +29692,7 @@ sp_areaEnchant proc far
 	mov	al, spellEffectFlags[bx]
 	mov	detectDuration, al
 	mov	al, byte_480A4[bx]
-	mov	byte_4EEC2, al
+	mov	detectType, al
 	mov	ax, icon_areaEnchant
 	push	ax
 	call	icon_activate
@@ -36019,7 +35950,7 @@ loc_24E9B:
 	jmp	short loc_24E97
 loc_24EB3:
 	mov	byte ptr word_44166,	0
-	wait4IO
+	;delayNoTable	2
 	sub	ax, ax
 	push	ax
 	push	sq_east
@@ -36204,12 +36135,13 @@ loc_25075:
 
 	cmp	lightDuration[bx], 0
 	jz	short loc_25093
-	push	bx
+	push	[bp+var_2]
 	call	sub_17920
 	add	sp, 2
 loc_25093:
 	jmp	short loc_25072
 loc_25095:
+	mov	byte ptr word_44166, 0
 	sub	ax, ax
 	jmp	short $+2
 	mov	sp, bp
@@ -36258,6 +36190,7 @@ loc_25103:
 	jle	short loc_25118
 	mov	buildingRvalMaybe, 5
 loc_25118:
+	mov	byte ptr word_44166, 0
 	sub	ax, ax
 	jmp	short $+2
 	pop	si
@@ -36274,7 +36207,7 @@ dunsq_somethingOdd proc	far
 	xor	ax, ax
 	call	someStackOperation
 	sub	al, al
-	mov	byte_4EEC2, al
+	mov	detectType, al
 	mov	gs:byte_41E61, al
 	sub	ax, ax
 	jmp	short $+2
@@ -36915,7 +36848,7 @@ loc_256DB:
 	push	cs
 	call	near ptr dun_getSqFlagAhead3
 	add	sp, 8
-	mov	bl, byte_4EEC2
+	mov	bl, detectType
 	sub	bh, bh
 	mov	al, byte_4B2B8[bx]
 	cbw
@@ -36993,7 +36926,25 @@ loc_2579C:
 	inc	[bp+deltaSq]
 loc_2579F:
 	cmp	[bp+deltaSq], 3
-	jge	short loc_25816
+	jge	loc_25816
+	mov	si, dirFacing
+	shl	si, 1
+	mov	ax, dirDeltaE[si]
+	add	[bp+sqE], ax
+	mov	al, dunWidth
+	sub	ah, ah
+	push_reg	ax
+	push_var_stack	sqE
+	std_call	wrapNumber, 4
+	mov	[bp+sqE], ax
+	mov	ax, dirDeltaN[si]
+	sub	[bp+sqN], ax
+	mov	al, dunHeight
+	sub	ah, ah
+	push_reg	ax
+	push_var_stack	sqN
+	std_call	wrapNumber, 4
+	mov	[bp+sqN], ax
 	mov	bx, [bp+sqN]
 	shl	bx, 1
 	shl	bx, 1
@@ -37014,21 +36965,13 @@ loc_257D7:
 	inc	[bp+counter]
 loc_257DA:
 	cmp	[bp+counter], 3
-	jge	short loc_257F1
+	jge	short loc_2579C
 	mov	bx, [bp+counter]
 	lfs	si, [bp+sqFlagP]
 	mov	al, fs:[bx+si]
 	lfs	si, [bp+rSqList]
 	or	fs:[bx+si], al
 	jmp	short loc_257D7
-loc_257F1:
-	mov	si, dirFacing
-	shl	si, 1
-	mov	ax, dirDeltaE[si]
-	add	[bp+sqE], ax
-	mov	ax, dirDeltaN[si]
-	sub	[bp+sqN], ax
-	jmp	short loc_2579C
 loc_25816:
 	pop	si
 	mov	sp, bp
@@ -56461,7 +56404,7 @@ compassDuration		db 0
 detectDuration		db 0
 shieldDuration		db 0
 levitationDuration	db 0
-byte_4EEC2 db 0
+detectType		db 0
 byte_4EEC3 db 0
 byte_4EEC4 db 0
 levelNoMaybe db	0

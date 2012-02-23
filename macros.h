@@ -8,6 +8,10 @@ func_exit	macro
 	pop	bp
 	endm
 
+func_return	macro	_rval
+	mov	ax, _rval
+	endm
+
 null_terminate	macro inString
 	lfs	bx, dword ptr inString
 	inc 	word ptr inString
@@ -45,6 +49,11 @@ wait4IO		macro
 	push	ax
 	call	far ptr sub_14E41
 	add	sp, 2
+	endm
+
+delayNoTable	macro _count
+	push_imm	_count
+	std_call	sub_14E41, 2
 	endm
 
 do_strcat	macro _dest
@@ -100,7 +109,13 @@ push_ss_string	macro _str
 	push	ss
 	push	ax
 	endm
-	
+
+push_seg_ptr	macro _seg, _off
+	mov	ax, offset _off
+	mov	dx, seg _seg
+	push	dx
+	push	ax
+	endm
 
 far_call	macro _func,_sp_add
 	push	cs
@@ -153,4 +168,16 @@ func_lseek		macro
 
 func_close		macro
 	std_call	_close, 2
+	endm
+
+func_readLevelData	macro
+	std_call	readLevelData, 6
+	endm
+
+func_readGraphicsMaybe	macro
+	std_call	readGraphicsMaybe, 2
+	endm
+
+func_readMonsterFile	macro
+	std_call	readMonsterFile, 2
 	endm
