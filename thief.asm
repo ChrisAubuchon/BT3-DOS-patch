@@ -9,8 +9,6 @@ include macros.h
 ;
 ; Check the monster breath effects are correct. e.g. "Frozen for xx" instead of "Burned for xx"
 ;
-;
-; Levels with 0x20 are "outdoor" levels. This means no light and a different background
 
 
 ; Still Testing
@@ -40,6 +38,8 @@ include macros.h
 ; Fizzle spells when cast on an anti-magic square like BT1 and BT2.
 ; Print full spell name under "Known Spells" screen of a magic user
 ; Removed wait4IO from dunsq_doTrap
+; Made the outdoor levels outdoor. Basically just call a different setBG routine and make lightDistance 4 in dun_buildView
+; COSMETIC: Clear the screen after certain actions in dunMainLoop and wildMainLoop. Messages would linger and be confusing.
 
 .686p
 .mmx
@@ -672,37 +672,37 @@ dunMainLoop proc far
 	mov	levFlags, al
 	and	al, 7
 	mov	levelNoMaybe, al
-	cmp	gs:word_42402, 0
-	jz	short loc_106D9
+	cmp	gs:levelChangedFlag, 0
+	jz	short loc_dunMainLoop_skipDeltaSQEN
+
+	; Add deltaSqN and deltaSqE to sq_north and sq_east
 	mov	al, fs:[bx+dun_t.deltaSqN]
 	cbw
 	sub	sq_north, ax
 	mov	al, fs:[bx+dun_t.deltaSqE]
 	cbw
 	sub	sq_east, ax
-	mov	gs:word_42402, 0
-loc_106D9:
+	mov	gs:levelChangedFlag, 0
+
+loc_dunMainLoop_skipDeltaSQEN:
 	mov	ax, bx
 	mov	dx, word ptr [bp+levP+2]
 	add	ax, 24h	
 	mov	gs:mapDataOff, ax
 	mov	gs:mapDataSeg, dx
 	mov	[bp+var_C], 0
-	jmp	short loc_106F8
-loc_106F5:
-	inc	[bp+var_C]
-loc_106F8:
-	lfs	bx, [bp+levP]
-	mov	al, fs:[bx+dun_t._height]
-	sub	ah, ah
-	cmp	ax, [bp+var_C]
-	jbe	short loc_1074B
+	mov	dl, dunHeight
+	sub	dh, dh
+
+loc_dunMainLoop_popRowLoop_enter:
+	cmp	dx, [bp+var_C]
+	jbe	short loc_dunMainLoop_popRowLoop_exit
 	mov	ax, [bp+var_C]
 	shl	ax, 1
 	add	ax, gs:mapDataOff
-	mov	dx, gs:mapDataSeg
 	mov	word ptr [bp+var_26], ax
-	mov	word ptr [bp+var_26+2],	dx
+	mov	ax, gs:mapDataSeg
+	mov	word ptr [bp+var_26+2],	ax
 	lfs	bx, [bp+var_26]
 	mov	ah, fs:[bx+1]
 	sub	al, al
@@ -715,8 +715,10 @@ loc_106F8:
 	shl	bx, 1
 	mov	word ptr gs:rowOffset[bx], ax
 	mov	word ptr gs:(rowOffset+2)[bx], seg seg022
-	jmp	short loc_106F5
-loc_1074B:
+	inc	[bp+var_C]
+	jmp	short loc_dunMainLoop_popRowLoop_enter
+
+loc_dunMainLoop_popRowLoop_exit::
 	mov	ax, word ptr [bp+levP]
 	mov	dx, word ptr [bp+levP+2]
 	add	ax, 22h	
@@ -726,13 +728,14 @@ loc_1074B:
 loc_dunMainLoop_wander_check:
 	call	_random
 	test	al, 0FCh
-	jnz	short loc_1076F
+	jnz	short loc_dunMainLoop_battleCheck
 	call	dun_wanderingCreature
-loc_1076F:
+
+loc_dunMainLoop_battleCheck:
 	cmp	partyAttackFlag, 0
-	jnz	short loc_107A8
+	jnz	short loc_dunMainLoop_doBattle
 	cmp	byte_4EECC, 0
-	jnz	short loc_107A8
+	jnz	short loc_dunMainLoop_doBattle
 	call	_random
 	test	al, 3Fh
 	jnz	short loc_107BE
@@ -740,58 +743,56 @@ loc_1076F:
 	jz	short loc_107BE
 	cmp	gs:songAntiMonster, 0
 	jnz	short loc_107BE
-loc_107A8:
+
+loc_dunMainLoop_doBattle:
 	call	bat_init
 	or	ax, ax
-	jz	short loc_107BE
+	jz	short loc_107B9
 	mov	ax, 5
 	jmp	loc_dunMainLoop_exit
-loc_107BE:
+
+loc_107B9:
 	call	clearTextWindow
+
+loc_107BE:
 	push	sq_north
 	push	sq_east
-	push_seg_ptr	seg027, rowOffset
+	push	seg027_x
+	push	offset rowOffset
 	std_call	dun_doSpecialSquare, 8
 
-	push_seg_ptr	seg023, graphicsBuf
+	push	seg023_x
+	push	offset graphicsBuf
 	push	sq_north
 	push	sq_east
-	push	cs
-	call	near ptr dun_buildView
-	add	sp, 8
+	std_call	dun_buildView, 8
 	mov	[bp+var_E], ax
+
 	push	dirFacing
-	lfs	bx, [bp+levP]
-	mov	al, fs:[bx+dun_t._height]
+	mov	al, dunHeight
 	sub	ah, ah
 	push	ax
-	mov	al, fs:[bx+dun_t._width]
+	mov	al, dunWidth
 	push	ax
 	push	sq_north
 	push	sq_east
-	mov	ax, offset rowOffset
-	mov	dx, seg	seg027
-	push	dx
-	push	ax
-	push	cs
-	call	near ptr sub_10B3D
-	add	sp, 0Eh
+	push	seg027_x
+	push	offset rowOffset
+	std_call	sub_10B3D, 0Eh
+
 	push	dirFacing
 	push	sq_north
 	push	sq_east
-	call	dun_detectSquares
-	add	sp, 6
-	lea	ax, [bp+var_1E]
-	push	ss
-	push	ax
-	call	setTitle
-	add	sp, 4
+	std_call	dun_detectSquares,6
+
+	push_ss_string	var_1E
+	std_call	setTitle, 4
+
 	sub	ax, ax
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	call	map_execute
-	add	sp, 6
+	std_call	map_execute, 6
 loc_10886:
 	cmp	buildingRvalMaybe, 0
 	jz	short loc_10899
@@ -804,8 +805,7 @@ loc_10899:
 	add	sp, 2
 	mov	[bp+var_6], ax
 	push	ax
-	call	getKeyboardCmd
-	add	sp, 2
+	std_call	getKeyboardCmd, 2
 	mov	[bp+var_20], ax
 	or	ax, ax
 	jz	short loc_1090B
@@ -814,73 +814,83 @@ loc_10899:
 	jnz	loc_dunMainLoop_return_bldg_rval
 loc_108D5:
 	mov	ax, offset graphicsBuf
-	mov	dx, seg	seg023
-	push	dx
-	push	ax
+	push	offset graphicsBuf
 	push	sq_north
 	push	sq_east
-	push	cs
-	call	near ptr dun_buildView
-	add	sp, 8
+	std_call	dun_buildView, 8
 	mov	[bp+var_E], ax
-	lea	ax, [bp+var_1E]
-	push	ss
-	push	ax
-	call	setTitle
-	add	sp, 4
+	push_ss_string	var_1E
+	std_call	setTitle, 4
 	call	clearTextWindow
 loc_1090B:
 	cmp	[bp+var_20], 0
-	jz	short loc_10914
-	jmp	loc_10886
-loc_10914:
+	jnz	short loc_10886
 	mov	ax, [bp+var_6]
-	jmp	loc_10ADE
-loc_1091A:
+
+loc_dunMainLoop_key_Q:
+	cmp	ax, 'Q'
+	jnz	loc_dunMainLoop_key_split
+
 	call	quitGame
 	or	ax, ax
-	jz	short loc_10929
+	jz	loc_dunMainLoop_buildingRvalMaybe_check
+
 	mov	ax, 0FFh
 	jmp	loc_dunMainLoop_exit
-loc_10929:
-	jmp	loc_10B23
-loc_1092C:
-	push	sq_north
-	push	sq_east
-	call	dun_ascendPortal
-	add	sp, 4
-	jmp	loc_10B23
-loc_10949:
-	push	sq_north
-	push	sq_east
-	call	dun_descendPortal
-	add	sp, 4
-	jmp	loc_10B23
-loc_10966:
-	lfs	bx, [bp+levP]
-	mov	al, fs:[bx+dun_t._height]
+
+loc_dunMainLoop_key_split:
+	jg	short loc_dunMainLoop_key_W
+
+loc_dunMainLoop_key_qmark:
+	cmp	ax, '?'
+	jnz	loc_dunMainLoop_key_E
+
+	mov	al, dunHeight
 	sub	ah, ah
 	push	ax
-	mov	al, fs:[bx+dun_t._width]
+	mov	al, dunWidth
 	push	ax
 	push	sq_north
 	push	sq_east
-	mov	ax, offset rowOffset
-	mov	dx, seg	seg027
-	push	dx
-	push	ax
-	call	dun_doMiniMap
-	add	sp, 0Ch
-	jmp	loc_10B23
-loc_1099A:
-	mov	ax, 1
-	push	ax
+	push	seg027_x
+	push	offset rowOffset
+	std_call	dun_doMiniMap, 0Ch
+	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+
+loc_dunMainLoop_key_E:
+	cmp	ax, 'E'
+	jnz	loc_dunMainLoop_key_K
+
+	push	sq_north
+	push	sq_east
+	std_call	dun_ascendPortal, 4
+	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+
+loc_dunMainLoop_key_K:
+	cmp	ax, 'K'
+	jnz	loc_dunMainLoop_buildingRvalMaybe_check
+	jmp	loc_dunMainLoop_go_forward
+	
+loc_dunMainLoop_key_W:
+	cmp	ax, 'W'
+	jnz	loc_dunMainLoop_key_upArrow
+
+	push	sq_north
+	push	sq_east
+	std_call	dun_descendPortal, 4
+	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+
+loc_dunMainLoop_key_upArrow:
+	cmp	ax, dosKeys_upArrow
+	jnz	loc_dunMainLoop_key_leftArrow
+	
+loc_dunMainLoop_go_forward:
+	push_imm	1
 	push	[bp+var_E]
-	push	cs
-	call	near ptr dun_goForwardCheck
-	add	sp, 4
+	std_call	dun_goForwardCheck, 4
 	or	ax, ax
-	jz	short loc_10A22
+	jz	loc_dunMainLoop_buildingRvalMaybe_check
+	call	clearTextWindow
 	mov	si, dirFacing
 	shl	si, 1
 	mov	ax, sq_north
@@ -889,79 +899,51 @@ loc_1099A:
 	mov	ax, dirDeltaE[si]
 	add	ax, sq_east
 	mov	[bp+var_A], ax
-	lfs	bx, [bp+levP]
-	mov	al, fs:[bx+dun_t._height]
+
+	mov	al, dunHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+var_8]
-	push	cs
-	call	near ptr wrapNumber
-	add	sp, 4
+	std_call	wrapNumber, 4
+
 	mov	sq_north, ax
-	lfs	bx, [bp+levP]
-	mov	al, fs:[bx+dun_t._width]
+	mov	al, dunWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_A]
-	push	cs
-	call	near ptr wrapNumber
-	add	sp, 4
+	std_call	wrapNumber ,4
 	mov	sq_east, ax
 	mov	gs:wallIsPhased, 0
-loc_10A22:
-	jmp	loc_10B23
-loc_10AAE:
-	inc	dirFacing
-loc_10AB7:
-	inc	dirFacing
-loc_10AC0:
+	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+
+loc_dunMainLoop_key_leftArrow:
+	cmp	ax, dosKeys_leftArrow
+	jnz	loc_dunMainLoop_key_rightArrow
+	mov	bx, 3
+	jmp	loc_dunMainLoop_incDirFacing
+
+loc_dunMainLoop_key_rightArrow:
+	cmp	ax, dosKeys_rightArrow
+	jnz	loc_dunMainLoop_key_downArrow
+	mov	bx, 1
+	jmp	loc_dunMainLoop_incDirFacing
+
+loc_dunMainLoop_key_downArrow:
+	cmp	ax, dosKeys_downArrow
+	jnz	loc_dunMainLoop_buildingRvalMaybe_check
+	mov	bx, 2
+
+loc_dunMainLoop_incDirFacing:
 	mov	ax, dirFacing
-	inc	ax
+	add	ax, bx
 	and	ax, 3
 	mov	dirFacing, ax
 	mov	gs:wallIsPhased, 0
-loc_10ADA:
-	jmp	short loc_10B23
-loc_10ADE:
-	cmp	ax, 'Q'
-	jnz	short loc_10AE6
-	jmp	loc_1091A
-loc_10AE6:
-	jg	short loc_10B02
-	cmp	ax, '?'
-	jnz	short loc_10AF0
-	jmp	loc_10966
-loc_10AF0:
-	cmp	ax, 'E'
-	jnz	short loc_10AF8
-	jmp	loc_1092C
-loc_10AF8:
-	cmp	ax, 'K'
-	jnz	short loc_10B00
-	jmp	loc_1099A
-loc_10B00:
-	jmp	short loc_10ADA
-loc_10B02:
-	cmp	ax, 'W'
-	jnz	short loc_10B0A
-	jmp	loc_10949
-loc_10B0A:
-	cmp	ax, dosKeys_upArrow
-	jnz	short loc_10B12
-	jmp	loc_1099A
-loc_10B12:
-	cmp	ax, dosKeys_leftArrow
-	jz	short loc_10AAE
-	cmp	ax, dosKeys_rightArrow
-	jz	short loc_10AC0
-	cmp	ax, dosKeys_downArrow
-	jz	short loc_10AB7
-	jmp	short loc_10ADA
-loc_10B23:
+	call	clearTextWindow
+
+loc_dunMainLoop_buildingRvalMaybe_check:
 	cmp	buildingRvalMaybe, 0
-	jnz	short loc_dunMainLoop_return_bldg_rval
-loc_10B35:
-	jmp	loc_dunMainLoop_wander_check
+	jz	loc_dunMainLoop_wander_check
 
 loc_dunMainLoop_return_bldg_rval:
 	mov	ax, buildingRvalMaybe
@@ -1206,21 +1188,18 @@ wildMainLoop proc far
 	mov	gs:mapDataOff, map_t.rowOffset
 	mov	gs:mapDataSeg, seg seg022
 	mov	[bp+var_2C], 0
-	jmp	short loc_10D76
-loc_10D73:
-	inc	[bp+var_2C]
-loc_10D76:
-	lfs	bx, [bp+var_30]
-	mov	al, fs:[bx+map_t._height]
-	sub	ah, ah
-	cmp	ax, [bp+var_2C]
-	jbe	short loc_10DC9
+	mov	dl, mapHeight
+	sub	dh, dh
+
+loc_wildMainLoop_rowPopLoop_start:
+	cmp	dx, [bp+var_2C]
+	jbe	short loc_wildMainLoop_rowPopLoop_exit
 	mov	ax, [bp+var_2C]
 	shl	ax, 1
 	add	ax, gs:mapDataOff
-	mov	dx, gs:mapDataSeg
 	mov	word ptr [bp+var_4A], ax
-	mov	word ptr [bp+var_4A+2],	dx
+	mov	ax, gs:mapDataSeg
+	mov	word ptr [bp+var_4A+2],	ax
 	lfs	bx, [bp+var_4A]
 	mov	ah, fs:[bx+1]
 	sub	al, al
@@ -1233,251 +1212,221 @@ loc_10D76:
 	shl	bx, 1
 	mov	word ptr gs:rowOffset[bx], ax
 	mov	word ptr gs:(rowOffset+2)[bx], seg seg022
-	jmp	short loc_10D73
-loc_10DC9:
+	inc	[bp+var_2C]
+	jmp	short loc_wildMainLoop_rowPopLoop_start
+
+loc_wildMainLoop_rowPopLoop_exit:
 	mov	gs:mapDataOff, map_t.dataOffset
 	mov	gs:mapDataSeg, seg seg022
-loc_10DDB:
+
+loc_wildMainLoop_loopStart:
 	cmp	partyAttackFlag, 0
-	jnz	short loc_10E06
+	jnz	short loc_wildMainLoop_battleCheck
 	lfs	bx, [bp+var_30]
 	test	byte ptr fs:[bx+12h], 1
-	jz	short loc_10E1C
+	jz	short loc_wildMainLoop_mapExecute
 	call	_random
 	test	al, 1Fh
-	jnz	short loc_10E1C
+	jnz	short loc_wildMainLoop_mapExecute
 	cmp	gs:songAntiMonster, 0
-	jnz	short loc_10E1C
-loc_10E06:
+	jnz	short loc_wildMainLoop_mapExecute
+
+loc_wildMainLoop_battleCheck:
 	call	bat_init
 	or	ax, ax
 	jz	short loc_10E17
 	mov	ax, 5
-	jmp	loc_110B9
-	jmp	short loc_10E1C
+	jmp	loc_wildMainLoop_exit
+
 loc_10E17:
 	call	clearTextWindow
-loc_10E1C:
+
+loc_wildMainLoop_mapExecute:
 	sub	ax, ax
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	call	map_execute
-	add	sp, 6
-	cmp	buildingRvalMaybe, 0
-	jz	short loc_10E48
-	mov	ax, buildingRvalMaybe
-	jmp	loc_110B9
+	std_call	map_execute, 6
+
 loc_10E48:
 	cmp	buildingRvalMaybe, 0
-	jz	short loc_10E5B
-	mov	ax, buildingRvalMaybe
-	jmp	loc_110B9
+	jnz	loc_wildMainLoop_return_bldg_rval
+
 loc_10E5B:
-	lea	ax, [bp+levelName]
-	push	ss
-	push	ax
-	call	setTitle
-	add	sp, 4
+	push_ss_string	levelName
+	std_call	setTitle, 4
+
 	push	sq_north
 	push	sq_east
-	push	cs
-	call	near ptr bigpic_buildViewMaybe
-	add	sp, 4
+	std_call	 bigpic_buildViewMaybe, 4
 	mov	[bp+square], ax
+
 	mov	ax, 0A000h
 	push	ax
-	call	sub_14E41
-	add	sp, 2
+	std_call	sub_14E41, 2
 	mov	[bp+var_2], ax
+
 	push	ax
-	call	getKeyboardCmd
-	add	sp, 2
+	std_call	getKeyboardCmd, 2
 	mov	[bp+var_44], ax
 	or	ax, ax
 	jz	short loc_10EEE
-	mov	byte ptr word_44166,	0
+	mov	byte ptr word_44166, 0
 	cmp	buildingRvalMaybe, 0
-	jz	short loc_10EC0
-	mov	ax, buildingRvalMaybe
-	jmp	loc_110B9
+	jnz	loc_wildMainLoop_return_bldg_rval
+
 loc_10EC0:
 	push	sq_north
 	push	sq_east
-	push	cs
-	call	near ptr bigpic_buildViewMaybe
-	add	sp, 4
+	std_call	bigpic_buildViewMaybe, 4
 	mov	[bp+square], ax
-	lea	ax, [bp+levelName]
-	push	ss
-	push	ax
-	call	setTitle
-	add	sp, 4
+
+	push_ss_string levelName
+	std_call	setTitle, 4
 	call	clearTextWindow
+
 loc_10EEE:
 	cmp	[bp+var_44], 0
-	jz	short loc_10EF7
-	jmp	loc_10E48
-loc_10EF7:
+	jnz	loc_10E48
+
 	mov	ax, [bp+var_2]
-	jmp	loc_11070
-loc_10EFD:
-	call	quitGame
-	or	ax, ax
-	jz	short loc_10F0C
-	mov	ax, 0FFh
-	jmp	loc_110B9
-loc_10F0C:
-	jmp	loc_110B6
-loc_10F0F:
-	call	cmd_printLocation
-	jmp	loc_110B6
-loc_10F17:
+
+loc_wildMainLoop_key_upArrow:
+	cmp	ax, dosKeys_upArrow
+	jnz	loc_wildMainLoop_key_split
+
+loc_wildMainLoop_goForward:
 	push	[bp+square]
-	push	cs
-	call	near ptr map_enterBuilding
-	add	sp, 2
+	std_call	map_enterBuilding, 2
 	or	ax, ax
-	jz	short loc_10F38
-	cmp	buildingRvalMaybe, 0
-	jz	short loc_10F38
-	mov	ax, buildingRvalMaybe
-	jmp	loc_110B9
-loc_10F38:
+	jnz	loc_wildMainLoop_return_bldg_rval
+
 	push	[bp+square]
-	push	cs
-	call	near ptr sub_110BE
-	add	sp, 2
+	std_call	wild_goForwardCheck, 2
 	or	ax, ax
-	jnz	short loc_10F49
-	jmp	loc_10FF7
-loc_10F49:
+	jz	loc_wildMainLoop_loopStart
+
+	call	clearTextWindow
 	mov	si, dirFacing
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]
 	mov	[bp+var_8], ax
-	mov	ax, dirDeltaE[si]
-	add	ax, sq_east
+	mov	ax, sq_east
+	add	ax, dirDeltaE[si]
 	mov	[bp+var_2A], ax
-	lfs	bx, [bp+var_30]
-	test	fs:[bx+map_t.wrapFlag],	2
-	jz	short loc_10FBE
-	mov	al, fs:[bx+map_t._height]
+
+	test	wildWrapFlag, 2
+	jz	loc_wildMainLoop_forward_nowrap
+
+	mov	al, mapHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+var_8]
-	push	cs
-	call	near ptr wrapNumber
-	add	sp, 4
+	std_call	wrapNumber, 4
 	mov	sq_north, ax
-	lfs	bx, [bp+var_30]
-	mov	al, fs:[bx+map_t._width]
+
+	mov	al, mapWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_2A]
-	push	cs
-	call	near ptr wrapNumber
-	add	sp, 4
+	std_call	wrapNumber, 4
 	mov	sq_east, ax
-	jmp	short loc_10FF7
-loc_10FBE:
+	jmp	loc_wildMainLoop_loopStart
+
+loc_wildMainLoop_forward_nowrap:
 	cmp	[bp+var_8], 0
-	jl	short loc_10FF7
-	lfs	bx, [bp+var_30]
-	mov	al, fs:[bx+map_t._height]
+	jl	loc_wildMainLoop_loopStart
+
+	mov	al, mapHeight
 	sub	ah, ah
 	cmp	ax, [bp+var_8]
-	jbe	short loc_10FF7
+	jbe	loc_wildMainLoop_loopStart
+
 	cmp	[bp+var_2A], 0
-	jl	short loc_10FF7
-	mov	al, fs:[bx+map_t._width]
+	jl	loc_wildMainLoop_loopStart
+
+	mov	al, mapWidth
 	cmp	ax, [bp+var_2A]
-	jbe	short loc_10FF7
+	jbe	loc_wildMainLoop_loopStart
+
 	mov	ax, [bp+var_8]
 	mov	sq_north, ax
 	mov	ax, [bp+var_2A]
 	mov	sq_east, ax
-loc_10FF7:
-	jmp	loc_110B6
-loc_10FFA:
-	inc	dirFacing
-loc_11003:
-	inc	dirFacing
-loc_1100C:
+	jmp	loc_wildMainLoop_loopStart
+
+loc_wildMainLoop_key_split:
+	jg	loc_wildMainLoop_key_center
+
+loc_wildMainLoop_key_qmark:
+	cmp	ax, '?'
+	jnz	loc_wildMainLoop_key_K
+
+	call	cmd_printLocation
+	jmp	loc_wildMainLoop_loopStart
+
+loc_wildMainLoop_key_K:
+	cmp	ax, 'K'
+	jz	loc_wildMainLoop_goForward
+
+loc_wildMainLoop_key_Q:
+	cmp	ax, 'Q'
+	jnz	loc_wildMainLoop_loopStart
+
+	call	quitGame
+	or	ax, ax
+	jz	loc_wildMainLoop_loopStart
+	mov	ax, 0FFh
+	jmp	loc_wildMainLoop_exit
+
+loc_wildMainLoop_key_center:
+	cmp	ax, 4C00h
+	jz	loc_wildMainLoop_goForward
+
+loc_wildMainLoop_key_leftArrow:
+	cmp	ax, dosKeys_leftArrow
+	jnz	loc_wildMainLoop_key_rightArrow
+	mov	bx, 3
+	jmp	loc_wildMainLoop_incDirFacing
+
+loc_wildMainLoop_key_rightArrow:
+	cmp	ax, dosKeys_rightArrow
+	jnz	loc_wildMainLoop_key_downArrow
+	mov	bx, 1
+	jmp	loc_wildMainLoop_incDirFacing
+
+loc_wildMainLoop_key_downArrow:
+	cmp	ax, dosKeys_downArrow
+	jnz	loc_wildMainLoop_loopStart
+	mov	bx, 2
+
+loc_wildMainLoop_incDirFacing:
 	mov	ax, dirFacing
-	inc	ax
+	add	ax, bx
 	and	ax, 3
 	mov	dirFacing, ax
-	mov	ax, offset aFacing
-	push	ds
-	push	ax
-	lea	ax, [bp+var_28]
-	push	ss
-	push	ax
-	call	_strcat
-	add	sp, 8
-	mov	[bp+var_6], ax
-	mov	[bp+var_4], dx
+
+	push_ds_string aFacing
+	push_ss_string var_28
+	func_strcat
+
 	mov	bx, dirFacing
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (dirStringList+2)[bx]
-	push	word ptr dirStringList[bx]
+	push_ptr_stringList	dirStringList, bx
 	push	dx
 	push	ax
-	call	_strcat
-	add	sp, 8
-	mov	[bp+var_6], ax
-	mov	[bp+var_4], dx
-	lea	ax, [bp+var_28]
-	push	ss
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-loc_1106C:
-	jmp	short loc_110B6
-	jmp	short loc_110B6
-loc_11070:
-	cmp	ax, dosKeys_upArrow
-	jnz	short loc_11078
-	jmp	loc_10F17
-loc_11078:
-	jg	short loc_11094
-	cmp	ax, '?'
-	jnz	short loc_11082
-	jmp	loc_10F0F
-loc_11082:
-	cmp	ax, 'K'
-	jnz	short loc_1108A
-	jmp	loc_10F17
-loc_1108A:
-	cmp	ax, 'Q'
-	jnz	short loc_11092
-	jmp	loc_10EFD
-loc_11092:
-	jmp	short loc_1106C
-loc_11094:
-	cmp	ax, dosKeys_leftArrow
-	jnz	short loc_1109C
-	jmp	loc_10FFA
-loc_1109C:
-	cmp	ax, 4C00h
-	jnz	short loc_110A4
-	jmp	loc_10F17
-loc_110A4:
-	cmp	ax, dosKeys_rightArrow
-	jnz	short loc_110AC
-	jmp	loc_1100C
-loc_110AC:
-	cmp	ax, dosKeys_downArrow
-	jnz	short loc_110B4
-	jmp	loc_11003
-loc_110B4:
-	jmp	short loc_1106C
-loc_110B6:
-	jmp	loc_10DDB
-loc_110B9:
+	func_strcat
+
+	push_ss_string	var_28
+	std_call	printStringWClear, 4
+	jmp	loc_wildMainLoop_loopStart
+
+loc_wildMainLoop_return_bldg_rval:
+	mov	ax, buildingRvalMaybe
+
+loc_wildMainLoop_exit:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -1486,7 +1435,7 @@ wildMainLoop endp
 
 ; Attributes: bp-based frame
 
-sub_110BE proc far
+wild_goForwardCheck proc far
 
 	arg_0= byte ptr	 6
 
@@ -1524,7 +1473,7 @@ loc_110FE:
 	mov	sp, bp
 	pop	bp
 	retf
-sub_110BE endp
+wild_goForwardCheck endp
 
 ; Attributes: bp-based frame
 
@@ -1853,10 +1802,19 @@ loc_11426:
 	jz	short loc_11444
 	and	byte ptr [bp+var_1E], 0Fh
 loc_11444:
+	test	levFlags, 20h
+	jz	loc_dun_buildView_inDungeon
+
+	mov	ax, 4
+	jmp	loc_dun_buildView_loop_preamble
+
+loc_dun_buildView_inDungeon:
 	mov	bl, lightDistance
 	sub	bh, bh
 	mov	al, byte_44494[bx]
 	sub	ah, ah
+
+loc_dun_buildView_loop_preamble:
 	mov	[bp+counter], ax
 	jmp	short loc_11462
 loc_1145F:
@@ -13359,10 +13317,23 @@ dun_setBigpicBG	proc far
 	var_2= word ptr	-2
 	arg_0= dword ptr  6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	func_enter
+	_chkstk		4
+
+	test	levFlags, 20h
+	jz	loc_dun_setBigpicBG_inDungeon
+
+	push_imm	44h
+	push_imm	0BBBBh
+	mov		ax, offset bigpicBuf
+	mov		dx, seg seg021
+	push		dx
+	push		ax
+	std_call	bigpic_setBG, 8
+	jmp	loc_dun_setBigpicBG_exit
+	
+
+loc_dun_setBigpicBG_inDungeon:
 	push	si
 	lfs	bx, [bp+arg_0]
 	mov	ah, fs:(graphicsBuf+11h)[bx]
@@ -13407,7 +13378,7 @@ dun_setBigpicBG	proc far
 	call	_memcpy
 	add	sp, 0Ah
 	cmp	lightDistance, 4
-	jnb	short loc_1791B
+	jnb	short loc_dun_setBigpicBG_exit
 	mov	al, lightDistance
 	sub	ah, ah
 	mov	si, ax
@@ -13422,10 +13393,9 @@ dun_setBigpicBG	proc far
 	push	ax
 	call	_memset
 	add	sp, 8
-loc_1791B:
 	pop	si
-	mov	sp, bp
-	pop	bp
+loc_dun_setBigpicBG_exit:
+	func_exit
 	retf
 dun_setBigpicBG	endp
 
@@ -16081,7 +16051,7 @@ dun_changeLevels proc far
 	mov	al, fs:[bx+dun_t.deltaSqE]
 	cbw
 	add	sq_east, ax
-	mov	gs:word_42402, 1
+	mov	gs:levelChangedFlag, 1
 	mov	buildingRvalMaybe, 4
 	pop	si
 	mov	sp, bp
@@ -29299,7 +29269,7 @@ loc_21168:
 	mov	al, fs:[bx+dun_t.deltaSqE]
 	cbw
 	add	sq_east, ax
-	mov	gs:word_42402, 1
+	mov	gs:levelChangedFlag, 1
 loc_211F1:
 	jmp	short loc_21200
 loc_211F3:
@@ -50576,7 +50546,7 @@ monGroups mon_t <>
 stru_42372 mon_t <>
 mon_t <>
 mon_t <>
-word_42402 dw 0
+levelChangedFlag	dw 0
 summonMeleeDamage dw 0
 regenSpptSq db 0
 align 2
@@ -57222,9 +57192,10 @@ dword_4F908	dd 0
 dword_4F90C	dd 0
 off_4F910	dd sub_28846
 seg027_41	dw seg seg027
-dseg_x dw seg dseg
-seg027_x dw seg	seg027
-seg022_x dw seg	seg022
+dseg_x		dw seg dseg
+seg027_x	dw seg	seg027
+seg022_x	dw seg	seg022
+seg023_x	dw seg seg023
 aNmsg db '<<NMSG>>',0
 align 2
 aR6000StackOver	db 'R6000',0Dh,0Ah

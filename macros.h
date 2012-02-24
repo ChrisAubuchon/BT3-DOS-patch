@@ -89,8 +89,8 @@ push_reg	macro _reg
 	endm
 
 push_ptr_stack	macro _src
-	push	word ptr[bp+_src+2]
-	push	word ptr[bp+_src]
+	push	word ptr [bp+_src+2]
+	push	word ptr [bp+_src]
 	endm
 
 push_ptr_stringList	macro _src,_reg
