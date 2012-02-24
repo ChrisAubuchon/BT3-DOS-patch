@@ -53,7 +53,7 @@ wait4IO		macro
 
 delayNoTable	macro _count
 	push_imm	_count
-	std_call	sub_14E41, 2
+	std_call	getIOwithDelay, 2
 	endm
 
 do_strcat	macro _dest
@@ -148,10 +148,6 @@ func_strcat		macro
 
 func_strncpy	macro
 	std_call	_strncpy, 0Ah
-	endm
-
-func_printCharName	macro
-	std_call	printCharName, 2
 	endm
 
 func_dun_maskSquare	macro

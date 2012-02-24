@@ -1062,59 +1062,52 @@ sub_10B3D endp
 
 dun_goForwardCheck proc far
 
-	var_2= word ptr	-2
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	func_enter
+
 	cmp	gs:stuckFlag, 0
-	jz	short loc_10C50
+	jz	short loc_dun_goForwardCheck_not_stuck
 	call	clearTextWindow
-	mov	ax, offset aStuck____
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	sub	ax, ax
-	jmp	short loc_10CA1
-loc_10C50:
+
+	push_ds_string	aStuck___
+	func_printString
+	jmp	loc_dun_goForwardCheck_return_zero
+
+loc_dun_goForwardCheck_not_stuck:
 	mov	ax, [bp+arg_0]
 	mov	cl, 4
 	shr	ax, cl
 	and	ax, 0Fh
-	mov	[bp+var_2], ax
 	mov	bx, ax
 	mov	al, byte_44344[bx]
 	sub	ah, ah
-	jmp	short loc_10C91
-loc_10C6C:
+
+	or	ax, ax
+	jz	loc_dun_goForwardCheck_success
+
+loc_dun_goForwardCheck_not_zero:
+	cmp	ax, 1
+	jb	loc_dun_goForwardCheck_return_zero
+
+	cmp	ax, 2
+	jg	loc_dun_goForwardCheck_return_zero
+
 	cmp	[bp+arg_2], 0
-	jnz	short loc_10C76
-	sub	ax, ax
-	jmp	short loc_10CA1
-loc_10C76:
+	jz	loc_dun_goForwardCheck_return_zero
+
+loc_dun_goForwardCheck_success:
 	mov	word_4EE66, 0
 	call	clearTextWindow
 	mov	ax, 1
-	jmp	short loc_10CA1
-loc_10C8B:
-	sub	ax, ax
-	jmp	short loc_10CA1
-	jmp	short loc_10CA1
-loc_10C91:
-	or	ax, ax
-	jz	short loc_10C76
-	cmp	ax, 1
-	jb	short loc_10C8B
-	cmp	ax, 2
-	jbe	short loc_10C6C
-	jmp	short loc_10C8B
-loc_10CA1:
-	mov	sp, bp
-	pop	bp
+	jmp	loc_dun_goForwardCheck_exit
+	
+loc_dun_goForwardCheck_return_zero:
+	xor	ax, ax
+
+loc_dun_goForwardCheck_exit:
+	func_exit
 	retf
 dun_goForwardCheck endp
 
@@ -1299,8 +1292,11 @@ loc_wildMainLoop_goForward:
 	push	[bp+square]
 	std_call	map_enterBuilding, 2
 	or	ax, ax
+	jz	loc_wildMainLoop_exitBuilding
+	cmp	buildingRvalMaybe, 0
 	jnz	loc_wildMainLoop_return_bldg_rval
 
+loc_wildMainLoop_exitBuilding:
 	push	[bp+square]
 	std_call	wild_goForwardCheck, 2
 	or	ax, ax
@@ -1439,113 +1435,55 @@ wild_goForwardCheck proc far
 
 	arg_0= byte ptr	 6
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	func_enter
+
 	test	[bp+arg_0], 0F0h
-	jnz	short loc_110D3
-	mov	ax, 1
-	jmp	short loc_110FE
-loc_110D3:
+	jz	loc_wild_goForwardCheck_return_one
+
 	mov	al, [bp+arg_0]
 	and	al, 0F0h
 	cmp	al, 0E0h
-	jnz	short loc_110E0
-	sub	ax, ax
-	jmp	short loc_110FE
-loc_110E0:
+	jz	loc_wild_goForwardCheck_return_zero
 	mov	al, [bp+arg_0]
 	and	al, 0F0h
 	cmp	al, 0F0h
-	jnz	short loc_110EE
-	mov	ax, 1
-	jmp	short loc_110FE
-loc_110EE:
+	jz	loc_wild_goForwardCheck_return_one
 	mov	al, [bp+arg_0]
 	and	al, 0Fh
 	mov	cx, ax
 	cmp	cl, 1
 	sbb	ax, ax
 	neg	ax
-	jmp	short $+2
-loc_110FE:
-	mov	sp, bp
-	pop	bp
+	jmp	loc_wild_goForwardCheck_exit
+
+loc_wild_goForwardCheck_return_zero:
+	xor	ax, ax
+	jmp	loc_wild_goForwardCheck_exit
+
+loc_wild_goForwardCheck_return_one:
+	mov	ax, 1
+
+loc_wild_goForwardCheck_exit:
+	func_exit
 	retf
+
 wild_goForwardCheck endp
 
 ; Attributes: bp-based frame
 
 map_enterBuilding proc far
 
-	var_2= word ptr	-2
 	square=	word ptr  6
 
 	func_enter
-	_chkstk		2
 	mov	ax, [bp+square]
 	mov	cl, 4
 	sar	ax, cl
 	and	ax, 0Fh
-	mov	[bp+var_2], ax
-	jmp	loc_111DF
-l_camp:
-	call	camp_enter
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	loc_11201
-l_tavern:
-	call	tav_enter
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	loc_11201
-l_temple:
-	call	temple_enter
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	loc_11201
-l_normalBuilding:
-	call	enterBuildingMaybe
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	loc_11201
-l_storageBuilding:
-	call	strg_enter
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	short loc_11201
-l_reviewBoard:
-	call	rev_enter
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	short loc_11201
-l_hallOfWizards:
-	call	enterHallOfWizards
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	short loc_11201
-l_bards:
-	call	bards_enter
-	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
-	mov	ax, 1
-	jmp	short loc_11201
-loc_111D9:
-	sub	ax, ax
-	jmp	short loc_11201
-	jmp	short loc_11201
-loc_111DF:
+
 	sub	ax, 1
 	cmp	ax, 8
-	ja	short loc_111D9
+	ja	loc_map_enterBuilding_return_zero
 	add	ax, ax
 	xchg	ax, bx
 	jmp	cs:off_111EF[bx]
@@ -1553,14 +1491,48 @@ off_111EF dw offset l_camp ; 0x10
 dw offset l_tavern	; 0x20
 dw offset l_temple	; 0x30
 dw offset l_normalBuilding ; 0x40
-dw offset loc_111D9	; 0x50
+dw offset loc_map_enterBuilding_return_zero	; 0x50
 dw offset l_storageBuilding ; 0x60
 dw offset l_reviewBoard	; 0x70
 dw offset l_hallOfWizards	; 0x80
 dw offset l_bards		; 0x90
-loc_11201:
-	mov	sp, bp
-	pop	bp
+
+l_camp:
+	call	camp_enter
+	jmp	loc_map_enterBuilding_turn_around
+l_tavern:
+	call	tav_enter
+	jmp	loc_map_enterBuilding_turn_around
+l_temple:
+	call	temple_enter
+	jmp	loc_map_enterBuilding_turn_around
+l_normalBuilding:
+	call	enterBuildingMaybe
+	jmp	loc_map_enterBuilding_turn_around
+l_storageBuilding:
+	call	strg_enter
+	jmp	loc_map_enterBuilding_turn_around
+l_reviewBoard:
+	call	rev_enter
+	jmp	loc_map_enterBuilding_turn_around
+l_hallOfWizards:
+	call	enterHallOfWizards
+	jmp	loc_map_enterBuilding_turn_around
+l_bards:
+	call	bards_enter
+	jmp	loc_map_enterBuilding_turn_around
+
+loc_map_enterBuilding_return_zero:
+	sub	ax, ax
+	jmp	short loc_map_enterBuilding_exit
+
+loc_map_enterBuilding_turn_around:
+	mov	buildingRvalMaybe, ax
+	call	map_turnPartyAround
+	mov	ax, 1
+
+loc_map_enterBuilding_exit:
+	func_exit
 	retf
 map_enterBuilding endp
 
@@ -4545,50 +4517,41 @@ camp_createMember endp
 ; Attributes: bp-based frame
 getCharacterGender proc	far
 
-	var_2= word ptr	-2
+	func_enter
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-loc_12DBF:
-	mov	ax, offset aDoYouWishYourC
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+loc_getCharacterGender_loop_start:
+	push_ds_string	aDoYouWishYourC
+	std_call	printStringWClear, 4
+
 	mov	ax, 0Ch
 	push	ax
-	call	sub_14E41
-	add	sp, 2
-	mov	[bp+var_2], ax
-	jmp	short loc_12DED
-loc_12DDD:
-	sub	ax, ax
-	jmp	short loc_12E0A
-loc_12DE1:
-	mov	ax, 1
-	jmp	short loc_12E0A
-loc_12DE6:
-	mov	ax, 0FFh
-	jmp	short loc_12E0A
-loc_12DEB:
-	jmp	short loc_12E08
-loc_12DED:
+	std_call	sub_14E41, 2
+
 	cmp	ax, 1Bh
-	jz	short loc_12DE6
-	cmp	ax, 46h	
-	jz	short loc_12DE1
-	cmp	ax, 4Dh	
-	jz	short loc_12DDD
-	cmp	ax, 110h
-	jz	short loc_12DDD
+	jz	loc_getCharacterGender_return_ff
+
+	cmp	ax, 'F'
+	jz	loc_getCharacterGender_return_one
 	cmp	ax, 111h
-	jz	short loc_12DE1
-	jmp	short loc_12DEB
-loc_12E08:
-	jmp	short loc_12DBF
-loc_12E0A:
+	jz	loc_getCharacterGender_return_one
+
+	cmp	ax, 'M'
+	jz	loc_getCharacterGender_return_zero
+	cmp	ax, 110h
+	jnz	loc_getCharacterGender_loop_start
+	
+loc_getCharacterGender_return_zero:
+	xor	ax, ax
+	jmp	loc_getCharacterGender_exit
+
+loc_getCharacterGender_return_one:
+	mov	ax, 1
+	jmp	loc_getCharacterGender_exit
+
+loc_getCharacterGender_return_ff:
+	mov	ax, 0FFh
+
+loc_getCharacterGender_exit:
 	mov	sp, bp
 	pop	bp
 	retf
@@ -5346,7 +5309,8 @@ enterWilderness	endp
 
 ; Attributes: bp-based frame
 
-	camp_enter proc	far
+camp_enter proc	far
+
 	var_58=	word ptr -58h
 	var_56=	word ptr -56h
 	var_54=	word ptr -54h
