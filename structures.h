@@ -391,3 +391,8 @@ mouseBox_t	struc ; (sizeof=0x8)
 	_bottom		dw ?
 	_right		dw ?
 mouseBox_t	ends
+
+trapSave_t	struc
+	_low		db ?
+	_high		db ?
+trapSave_t	ends

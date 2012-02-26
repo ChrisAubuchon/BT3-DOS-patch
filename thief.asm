@@ -113,7 +113,7 @@ loc_1007E:
 	mov	gs:word_4243C, ax
 	mov	ax, 2
 	push	ax
-	mov	ax, offset aThief_cfg_0
+	mov	ax, offset aThief_cfg
 	push	ds
 	push	ax
 	call	openFile
@@ -432,7 +432,7 @@ loc_103D4:
 	add	sp, 4
 	sub	ax, ax
 	push	ax
-	mov	ax, offset aBardscr_0
+	mov	ax, offset aBardscr
 	push	ds
 	push	ax
 	call	openFile
@@ -813,8 +813,9 @@ loc_10899:
 	cmp	buildingRvalMaybe, 0
 	jnz	loc_dunMainLoop_return_bldg_rval
 loc_108D5:
+	push	seg023_x
 	mov	ax, offset graphicsBuf
-	push	offset graphicsBuf
+	push	ax
 	push	sq_north
 	push	sq_east
 	std_call	dun_buildView, 8
@@ -1071,7 +1072,7 @@ dun_goForwardCheck proc far
 	jz	short loc_dun_goForwardCheck_not_stuck
 	call	clearTextWindow
 
-	push_ds_string	aStuck___
+	push_ds_string	aStuckElipsis
 	func_printString
 	jmp	loc_dun_goForwardCheck_return_zero
 
@@ -2211,8 +2212,7 @@ loc_txt_castSpell_notLearned:
 loc_txt_castSpell_fail:
 	func_printString
 
-	push_imm	2
-	std_call	getIOwithDelay, 2
+	delayNoTable	2
 
 	func_return	0FFFFh
 
@@ -2751,7 +2751,7 @@ restoreGame proc far
 	jmp	loc_11CD6
 loc_11C2C:
 	call	sub_22DA1
-	mov	ax, offset aGame_sav_0
+	mov	ax, offset aGame_sav
 	push	ds
 	push	ax
 	call	getDisk2
@@ -2859,7 +2859,7 @@ loc_11D2B:
 loc_11D4B:
 	push_reg	ax
 	push_ss_string	var_32
-	push_ds_string	aWhichItem?_0
+	push_ds_string	aWhichItem?
 	std_call	printStringGetInput, 0Ah
 
 	mov	[bp+var_34], ax
@@ -3133,7 +3133,7 @@ loc_11FC3:
 	jz	short loc_11FEF
 	call	txt_newLine
 loc_11FEF:
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	add	ax, 10Eh
 	mov	bx, [bp+var_8]
@@ -3141,7 +3141,7 @@ loc_11FEF:
 	shl	bx, 1
 	lfs	si, [bp+arg_C]
 	mov	fs:[bx+si], ax
-	mov	bl, gs:byte_4241B
+	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
 	mov	ax, bitMask16bit[bx]
@@ -3226,7 +3226,7 @@ cmd_printLocation proc far
 	mov	[bp+var_108], dx
 	cmp	currentLocationMaybe, 0
 	jnz	short loc_120DF
-	mov	ax, offset aThe_0
+	mov	ax, offset aThe
 	push	ds
 	push	ax
 	push	dx
@@ -3751,10 +3751,7 @@ loc_125FA:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	2
 	jmp	loc_12701
 loc_1264B:
 	push	cs
@@ -3793,10 +3790,7 @@ loc_1265A:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	2
 	jmp	short loc_126E6
 loc_126AF:
 	getCharP [bp+var_2], bx
@@ -3823,10 +3817,7 @@ loc_126E8:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	2
 loc_12701:
 	jmp	loc_125D7
 loc_12704:
@@ -4265,7 +4256,7 @@ loc_12A5A:
 	sub	ax, ax
 	mov	[bp+var_EA], ax
 	mov	[bp+var_2], ax
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	[bp+var_8], ax
 	mov	[bp+counter], 0
@@ -4279,7 +4270,7 @@ loc_12AD8:
 	mov	bx, [bp+counter]
 	cmp	byte ptr startingClasses.canBeWarrior[bx+si], 0
 	jz	short loc_12B2E
-	mov	bl, gs:byte_4241B
+	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
 	mov	ax, (bitMask16bit+2)[bx]
@@ -5403,7 +5394,7 @@ loc_134E2:
 	push	ax
 	call	bigpic_drawPicNumber
 	add	sp, 2
-	mov	ax, offset aTheRuin_0
+	mov	ax, offset aTheRuin
 	push	ds
 	push	ax
 	call	setTitle
@@ -5576,7 +5567,7 @@ saveCharsInf proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	mov	ax, offset aThieves_inf_0
+	mov	ax, offset aThieves_inf
 	push	ds
 	push	ax
 	push	cs
@@ -5612,7 +5603,7 @@ savePartiesInf proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	mov	ax, offset aParties_inf_0
+	mov	ax, offset aParties_inf
 	push	ds
 	push	ax
 	push	cs
@@ -6137,7 +6128,7 @@ loc_13AF9:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	add	ax, 2
 	mov	[bp+var_8], ax
@@ -7051,7 +7042,7 @@ loc_143A1:
 	add	sp, 0Ah
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
-	mov	ax, offset a____1
+	mov	ax, offset aElipsis
 	push	ds
 	push	ax
 	push	dx
@@ -7060,7 +7051,7 @@ loc_143A1:
 	add	sp, 8
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
-	mov	ax, offset a___and
+	mov	ax, offset aElipsisAnd
 	push	ds
 	push	ax
 	push	dx
@@ -7806,10 +7797,7 @@ loc_14B03:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	mov	ax, 4
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	4
 	jmp	short loc_14B4E
 loc_14B1E:
 	jmp	short loc_14B22
@@ -7823,16 +7811,10 @@ loc_14B24:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	mov	ax, 4
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	4
 	jmp	short loc_14B4E
 loc_14B3F:
-	mov	ax, 4
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	4
 	jmp	loc_14A05
 loc_14B4E:
 	pop	si
@@ -7886,7 +7868,7 @@ readInventoryStf proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	mov	ax, offset aInventor_stf_0
+	mov	ax, offset aInventor_stf
 	push	ds
 	push	ax
 	push	cs
@@ -8160,7 +8142,7 @@ getYesNo proc far
 	push	si
 	push	cs
 	call	near ptr txt_newLine
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	si, ax
 	mov	di, si
@@ -8675,13 +8657,13 @@ sub_15226 proc far
 	call	someStackOperation
 	push	si
 	mov	ax, gs:word_42294
-	cmp	word_4EF47, ax
+	cmp	_clockTicks, ax
 	jz	short loc_15256
-	mov	ax, word_4EF47
+	mov	ax, _clockTicks
 	mov	gs:word_42294, ax
 	call	sub_179C4
 loc_15256:
-	mov	ax, word_4EF47
+	mov	ax, _clockTicks
 	mov	cl, 5
 	sar	ax, cl
 	mov	[bp+var_4], ax
@@ -8856,11 +8838,11 @@ loc_15446:
 	shl	ax, 1
 	add	ax, cx
 	shl	ax, 1
-	add	ax, word_4EF47
+	add	ax, _clockTicks
 	mov	[bp+var_4], ax
 loc_1545F:
 	mov	ax, [bp+var_4]
-	cmp	word_4EF47, ax
+	cmp	_clockTicks, ax
 	jz	short loc_15490
 	call	checkKeyboard
 	or	ax, ax
@@ -8888,12 +8870,43 @@ loc_15495:
 sub_1542D endp
 
 ; Attributes: bp-based frame
+txt_delayNoTable	proc far
+
+	arg_0= word ptr 6
+
+	func_enter
+	push_imm	0
+	mov	ax, [bp+arg_0]
+	shl	ax, 1
+	shl	ax, 1
+	push	ax
+	std_call	getIOwithDelay, 4
+	func_exit
+	retf
+txt_delayNoTable	endp
+
+txt_delayWithTable	proc far
+
+	func_enter
+	push_imm	1
+	mov	bl, txtDelayIndex
+	sub	bh, bh
+	mov	al, txtDelayTable[bx]
+	sub	ah, ah
+	push	ax
+	std_call	getIOwithDelay, 4
+	func_exit
+	retf
+
+txt_delayWithTable	endp
+	
 
 ; This is where the print delay occurs during battle.
 getIOwithDelay proc far
 
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
+	arg_2= word ptr 8
 
 	push	bp
 	mov	bp, sp
@@ -8901,15 +8914,10 @@ getIOwithDelay proc far
 	call	someStackOperation
 	cmp	[bp+arg_0], 0
 	jge	short loc_154B7
-	jmp	short loc_15522
+	jmp	loc_15522
 loc_154B7:
 	mov	ax, [bp+arg_0]
-	mov	cx, ax
-	shl	ax, 1
-	shl	ax, 1
-	add	ax, cx
-	shl	ax, 1
-	add	ax, word_4EF47
+	add	ax, _clockTicks
 	mov	[bp+var_2], ax
 	push	cs
 	call	near ptr sub_1766A
@@ -8918,6 +8926,52 @@ loc_154D4:
 	or	ax, ax
 	jz	short loc_154E9
 	call	_readChFromKeyboard
+
+	cmp	[bp+arg_2], 0
+	jz	loc_getIOwithDelay_skipFastCheck
+
+	sub	ah, ah
+	cmp	ax, '>'
+	jz	loc_getIOwithDelay_faster
+	cmp	ax, '.'
+	jnz	loc_getIOwithDelay_slowCheck
+
+loc_getIOwithDelay_faster:
+	mov	al, txtDelayIndex
+	dec	txtDelayIndex
+	or	al, al
+	ja	loc_getIOwithDelay_printFaster
+	mov	txtDelayIndex, 0
+	jmp	loc_154D4
+
+loc_getIOwithDelay_slowCheck:
+	cmp	ax, '<'
+	jz	loc_getIOwithDelay_slower
+	cmp	ax, ','
+	jnz	loc_getIOwithDelay_skipFastCheck
+
+loc_getIOwithDelay_slower:
+	mov	al, txtDelayIndex
+	inc	txtDelayIndex
+	cmp	al, 9
+	jb	loc_getIOwithDelay_printSlower
+	mov	txtDelayIndex, 9
+	jmp	loc_154D4
+
+loc_getIOwithDelay_printFaster:
+	mov	ax, offset aFaster
+	jmp	loc_getIOwithDelay_doPrint
+
+loc_getIOwithDelay_printSlower:
+	mov	ax, offset aSlower
+
+loc_getIOwithDelay_doPrint:
+	push	ds
+	push	ax
+	func_printString
+	jmp	loc_154D4
+
+loc_getIOwithDelay_skipFastCheck:
 	call	far ptr	sub_3E974
 	jmp	short loc_15522
 loc_154E9:
@@ -8927,8 +8981,8 @@ loc_154E9:
 	push	cs
 	call	near ptr printRoster
 	mov	ax, [bp+var_2]
-	cmp	word_4EF47, ax
-	jnz	short loc_1550B
+	cmp	_clockTicks, ax
+	jl	short loc_1550B
 	call	far ptr	sub_3E974
 	jmp	short loc_15522
 loc_1550B:
@@ -8938,7 +8992,7 @@ loc_1550B:
 	push	cs
 	call	near ptr sub_1766A
 loc_15520:
-	jmp	short loc_154D4
+	jmp	loc_154D4
 loc_15522:
 	mov	sp, bp
 	pop	bp
@@ -9536,7 +9590,7 @@ loc_15988:
 	push	cs
 	call	near ptr printStringWClear
 	add	sp, 4
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	inc	ax
 	mov	[bp+var_A], ax
@@ -10269,7 +10323,7 @@ sub_15FC5 proc far
 	sub	ah, ah
 	add	ax, 0A8h 
 	push	ax
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	cl, 3
 	shl	ax, cl
@@ -11091,7 +11145,7 @@ loc_165A0:
 	sub	ah, ah
 	add	ax, 0A8h 
 	push	ax
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	cl, 3
 	shl	ax, cl
@@ -11121,13 +11175,13 @@ txt_newLine proc far
 	push	bp
 	mov	bp, sp
 	mov	gs:byte_42419, 0
-	mov	al, gs:byte_4241B
-	inc	gs:byte_4241B
+	mov	al, gs:txt_numLines
+	inc	gs:txt_numLines
 	cmp	al, 0Bh
 	jb	short loc_16635
 	push	cs
 	call	near ptr sub_16639
-	mov	gs:byte_4241B, 0Bh
+	mov	gs:txt_numLines, 0Bh
 loc_16635:
 	mov	sp, bp
 	pop	bp
@@ -12224,7 +12278,7 @@ clearTextWindow	proc far
 	cmp	gs:byte_4241A, 0
 	jz	short loc_16FF0
 	sub	al, al
-	mov	gs:byte_4241B, al
+	mov	gs:txt_numLines, al
 	mov	gs:byte_42419, al
 	mov	ax, 0Fh
 	push	ax
@@ -14304,7 +14358,7 @@ loc_18206:
 	call	near ptr printCharStats
 	add	sp, 4
 	mov	[bp+var_4], 0
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	sub	ax, 2
 	mov	[bp+var_8], ax
@@ -14312,7 +14366,7 @@ loc_18206:
 loc_1822A:
 	inc	[bp+var_8]
 loc_1822D:
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	cmp	ax, [bp+var_8]
 	jb	short loc_1824F
@@ -14328,7 +14382,7 @@ loc_1824F:
 	mov	[bp+var_6], ax
 	cmp	ax, 50h	
 	jz	short loc_18274
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	add	ax, 10Ch
 	cmp	ax, [bp+var_6]
@@ -14342,7 +14396,7 @@ loc_18274:
 loc_18284:
 	cmp	[bp+var_6], 54h	
 	jz	short loc_1829C
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	add	ax, 10Dh
 	cmp	ax, [bp+var_6]
@@ -14356,7 +14410,7 @@ loc_1829C:
 loc_182A9:
 	cmp	[bp+var_6], 1Bh
 	jz	short loc_182C4
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	add	ax, 10Eh
 	cmp	ax, [bp+var_6]
@@ -14518,7 +14572,7 @@ loc_183BD:
 	add	sp, 4
 	jmp	short loc_1844C
 loc_18433:
-	mov	ax, offset aAllFull_0
+	mov	ax, offset aAllFull
 	push	ds
 	push	ax
 	call	printStringWClear
@@ -15596,7 +15650,7 @@ loc_18EB7:
 	or	ax, ax
 	jnz	short loc_18EE0
 	call	clearTextWindow
-	mov	ax, offset aNotEnoughGol_0
+	mov	ax, offset aNotEnoughGold_
 	push	ds
 	push	ax
 	call	printString
@@ -17104,7 +17158,7 @@ loc_19BB0:
 	jmp	short loc_19CB5
 	jmp	short loc_19CB2
 loc_19C46:
-	mov	ax, offset aSorryBut_0
+	mov	ax, offset aSorryBut
 	push	ds
 	push	ax
 	lea	ax, [bp+var_106]
@@ -18233,10 +18287,7 @@ loc_1A571:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 3
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	3
 loc_1A58A:
 	mov	bx, [bp+var_6]
 	shl	bx, 1
@@ -19625,8 +19676,8 @@ partyRan:
 	sub	ax, ax
 	jmp	loc_1B291
 loc_1B18C:
-	push	cs
-	call	near ptr bat_doCombatRound
+	mov	gs:txt_numLines, 0Bh
+	call	bat_doCombatRound
 	call	bat_partyDisbelieves
 	cmp	gs:monDisbelieveFlag, 0
 	jnz	short loc_1B1AF
@@ -20524,10 +20575,7 @@ loc_1BA3B:
 	call	printString
 	add	sp, 4
 	mov	byte ptr word_44166,	0
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayWithTable
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -21238,8 +21286,7 @@ loc_1C0B3:
 	mov	gs:byte_42280[bx], 0
 	mov	byte ptr word_44166,	0
 
-	push_imm	2
-	std_call	getIOwithDelay, 2
+	delayWithTable
 loc_1C0F0:
 	pop	si
 	func_exit
@@ -23299,7 +23346,7 @@ loc_1D4ED:
 	mov	gs:byte_42244[bx], al
 	cmp	[bp+var_2], 4
 	jg	short loc_1D52D
-	mov	ax, offset aCastAt_0
+	mov	ax, offset aCastAt
 	push	ds
 	push	ax
 	push	[bp+var_2]
@@ -23360,7 +23407,7 @@ loc_1D570:
 	lea	ax, [bp+var_34]
 	push	ss
 	push	ax
-	mov	ax, offset aWhichItem?_0
+	mov	ax, offset aWhichItem?
 	push	ds
 	push	ax
 	call	printStringGetInput
@@ -24015,7 +24062,7 @@ loc_1DB86:
 	lea	ax, [bp+var_10E]
 	mov	word ptr [bp+var_C], ax
 	mov	word ptr [bp+var_C+2], ss
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	si, ax
 	mov	bx, si
@@ -24069,7 +24116,7 @@ loc_1DC2C:
 	lea	ax, [bp+var_10E]
 	mov	word ptr [bp+var_C], ax
 	mov	word ptr [bp+var_C+2], ss
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	si, ax
 	mov	bx, si
@@ -24623,7 +24670,7 @@ loc_1E2F4:
 	push	ax
 	push	dx
 	push	[bp+dmgLo]
-	mov	ax, offset aPointSOfDamage_0
+	mov	ax, offset aPointSOfDamage
 	push	ds
 	push	ax
 	call	str_pluralize
@@ -25447,10 +25494,7 @@ loc_1EB20:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayWithTable
 loc_1EB61:
 	jmp	loc_1EACE
 loc_1EB64:
@@ -25498,10 +25542,7 @@ loc_1EB89:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayWithTable
 	jmp	short loc_1EBEB
 loc_1EBE9:
 	jmp	short loc_1EB86
@@ -26139,8 +26180,7 @@ bat_getReward proc far
 
 	func_enter
 	_chkstk	114h
-	push_imm	2
-	std_call	getIOwithDelay, 2
+	delayNoTable	2
 	call	clearTextWindow
 	mov	gs:word_41E6E, 0
 	mov	ax, gs:batRewardLo
@@ -26276,10 +26316,7 @@ loc_1F38E:
 loc_1F3B0:
 	cmp	gs:word_41E6E, 0
 	jnz	short loc_1F3C8
-	mov	ax, 1
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	1
 loc_1F3C8:
 	call	_random
 	sub	ah, ah
@@ -26396,10 +26433,7 @@ loc_1F4A5:
 	mov	word ptr [bp+var_108+2], ss
 	lfs	bx, [bp+var_108]
 	mov	byte ptr fs:[bx], 0
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	2
 	jmp	short loc_1F544
 	jmp	short loc_1F541
 loc_1F535:
@@ -26416,10 +26450,7 @@ loc_1F547:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 8
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	8
 	sub	ax, ax
 	jmp	short $+2
 loc_1F565:
@@ -26757,10 +26788,7 @@ loc_1F8F9:
 	mov	gs:word_41E6E, 0
 	mov	gs:word_42560, 1
 loc_1F90F:
-	mov	ax, 5
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	5
 	mov	ax, 1
 	jmp	short $+2
 loc_1F920:
@@ -27117,10 +27145,7 @@ loc_1FC4D:
 loc_1FC65:
 	mov	[bp+var_1C], 0
 loc_1FC6A:
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	2
 loc_1FC76:
 	inc	[bp+var_1A]
 	jmp	short loc_1FC31
@@ -27239,10 +27264,7 @@ loc_1FD5A:
 	push	cs
 	call	near ptr doCastSpell
 	add	sp, 8
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	2
 loc_1FD85:
 	mov	ax, 1
 	jmp	short $+2
@@ -27575,15 +27597,12 @@ sp_lightSpell proc far
 	mov	bx, [bp+var_2]
 	mov	al, byte_484B2[bx]
 	mov	gs:byte_41E61, al
-	mov	ax, offset a____0
+	mov	ax, offset aElipsisNLNL
 	push	ds
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	2
 	mov	sp, bp
 	pop	bp
 	retf
@@ -27794,10 +27813,7 @@ loc_201E6:
 	call	printString
 	add	sp, 4
 	mov	byte ptr word_44166,	0
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayWithTable
 	mov	ax, [bp+var_10A]
 	dec	ax
 	jmp	bat_doBreathAttack_exit
@@ -27851,7 +27867,7 @@ loc_202B3:
 	add	sp, 8
 	mov	word ptr [bp+var_116], ax
 	mov	word ptr [bp+var_116+2], dx
-	mov	ax, offset a___
+	mov	ax, offset aElipsisNLNL
 	push	ds
 	push	ax
 	push	dx
@@ -28268,10 +28284,7 @@ loc_20810:
 	call	printString
 	add	sp, 4
 	mov	byte ptr word_44166,	0
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayWithTable
 	lea	ax, [bp+var_106]
 	mov	word ptr [bp+var_116], ax
 	mov	word ptr [bp+var_116+2], ss
@@ -29077,7 +29090,7 @@ loc_20FF7:
 	add	sp, 8
 	mov	word ptr [bp+var_10], ax
 	mov	word ptr [bp+var_10+2],	dx
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	[bp+var_C], ax
 	mov	al, levFlags
@@ -29101,7 +29114,7 @@ loc_20FF7:
 	add	sp, 4
 	mov	al, byte ptr [bp+var_C]
 	add	al, 3
-	mov	gs:byte_4241B, al
+	mov	gs:txt_numLines, al
 	mov	[bp+counter], 0
 	jmp	short loc_21071
 loc_2106E:
@@ -29124,7 +29137,7 @@ loc_21086:
 	push	cs
 	call	near ptr _sp_teleportPrintNum
 	add	sp, 4
-	inc	gs:byte_4241B
+	inc	gs:txt_numLines
 	jmp	short loc_2106E
 loc_210A1:
 	sub	ax, ax
@@ -29558,10 +29571,7 @@ loc_21486:
 	call	printString
 	add	sp, 4
 loc_214C2:
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayWithTable
 	mov	sp, bp
 	pop	bp
 	retf
@@ -32152,7 +32162,7 @@ loc_22BA1:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	bl, gs:byte_4241B
+	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
 	mov	ax, bitMask16bit[bx]
@@ -32586,7 +32596,7 @@ loc_23049:
 loc_2304C:
 	cmp	[bp+var_6], 5
 	jge	short loc_23070
-	mov	bl, gs:byte_4241B
+	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	sub	bx, [bp+var_6]
 	shl	bx, 1
@@ -32602,7 +32612,7 @@ loc_23070:
 	jl	short loc_23098
 	cmp	ax, 119h
 	jg	short loc_23098
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	sub	ax, 4
 	sub	[bp+var_4], ax
@@ -33300,7 +33310,7 @@ loc_23771:
 	add	sp, 0Ah
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
-	mov	ax, offset aInGold_WhoWi_0
+	mov	ax, offset aInGold_WhoWill
 	push	ds
 	push	ax
 	push	dx
@@ -33331,7 +33341,7 @@ loc_23844:
 	cmp	word ptr gs:roster.gold[si], cx
 	jnb	short loc_23877
 loc_23868:
-	mov	ax, offset aNotEnoughGol_1
+	mov	ax, offset aNotEnoughGoldNL
 	push	ds
 	push	ax
 	call	anotherPrintString
@@ -33689,7 +33699,7 @@ loc_23ACD:
 	shl	si, 1
 	mov	ax, [bp+counter]
 	mov	[bp+si+var_16],	ax
-	mov	bl, gs:byte_4241B
+	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
 	mov	ax, bitMask16bit[bx]
@@ -34467,7 +34477,7 @@ loc_24153:
 	mov	[bp+var_8], ax
 	cmp	[bp+var_6], 0
 	jz	short loc_24161
-	mov	ax, offset aBuilding_0
+	mov	ax, offset aBuilding
 	jmp	short loc_24164
 loc_24161:
 	mov	ax, offset aReviewBoard
@@ -35508,7 +35518,7 @@ loc_24ADF:
 loc_24AE2:
 	cmp	[bp+var_6], 4
 	jge	short loc_24B06
-	mov	bl, gs:byte_4241B
+	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	sub	bx, [bp+var_6]
 	shl	bx, 1
@@ -35524,7 +35534,7 @@ loc_24B06:
 	jl	short loc_24B2E
 	cmp	ax, 119h
 	jg	short loc_24B2E
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	sub	ax, 3
 	sub	[bp+var_4], ax
@@ -35708,7 +35718,7 @@ loc_24CDB:
 	cmp	word ptr gs:roster.gold[si], cx
 	jnb	short loc_24D27
 loc_24D0C:
-	mov	ax, offset aNotEnoughGol_1
+	mov	ax, offset aNotEnoughGoldNL
 	push	ds
 	push	ax
 	call	printStringWClear
@@ -35737,10 +35747,7 @@ loc_24D27:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	mov	ax, 5
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayNoTable	5
 loc_24D7F:
 	pop	si
 	mov	sp, bp
@@ -35865,9 +35872,9 @@ loc_24DDE:
 	mov	[bp+var_10C], ax
 	mov	si, gs:word_41E6E
 	shl	si, 1
-	mov	al, byte_4B298[si]
+	mov	al, trapSaveList._low[si]
 	mov	gs:monGroups.breathSaveLo, al
-	mov	al, byte_4B299[si]
+	mov	al, trapSaveList._high[si]
 	mov	gs:monGroups.breathSaveHi, al
 	mov	[bp+var_108], 0
 	jmp	short loc_24E9B
@@ -36361,7 +36368,7 @@ dunsq_portalAbove proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	mov	ax, offset aThereIsAPortal
+	mov	ax, offset aThereIsAPortAbove
 	push	ds
 	push	ax
 	call	printStringWClear
@@ -36378,7 +36385,7 @@ dunsq_portalBelow proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	mov	ax, offset aThereIsAPort_0
+	mov	ax, offset aThereIsAPortBelow
 	push	ds
 	push	ax
 	call	printStringWClear
@@ -37286,7 +37293,7 @@ loc_25B2D:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	si, ax
 	shl	si, 1
@@ -37301,7 +37308,7 @@ loc_25B2D:
 	jl	short loc_25B7D
 	cmp	ax, 119h
 	jg	short loc_25B7D
-	mov	al, gs:byte_4241B
+	mov	al, gs:txt_numLines
 	sub	ah, ah
 	dec	ax
 	sub	[bp+var_4], ax
@@ -37525,7 +37532,7 @@ bards_learnSong	proc far
 	add	sp, 0Ah
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
-	mov	ax, offset aInGold_WhoWi_1
+	mov	ax, offset aInGold_WhoWill
 	push	ds
 	push	ax
 	push	dx
@@ -37559,7 +37566,7 @@ loc_25D64:
 	cmp	word ptr gs:roster.gold[si], cx
 	jnb	short loc_25DA2
 loc_25D93:
-	mov	ax, offset aNotEnoughGol_2
+	mov	ax, offset aNotEnoughGoldNL
 	push	ds
 	push	ax
 	call	printStringWClear
@@ -38111,10 +38118,7 @@ sum_printNoRoom	proc far
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	ax, 2
-	push	ax
-	call	getIOwithDelay
-	add	sp, 2
+	delayWithTable
 loc_2625A:
 	mov	sp, bp
 	pop	bp
@@ -38453,7 +38457,7 @@ loc_2649C:
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
 loc_264E1:
-	mov	ax, offset aThieves_inf_1
+	mov	ax, offset aThieves_inf
 	push	ds
 	push	ax
 	push	[bp+var_24]
@@ -38521,7 +38525,7 @@ loc_26572:
 	add	sp, 8
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
-	mov	ax, offset aParties_inf_1
+	mov	ax, offset aParties_inf
 	push	ds
 	push	ax
 	push	dx
@@ -41550,7 +41554,7 @@ word_27F0B dw 0
 word_27F0D dw 0
 align 2
 
-sub_27F10 proc far
+timerIntHandler proc far
 	push	es
 	push	ds
 	push	ax
@@ -41564,7 +41568,7 @@ sub_27F10 proc far
 	mov	ax, word_4EF49
 	and	ax, 3
 	jnz	short loc_27F40
-	inc	word_4EF47
+	inc	_clockTicks
 	pop	ax
 	pop	ds
 	pop	es
@@ -41574,10 +41578,10 @@ loc_27F40:
 	pop	ds
 	pop	es
 	iret
-sub_27F10 endp
+timerIntHandler endp
 
 
-sub_27F44	proc far
+errorHandler	proc far
                 push    ds
                 push    es
                 push    bx
@@ -41599,7 +41603,7 @@ sub_27F44	proc far
                 pop     es
                 pop     ds
                 iret
-sub_27F44       endp
+errorHandler       endp
 
 ; Attributes: bp-based frame
 
@@ -41615,7 +41619,7 @@ sub_27F63 proc far
 	mov	word ptr cs:dword_27F07, ax
 	mov	ax, es:22h
 	mov	word ptr cs:dword_27F07+2, ax
-	mov	word ptr es:20h, offset	sub_27F10
+	mov	word ptr es:20h, offset	timerIntHandler
 	mov	word ptr es:22h, cs
 	mov	cs:word_27F05, ds
 	mov	al, 36h	
@@ -41631,7 +41635,7 @@ sub_27F63 proc far
 	mov	cs:word_27F0B, ax
 	mov	ax, es:[di+2]
 	mov	cs:word_27F0D, ax
-	mov	word ptr es:[di], offset sub_27F44
+	mov	word ptr es:[di], offset errorHandler
 	mov	word ptr es:[di+2], cs
 	sti
 	sub	ax, ax
@@ -42359,7 +42363,7 @@ sub_28536 proc near
 	mov	es, word_4EFF3
 	assume es:nothing
 	mov	es, word ptr es:2Ch
-	mov	seg_4F01C, es
+	mov	word ptr off_4F01A+2, es
 	xor	ax, ax
 	cwd
 	mov	cx, 8000h
@@ -42370,7 +42374,7 @@ loc_2855C:
 	jnz	short loc_2855C
 	inc	di
 	inc	di
-	mov	word_4F01A, di
+	mov	word ptr off_4F01A, di
 	mov	cx, 0FFFFh
 	repne scasb
 	not	cx
@@ -42480,7 +42484,7 @@ loc_285F6:
 	mov	ss:[bx], di
 	mov	word ptr ss:[bx+2], ss
 	add	bx, 4
-	lds	si, dword ptr word_4F01A
+	lds	si, off_4F01A
 loc_28627:
 	lodsb
 	stosb
@@ -50393,184 +50397,182 @@ seg026 ends
 seg027 segment para public 'DATA' use16
 	assume cs:seg027
 	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
-byte_41E50 db 4 dup(0)		; 0
-songRegenSppt db 0
-monDisbelieveFlag db 0
-isNight	db 0
-byte_41E57 db 0
-vorpalPlateBonus db 7 dup(0)
-algn_41E5F:
+byte_41E50	db 4 dup(0)		; 0
+songRegenSppt	db 0
+monDisbelieveFlag	db 0
+isNight		db 0
+byte_41E57	db 0
+vorpalPlateBonus	db 7 dup(0)
 align 2
-antiMagicFlag db 0
-byte_41E61 db 0
-byte_41E62 db 0
-byte_41E63 db 0
+antiMagicFlag	db 0
+byte_41E61	db 0
+byte_41E62	db 0
+byte_41E63	db 0
 charActionList db 7	dup(0)		   ; 0
-unk_41E6B db	0
-word_41E6C dw 0
-word_41E6E dw 0
-byte_41E70 db 0
-byte_41E71 db 0
-strengthBonus db 7 dup(0)	      ;	0
-byte_41E79 db 0
-mapWidth db 0
-algn_41E7B:
+unk_41E6B	db	0
+word_41E6C	dw 0
+word_41E6E	dw 0
+byte_41E70	db 0
+byte_41E71	db 0
+strengthBonus	db 7 dup(0)	      ;	0
+byte_41E79	db 0
+mapWidth	db 0
 align 2
-batRewardLo dw 0
-batRewardHi dw 0
-mapHeight db 0
-byte_41E81 db 0
-roster character_t <>
-stru_41EFA character_t <>
-character_t <>
-character_t <>
-character_t <>
-character_t <>
-rosterTail character_t <>
-newCharBuffer character_t <>
-byte_42242 db 0
-db 0
-byte_42244 db 0
-db 0
-db 0
-db 0
-db 0
-db 0
-db 0
-db 0
-bat_curSong db 0
-bat_curTarget db 0
-musicBufs memoryPointer	8 dup(<0>)
-monFrozenFlag db 0
-db 0
-byte_42270 db 0
-db 0
-db 0
-db 0
-byte_42274 db 0
-db 0
-byte_42276 db 0
-db 0
-db 0
-db 0
-db 0
-db 0
-db 0
-db 0
-byte_4227E db 0
-db 0
-byte_42280 db 6	dup(0)		   ; 0
-byte_42286 db 0
+batRewardLo	dw 0
+batRewardHi	dw 0
+mapHeight	db 0
+byte_41E81	db 0
+roster		character_t <>
+stru_41EFA	character_t <>
+		character_t <>
+		character_t <>
+		character_t <>
+		character_t <>
+rosterTail	character_t <>
+newCharBuffer	character_t <>
+byte_42242	db 0
+		db 0
+byte_42244	db 0
+		db 0
+		db 0
+		db 0
+		db 0
+		db 0
+		db 0
+		db 0
+bat_curSong	db 0
+bat_curTarget	db 0
+musicBufs	memoryPointer	8 dup(<0>)
+monFrozenFlag	db 0
+		db 0
+byte_42270	db 0
+		db 0
+		db 0
+		db 0
+byte_42274	db 0
+		db 0
+byte_42276	db 0
+		db 0
+		db 0
+		db 0
+		db 0
+		db 0
+		db 0
+		db 0
+byte_4227E	db 0
+		db 0
+byte_42280	db 6	dup(0)		   ; 0
+byte_42286	db 0
 align 2
-byte_42288 db 0
-wildWrapFlag db	0
-db    0
-byte_4228B db 0
-mapRval	dw 0
-byte_4228E db 0
+byte_42288	db 0
+wildWrapFlag	db	0
+		db    0
+byte_4228B	db 0
+mapRval		dw 0
+byte_4228E	db 0
 align 2
-mapDataOff dw 0
-mapDataSeg dw 0
-word_42294 dw 0
-byte_42296 db 0
+mapDataOff	dw 0
+mapDataSeg	dw 0
+word_42294	dw 0
+byte_42296	db 0
 align 2
-word_42298 dw 0
-byte_4229A db 0
-byte_4229B db 0
-byte_4229C db 4	dup(0)		   ; 0
-byte_422A0 db 0
+word_42298	dw 0
+byte_4229A	db 0
+byte_4229B	db 0
+byte_4229C	db 4	dup(0)		   ; 0
+byte_422A0	db 0
 align 2
-specialAttackVal dw 0
-byte_422A4 db 0
-db    0
-bat_charPriority db 7 dup(0)		 ; 0
-db 0
-wallIsPhased db 0
-db 0
-rowOffset dd 20h dup(0)		  ; 0 ;	This array holds the offsets into the maps-lo|hi-XX
+specialAttackVal	dw 0
+byte_422A4	db 0
+		db    0
+bat_charPriority 	db 7 dup(0)		 ; 0
+		db 0
+wallIsPhased	db 0
+		db 0
+rowOffset	dd 20h dup(0)		  ; 0 ;	This array holds the offsets into the maps-lo|hi-XX
 			; file for the rows. This makes	it easy	to index into
 			; the map. To access a square rowOffset[sqNorth]+sqEast
-word_42330 dw 0
+word_42330	dw 0
 partyFrozenFlag	db 0
-db    0
-byte_42334 db 0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
+		db    0
+byte_42334	db 0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
 songExtraAttack	db 0
 align 2
-word_4233E dw 0
-bigpicImageNo db 0
+word_4233E	dw 0
+bigpicImageNo	db 0
 align 2
-monGroups mon_t <>
-stru_42372 mon_t <>
-mon_t <>
-mon_t <>
+monGroups	mon_t <>
+stru_42372	mon_t <>
+		mon_t <>
+		mon_t <>
 levelChangedFlag	dw 0
-summonMeleeDamage dw 0
-regenSpptSq db 0
+summonMeleeDamage	dw 0
+regenSpptSq	db 0
 align 2
 summonMeleeType	dw 0
-word_4240A dw 0
-word_4240C dw 0
-byte_4240E db 0
+word_4240A	dw 0
+word_4240C	dw 0
+byte_4240E	db 0
 align 2
-word_42410 dw 0
-damageAmount dw	0
-stuckFlag db 0
+word_42410	dw 0
+damageAmount	dw 0
+stuckFlag	db 0
 align 2
-word_42416 dw 0
+word_42416	dw 0
 db    0
-byte_42419 db 0
-byte_4241A db 0
-byte_4241B db 0
+byte_42419	db 0
+byte_4241A	db 0
+txt_numLines	db 0
 songAntiMonster	db 0
 align 2
-word_4241E dw 0
-byte_42420 db 0
+word_4241E	dw 0
+byte_42420	db 0
 db    0
-byte_42422 db 4	dup(0)		   ; 0
-mfunc_ioBuf db 10h dup(0)	    ; 0
-dword_42436 dd 0
-word_4243A dw 0
-word_4243C dw 0
-word_4243E dw 0
-byte_42440 db 0
-runAwayFlag db 0
-songRegenHP db 0
+byte_42422	db 4	dup(0)		   ; 0
+mfunc_ioBuf	db 10h dup(0)	    ; 0
+dword_42436	dd 0
+word_4243A	dw 0
+word_4243C	dw 0
+word_4243E	dw 0
+byte_42440	db 0
+runAwayFlag	db 0
+songRegenHP	db 0
 db    0
-byte_42444 db 7	dup(0)
+byte_42444	db 7	dup(0)
 align 2
-word_4244C dw 0
-byte_4244E db 0
+word_4244C	dw 0
+byte_4244E	db 0
 align 2
-word_42450 dw 0
-breakAfterFunc dw 0
+word_42450	dw 0
+breakAfterFunc	dw 0
 sq_antiMagicFlag		db 0
 align 2
-word_42456 dw 0
-byte_42458 db 0
+word_42456	dw 0
+byte_42458	db 0
 align 2
-word_4245A dw 0
-monHpList dw 80h dup(0)		  ; 0
-songCanRun db 0
-byte_4255D db 0
-byte_4255E db 0
+word_4245A	dw 0
+monHpList	dw 80h dup(0)		  ; 0
+songCanRun	db 0
+byte_4255D	db 0
+byte_4255E	db 0
 align 2
-word_42560 dw 0
-word_42562 dw 0
-word_42564 dw 0
-byte_42566 db 0
-byte_42567 db 0
-songACBonus db 0
-songHalfDamage db 0
+word_42560	dw 0
+word_42562	dw 0
+word_42564	dw 0
+byte_42566	db 0
+byte_42567	db 0
+songACBonus	db 0
+songHalfDamage	db 0
 bat_monPriorityList dw 80h dup(0)	    ; 0
-db    0
-byte_4266B db 0
+		db    0
+byte_4266B	db 0
 align 8
 seg027 ends
 
@@ -50578,3104 +50580,2847 @@ seg027 ends
 dseg segment para public 'DATA' use16
 	assume cs:dseg
 ;byte_foobar	db 200h dup(0)
-word_42670 dw 0
-word_42672 dw 0
-byte_42674 db 0
-byte_42675 db 0
-word_42676 dw 0
-aMsRunTimeLibraryCopy db 'MS Run-Time Library - Copyright (c)'
-db ' 1988, Microsoft Corp'
-db  11h
-byte_426B1 db 0
-aComp db 'comp',0
-aRgb db	'rgb',0
-aEga db	'ega',0
-aTdy db	'tdy',0
-aThief_cfg db 'thief.cfg',0
-aThief_cfg_0 db	'thief.cfg',0
-aTit0 db 'tit0',0
-aTitle db 'title',0
-aMusic_all db 'music.all',0
-aBardscr_0 db 'bardscr',0
-aStuck____ db 'Stuck....',0
+word_42670	dw 0
+word_42672	dw 0
+byte_42674	db 0
+byte_42675	db 0
+word_42676	dw 0
+aMsRunTimeLibraryCopy db 'MS Run-Time Library - Copyright (c) 1988, Microsoft Corp'
+		db  11h
+byte_426B1	db 0
+aComp		db 'comp',0
+aRgb		db	'rgb',0
+aEga		db	'ega',0
+aTdy		db	'tdy',0
+aThief_cfg	db 'thief.cfg',0
+aTit0		db 'tit0',0
+aTitle		db 'title',0
+aMusic_all	db 'music.all',0
+aStuckElipsis	db 'Stuck....',0
 graphicsDrivers	dd aComp, aRgb,	aEga, aTdy; 0
-aFacing	db 'facing ',0
-byte_42716 db 0
-db    2
-db  20h
-db  22h	; "
-aEarlyMorning_ db 'early morning.',0
-aMidMorning_ db	'mid morning.',0
-aNoon_ db 'noon.',0
-aAfternoon_ db 'afternoon.',0
-aDusk_ db 'dusk.',0
-aEvening_ db 'evening.',0
-aMidnight_ db 'midnight.',0
+aFacing		db 'facing ',0
+byte_42716	db 0, 2, 20h, 22h
+aEarlyMorning_	db 'early morning.',0
+aMidMorning_	db	'mid morning.',0
+aNoon_		db 'noon.',0
+aAfternoon_	db 'afternoon.',0
+aDusk_		db 'dusk.',0
+aEvening_	db 'evening.',0
+aMidnight_	db 'midnight.',0
 aAfterMidnight_	db 'after midnight.',0
 aRefugeeCampOfS	db ' refugee camp of Skara Brae.',0
-aCityGates_ db ' city gates.',0
+aCityGates_	db ' city gates.',0
 aEntranceToTheC	db ' entrance to the city.',0
-aGreatIceKeep_ db ' great ice keep.',0
+aGreatIceKeep_	db ' great ice keep.',0
 aEntranceOfTheF	db ' entrance of the forest.',0
-aPausing db 'pausing',0
-db    0
+aPausing	db 'pausing',0
+		db    0
 aWhoWillYouDrop? db 'Who will you drop?',0
-db    0
+		db    0
 aYouCanTDropAPart db 'You can',27h,'t drop a party member.',0
-db    0
+		db    0
 aYouReIn db 'You',27h,'re in ',0
-db    0
-aThe_0 db 'the ',0
-db    0
-aAnd_2 db ' and ',0
-aPaceS_1 db ' pace/\s',0
-db    0
-aNorthSouth_0 db ' /north\south\',0
-db    0
+		db    0
+aAnd_2		db ' and ',0
+aPaceS_1	db ' pace/\s',0
+		db    0
+aNorthSouth_0	db ' /north\south\',0
+		db    0
 aEastWest_0 db ' /east\west\',0
-db    0
-aItSNow	db 0Ah
-db 0Ah
-db 'It',27h,'s now ',0
-timeOfDay dd aEarlyMorning_, aMidMorning_, aNoon_, aAfternoon_,	aDusk_,	aEvening_, aMidnight_; 0
-dw 0F0h
-dw seg dseg
-aOfAtThe db ' /of\at\ the',0
-db    0
-locationString dd aRefugeeCampOfS, aCityGates_,	aEntranceToTheC, aGreatIceKeep_, aEntranceOfTheF; 0
-byte_428A6 db 0Ch, 0Ah,	7, 0Fh,	6, 6, 7, 9; 0
-db 0Ah,	0Fh		; 8
-byte_428B0 db 0Fh, 0, 6, 8, 0Ah, 9, 0, 8; 0
-db 5, 1			; 8
-byte_428BA db 0, 1, 2, 1, 3, 2,	1, 2; 0
-db 4, 1			; 8
-byte_428C4 db 7, 7, 7, 7, 0, 0,	0, 1; 0
-db 1, 1, 1, 2, 2, 2, 3,	3; 8
-db 4, 4, 4, 5, 5, 5, 6,	6; 16
+		db    0
+aItSNow		db 0Ah,0Ah, 'It',27h,'s now ',0
+timeOfDay	dd aEarlyMorning_, aMidMorning_, aNoon_, aAfternoon_,	aDusk_,	aEvening_, aMidnight_, aAfterMidnight_
+aOfAtThe	db ' /of\at\ the',0
+		db    0
+locationString	dd aRefugeeCampOfS, aCityGates_,	aEntranceToTheC, aGreatIceKeep_, aEntranceOfTheF; 0
+byte_428A6	db 0Ch, 0Ah,	7, 0Fh,	6, 6, 7, 9; 0
+		db 0Ah,	0Fh		; 8
+byte_428B0	db 0Fh, 0, 6, 8, 0Ah, 9, 0, 8; 0
+		db 5, 1			; 8
+byte_428BA	db 0, 1, 2, 1, 3, 2,	1, 2; 0
+		db 4, 1			; 8
+byte_428C4	db 7, 7, 7, 7, 0, 0,	0, 1; 0
+		db 1, 1, 1, 2, 2, 2, 3,	3; 8
+		db 4, 4, 4, 5, 5, 5, 6,	6; 16
 aWhoWillUseAnItem db 'Who will use an item?',0
-aUseOn db 'Use on ',0
-aPowerless_ db 'Powerless.',0
-db    0
-aDoYouWishToResto db 'Do you wish to restore your last sa'
-db 'ved game?',0
-db    0
+aUseOn		db 'Use on ',0
+aPowerless_	db 'Powerless.',0
+		db    0
+aDoYouWishToResto db 'Do you wish to restore your last saved game?',0
+		db    0
 aDoYouWishToSaveY db 'Do you wish to save your game?',0
-db    0
+		db    0
 aSavingTheGame_	db 'Saving the game.',0
-db    0
-aYourGameHasBeenS db 'Your game has been saved to disk.',0Ah
-db 0Ah
-db 'Do you wish to exit to DOS?',0
-aHelpForThoseInNeed17 db 'HELP for those in need:',0Ah
-db 0Ah
-db '1-7 = Player info',0Ah
-db 'Arrows = Move, turn',0Ah
-db '? = Where are we',0Ah
-db 'N = New march order',0Ah
-db 'S = Save the game',0Ah
-db 'T = Time out',0Ah
-db 'V = Sound on/off',0Ah,0
-aMoreHelpBPlayABardTu db 'More HELP:',0Ah
-db 0Ah
-db 'B = Play a Bard tune',0Ah
-db 'C = Cast a spell',0Ah
-db 'F1-F7 = Cast a spell',0Ah
-db 'E = Ascend portal',0Ah
-db 'W = Descend portal',0Ah
-db 'P = Party combat',0Ah
-db 'D = Drop special party member',0Ah
-db 'U = Use an item',0Ah,0
-aNewOrder db 'New Order:',0Ah
-db 0Ah,0
-db    0
-gtChar db '>'
-byte_42AF5 db 78h
-db 20h
-db 0
-aUseThisOrder? db 0Ah
-db 'Use this order?',0
-aGame_sav db 'game.sav',0
-aCanTOpenGameSave db 'Can',27h,'t open game save file',0
-aGame_sav_0 db 'game.sav',0
-db    0
-word_42B36 dw 1
-aQuitTheGame? db 'Quit the game?',0
+		db    0
+aYourGameHasBeenS	db 'Your game has been saved to disk.',0Ah, 0Ah
+			db 'Do you wish to exit to DOS?',0
+aHelpForThoseInNeed17	db 'HELP for those in need:',0Ah, 0Ah
+			db '1-7 = Player info',0Ah
+			db 'Arrows = Move, turn',0Ah
+			db '? = Where are we',0Ah
+			db 'N = New march order',0Ah
+			db 'S = Save the game',0Ah
+			db 'T = Time out',0Ah
+			db 'V = Sound on/off',0Ah,0
+aMoreHelpBPlayABardTu	db 'More HELP:',0Ah, 0Ah
+			db 'B = Play a Bard tune',0Ah
+			db 'C = Cast a spell',0Ah
+			db 'F1-F7 = Cast a spell',0Ah
+			db 'E = Ascend portal',0Ah
+			db 'W = Descend portal',0Ah
+			db 'P = Party combat',0Ah
+			db 'D = Drop special party member',0Ah
+			db 'U = Use an item',0Ah,0
+aNewOrder	db 'New Order:',0Ah,0Ah,0
+		db    0
+gtChar		db '>'
+byte_42AF5	db 78h				; XXX - Doesn't seem to be used
+		db 20h
+		db 0
+aUseThisOrder?	db 0Ah,'Use this order?',0
+aGame_sav	db 'game.sav',0
+aCanTOpenGameSave	db 'Can',27h,'t open game save file',0
+			db    0
+word_42B36	dw 1
+aQuitTheGame?	db 'Quit the game?',0
 aYouWillLoseYou	db 'You will lose your game status.',0Ah
-db 0Ah
-db 0Ah
-db 0Ah
-db '  Do you wish to quit?',0
+		db 0Ah, 0Ah, 0Ah
+		db '  Do you wish to quit?',0
 align 2
-aWarrior db 'Warrior',0
-aWizard	db 'Wizard',0
-aSorcerer db 'Sorcerer',0
-aConjurer db 'Conjurer',0
-aMagician db 'Magician',0
-aRogue db 'Rogue',0
-aBard db 'Bard',0
-aPaladin db 'Paladin',0
-aHunter	db 'Hunter',0
-aMonk db 'Monk',0
-aArchmage db 'Archmage',0
-aChronomancer db 'Chronomancer',0
-aGeomancer db 'Geomancer',0
-aMonster db 'Monster',0
-aIllusion db 'Illusion',0
+aWarrior	db 'Warrior',0
+aWizard		db 'Wizard',0
+aSorcerer	db 'Sorcerer',0
+aConjurer	db 'Conjurer',0
+aMagician	db 'Magician',0
+aRogue		db 'Rogue',0
+aBard		db 'Bard',0
+aPaladin	db 'Paladin',0
+aHunter		db 'Hunter',0
+aMonk		db 'Monk',0
+aArchmage	db 'Archmage',0
+aChronomancer	db 'Chronomancer',0
+aGeomancer	db 'Geomancer',0
+aMonster	db 'Monster',0
+aIllusion	db 'Illusion',0
 aThouArtInTheCa	db 'Thou art in the Camp of Skara Brae.'
-db 0Ah
-db 0Ah
-db '@Add a member',0Ah
-db '@Remove a member',0Ah
-db '@Rename a member',0Ah
-db '@Create a member',0Ah
-db '@Transfer characters',0Ah
-db '@Delete a member',0Ah
-db '@Save the party',0Ah
-db '@Leave the game',0Ah
-db '@Enter wilderness',0
+		db 0Ah
+		db 0Ah
+		db '@Add a member',0Ah
+		db '@Remove a member',0Ah
+		db '@Rename a member',0Ah
+		db '@Create a member',0Ah
+		db '@Transfer characters',0Ah
+		db '@Delete a member',0Ah
+		db '@Save the party',0Ah
+		db '@Leave the game',0Ah
+		db '@Enter wilderness',0
 aPressReturnToS	db 'Press <RETURN> to save off all char'
-db 'acters and end game play. Or press '
-db 'ESC to go back.',0
+		db 'acters and end game play. Or press '
+		db 'ESC to go back.',0
 aDoYouWishYourC	db 'Do you wish your character to be',0Ah
-db 'Male or',0Ah
-db 'Female?',0
+		db 'Male or',0Ah
+		db 'Female?',0
 align 2
-aSelectARaceFor	db 'Select a race for your new characte'
-db 'r:',0Ah
-db 0Ah
-db '1) Human',0Ah
-db '2) Elf',0Ah
-db '3) Dwarf',0Ah
-db '4) Hobbit',0Ah
-db '5) Half-Elf',0Ah
-db '6) Half-Orc',0Ah
-db '7) Gnome',0
+aSelectARaceFor	db 'Select a race for your new character:',0Ah,0Ah
+		db '1) Human',0Ah
+		db '2) Elf',0Ah
+		db '3) Dwarf',0Ah
+		db '4) Hobbit',0Ah
+		db '5) Half-Elf',0Ah
+		db '6) Half-Orc',0Ah
+		db '7) Gnome',0
 align 2
 aNameYourNewCha	db 'Name your new character --',0
 align 2
-aSelectWhichPar	db 'Select which party member to remove'
-db ' or...',0
-aRemoveThemAll db 'Remove them all!',0
+aSelectWhichPar	db 'Select which party member to remove or...',0
+aRemoveThemAll	db 'Remove them all!',0
 align 2
 aNameToSavePart	db 'Name to save party under?',0
-aDeleteWho? db 'Delete Who?',0
-aIsCurrentlyInT	db ' is currently in the party. Remove '
-db 'from the party first.',0
+aDeleteWho?	db 'Delete Who?',0
+aIsCurrentlyInT	db ' is currently in the party. Remove from the party first.',0
 align 2
 aAreYouSureYouW	db 'Are you sure you want to delete ',0
 align 2
-aThereAreNoChar	db 'There are no characters on this dis'
-db 'k.',0
-aWhoShallJoin? db 'Who shall join?',0
+aThereAreNoChar	db 'There are no characters on this disk.',0
+aWhoShallJoin?	db 'Who shall join?',0
 aIsAlreadyInThe	db ' is already in the party.',0
-aThereIsAlready	db 'There is already a character with t'
-db 'hat name in the roster.',0
+aThereIsAlready	db 'There is already a character with that name in the roster.',0
 align 2
 aTheRosterIsFul	db 'The roster is full.',0
 aThereSNoOneHer	db 'There',27h,'s no one here named that!',0
-aRenameWho? db 'Rename Who?',0
+aRenameWho?	db 'Rename Who?',0
 aYouCanTRenameA	db 'You can',27h,'t rename a party list!',0
 align 2
-aWhatIs	db 'What is ',0
+aWhatIs		db 'What is ',0
 align 2
-aSNewName? db 27h,'s new name?',0
+aSNewName?	db 27h,'s new name?',0
 align 2
-byte_42F8C db 33, 48, 54, 79, 54, 79, 54, 79, 54, 79, 33; 0
-db 48, 33, 48, 33, 48, 33, 48, 33, 48, 54, 79; 11
-baseAttributes startingAttrBase	<10, 6,	8, 8, 5, 10, 6,\
-		  8, 8,	5>
-startingAttrBase <8, 9,	9, 6, 6, 8, 9, \
-		  9, 6,	6>
-startingAttrBase <12, 6, 7, 10,	3, 12, \
-		  6, 7,	10, 3>
-startingAttrBase <4, 6,	12, 5, 10, 4, 6,\
-		  12, 5, 10>
-startingAttrBase <9, 8,	9, 7, 6, 9, 8, \
-		  9, 7,	6>
-startingAttrBase <11, 3, 8, 11,	4, 11, \
-		  3, 8,	11, 4>
-startingAttrBase <9, 10, 7, 3, 4, 9, 10,\
-		  7, 3,	4>
-startingClasses	startingClass_t	<1, 0, 0, 1, 1,	1, 1, 1,\
-		 1, 1>	; 0
-startingClass_t	<1, 0, 0, 1, 1,	1, 1, 1,\
-		 0, 1>	; 1
-startingClass_t	<1, 0, 0, 0, 0,	1, 1, 1,\
-		 1, 1>	; 2
-startingClass_t	2 dup(<1, 0, 0,	1, 1, 1,\
-		       1, 0, 0,	1>); 3
-startingClass_t	<1, 0, 0, 1, 1,	1, 0, 0,\
-		 1, 0>	; 5
-startingClass_t	<1, 0, 0, 1, 1,	1, 0, 0,\
-		 1, 1>	; 6
-byte_4302E db 6, 42, 42, 42, 42, 32, 0,	6, 6, 22; 0
-db  2Ah	; *
-db    0
-startingInventory db 1,	14h, 0FFh, 4, 76h, 0Ah,	1, 3, 0FFh, 1, 0Eh; 0
-db 0FFh, 1, 0Ah, 0FFh, 1, 11h, 0FFh, 1,	12h, 0FFh, 0FEh; 11
-db 1, 4, 0FFh, 1, 0Ch, 0FFh, 0,	7Dh, 0Ah, 0FEh,	1; 22
-db 4, 0FFh, 1, 0Ch, 0FFh, 1, 0Ah, 0FFh,	0FEh, 1, 10h; 33
-db 0FFh, 1, 9, 0FFh, 1,	2, 1, 0FEh; 44
-classString dd aWarrior		    ; 0
-dd aWizard		; 1
-dd aSorcerer		; 2
-dd aConjurer		; 3
-dd aMagician		; 4
-dd aRogue		; 5
-dd aBard		; 6
-dd aPaladin		; 7
-dd aHunter		; 8
-dd aMonk		; 9
-dd aArchmage		; 10
-dd aChronomancer	; 11
-dd aGeomancer		; 12
-dd aMonster		; 13
-dd aIllusion		; 14
-aTheRuin db 'The Ruin',0
-aTheRuin_0 db 'The Ruin',0
-off_430BC dd camp_addMember
-dd camp_removeMember
-dd camp_renameMember
-dd camp_createMember
-dd transferCharacter
-dd camp_deleteCharacter
-dd saveParty
-dd saveAndExitMaybe
-dd enterWilderness
-aThieves_inf db	'thieves.inf',0
-aParties_inf db	'parties.inf',0
-aThieves_inf_0 db 'thieves.inf',0
-aParties_inf_0 db 'parties.inf',0
-aHailTravelersS	db 'Hail, travelers! Step to the bar an'
-db 'd I',27h,'ll draw you a tankard.',0Ah
-db 'You can:',0Ah
-db 'Order a drink',0Ah
-db 'Talk to barkeep',0Ah
-db 'Exit the tavern',0
+byte_42F8C	db 33, 48, 54, 79, 54, 79, 54, 79, 54, 79, 33; 0
+		db 48, 33, 48, 33, 48, 33, 48, 33, 48, 54, 79; 11
+baseAttributes	startingAttrBase <10, 6,	8, 8, 5, 10, 6, 8, 8,	5>
+		startingAttrBase <8, 9,	9, 6, 6, 8, 9, 9, 6, 6>
+		startingAttrBase <12, 6, 7, 10,	3, 12, 6, 7, 10, 3>
+		startingAttrBase <4, 6,	12, 5, 10, 4, 6, 12, 5, 10>
+		startingAttrBase <9, 8,	9, 7, 6, 9, 8, 9, 7, 6>
+		startingAttrBase <11, 3, 8, 11,	4, 11, 3, 8, 11, 4>
+		startingAttrBase <9, 10, 7, 3, 4, 9, 10, 7, 3, 4>
+startingClasses	startingClass_t	<1, 0, 0, 1, 1,	1, 1, 1, 1, 1>	; 0
+		startingClass_t	<1, 0, 0, 1, 1,	1, 1, 1, 0, 1>	; 1
+		startingClass_t	<1, 0, 0, 0, 0,	1, 1, 1, 1, 1>	; 2
+		startingClass_t	2 dup(<1, 0, 0,	1, 1, 1, 1, 0, 0, 1>); 3
+		startingClass_t	<1, 0, 0, 1, 1,	1, 0, 0, 1, 0>	; 5
+		startingClass_t	<1, 0, 0, 1, 1,	1, 0, 0, 1, 1>	; 6
+byte_4302E	db 6, 42, 42, 42, 42, 32, 0,	6, 6, 22, 2Ah
+		db    0
+startingInventory	db 1,	14h, 0FFh, 4, 76h, 0Ah,	1, 3, 0FFh, 1, 0Eh; 0
+			db 0FFh, 1, 0Ah, 0FFh, 1, 11h, 0FFh, 1,	12h, 0FFh, 0FEh; 11
+			db 1, 4, 0FFh, 1, 0Ch, 0FFh, 0,	7Dh, 0Ah, 0FEh,	1; 22
+			db 4, 0FFh, 1, 0Ch, 0FFh, 1, 0Ah, 0FFh,	0FEh, 1, 10h; 33
+			db 0FFh, 1, 9, 0FFh, 1,	2, 1, 0FEh; 44
+classString	dd aWarrior		    ; 0
+		dd aWizard		; 1
+		dd aSorcerer		; 2
+		dd aConjurer		; 3
+		dd aMagician		; 4
+		dd aRogue		; 5
+		dd aBard		; 6
+		dd aPaladin		; 7
+		dd aHunter		; 8
+		dd aMonk		; 9
+		dd aArchmage		; 10
+		dd aChronomancer	; 11
+		dd aGeomancer		; 12
+		dd aMonster		; 13
+		dd aIllusion		; 14
+aTheRuin	db 'The Ruin',0
+off_430BC	dd camp_addMember
+		dd camp_removeMember
+		dd camp_renameMember
+		dd camp_createMember
+		dd transferCharacter
+		dd camp_deleteCharacter
+		dd saveParty
+		dd saveAndExitMaybe
+		dd enterWilderness
+aThieves_inf	db	'thieves.inf',0
+aParties_inf	db	'parties.inf',0
+aHailTravelersS	db 'Hail, travelers! Step to the bar and I',27h,'ll draw you a tankard.',0Ah
+		db 'You can:',0Ah
+		db 'Order a drink',0Ah
+		db 'Talk to barkeep',0Ah
+		db 'Exit the tavern',0
 align 2
 aWhoWillOrderAD	db 'Who will order a drink?',0
-aSeatThyself db	'Seat thyself,',0Ah,0
+aSeatThyself	db	'Seat thyself,',0Ah,0
 align 2
 aWhatLlItBe?Ale	db 'What',27h,'ll it be?',0Ah
-db 'Ale',0Ah
-db 'Beer',0Ah
-db 'Mead',0Ah
-db 'Foul spirits',0Ah
-db 'Ginger Ale',0
+		db 'Ale',0Ah
+		db 'Beer',0Ah
+		db 'Mead',0Ah
+		db 'Foul spirits',0Ah
+		db 'Ginger Ale',0
 align 2
-aThouAreInNoCon	db 'Thou are in no condition to order a'
-db 'nything.',0
+aThouAreInNoCon	db 'Thou are in no condition to order anything.',0
 aInFactThyParty	db 'In fact, thy party is a disgrace..',0Ah
-db 'Bouncers!!!',0
+		db 'Bouncers!!!',0
 align 2
 aWillYouHaveIt_	db 'Will you have it...',0Ah
-db 'Here or',0Ah
-db 'To go?',0
+		db 'Here or',0Ah
+		db 'To go?',0
 align 2
 aBurpNotTooBad_	db '(Burp!) Not too bad.',0
 align 2
 aMyGoodnessThat	db 'My goodness, that',27h,'s good stuff.',0
-aNowThatSARealT	db 'Now that',27h,'s a real thirst quenche'
-db 'r!',0
+aNowThatSARealT	db 'Now that',27h,'s a real thirst quencher!',0
 align 2
 aButYouFeelALit	db 'But you feel a little light-headed.'
-db 0
+		db 0
 aYouStartHiccup	db 'You start hiccuping',0
-aYouBeginToSing	db 'You begin to sing 99 bottles of bee'
-db 'r on the wall.',0
-aYouSeemToHaveA	db 'You seem to have a hard time stayin'
-db 'g on the bar stool.',0
+aYouBeginToSing	db 'You begin to sing 99 bottles of beer on the wall.',0
+aYouSeemToHaveA	db 'You seem to have a hard time staying on the bar stool.',0
 align 2
 aYouCollapseOnT	db 'You collapse on the floor.',0
 align 2
-aSorryBut db 'Sorry but ',0
+aSorryBut	db 'Sorry but ',0
 align 2
 aCanTCarryAnyMo	db ' can',27h,'t carry any more items.',0
 align 2
-aTheBartenderFi	db 'The bartender fills a wineskin with'
-db ' your order and hands it to you.',0
+aTheBartenderFi	db 'The bartender fills a wineskin with your order and hands it to you.',0
 aWhoWillTalkToT	db 'Who will talk to the barkeep?',0
 aYouAreInNoCond	db 'You are in no condition to talk.',0
 align 2
 aTalkAinTCheap db '"Talk ain',27h,'t cheap,',0
 align 2
-aBeerBreath db ' Beer Breath',0
+aBeerBreath	db ' Beer Breath',0
 align 2
 aTheBarkeepSays	db '" the barkeep says.',0
 aHowMuchWillYou	db 'How much will you tip him?',0
 align 2
 aMoneyTalksFrie	db '"Money talks, friend," he says.',0
-aThereSABuildin	db '"There',27h,'s a building in Skara Bra'
-db 'e where some of the survivors stash'
-db 'ed their goods. It may be helpful,"'
-db ' smiles the bartender',0
-aBeOnTheLookout	db '"Be on the lookout for the magic ge'
-db 'ms, your spellcasters will need the'
-db 'm."',0
-aThereLiesAnoth	db '"There lies another bar in Celaria '
-db 'Bree, seek it. It exists only in th'
-db 'e dimension called Lucencia."',0
-aSeekOutTheOldM	db '"Seek out the old man in the Review'
-db ' Board. He keeps watch over everyth'
-db 'ing."',0
-aGoToTheBardSHa	db '"Go to the bard',27h,'s hall and liste'
-db 'n to the songs they sing. They cont'
-db 'ain useful information."',0
-aThereIsSaidToB	db '"There is said to be a key existing'
-db ' in the Violet Mountains, this will'
-db ' gain access to Cyanis',27h,'s Tower."'
-db 0
+aThereSABuildin	db '"There',27h,'s a building in Skara Brae where some of the survivors stashed their goods. It may be helpful," smiles the bartender',0
+aBeOnTheLookout	db '"Be on the lookout for the magic gems, your spellcasters will need them."',0
+aThereLiesAnoth	db '"There lies another bar in Celaria Bree, seek it. It exists only in the dimension called Lucencia."',0
+aSeekOutTheOldM	db '"Seek out the old man in the Review Board. He keeps watch over everything."',0
+aGoToTheBardSHa	db '"Go to the bard',27h,'s hall and listen to the songs they sing. They contain useful information."',0
+aThereIsSaidToB	db '"There is said to be a key existing in the Violet Mountains, this will gain access to Cyanis',27h,'s Tower."', 0
 align 2
-aAckItSNotJustA	db '"Ack! It',27h,'s not just a word, but '
-db 'a state of mind."',0
-aTheKeyToFindin	db '"The key to finding Sceadu is findi'
-db 'ng the lock."',0
+aAckItSNotJustA	db '"Ack! It',27h,'s not just a word, but a state of mind."',0
+aTheKeyToFindin	db '"The key to finding Sceadu is finding the lock."',0
 align 2
-aSceaduCanBeFou	db '"Sceadu can be found in the middle '
-db 'of Nowhere."',0
+aSceaduCanBeFou	db '"Sceadu can be found in the middle of Nowhere."',0
 aSeekWerraInTar	db '"Seek Werra in Tarmitia."',0
 aNotEnoughGold_	db 'Not enough gold.',0
 align 2
-barkeepSayings dd aThereSABuildin      ; 0
-dd aBeOnTheLookout	; 1
-dd aThereLiesAnoth	; 2
-dd aSeekOutTheOldM	; 3
-dd aSeekOutTheOldM	; 4
-dd aAckItSNotJustA	; 5
-dd aBeOnTheLookout	; 6
-dd aThereLiesAnoth	; 7
-dd aGoToTheBardSHa	; 8
-dd aThereIsSaidToB	; 9
-dd aBeOnTheLookout	; 10
-dd aSeekOutTheOldM	; 11
-dd aSeekWerraInTar	; 12
-dd aTheKeyToFindin	; 13
-dd aSceaduCanBeFou	; 14
-aAbmfg db 'ABMFG',0
-byte_437D8 db 3, 2, 4, 6, 1, 3	   ; 0
-nullDrunkValue dw 0
-drunkString dd nullDrunkValue	    ; 0
-dd nullDrunkValue	; 1
-dd nullDrunkValue	; 2
-dd nullDrunkValue	; 3
-dd aButYouFeelALit	; 4
-dd aButYouFeelALit	; 5
-dd aYouStartHiccup	; 6
-dd aYouStartHiccup	; 7
-dd aYouBeginToSing	; 8
-dd aYouSeemToHaveA	; 9
-dd aYouSeemToHaveA	; 10
-dd aYouCollapseOnT	; 11
-dd aYouCollapseOnT	; 12
+barkeepSayings	dd aThereSABuildin      ; 0
+		dd aBeOnTheLookout	; 1
+		dd aThereLiesAnoth	; 2
+		dd aSeekOutTheOldM	; 3
+		dd aSeekOutTheOldM	; 4
+		dd aAckItSNotJustA	; 5
+		dd aBeOnTheLookout	; 6
+		dd aThereLiesAnoth	; 7
+		dd aGoToTheBardSHa	; 8
+		dd aThereIsSaidToB	; 9
+		dd aBeOnTheLookout	; 10
+		dd aSeekOutTheOldM	; 11
+		dd aSeekWerraInTar	; 12
+		dd aTheKeyToFindin	; 13
+		dd aSceaduCanBeFou	; 14
+aAbmfg		db 'ABMFG',0
+byte_437D8	db 3, 2, 4, 6, 1, 3	   ; 0
+nullDrunkValue	dw 0
+drunkString	dd nullDrunkValue	    ; 0
+		dd nullDrunkValue	; 1
+		dd nullDrunkValue	; 2
+		dd nullDrunkValue	; 3
+		dd aButYouFeelALit	; 4
+		dd aButYouFeelALit	; 5
+		dd aYouStartHiccup	; 6
+		dd aYouStartHiccup	; 7
+		dd aYouBeginToSing	; 8
+		dd aYouSeemToHaveA	; 9
+		dd aYouSeemToHaveA	; 10
+		dd aYouCollapseOnT	; 11
+		dd aYouCollapseOnT	; 12
 tav_drinkStrength db 1,	2, 3, 4, 0, 0	  ; 0
-aScrapwood db 'Scrapwood',0
-aStaggerInn db 'Stagger Inn',0
-aHicHaven db 'Hic Haven',0
-aCheers	db 'Cheers',0
-aTavern	db 'Tavern',0
-tavCoords tavernLoc_t <12, 17, 0, 0, 0>; 0
-tavernLoc_t <7,	12, 3, 2, 5>; 1
-tavernLoc_t <2,	3, 3, 4, 5>; 2
-tavernLoc_t <13, 7, 6, 6, 5>; 3
-tavernLoc_t <99, 99, 99, 8, 10>; 4
-db    0
-tavernNames dd aScrapwood	    ; 0
-dd aStaggerInn		; 1
-dd aHicHaven		; 2
-dd aCheers		; 3
-dd aTavern		; 4
-byte_43876 db 0, 50, 250, 244, 232 ; 0
-db    0
-aWelcomeOhWearyOne db 'Welcome, oh weary ones, to our humb'
-db 'le temple.',0Ah
-db 'Dost thou wish to...',0Ah
-db 'Heal a character',0Ah
-db 'Pool thy gold',0Ah
-db 'Exit temple',0
-aWhomShallGatherTh db 'Whom shall gather thy gold?',0
-aNowHathAllTheGold db ' now hath all the gold.',0
-aWhoNeedethHealing db 'Who needeth healing?',0
-db    0
-aIsInBadShapeIndeed_ db	' is in bad shape, indeed. ',0
-db    0
-aThouMustSacrifice db 'Thou must sacrifice ',0
-db    0
-aInGold_WhoWillForfeit db ' in gold. Who will forfeit the gold'
-db '?',0
-db    0
-aSorryButWithoutProper db 'Sorry, but without proper sacrifice'
-db ' the prayer will fail.',0
-aThePriestsLayHandsOn db 'The priests lay hands on ',0
-a____1 db '...',0
-a___and	db '...and ',0
-aIsHealed db ' is healed!',0
-aHathBeenDrainedOfLife db ' hath been drained of life force. ',0
-db    0
-aThouMustSacrifice_0 db	'Thou must sacrifice ',0
-db    0
-aDoesNotRequireAnyHeal db ' does not require any healing.',0
-db    0
-aHasWoundsWhichNeedTen db ' has wounds which need tending. ',0
-db    0
-aTheDonationWillBe db 'The donation will be ',0
-temple_healPrice dw 0, 400, 300, 900, 1120, 220, 500, 600; 0
-dw 900			; 8
-aHe db 'he',0
-aShe db	'she',0
-aIt db 'it',0
-aHim db	'him',0
-aHer db	'her',0
-aIt_0 db 'it',0
-aHis db	'his',0
-aHer_0 db 'her',0
-aIts db	'its',0
-aMoreCodeIsNeededToHa db 'More code is needed to handle monst'
-db 'ers',0
-pronounString dd aHe, aShe, aIt, aHim, aHer, aIt_0, aHis; 0
-dd aHer_0, aIts		; 7
-aShrine	db 'Shrine',0
-aForestLawn db 'Forest Lawn',0
-aAlliria db 'Alliria',0
-aTwilightTmp db	'Twilight Tmp',0
-templeLoc templeLoc_t <8, 1, 0,	0>; 0
-templeLoc_t <10, 4, 3, 2>; 1
-templeLoc_t <2,	7, 6, 4>; 2
-templeLoc_t <255, 255, 255, 6>;	3
-templeTitles dd	aShrine, aForestLawn, aAlliria,	aTwilightTmp; 0
-byte_43B50 db 2, 1, 10h, 40h, 20h, 8, 4, 0; 0
-byte_43B58 db 2, 1, 5, 7, 6, 4,	3, 0; 0
-statusHealMask db 0FFh,	0FEh, 0FDh, 3, 3, 0EFh,	0DFh, 0BFh; 0
-db 0FFh, 0		; 8
-fgtrXPReq dd 2000, 4000, 7000, 10000, 15000, 20000; 0
-dd 30000, 50000, 80000,	110000,	150000,	200000;	6
-wizdXPReq dd 20000, 50000, 80000, 120000, 160000, 200000; 0
-dd 250000, 300000, 400000, 600000, 900000; 6
-dd 1300000		; 11
-sorcXPReq dd 7000, 15000, 25000, 40000,	60000, 80000; 0
-dd 100000, 130000, 170000, 220000, 300000; 6
-dd 400000		; 11
-magiXPReq dd 1800, 4000, 6000, 10000, 14000, 19000; 0
-dd 29000, 50000, 90000,	120000,	170000,	230000;	6
-archXPReq dd 70000, 140000, 240000, 340000, 540000; 0
-dd 740000, 1000000, 1400000, 1800000, 2200000; 5
-dd 2600000, 3000000	; 10
-geomXPReq dd 100000, 225000, 400000, 650000, 950000; 0
-dd 1400000, 1800000, 2200000, 2600000, 3000000;	5
-dd 3400000, 3800000	; 10
-classXPReqs dd fgtrXPReq, wizdXPReq, sorcXPReq,	magiXPReq; 0
-dd magiXPReq, fgtrXPReq, fgtrXPReq, fgtrXPReq; 4
-dd fgtrXPReq, magiXPReq, archXPReq, archXPReq; 8
-dd geomXPReq		; 12
+aScrapwood	db 'Scrapwood',0
+aStaggerInn	db 'Stagger Inn',0
+aHicHaven	db 'Hic Haven',0
+aCheers		db 'Cheers',0
+aTavern		db 'Tavern',0
+tavCoords	tavernLoc_t <12, 17, 0, 0, 0>; 0
+		tavernLoc_t <7,	12, 3, 2, 5>; 1
+		tavernLoc_t <2,	3, 3, 4, 5>; 2
+		tavernLoc_t <13, 7, 6, 6, 5>; 3
+		tavernLoc_t <99, 99, 99, 8, 10>; 4
+		db    0
+tavernNames	dd aScrapwood	    ; 0
+		dd aStaggerInn		; 1
+		dd aHicHaven		; 2
+		dd aCheers		; 3
+		dd aTavern		; 4
+byte_43876	db 0, 50, 250, 244, 232 ; 0
+		db    0
+aWelcomeOhWearyOne	db 'Welcome, oh weary ones, to our humble temple.',0Ah
+			db 'Dost thou wish to...',0Ah
+			db 'Heal a character',0Ah
+			db 'Pool thy gold',0Ah
+			db 'Exit temple',0
+aWhomShallGatherTh	db 'Whom shall gather thy gold?',0
+aNowHathAllTheGold	db ' now hath all the gold.',0
+aWhoNeedethHealing	db 'Who needeth healing?',0
+			db    0
+aIsInBadShapeIndeed_	db	' is in bad shape, indeed. ',0
+			db    0
+aInGold_WhoWillForfeit	db ' in gold. Who will forfeit the gold?',0
+			db    0
+aSorryButWithoutProper	db 'Sorry, but without proper sacrifice the prayer will fail.',0
+aThePriestsLayHandsOn	db 'The priests lay hands on ',0
+aElipsis		db '...',0
+aElipsisAnd		db '...and ',0
+aIsHealed		db ' is healed!',0
+aHathBeenDrainedOfLife	db ' hath been drained of life force. ',0
+			db    0
+aThouMustSacrifice	db	'Thou must sacrifice ',0
+			db    0
+aDoesNotRequireAnyHeal	db ' does not require any healing.',0
+			db    0
+aHasWoundsWhichNeedTen	db ' has wounds which need tending. ',0
+			db    0
+aTheDonationWillBe	db 'The donation will be ',0
+temple_healPrice	dw 0, 400, 300, 900, 1120, 220, 500, 600, 900			; 8
+aHe		db 'he',0
+aShe		db 'she',0
+aIt		db 'it',0
+aHim		db 'him',0
+aHer		db 'her',0
+aHis		db 'his',0
+aIts		db 'its',0
+pronounString	dd aHe, aShe, aIt, aHim, aHer, aIt, aHis, aHer, aIts		; 7
+aShrine		db 'Shrine',0
+aForestLawn	db 'Forest Lawn',0
+aAlliria	db 'Alliria',0
+aTwilightTmp	db 'Twilight Tmp',0
+templeLoc	templeLoc_t <8, 1, 0,	0>; 0
+		templeLoc_t <10, 4, 3, 2>; 1
+		templeLoc_t <2,	7, 6, 4>; 2
+		templeLoc_t <255, 255, 255, 6>;	3
+templeTitles	dd aShrine, aForestLawn, aAlliria,	aTwilightTmp; 0
+byte_43B50	db 2, 1, 10h, 40h, 20h, 8, 4, 0; 0
+byte_43B58	db 2, 1, 5, 7, 6, 4,	3, 0; 0
+statusHealMask	db 0FFh,	0FEh, 0FDh, 3, 3, 0EFh,	0DFh, 0BFh, 0FFh, 0		; 8
+fgtrXPReq	dd 2000, 4000, 7000, 10000, 15000, 20000; 0
+		dd 30000, 50000, 80000,	110000,	150000,	200000;	6
+wizdXPReq	dd 20000, 50000, 80000, 120000, 160000, 200000; 0
+		dd 250000, 300000, 400000, 600000, 900000; 6
+		dd 1300000		; 11
+sorcXPReq	dd 7000, 15000, 25000, 40000,	60000, 80000; 0
+		dd 100000, 130000, 170000, 220000, 300000; 6
+		dd 400000		; 11
+magiXPReq	dd 1800, 4000, 6000, 10000, 14000, 19000; 0
+		dd 29000, 50000, 90000,	120000,	170000,	230000;	6
+archXPReq	dd 70000, 140000, 240000, 340000, 540000; 0
+		dd 740000, 1000000, 1400000, 1800000, 2200000; 5
+		dd 2600000, 3000000	; 10
+geomXPReq	dd 100000, 225000, 400000, 650000, 950000; 0
+		dd 1400000, 1800000, 2200000, 2600000, 3000000;	5
+		dd 3400000, 3800000	; 10
+classXPReqs	dd fgtrXPReq, wizdXPReq, sorcXPReq,	magiXPReq; 0
+		dd magiXPReq, fgtrXPReq, fgtrXPReq, fgtrXPReq; 4
+		dd fgtrXPReq, magiXPReq, archXPReq, archXPReq; 8
+		dd geomXPReq		; 12
 aYouAreInAnEmpt	db 'You are in an empty building.',0
-aBuilding db 'Building',0
+aBuilding	db 'Building',0
 align 2
-aThePartyIsInsi	db 'The party is inside a storage build'
-db 'ing.',0Ah
-db 'Who wishes to inspect?',0Ah
-db 0Ah
-db 0Ah
-db 0Ah
-db 'ESC to exit building',0
+aThePartyIsInsi	db 'The party is inside a storage building.',0Ah
+		db 'Who wishes to inspect?',0Ah
+		db 0Ah, 0Ah, 0Ah
+		db 'ESC to exit building',0
 align 2
-aWould db 'Would ',0
+aWould		db 'Would ',0
 align 2
 aLikeToPickup__	db ' like to pickup...',0
 align 2
 aTheBuildingIsE	db 'The building is empty.',0
 align 2
-aPickUp___ db 'Pick up...',0
+aPickUp___	db 'Pick up...',0
 align 2
-aAllFull db 'All full!',0
+aAllFull	db 'All full!',0
 aYouPickUpTheIt	db 'You pick up the item.',0
-aDropOff__ db 'Drop off..',0
+
+aInventor_stf	db 'inventor.stf',0
 align 2
-aTheBuildingIsF	db 'The building is filled to the ceili'
-db 'ng with your junk. Remove something'
-db ' first!',0
-aInventor_stf db 'inventor.stf',0
-aInventor_stf_0	db 'inventor.stf',0
-aDisk2 db 'Disk 2',0
-align 2
-aWildwal_grp db	'wildwal.grp',0
-aSkara_grp db 'skara.grp',0
-aSkara_grp_0 db	'skara.grp',0
-aGdung_grp db 'gdung.grp',0
-aGdung_grp_0 db	'gdung.grp',0
-aGdung_grp_1 db	'gdung.grp',0
-aDung_tst db 'dung.tst',0
-aDisk1 db 'Disk 1',0
-aDisk2_0 db 'Disk 2',0
-aDisk3 db 'Disk 3',0
-aMaps_lo db 'maps.lo',0
-aMaps_hi db 'maps.hi',0
-aMonsterl db 'monsterl',0
-aMonsterh db 'monsterh',0
-aLow_pic db 'low.pic',0
-aHi_pic	db 'hi.pic',0
+aWildwal_grp	db	'wildwal.grp',0
+aSkara_grp	db 'skara.grp',0
+aGdung_grp	db 'gdung.grp',0
+aDisk1		db 'Disk 1',0
+aDisk2		db 'Disk 2',0
+aDisk3		db 'Disk 3',0
+aMaps_lo	db 'maps.lo',0
+aMaps_hi	db 'maps.hi',0
+aMonsterl	db 'monsterl',0
+aMonsterh	db 'monsterh',0
+aLow_pic	db 'low.pic',0
+aHi_pic		db 'hi.pic',0
 align 2
 aPleaseInsertDi	db 'Please insert disk ',0
-byte_43EBC db 0FFh, 0, 4, 8, 4,	0, 0, 4; 0
-db 0, 0, 4, 8, 4, 0, 0,	4; 8
-aOldPsndnutspossparade db 'Old PsndNutsPossParaDeadSton',0
-db    0
-byte_43EEA db stat_old,	stat_poisoned, stat_nuts, stat_possessed; 0
-db stat_paralyzed, stat_dead, stat_stoned, 0; 4
-aWawisocomarobapahumoa db 'WaWiSoCoMaRoBaPaHuMoArChGeMnIl',0
-db    0
-word_43F12 dw 0
+byte_43EBC	db 0FFh, 0, 4, 8, 4,	0, 0, 4; 0
+		db 0, 0, 4, 8, 4, 0, 0,	4; 8
+aOldPsndnutspossparade	db 'Old PsndNutsPossParaDeadSton',0
+			db    0
+byte_43EEA	db stat_old, stat_poisoned, stat_nuts, stat_possessed; 0
+		db stat_paralyzed, stat_dead, stat_stoned, 0; 4
+aWawisocomarobapahumoa	db 'WaWiSoCoMaRoBaPaHuMoArChGeMnIl',0
+			db    0
+word_43F12	dw 0
 mouseBoxes	mouseBox_t < 0Fh,  0Ah,  6Ah,  7Ah>	; Bigpic Window
 		mouseBox_t <   6, 0A8h,  66h, 132h>	; Text Window
 		mouseBox_t < 90h,  0Ch, 0C7h, 132h>	; Roster Area
-db    0
-db    0
-off_43F2E dd aWildwal_grp, aSkara_grp; 0
-dd aSkara_grp_0, aGdung_grp; 2
-dd aGdung_grp_0, aGdung_grp_1; 4
-dd aDung_tst		; 6
-byte_43F4A db 0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-disk1 dw offset	aDisk1
-dseg_0 dw seg dseg
-disk2 dd aDisk2_0
-disk3 dd aDisk3
-mapFiles dd aMaps_lo, aMaps_hi
-monsterFiles dd	aMonsterl, aMonsterh
-stru_43F6E someFileStru	<lev_monsterl, 0>; 0
-someFileStru <lev_monsterl, 1>;	1
-someFileStru <lev_monsterl, 2>;	2
-someFileStru <lev_monsterl, 3>;	3
-someFileStru <lev_monsterl, 4>;	4
-someFileStru <lev_monsterh, 0>;	5
-someFileStru <lev_monsterh, 1>;	6
-someFileStru <lev_monsterh, 2>;	7
-someFileStru <lev_monsterh, 3>;	8
-someFileStru <lev_monsterh, 4>;	9
-someFileStru <lev_monsterl, 5>;	10
-someFileStru <lev_monsterl, 6>;	11
-someFileStru <lev_monsterl, 7>;	12
-someFileStru <lev_monsterl, 8>;	13
-someFileStru <lev_monsterl, 9>;	14
-someFileStru <lev_monsterl, 10>; 15
-someFileStru <lev_monsterl, 11>; 16
-someFileStru <lev_monsterl, 12>; 17
-someFileStru <lev_monsterl, 13>; 18
-someFileStru <lev_monsterl, 14>; 19
-someFileStru <lev_monsterl, 15>; 20
-someFileStru <lev_monsterl, 16>; 21
-someFileStru <lev_monsterl, 17>; 22
-someFileStru <lev_monsterl, 18>; 23
-someFileStru <lev_monsterl, 19>; 24
-someFileStru <lev_monsterl, 20>; 25
-someFileStru <lev_monsterl, 21>; 26
-someFileStru <lev_monsterl, 22>; 27
-someFileStru <lev_monsterl, 23>; 28
-someFileStru <lev_monsterl, 24>; 29
-someFileStru <lev_monsterl, 25>; 30
-someFileStru <lev_monsterl, 26>; 31
-someFileStru <lev_monsterl, 27>; 32
-someFileStru <lev_monsterl, 28>; 33
-someFileStru <lev_monsterh, 5>;	34
-someFileStru <lev_monsterh, 6>;	35
-someFileStru <lev_monsterh, 7>;	36
-someFileStru <lev_monsterh, 8>;	37
-someFileStru <lev_monsterh, 9>;	38
-someFileStru <lev_monsterh, 10>; 39
-someFileStru <lev_monsterh, 11>; 40
-someFileStru <lev_monsterh, 12>; 41
-someFileStru <lev_monsterh, 13>; 42
-someFileStru <lev_monsterh, 14>; 43
-someFileStru <lev_monsterh, 15>; 44
-someFileStru <lev_monsterh, 16>; 45
-someFileStru <lev_monsterh, 17>; 46
-someFileStru <lev_monsterh, 18>; 47
-someFileStru <lev_monsterh, 19>; 48
-someFileStru <lev_monsterh, 20>; 49
-someFileStru <lev_monsterl, 29>; 50
-someFileStru <lev_monsterl, 30>; 51
-someFileStru <lev_monsterh, 21>; 52
-someFileStru <lev_monsterh, 22>; 53
-someFileStru <lev_monsterh, 23>; 54
-someFileStru <lev_monsterh, 24>; 55
-someFileStru <lev_monsterh, 25>; 56
-someFileStru <lev_monsterh, 26>; 57
-someFileStru <lev_monsterh, 27>; 58
-someFileStru <lev_monsterh, 28>; 59
-someFileStru <lev_monsterh, 29>; 60
-someFileStru <lev_monsterh, 30>; 61
-someFileStru <lev_monsterl, 31>; 62
-someFileStru <lev_monsterl, 32>; 63
-someFileStru <lev_monsterl, 33>; 64
-someFileStru <lev_monsterl, 34>; 65
-someFileStru <lev_monsterh, 31>; 66
-someFileStru <lev_monsterh, 32>; 67
-someFileStru <lev_monsterh, 33>; 68
-someFileStru <lev_monsterh, 34>; 69
-someFileStru <lev_monsterh, 35>; 70
-lowPic dd aLow_pic
-dd aHi_pic
-bigpicIndex db 0, 1, 2,	3	    ; 0
-db 4, 5, 6, 7		; 4
-db 8, 9, 10, 11		; 8
-db 12, 13, 14, 15	; 12
-db 16, 17, 18, 19	; 16
-db 20, 21, 255,	255	; 20
-db 22, 255, 23,	255	; 24
-db 255,	24, 25,	255	; 28
-db 26, 27, 255,	255	; 32
-db 255,	255, 28, 29	; 36
-db 255,	255, 255, 30	; 40
-db 255,	255, 31, 32	; 44
-db 33, 34, 35, 36	; 48
-db 37, 38, 39, 40	; 52
-db 41, 42, 43, 44	; 56
-db 255,	45, 255, 46	; 60
-db 255,	255, 255, 255	; 64
-db 255,	47, 48,	49	; 68
-db 255,	255, 50, 255	; 72
-db 255,	255, 51, 52	; 76
-db 255,	255, 255, 53	; 80
-db 255,	255, 255, 255	; 84
-db 255,	255, 255, 0	; 88
-db 255,	1, 255,	2	; 92
-db 255,	3, 4, 255	; 96
-db 255,	255, 5,	6	; 100
-db 255,	255, 255, 255	; 104
-db 255,	7, 8, 9		; 108
-db 255,	10, 255, 255	; 112
-db 11, 255, 255, 12	; 116
-db 13, 255, 14,	15	; 120
-db 16, 17, 18, 255	; 124
-db 19, 20, 21, 255	; 128
-db 22, 23, 255,	255	; 132
-db 24, 255, 255, 25	; 136
-db 26, 27, 28, 29	; 140
-db 255,	255, 255, 255	; 144
-db 30, 31, 32, 255	; 148
-db 33, 34, 35, 36	; 152
-db 37, 255, 255, 255	; 156
-db 38, 39, 255,	40	; 160
-db 41, 42, 43, 44	; 164
-db 45, 255, 46,	255	; 168
-db 47, 48, 255,	49	; 172
-aYesNo db 'Yes',0Ah
-db 'No',0
-db    0
-word_440BC dw 0
+		db    0
+		db    0
+off_43F2E	dd aWildwal_grp, aSkara_grp; 0
+		dd aSkara_grp, aGdung_grp; 2
+		dd aGdung_grp, aGdung_grp; 4
+byte_43F4A	db 8 dup(0)
+disk1		dw offset aDisk1
+dseg_0		dw seg dseg
+disk2		dd aDisk2
+disk3		dd aDisk3
+mapFiles	dd aMaps_lo, aMaps_hi
+monsterFiles	dd	aMonsterl, aMonsterh
+stru_43F6E	someFileStru	<lev_monsterl, 0>; 0
+		someFileStru <lev_monsterl, 1>;	1
+		someFileStru <lev_monsterl, 2>;	2
+		someFileStru <lev_monsterl, 3>;	3
+		someFileStru <lev_monsterl, 4>;	4
+		someFileStru <lev_monsterh, 0>;	5
+		someFileStru <lev_monsterh, 1>;	6
+		someFileStru <lev_monsterh, 2>;	7
+		someFileStru <lev_monsterh, 3>;	8
+		someFileStru <lev_monsterh, 4>;	9
+		someFileStru <lev_monsterl, 5>;	10
+		someFileStru <lev_monsterl, 6>;	11
+		someFileStru <lev_monsterl, 7>;	12
+		someFileStru <lev_monsterl, 8>;	13
+		someFileStru <lev_monsterl, 9>;	14
+		someFileStru <lev_monsterl, 10>; 15
+		someFileStru <lev_monsterl, 11>; 16
+		someFileStru <lev_monsterl, 12>; 17
+		someFileStru <lev_monsterl, 13>; 18
+		someFileStru <lev_monsterl, 14>; 19
+		someFileStru <lev_monsterl, 15>; 20
+		someFileStru <lev_monsterl, 16>; 21
+		someFileStru <lev_monsterl, 17>; 22
+		someFileStru <lev_monsterl, 18>; 23
+		someFileStru <lev_monsterl, 19>; 24
+		someFileStru <lev_monsterl, 20>; 25
+		someFileStru <lev_monsterl, 21>; 26
+		someFileStru <lev_monsterl, 22>; 27
+		someFileStru <lev_monsterl, 23>; 28
+		someFileStru <lev_monsterl, 24>; 29
+		someFileStru <lev_monsterl, 25>; 30
+		someFileStru <lev_monsterl, 26>; 31
+		someFileStru <lev_monsterl, 27>; 32
+		someFileStru <lev_monsterl, 28>; 33
+		someFileStru <lev_monsterh, 5>;	34
+		someFileStru <lev_monsterh, 6>;	35
+		someFileStru <lev_monsterh, 7>;	36
+		someFileStru <lev_monsterh, 8>;	37
+		someFileStru <lev_monsterh, 9>;	38
+		someFileStru <lev_monsterh, 10>; 39
+		someFileStru <lev_monsterh, 11>; 40
+		someFileStru <lev_monsterh, 12>; 41
+		someFileStru <lev_monsterh, 13>; 42
+		someFileStru <lev_monsterh, 14>; 43
+		someFileStru <lev_monsterh, 15>; 44
+		someFileStru <lev_monsterh, 16>; 45
+		someFileStru <lev_monsterh, 17>; 46
+		someFileStru <lev_monsterh, 18>; 47
+		someFileStru <lev_monsterh, 19>; 48
+		someFileStru <lev_monsterh, 20>; 49
+		someFileStru <lev_monsterl, 29>; 50
+		someFileStru <lev_monsterl, 30>; 51
+		someFileStru <lev_monsterh, 21>; 52
+		someFileStru <lev_monsterh, 22>; 53
+		someFileStru <lev_monsterh, 23>; 54
+		someFileStru <lev_monsterh, 24>; 55
+		someFileStru <lev_monsterh, 25>; 56
+		someFileStru <lev_monsterh, 26>; 57
+		someFileStru <lev_monsterh, 27>; 58
+		someFileStru <lev_monsterh, 28>; 59
+		someFileStru <lev_monsterh, 29>; 60
+		someFileStru <lev_monsterh, 30>; 61
+		someFileStru <lev_monsterl, 31>; 62
+		someFileStru <lev_monsterl, 32>; 63
+		someFileStru <lev_monsterl, 33>; 64
+		someFileStru <lev_monsterl, 34>; 65
+		someFileStru <lev_monsterh, 31>; 66
+		someFileStru <lev_monsterh, 32>; 67
+		someFileStru <lev_monsterh, 33>; 68
+		someFileStru <lev_monsterh, 34>; 69
+		someFileStru <lev_monsterh, 35>; 70
+lowPic		dd aLow_pic
+		dd aHi_pic
+bigpicIndex	db 0, 1, 2, 3	    ; 0
+		db 4, 5, 6, 7		; 4
+		db 8, 9, 10, 11		; 8
+		db 12, 13, 14, 15	; 12
+		db 16, 17, 18, 19	; 16
+		db 20, 21, 255,	255	; 20
+		db 22, 255, 23,	255	; 24
+		db 255,	24, 25,	255	; 28
+		db 26, 27, 255,	255	; 32
+		db 255,	255, 28, 29	; 36
+		db 255,	255, 255, 30	; 40
+		db 255,	255, 31, 32	; 44
+		db 33, 34, 35, 36	; 48
+		db 37, 38, 39, 40	; 52
+		db 41, 42, 43, 44	; 56
+		db 255,	45, 255, 46	; 60
+		db 255,	255, 255, 255	; 64
+		db 255,	47, 48,	49	; 68
+		db 255,	255, 50, 255	; 72
+		db 255,	255, 51, 52	; 76
+		db 255,	255, 255, 53	; 80
+		db 255,	255, 255, 255	; 84
+		db 255,	255, 255, 0	; 88
+		db 255,	1, 255,	2	; 92
+		db 255,	3, 4, 255	; 96
+		db 255,	255, 5,	6	; 100
+		db 255,	255, 255, 255	; 104
+		db 255,	7, 8, 9		; 108
+		db 255,	10, 255, 255	; 112
+		db 11, 255, 255, 12	; 116
+		db 13, 255, 14,	15	; 120
+		db 16, 17, 18, 255	; 124
+		db 19, 20, 21, 255	; 128
+		db 22, 23, 255,	255	; 132
+		db 24, 255, 255, 25	; 136
+		db 26, 27, 28, 29	; 140
+		db 255,	255, 255, 255	; 144
+		db 30, 31, 32, 255	; 148
+		db 33, 34, 35, 36	; 152
+		db 37, 255, 255, 255	; 156
+		db 38, 39, 255,	40	; 160
+		db 41, 42, 43, 44	; 164
+		db 45, 255, 46,	255	; 168
+		db 47, 48, 255,	49	; 172
+aYesNo		db 'Yes',0Ah,'No',0
+		db    0
+word_440BC	dw 0
 _str_Loalphabet	db ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g'; 0
-db 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p'; 8
-db 'r', 's', 't', 'u', 'v', 'w', 'y', '.'; 16
-db '"', 27h, ',', '!', 0Ah, 0; 24
+		db 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p'; 8
+		db 'r', 's', 't', 'u', 'v', 'w', 'y', '.'; 16
+		db '"', 27h, ',', '!', 0Ah, 0; 24
 _str_Hialphabet	db 'j', 'q', 'x', 'z', '0', '1', '2', '3'; 0
-db '4', '5', '6', '7', '8', '9', '0', '1'; 8
-db '2', '3', '4', '5', '6', '7', '8', '9'; 16
-db 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'; 24
-db 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'; 32
-db 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'; 40
-db 'Y', 'Z', '(', ')', '/', '\', '#', '*'; 48
-db '?', '<', '>', ':', ';', '-', '%', 0; 56
-aEsc db	'ESC',0
-aU db '%U',0
-aVict db 'vict',0
-aBardscr db 'bardscr',0
-aIcons_bin db 'icons.bin',0
+		db '4', '5', '6', '7', '8', '9', '0', '1'; 8
+		db '2', '3', '4', '5', '6', '7', '8', '9'; 16
+		db 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'; 24
+		db 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'; 32
+		db 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'; 40
+		db 'Y', 'Z', '(', ')', '/', '\', '#', '*'; 48
+		db '?', '<', '>', ':', ';', '-', '%', 0; 56
+aEsc		db 'ESC',0
+aU		db '%U',0
+aVict		db 'vict',0
+aBardscr	db 'bardscr',0
+aIcons_bin	db 'icons.bin',0
 aPictureGetErro	db 'picture get error',0
-word_4414C dw 2
-word_4414E dw 0FFh
-aNorth db 'north',0
-aEast db 'east',0
-aSouth db 'south',0
-aWest db 'west',0
-word_44166 dw 1
-bitMask16bit dw	1, 2, 4, 8	     ; 0
-dw 10h,	20h, 40h, 80h	; 4
-dw 100h, 200h, 400h, 800h; 8
-dw 1000h, 2000h, 4000h,	8000h; 12
-byteMaskList db	80h, 40h, 20h, 10h   ; 0
-db 8, 4, 2, 1		; 4
-flagMaskList db	7Fh, 0BFh, 0DFh, 0EFh; 0
-db 0F7h, 0FBh, 0FDh, 0FEh; 4
-diceMaskList db	1, 3		     ; 0
-db 7, 15		; 2
-db 31, 63		; 4
-db 127,	255		; 6
-dirStringList dd aNorth, aEast,	aSouth,	aWest
-dirDeltaN dw 0FFFFh, 0,	1, 0	  ; 0
-dirDeltaE dw 0,	1, 0, 0FFFFh	  ; 0
-northDelta viewStruct <253, 3>	   ; 0
-viewStruct <254, 3>	; 1
-viewStruct <255, 3>	; 2
-viewStruct <0, 3>	; 3
-viewStruct <1, 3>	; 4
-viewStruct <2, 3>	; 5
-viewStruct <3, 3>	; 6
-viewStruct <253, 2>	; 7
-viewStruct <254, 2>	; 8
-viewStruct <255, 2>	; 9
-viewStruct <0, 2>	; 10
-viewStruct <1, 2>	; 11
-viewStruct <2, 2>	; 12
-viewStruct <3, 2>	; 13
-viewStruct <254, 1>	; 14
-viewStruct <255, 1>	; 15
-viewStruct <0, 1>	; 16
-viewStruct <1, 1>	; 17
-viewStruct <2, 1>	; 18
-viewStruct <255, 0>	; 19
-viewStruct <1, 0>	; 20
-southDelta viewStruct <3, 253>	   ; 0
-viewStruct <2, 253>	; 1
-viewStruct <1, 253>	; 2
-viewStruct <0, 253>	; 3
-viewStruct <255, 253>	; 4
-viewStruct <254, 253>	; 5
-viewStruct <253, 253>	; 6
-viewStruct <3, 254>	; 7
-viewStruct <2, 254>	; 8
-viewStruct <1, 254>	; 9
-viewStruct <0, 254>	; 10
-viewStruct <255, 254>	; 11
-viewStruct <254, 254>	; 12
-viewStruct <253, 254>	; 13
-viewStruct <2, 255>	; 14
-viewStruct <1, 255>	; 15
-viewStruct <0, 255>	; 16
-viewStruct <255, 255>	; 17
-viewStruct <254, 255>	; 18
-viewStruct <1, 0>	; 19
-viewStruct <255, 0>	; 20
-eastDelta viewStruct <3, 3>	  ; 0
-viewStruct <3, 2>	; 1
-viewStruct <3, 1>	; 2
-viewStruct <3, 0>	; 3
-viewStruct <3, 255>	; 4
-viewStruct <3, 254>	; 5
-viewStruct <3, 253>	; 6
-viewStruct <2, 3>	; 7
-viewStruct <2, 2>	; 8
-viewStruct <2, 1>	; 9
-viewStruct <2, 0>	; 10
-viewStruct <2, 255>	; 11
-viewStruct <2, 254>	; 12
-viewStruct <2, 253>	; 13
-viewStruct <1, 2>	; 14
-viewStruct <1, 1>	; 15
-viewStruct <1, 0>	; 16
-viewStruct <1, 255>	; 17
-viewStruct <1, 254>	; 18
-viewStruct <0, 1>	; 19
-viewStruct <0, 255>	; 20
-westDelta viewStruct <253, 253>	  ; 0
-viewStruct <253, 254>	; 1
-viewStruct <253, 255>	; 2
-viewStruct <253, 0>	; 3
-viewStruct <253, 1>	; 4
-viewStruct <253, 2>	; 5
-viewStruct <253, 3>	; 6
-viewStruct <254, 253>	; 7
-viewStruct <254, 254>	; 8
-viewStruct <254, 255>	; 9
-viewStruct <254, 0>	; 10
-viewStruct <254, 1>	; 11
-viewStruct <254, 2>	; 12
-viewStruct <254, 3>	; 13
-viewStruct <255, 254>	; 14
-viewStruct <255, 255>	; 15
-viewStruct <255, 0>	; 16
-viewStruct <255, 1>	; 17
-viewStruct <255, 2>	; 18
-viewStruct <0, 255>	; 19
-viewStruct <0, 1>	; 20
-off_44268 dd northDelta, eastDelta, southDelta,	westDelta; 0
-byte_44278 db 3, 3, 3, 3, 3, 3,	3, 1, 1, 1; 0
-db 1, 1, 1, 6, 6, 6, 6,	6, 6, 6; 10
-db 10, 10, 10, 10, 10, 10, 2, 2, 2, 2; 20
-db 10, 10, 10, 10, 10, 10, 10, 10, 10, 10; 30
-db 10, 3, 3, 3,	3, 18, 18, 18, 10, 10; 40
-db 10, 10, 10, 10, 6, 6, 32, 32, 32, 11; 50
-db 11, 0		; 60
-byte_442B6 db 6, 6, 6, 6, 6, 6,	6, 6
-db 6, 6, 6, 6, 6, 12, 12, 12
-db 12, 12, 12, 12, 64, 64, 64, 64
-db 64, 64, 14, 14, 14, 14, 20, 20
-db 20, 20, 20, 64, 64, 64, 64, 64
-db 64, 20, 20, 20, 20, 36, 36, 36
-db 64, 64, 64, 64, 64, 64, 36, 36
-db 64, 64, 64, 64, 64, 0
-byte_442F4 db 2, 2, 2, 2, 2, 2,	2, 0
-db 0, 0, 0, 0, 0, 2, 2,	2
-db 2, 2, 2, 2, 0, 0, 0,	2
-db 2, 2, 0, 0, 0, 0, 2,	2
-db 2, 2, 2, 0, 0, 0, 2,	2
-db 2, 0, 0, 0, 0, 2, 2,	2
-db 0, 0, 0, 2, 2, 2, 0,	0
-db 2, 2, 2, 0, 0, 0
-byte_44332 db 1, 2, 3, 4
-db 5, 9, 11, 9
-db 10, 11, 15, 17
-db 15, 16, 17, 19
-db 20, 0
-byte_44344 db 0, 255, 1, 1	   ; 0
-db 2, 255, 255,	1	; 4
-db 3, 255, 1, 1		; 8
-db 2, 255, 255,	1	; 12
-byte_44354 db 0, 0FFh, 0FFh, 0FFh  ; 0
-db 0FFh, 0, 0FFh, 0FFh	; 4
-db 0FFh, 0FFh, 0FFh, 0FFh; 8
-db 0FFh, 0, 0FFh, 0FFh	; 12
-dun_deltaNorth viewStruct <253,	4>     ; 0
-viewStruct <254, 4>	; 1
-viewStruct <255, 4>	; 2
-viewStruct <0, 4>	; 3
-viewStruct <1, 4>	; 4
-viewStruct <2, 4>	; 5
-viewStruct <3, 4>	; 6
-viewStruct <253, 3>	; 7
-viewStruct <254, 3>	; 8
-viewStruct <255, 3>	; 9
-viewStruct <0, 3>	; 10
-viewStruct <1, 3>	; 11
-viewStruct <2, 3>	; 12
-viewStruct <3, 3>	; 13
-viewStruct <254, 2>	; 14
-viewStruct <255, 2>	; 15
-viewStruct <0, 2>	; 16
-viewStruct <1, 2>	; 17
-viewStruct <2, 2>	; 18
-viewStruct <255, 1>	; 19
-viewStruct <0, 1>	; 20
-viewStruct <1, 1>	; 21
-viewStruct <255, 0>	; 22
-viewStruct <0, 0>	; 23
-viewStruct <1, 0>	; 24
-viewStruct <255, 3>	; 25
-viewStruct <0, 3>	; 26
-viewStruct <1, 3>	; 27
-viewStruct <255, 2>	; 28
-viewStruct <0, 2>	; 29
-viewStruct <1, 2>	; 30
-viewStruct <255, 1>	; 31
-viewStruct <0, 1>	; 32
-viewStruct <1, 1>	; 33
-dun_deltaSouth viewStruct <3, 252>     ; 0
-viewStruct <2, 252>	; 1
-viewStruct <1, 252>	; 2
-viewStruct <0, 252>	; 3
-viewStruct <255, 252>	; 4
-viewStruct <254, 252>	; 5
-viewStruct <253, 252>	; 6
-viewStruct <3, 253>	; 7
-viewStruct <2, 253>	; 8
-viewStruct <1, 253>	; 9
-viewStruct <0, 253>	; 10
-viewStruct <255, 253>	; 11
-viewStruct <254, 253>	; 12
-viewStruct <253, 253>	; 13
-viewStruct <2, 254>	; 14
-viewStruct <1, 254>	; 15
-viewStruct <0, 254>	; 16
-viewStruct <255, 254>	; 17
-viewStruct <254, 254>	; 18
-viewStruct <1, 255>	; 19
-viewStruct <0, 255>	; 20
-viewStruct <255, 255>	; 21
-viewStruct <1, 0>	; 22
-viewStruct <0, 0>	; 23
-viewStruct <255, 0>	; 24
-viewStruct <1, 253>	; 25
-viewStruct <0, 253>	; 26
-viewStruct <255, 253>	; 27
-viewStruct <1, 254>	; 28
-viewStruct <0, 254>	; 29
-viewStruct <255, 254>	; 30
-viewStruct <1, 255>	; 31
-viewStruct <0, 255>	; 32
-viewStruct <255, 255>	; 33
-dun_deltaEast viewStruct <4, 3>	      ;	0
-viewStruct <4, 2>	; 1
-viewStruct <4, 1>	; 2
-viewStruct <4, 0>	; 3
-viewStruct <4, 255>	; 4
-viewStruct <4, 254>	; 5
-viewStruct <4, 253>	; 6
-viewStruct <3, 3>	; 7
-viewStruct <3, 2>	; 8
-viewStruct <3, 1>	; 9
-viewStruct <3, 0>	; 10
-viewStruct <3, 255>	; 11
-viewStruct <3, 254>	; 12
-viewStruct <3, 253>	; 13
-viewStruct <2, 2>	; 14
-viewStruct <2, 1>	; 15
-viewStruct <2, 0>	; 16
-viewStruct <2, 255>	; 17
-viewStruct <2, 254>	; 18
-viewStruct <1, 1>	; 19
-viewStruct <1, 0>	; 20
-viewStruct <1, 255>	; 21
-viewStruct <0, 1>	; 22
-viewStruct <0, 0>	; 23
-viewStruct <0, 255>	; 24
-viewStruct <3, 1>	; 25
-viewStruct <3, 0>	; 26
-viewStruct <3, 255>	; 27
-viewStruct <2, 1>	; 28
-viewStruct <2, 0>	; 29
-viewStruct <2, 255>	; 30
-viewStruct <1, 1>	; 31
-viewStruct <1, 0>	; 32
-viewStruct <1, 255>	; 33
-dun_deltaWest viewStruct <252, 253>   ;	0
-viewStruct <252, 254>	; 1
-viewStruct <252, 255>	; 2
-viewStruct <252, 0>	; 3
-viewStruct <252, 1>	; 4
-viewStruct <252, 2>	; 5
-viewStruct <252, 3>	; 6
-viewStruct <253, 253>	; 7
-viewStruct <253, 254>	; 8
-viewStruct <253, 255>	; 9
-viewStruct <253, 0>	; 10
-viewStruct <253, 1>	; 11
-viewStruct <253, 2>	; 12
-viewStruct <253, 3>	; 13
-viewStruct <254, 254>	; 14
-viewStruct <254, 255>	; 15
-viewStruct <254, 0>	; 16
-viewStruct <254, 1>	; 17
-viewStruct <254, 2>	; 18
-viewStruct <255, 255>	; 19
-viewStruct <255, 0>	; 20
-viewStruct <255, 1>	; 21
-viewStruct <0, 255>	; 22
-viewStruct <0, 0>	; 23
-viewStruct <0, 1>	; 24
-viewStruct <253, 255>	; 25
-viewStruct <253, 0>	; 26
-viewStruct <253, 1>	; 27
-viewStruct <254, 255>	; 28
-viewStruct <254, 0>	; 29
-viewStruct <254, 1>	; 30
-viewStruct <255, 255>	; 31
-viewStruct <255, 0>	; 32
-viewStruct <255, 1>	; 33
-off_44474 dd dun_deltaNorth, dun_deltaEast, dun_deltaSouth; 0
-dd dun_deltaWest	; 3
-byte_44484 db 0, 1, 2, 2, 2, 0,	3, 4; 0
-db 3, 3, 4, 4, 4, 0, 3,	4; 8
-byte_44494 db 3Dh, 38h,	2Dh, 1Eh, 0Dh, 0, 2, 2,	2, 2; 0
-db 2, 2, 2, 16h, 16h, 4, 4, 16h, 16h, 6; 10
-db 6, 6, 6, 6, 6, 6, 2Ch, 2Ah, 2Ch, 38h; 20
-db 36h,	38h, 18h, 8, 8,	18h, 0Ah, 0Ah, 0Ah; 30
-db 0Ah,	0Ah, 30h, 2Eh, 30h, 3Ch, 3Ah, 3Ch; 39
-db 0Ch,	0Ch, 0Ch, 0Ch, 0Eh, 0Eh, 0Eh, 34h; 47
-db 32h,	34h, 40h, 3Eh, 40h, 10h, 10h, 12h; 55
-db 12h,	12h, 14h, 14h, 0; 63
-byte_444D8 db 0, 0, 0, 0	   ; 0
-db 0, 0, 0, 0		; 4
-db 0, 0, -1, -1		; 8
-db -1, 0, 0, 0		; 12
-db 0, 0, 0, 0		; 16
-db 0, 0, -1, 0		; 20
-db 0, -1, 0, 0		; 24
-db -1, -1, 0, 0		; 28
-db 0, 0, 0, 0		; 32
-db 0, -1, 0, 0		; 36
-db -1, 0, 0, -1		; 40
-db -1, 0, 0, 0		; 44
-db 0, 0, -1, 0		; 48
-db 0, -1, 0, -1		; 52
-db 0, 0, 0, 0		; 56
-db -1, 0		; 60
-byte_44516 db 0, 1, 2, 3, 4, 5,	6, 1, 2, 3, 3, 4, 5; 0
-db 7, 8, 9, 0Ah, 0Bh, 0Ch, 0Dh,	19h, 1Ah; 13
-db 1Bh,	19h, 1Ah, 1Bh, 9, 0Ah, 0Ah, 0Bh; 22
-db 0Eh,	0Fh, 10h, 11h, 12h, 1Ch, 1Dh, 1Eh; 30
-db 1Ch,	1Dh, 1Eh, 0Fh, 10h, 10h, 11h, 13h; 38
-db 14h,	15h, 1Fh, 20h, 21h, 1Fh, 20h, 21h; 46
-db 14h,	14h, 16h, 17h, 18h, 17h, 17h, 0; 54
-byte_44554 db 4, 4, 4, 4, 4, 4,	4, 8, 8, 8, 0, 0, 0; 0
-db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 0, 0, 0; 13
-db 8, 8, 0, 0, 4, 4, 4,	4, 4, 4, 4, 4, 0; 26
-db 0, 0, 8, 8, 0, 0, 4,	4, 4, 4, 4, 4, 0; 39
-db 0, 0, 8, 0, 4, 4, 4,	8, 0, 0; 52
-stru_44592 unknown_t <12, 42>	   ; 0
-unknown_t <15, 42>	; 1
-unknown_t <18, 42>	; 2
-unknown_t <21, 42>	; 3
-unknown_t <24, 42>	; 4
-unknown_t <27, 42>	; 5
-unknown_t <30, 42>	; 6
-unknown_t <5, 38>	; 7
-unknown_t <12, 38>	; 8
-unknown_t <26, 38>	; 9
-unknown_t <29, 38>	; 10
-unknown_t <31, 38>	; 11
-unknown_t <39, 38>	; 12
-unknown_t <254,	38>	; 13
-unknown_t <5, 38>	; 14
-unknown_t <17, 44>	; 15
-unknown_t <24, 44>	; 16
-unknown_t <31, 44>	; 17
-unknown_t <33, 38>	; 18
-unknown_t <40, 38>	; 19
-unknown_t <13, 33>	; 20
-unknown_t <21, 33>	; 21
-unknown_t <31, 33>	; 22
-unknown_t <13, 55>	; 23
-unknown_t <21, 55>	; 24
-unknown_t <31, 55>	; 25
-unknown_t <255,	38>	; 26
-unknown_t <23, 38>	; 27
-unknown_t <31, 38>	; 28
-unknown_t <42, 38>	; 29
-unknown_t <2, 42>	; 30
-unknown_t <12, 42>	; 31
-unknown_t <23, 42>	; 32
-unknown_t <34, 42>	; 33
-unknown_t <45, 42>	; 34
-unknown_t <4, 21>	; 35
-unknown_t <20, 21>	; 36
-unknown_t <34, 21>	; 37
-unknown_t <4, 63>	; 38
-unknown_t <20, 63>	; 39
-unknown_t <34, 63>	; 40
-unknown_t <3, 35>	; 41
-unknown_t <19, 35>	; 42
-unknown_t <33, 35>	; 43
-unknown_t <48, 35>	; 44
-unknown_t <0, 35>	; 45
-unknown_t <18, 35>	; 46
-unknown_t <37, 35>	; 47
-unknown_t <0, 8>	; 48
-unknown_t <17, 4>	; 49
-unknown_t <44, 8>	; 50
-unknown_t <0, 77>	; 51
-unknown_t <17, 77>	; 52
-unknown_t <44, 77>	; 53
-unknown_t <12, 22>	; 54
-unknown_t <37, 22>	; 55
-unknown_t <235,	22>	; 56
-unknown_t <11, 22>	; 57
-unknown_t <43, 22>	; 58
-unknown_t <0, 0>	; 59
-unknown_t <44, 0>	; 60
-byte_4460C db 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0; 0
-db 0, 0, 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0; 13
-db 0, 0, 0, 0, 0FFh, 0FFh, 0, 0, 0FFh, 0FFh; 23
-db 0FFh, 0, 0, 0, 0, 0,	0, 0, 0, 0FFh, 0FFh; 33
-db 0, 0FFh, 0FFh, 0FFh,	0, 0, 0, 0, 0, 0; 44
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 54
-db 0			; 61
-byte_4464A db 30, 31, 32, 33
-db 34, 42, 43, 45
-db 46, 47, 54, 55
-db 56, 57, 58, 59
-db 60, 0
-aContinue db '(Continue)',0
-db    0
-aCancel	db '(Cancel)',0
-db    0
-aEscToCancel db	'Esc to cancel',0
-strg_inventory db 0C3h,	0, 1, 0C3h, 0, 1, 0C3h,	0, 1, 0C3h; 0
-db 0, 1, 0Fh, 0, 0FFh, 0Fh, 0, 0FFh, 7,	0; 10
-db 0FFh, 7, 0, 0FFh, 8,	0, 0FFh, 8, 0, 0FFh; 20
-db 16h,	0, 18h,	16h, 0,	18h, 76h, 0, 0Ah; 30
-db 2, 0, 1, 2, 0, 1, 1Eh, 0, 50h, 0CAh,	0; 39
-db 5, 0DFh, 0, 0Ah, 7Bh, 0, 0FFh, 7Ch, 0; 50
-db 18h,	73h, 0,	0FFh, 74h, 0, 0FFh, 87h; 59
-db 0, 0FFh, 88h, 0, 0FFh, 98h, 0, 0FFh,	99h; 67
-db 0, 0FFh, 9Ch, 0, 0FFh, 9Dh, 0, 0FFh;	76
+word_4414C	dw 2
+word_4414E	dw 0FFh
+aNorth		db 'north',0
+aEast		db 'east',0
+aSouth		db 'south',0
+aWest		db 'west',0
+word_44166	dw 1
+bitMask16bit	dw	1, 2, 4, 8	     ; 0
+		dw 10h,	20h, 40h, 80h	; 4
+		dw 100h, 200h, 400h, 800h; 8
+		dw 1000h, 2000h, 4000h,	8000h; 12
+byteMaskList	db 80h, 40h, 20h, 10h   ; 0
+		db 8, 4, 2, 1		; 4
+flagMaskList	db 7Fh, 0BFh, 0DFh, 0EFh; 0
+		db 0F7h, 0FBh, 0FDh, 0FEh; 4
+diceMaskList	db 1, 3		     ; 0
+		db 7, 15		; 2
+		db 31, 63		; 4
+		db 127,	255		; 6
+dirStringList	dd aNorth, aEast, aSouth,	aWest
+dirDeltaN	dw 0FFFFh, 0,	1, 0	  ; 0
+dirDeltaE	dw 0,	1, 0, 0FFFFh	  ; 0
+northDelta	viewStruct <253, 3>	   ; 0
+		viewStruct <254, 3>	; 1
+		viewStruct <255, 3>	; 2
+		viewStruct <0, 3>	; 3
+		viewStruct <1, 3>	; 4
+		viewStruct <2, 3>	; 5
+		viewStruct <3, 3>	; 6
+		viewStruct <253, 2>	; 7
+		viewStruct <254, 2>	; 8
+		viewStruct <255, 2>	; 9
+		viewStruct <0, 2>	; 10
+		viewStruct <1, 2>	; 11
+		viewStruct <2, 2>	; 12
+		viewStruct <3, 2>	; 13
+		viewStruct <254, 1>	; 14
+		viewStruct <255, 1>	; 15
+		viewStruct <0, 1>	; 16
+		viewStruct <1, 1>	; 17
+		viewStruct <2, 1>	; 18
+		viewStruct <255, 0>	; 19
+		viewStruct <1, 0>	; 20
+southDelta	viewStruct <3, 253>	   ; 0
+		viewStruct <2, 253>	; 1
+		viewStruct <1, 253>	; 2
+		viewStruct <0, 253>	; 3
+		viewStruct <255, 253>	; 4
+		viewStruct <254, 253>	; 5
+		viewStruct <253, 253>	; 6
+		viewStruct <3, 254>	; 7
+		viewStruct <2, 254>	; 8
+		viewStruct <1, 254>	; 9
+		viewStruct <0, 254>	; 10
+		viewStruct <255, 254>	; 11
+		viewStruct <254, 254>	; 12
+		viewStruct <253, 254>	; 13
+		viewStruct <2, 255>	; 14
+		viewStruct <1, 255>	; 15
+		viewStruct <0, 255>	; 16
+		viewStruct <255, 255>	; 17
+		viewStruct <254, 255>	; 18
+		viewStruct <1, 0>	; 19
+		viewStruct <255, 0>	; 20
+eastDelta	viewStruct <3, 3>	  ; 0
+		viewStruct <3, 2>	; 1
+		viewStruct <3, 1>	; 2
+		viewStruct <3, 0>	; 3
+		viewStruct <3, 255>	; 4
+		viewStruct <3, 254>	; 5
+		viewStruct <3, 253>	; 6
+		viewStruct <2, 3>	; 7
+		viewStruct <2, 2>	; 8
+		viewStruct <2, 1>	; 9
+		viewStruct <2, 0>	; 10
+		viewStruct <2, 255>	; 11
+		viewStruct <2, 254>	; 12
+		viewStruct <2, 253>	; 13
+		viewStruct <1, 2>	; 14
+		viewStruct <1, 1>	; 15
+		viewStruct <1, 0>	; 16
+		viewStruct <1, 255>	; 17
+		viewStruct <1, 254>	; 18
+		viewStruct <0, 1>	; 19
+		viewStruct <0, 255>	; 20
+westDelta	viewStruct <253, 253>	  ; 0
+		viewStruct <253, 254>	; 1
+		viewStruct <253, 255>	; 2
+		viewStruct <253, 0>	; 3
+		viewStruct <253, 1>	; 4
+		viewStruct <253, 2>	; 5
+		viewStruct <253, 3>	; 6
+		viewStruct <254, 253>	; 7
+		viewStruct <254, 254>	; 8
+		viewStruct <254, 255>	; 9
+		viewStruct <254, 0>	; 10
+		viewStruct <254, 1>	; 11
+		viewStruct <254, 2>	; 12
+		viewStruct <254, 3>	; 13
+		viewStruct <255, 254>	; 14
+		viewStruct <255, 255>	; 15
+		viewStruct <255, 0>	; 16
+		viewStruct <255, 1>	; 17
+		viewStruct <255, 2>	; 18
+		viewStruct <0, 255>	; 19
+		viewStruct <0, 1>	; 20
+off_44268	dd northDelta, eastDelta, southDelta,	westDelta; 0
+byte_44278	db 3, 3, 3, 3, 3, 3,	3, 1, 1, 1; 0
+		db 1, 1, 1, 6, 6, 6, 6,	6, 6, 6; 10
+		db 10, 10, 10, 10, 10, 10, 2, 2, 2, 2; 20
+		db 10, 10, 10, 10, 10, 10, 10, 10, 10, 10; 30
+		db 10, 3, 3, 3,	3, 18, 18, 18, 10, 10; 40
+		db 10, 10, 10, 10, 6, 6, 32, 32, 32, 11; 50
+		db 11, 0		; 60
+byte_442B6	db 6, 6, 6, 6, 6, 6,	6, 6
+		db 6, 6, 6, 6, 6, 12, 12, 12
+		db 12, 12, 12, 12, 64, 64, 64, 64
+		db 64, 64, 14, 14, 14, 14, 20, 20
+		db 20, 20, 20, 64, 64, 64, 64, 64
+		db 64, 20, 20, 20, 20, 36, 36, 36
+		db 64, 64, 64, 64, 64, 64, 36, 36
+		db 64, 64, 64, 64, 64, 0
+byte_442F4	db 2, 2, 2, 2, 2, 2,	2, 0
+		db 0, 0, 0, 0, 0, 2, 2,	2
+		db 2, 2, 2, 2, 0, 0, 0,	2
+		db 2, 2, 0, 0, 0, 0, 2,	2
+		db 2, 2, 2, 0, 0, 0, 2,	2
+		db 2, 0, 0, 0, 0, 2, 2,	2
+		db 0, 0, 0, 2, 2, 2, 0,	0
+		db 2, 2, 2, 0, 0, 0
+byte_44332	db 1, 2, 3, 4
+		db 5, 9, 11, 9
+		db 10, 11, 15, 17
+		db 15, 16, 17, 19
+		db 20, 0
+byte_44344	db 0, 255, 1, 1	   ; 0
+		db 2, 255, 255,	1	; 4
+		db 3, 255, 1, 1		; 8
+		db 2, 255, 255,	1	; 12
+byte_44354	db 0, 0FFh, 0FFh, 0FFh  ; 0
+		db 0FFh, 0, 0FFh, 0FFh	; 4
+		db 0FFh, 0FFh, 0FFh, 0FFh; 8
+		db 0FFh, 0, 0FFh, 0FFh	; 12
+dun_deltaNorth	viewStruct <253,	4>     ; 0
+		viewStruct <254, 4>	; 1
+		viewStruct <255, 4>	; 2
+		viewStruct <0, 4>	; 3
+		viewStruct <1, 4>	; 4
+		viewStruct <2, 4>	; 5
+		viewStruct <3, 4>	; 6
+		viewStruct <253, 3>	; 7
+		viewStruct <254, 3>	; 8
+		viewStruct <255, 3>	; 9
+		viewStruct <0, 3>	; 10
+		viewStruct <1, 3>	; 11
+		viewStruct <2, 3>	; 12
+		viewStruct <3, 3>	; 13
+		viewStruct <254, 2>	; 14
+		viewStruct <255, 2>	; 15
+		viewStruct <0, 2>	; 16
+		viewStruct <1, 2>	; 17
+		viewStruct <2, 2>	; 18
+		viewStruct <255, 1>	; 19
+		viewStruct <0, 1>	; 20
+		viewStruct <1, 1>	; 21
+		viewStruct <255, 0>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <1, 0>	; 24
+		viewStruct <255, 3>	; 25
+		viewStruct <0, 3>	; 26
+		viewStruct <1, 3>	; 27
+		viewStruct <255, 2>	; 28
+		viewStruct <0, 2>	; 29
+		viewStruct <1, 2>	; 30
+		viewStruct <255, 1>	; 31
+		viewStruct <0, 1>	; 32
+		viewStruct <1, 1>	; 33
+dun_deltaSouth	viewStruct <3, 252>     ; 0
+		viewStruct <2, 252>	; 1
+		viewStruct <1, 252>	; 2
+		viewStruct <0, 252>	; 3
+		viewStruct <255, 252>	; 4
+		viewStruct <254, 252>	; 5
+		viewStruct <253, 252>	; 6
+		viewStruct <3, 253>	; 7
+		viewStruct <2, 253>	; 8
+		viewStruct <1, 253>	; 9
+		viewStruct <0, 253>	; 10
+		viewStruct <255, 253>	; 11
+		viewStruct <254, 253>	; 12
+		viewStruct <253, 253>	; 13
+		viewStruct <2, 254>	; 14
+		viewStruct <1, 254>	; 15
+		viewStruct <0, 254>	; 16
+		viewStruct <255, 254>	; 17
+		viewStruct <254, 254>	; 18
+		viewStruct <1, 255>	; 19
+		viewStruct <0, 255>	; 20
+		viewStruct <255, 255>	; 21
+		viewStruct <1, 0>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <255, 0>	; 24
+		viewStruct <1, 253>	; 25
+		viewStruct <0, 253>	; 26
+		viewStruct <255, 253>	; 27
+		viewStruct <1, 254>	; 28
+		viewStruct <0, 254>	; 29
+		viewStruct <255, 254>	; 30
+		viewStruct <1, 255>	; 31
+		viewStruct <0, 255>	; 32
+		viewStruct <255, 255>	; 33
+dun_deltaEast	viewStruct <4, 3>	      ;	0
+		viewStruct <4, 2>	; 1
+		viewStruct <4, 1>	; 2
+		viewStruct <4, 0>	; 3
+		viewStruct <4, 255>	; 4
+		viewStruct <4, 254>	; 5
+		viewStruct <4, 253>	; 6
+		viewStruct <3, 3>	; 7
+		viewStruct <3, 2>	; 8
+		viewStruct <3, 1>	; 9
+		viewStruct <3, 0>	; 10
+		viewStruct <3, 255>	; 11
+		viewStruct <3, 254>	; 12
+		viewStruct <3, 253>	; 13
+		viewStruct <2, 2>	; 14
+		viewStruct <2, 1>	; 15
+		viewStruct <2, 0>	; 16
+		viewStruct <2, 255>	; 17
+		viewStruct <2, 254>	; 18
+		viewStruct <1, 1>	; 19
+		viewStruct <1, 0>	; 20
+		viewStruct <1, 255>	; 21
+		viewStruct <0, 1>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <0, 255>	; 24
+		viewStruct <3, 1>	; 25
+		viewStruct <3, 0>	; 26
+		viewStruct <3, 255>	; 27
+		viewStruct <2, 1>	; 28
+		viewStruct <2, 0>	; 29
+		viewStruct <2, 255>	; 30
+		viewStruct <1, 1>	; 31
+		viewStruct <1, 0>	; 32
+		viewStruct <1, 255>	; 33
+dun_deltaWest	viewStruct <252, 253>   ;	0
+		viewStruct <252, 254>	; 1
+		viewStruct <252, 255>	; 2
+		viewStruct <252, 0>	; 3
+		viewStruct <252, 1>	; 4
+		viewStruct <252, 2>	; 5
+		viewStruct <252, 3>	; 6
+		viewStruct <253, 253>	; 7
+		viewStruct <253, 254>	; 8
+		viewStruct <253, 255>	; 9
+		viewStruct <253, 0>	; 10
+		viewStruct <253, 1>	; 11
+		viewStruct <253, 2>	; 12
+		viewStruct <253, 3>	; 13
+		viewStruct <254, 254>	; 14
+		viewStruct <254, 255>	; 15
+		viewStruct <254, 0>	; 16
+		viewStruct <254, 1>	; 17
+		viewStruct <254, 2>	; 18
+		viewStruct <255, 255>	; 19
+		viewStruct <255, 0>	; 20
+		viewStruct <255, 1>	; 21
+		viewStruct <0, 255>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <0, 1>	; 24
+		viewStruct <253, 255>	; 25
+		viewStruct <253, 0>	; 26
+		viewStruct <253, 1>	; 27
+		viewStruct <254, 255>	; 28
+		viewStruct <254, 0>	; 29
+		viewStruct <254, 1>	; 30
+		viewStruct <255, 255>	; 31
+		viewStruct <255, 0>	; 32
+		viewStruct <255, 1>	; 33
+off_44474	dd dun_deltaNorth, dun_deltaEast, dun_deltaSouth, dun_deltaWest	; 3
+byte_44484	db 0, 1, 2, 2, 2, 0,	3, 4; 0
+		db 3, 3, 4, 4, 4, 0, 3,	4; 8
+byte_44494	db 3Dh, 38h,	2Dh, 1Eh, 0Dh, 0, 2, 2,	2, 2; 0
+		db 2, 2, 2, 16h, 16h, 4, 4, 16h, 16h, 6; 10
+		db 6, 6, 6, 6, 6, 6, 2Ch, 2Ah, 2Ch, 38h; 20
+		db 36h,	38h, 18h, 8, 8,	18h, 0Ah, 0Ah, 0Ah; 30
+		db 0Ah,	0Ah, 30h, 2Eh, 30h, 3Ch, 3Ah, 3Ch; 39
+		db 0Ch,	0Ch, 0Ch, 0Ch, 0Eh, 0Eh, 0Eh, 34h; 47
+		db 32h,	34h, 40h, 3Eh, 40h, 10h, 10h, 12h; 55
+		db 12h,	12h, 14h, 14h, 0; 63
+byte_444D8	db 0, 0, 0, 0	   ; 0
+		db 0, 0, 0, 0		; 4
+		db 0, 0, -1, -1		; 8
+		db -1, 0, 0, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 0, -1, 0		; 20
+		db 0, -1, 0, 0		; 24
+		db -1, -1, 0, 0		; 28
+		db 0, 0, 0, 0		; 32
+		db 0, -1, 0, 0		; 36
+		db -1, 0, 0, -1		; 40
+		db -1, 0, 0, 0		; 44
+		db 0, 0, -1, 0		; 48
+		db 0, -1, 0, -1		; 52
+		db 0, 0, 0, 0		; 56
+		db -1, 0		; 60
+byte_44516	db 0, 1, 2, 3, 4, 5,	6, 1, 2, 3, 3, 4, 5; 0
+		db 7, 8, 9, 0Ah, 0Bh, 0Ch, 0Dh,	19h, 1Ah; 13
+		db 1Bh,	19h, 1Ah, 1Bh, 9, 0Ah, 0Ah, 0Bh; 22
+		db 0Eh,	0Fh, 10h, 11h, 12h, 1Ch, 1Dh, 1Eh; 30
+		db 1Ch,	1Dh, 1Eh, 0Fh, 10h, 10h, 11h, 13h; 38
+		db 14h,	15h, 1Fh, 20h, 21h, 1Fh, 20h, 21h; 46
+		db 14h,	14h, 16h, 17h, 18h, 17h, 17h, 0; 54
+byte_44554	db 4, 4, 4, 4, 4, 4,	4, 8, 8, 8, 0, 0, 0; 0
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 0, 0, 0; 13
+		db 8, 8, 0, 0, 4, 4, 4,	4, 4, 4, 4, 4, 0; 26
+		db 0, 0, 8, 8, 0, 0, 4,	4, 4, 4, 4, 4, 0; 39
+		db 0, 0, 8, 0, 4, 4, 4,	8, 0, 0; 52
+stru_44592	unknown_t <12, 42>	   ; 0
+		unknown_t <15, 42>	; 1
+		unknown_t <18, 42>	; 2
+		unknown_t <21, 42>	; 3
+		unknown_t <24, 42>	; 4
+		unknown_t <27, 42>	; 5
+		unknown_t <30, 42>	; 6
+		unknown_t <5, 38>	; 7
+		unknown_t <12, 38>	; 8
+		unknown_t <26, 38>	; 9
+		unknown_t <29, 38>	; 10
+		unknown_t <31, 38>	; 11
+		unknown_t <39, 38>	; 12
+		unknown_t <254,	38>	; 13
+		unknown_t <5, 38>	; 14
+		unknown_t <17, 44>	; 15
+		unknown_t <24, 44>	; 16
+		unknown_t <31, 44>	; 17
+		unknown_t <33, 38>	; 18
+		unknown_t <40, 38>	; 19
+		unknown_t <13, 33>	; 20
+		unknown_t <21, 33>	; 21
+		unknown_t <31, 33>	; 22
+		unknown_t <13, 55>	; 23
+		unknown_t <21, 55>	; 24
+		unknown_t <31, 55>	; 25
+		unknown_t <255,	38>	; 26
+		unknown_t <23, 38>	; 27
+		unknown_t <31, 38>	; 28
+		unknown_t <42, 38>	; 29
+		unknown_t <2, 42>	; 30
+		unknown_t <12, 42>	; 31
+		unknown_t <23, 42>	; 32
+		unknown_t <34, 42>	; 33
+		unknown_t <45, 42>	; 34
+		unknown_t <4, 21>	; 35
+		unknown_t <20, 21>	; 36
+		unknown_t <34, 21>	; 37
+		unknown_t <4, 63>	; 38
+		unknown_t <20, 63>	; 39
+		unknown_t <34, 63>	; 40
+		unknown_t <3, 35>	; 41
+		unknown_t <19, 35>	; 42
+		unknown_t <33, 35>	; 43
+		unknown_t <48, 35>	; 44
+		unknown_t <0, 35>	; 45
+		unknown_t <18, 35>	; 46
+		unknown_t <37, 35>	; 47
+		unknown_t <0, 8>	; 48
+		unknown_t <17, 4>	; 49
+		unknown_t <44, 8>	; 50
+		unknown_t <0, 77>	; 51
+		unknown_t <17, 77>	; 52
+		unknown_t <44, 77>	; 53
+		unknown_t <12, 22>	; 54
+		unknown_t <37, 22>	; 55
+		unknown_t <235,	22>	; 56
+		unknown_t <11, 22>	; 57
+		unknown_t <43, 22>	; 58
+		unknown_t <0, 0>	; 59
+		unknown_t <44, 0>	; 60
+byte_4460C	db 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0; 0
+		db 0, 0, 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0; 13
+		db 0, 0, 0, 0, 0FFh, 0FFh, 0, 0, 0FFh, 0FFh; 23
+		db 0FFh, 0, 0, 0, 0, 0,	0, 0, 0, 0FFh, 0FFh; 33
+		db 0, 0FFh, 0FFh, 0FFh,	0, 0, 0, 0, 0, 0; 44
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 54
+		db 0			; 61
+byte_4464A	db 30, 31, 32, 33
+		db 34, 42, 43, 45
+		db 46, 47, 54, 55
+		db 56, 57, 58, 59
+		db 60, 0
+strg_inventory	db 0C3h, 0, 1, 0C3h, 0, 1, 0C3h, 0, 1, 0C3h; 0
+		db 0, 1, 0Fh, 0, 0FFh, 0Fh, 0, 0FFh, 7,	0; 10
+		db 0FFh, 7, 0, 0FFh, 8,	0, 0FFh, 8, 0, 0FFh; 20
+		db 16h,	0, 18h,	16h, 0,	18h, 76h, 0, 0Ah; 30
+		db 2, 0, 1, 2, 0, 1, 1Eh, 0, 50h, 0CAh,	0; 39
+		db 5, 0DFh, 0, 0Ah, 7Bh, 0, 0FFh, 7Ch, 0; 50
+		db 18h,	73h, 0,	0FFh, 74h, 0, 0FFh, 87h; 59
+		db 0, 0FFh, 88h, 0, 0FFh, 98h, 0, 0FFh,	99h; 67
+		db 0, 0FFh, 9Ch, 0, 0FFh, 9Dh, 0, 0FFh;	76
 bigpicLightOffset dw 0,	460h, 818h, 9A0h, 8C0h;	0
 bigpicLightSize	dw 1340h, 0A80h, 620h, 348h, 1C0h; 0
-iconXOffset db 80, 92, 108, 124, 136, 0; 0
-iconHeight db 19, 26, 17, 20, 16, 0; 0
-iconWidth db 12, 16, 16, 12, 20, 0; 0
-iconDataList dd	iconLight, iconCompass,	iconAreaEnchant, iconShield, iconLevitation; 0
-word_4470E dw 0E4h, 1A0h, 110h,	0F0h, 140h; 0
-byte_44718 db 0, 0, 0, 0, 0, 0	   ; 0
-byte_4471E db 2, 0, 4, 0, 3, 0	   ; 0
+iconXOffset	db 80, 92, 108, 124, 136, 0; 0
+iconHeight	db 19, 26, 17, 20, 16, 0; 0
+iconWidth	db 12, 16, 16, 12, 20, 0; 0
+iconDataList	dd	iconLight, iconCompass,	iconAreaEnchant, iconShield, iconLevitation; 0
+word_4470E	dw 0E4h, 1A0h, 110h,	0F0h, 140h; 0
+byte_44718	db 0, 0, 0, 0, 0, 0	   ; 0
+byte_4471E	db 2, 0, 4, 0, 3, 0	   ; 0
 iconActiveFlagMaybe db 0, 0, 0,	0, 0, 0	    ; 0
-byte_4472A db 4, 4, 4, 1, 4, 0	   ; 0
-byte_44730 db 0
-byte_44731 db 0
-db    0
-db    0
-db    0
-db    0
-aMafl db 'MAFL',0
-aMageFlame db 'Mage Flame',0
-aArfi db 'ARFI',0
-aArcFire db 'Arc Fire',0
-aTrzp db 'TRZP',0
-aTrapZap db 'Trap Zap',0
-aFrfo db 'FRFO',0
-aFreezeFoes db 'Freeze Foes',0
-aMaco db 'MACO',0
-aKielSCompass db 'Kiel',27h,'s Compass',0
-aWohl db 'WOHL',0
-aWordOfHealing db 'Word of Healing',0
-aLere db 'LERE',0
-aLesserRev_ db 'Lesser Rev.',0
-aLevi db 'LEVI',0
-aLevitation db 'Levitation',0
-aWast db 'WAST',0
-aWarstrike db 'Warstrike',0
-aInwo db 'INWO',0
-aInstantWolf db	'Instant Wolf',0
-aFlre db 'FLRE',0
-aFleshRestore db 'Flesh Restore',0
-aGrre db 'GRRE',0
-aGreaterRev_ db	'Greater Rev.',0
-aShsp db 'SHSP',0
-aShockSphere db	'Shock-Sphere',0
-aFlan db 'FLAN',0
-aFleshAnew db 'Flesh Anew',0
-aMale db 'MALE',0
-aMajorLev_ db 'Major Lev.',0
-aRegn db 'REGN',0
-aRegeneration db 'Regeneration',0
-aApar db 'APAR',0
-aApportArcane db 'Apport Arcane',0
-aFafo db 'FAFO',0
-aFarFoe	db 'Far Foe',0
-aInsl db 'INSL',0
-aInstantSlayer db 'Instant Slayer',0
-aVopl db 'VOPL',0
-aVorpalPlating db 'Vorpal Plating',0
-aQufi db 'QUFI',0
-aQuickFix db 'Quick Fix',0
-aScsi db 'SCSI',0
-aScrySight db 'Scry Sight',0
-aHowa db 'HOWA',0
-aHolyWater db 'Holy Water',0
-aMaga db 'MAGA',0
-aMageGauntlets db 'Mage Gauntlets',0
-aAren db 'AREN',0
-aAreaEnchant db	'Area Enchant',0
-aMysh db 'MYSH',0
-aMysticShield db 'Mystic Shield',0
-aOgst db 'OGST',0
-aOgreStrength db 'Ogre Strength',0
-aStfl db 'STFL',0
-aStarflare db 'Starflare',0
-aSpto db 'SPTO',0
-aSpectreTouch db 'Spectre Touch',0
-aDrbr db 'DRBR',0
-aDragonBreath db 'Dragon Breath',0
-aAnma db 'ANMA',0
-aAntiMagic db 'Anti-Magic',0
-aGist db 'GIST',0
-aGiantStrength db 'Giant Strength',0
-aPhdo db 'PHDO',0
-aPhaseDoor db 'Phase Door',0
-aYmca db 'YMCA',0
-aMysticalArmor db 'Mystical Armor',0
-aRest db 'REST',0
-aRestoration db	'Restoration',0
-aDest db 'DEST',0
-aDeathStrike_0 db 'Death Strike',0
-aIces db 'ICES',0
-aIceStorm db 'Ice Storm',0
-aSton db 'STON',0
-aStoneToFlesh db 'Stone to Flesh',0
-aMija db 'MIJA',0
-aMindJab db 'Mind Jab',0
-aPhbl db 'PHBL',0
-aPhaseBlur db 'Phase Blur',0
-aLotr db 'LOTR',0
-aLocateTraps db	'Locate Traps',0
-aDisb db 'DISB',0
-aDisbelieve db 'Disbelieve',0
-aWiwa db 'WIWA',0
-aWindWarrior db	'Wind Warrior',0
-aFear db 'FEAR',0
-aWordOfFear db 'Word of Fear',0
-aWiog db 'WIOG',0
-aWindOgre db 'Wind Ogre',0
-aInvi db 'INVI',0
-aInvisibility db 'Invisibility',0
-aSesi db 'SESI',0
-aSecondSight db	'Second Sight',0
-aCaey db 'CAEY',0
-aCatEyes db 'Cat Eyes',0
-aWidr db 'WIDR',0
-aWindDragon db 'Wind Dragon',0
-aDiil db 'DIIL',0
-aDisruptIll_ db	'Disrupt Ill.',0
-aMibl db 'MIBL',0
-aMindBlade db 'Mind Blade',0
-aWigi db 'WIGI',0
-aWindGiant db 'Wind Giant',0
-aSosi db 'SOSI',0
-aSorcerorSight db 'Sorceror Sight',0
-aRime db 'RIME',0
-aRimefang db 'Rimefang',0
-aWihe db 'WIHE',0
-aWindHero db 'Wind Hero',0
-aMagm db 'MAGM',0
-aMageMaelstrom db 'Mage Maelstrom',0
-aPrec db 'PREC',0
-aPreclusion db 'Preclusion',0
-aSuel db 'SUEL',0
+byte_4472A	db 4, 4, 4, 1, 4, 0	   ; 0
+byte_44730	db 0
+byte_44731	db 0
+		db    0
+		db    0
+		db    0
+		db    0
+aMafl		db 'MAFL',0
+aMageFlame	db 'Mage Flame',0
+aArfi		db 'ARFI',0
+aArcFire	db 'Arc Fire',0
+aTrzp		db 'TRZP',0
+aTrapZap	db 'Trap Zap',0
+aFrfo		db 'FRFO',0
+aFreezeFoes	db 'Freeze Foes',0
+aMaco		db 'MACO',0
+aKielSCompass	db 'Kiel',27h,'s Compass',0
+aWohl		db 'WOHL',0
+aWordOfHealing	db 'Word of Healing',0
+aLere		db 'LERE',0
+aLesserRev_	db 'Lesser Rev.',0
+aLevi		db 'LEVI',0
+aLevitation	db 'Levitation',0
+aWast		db 'WAST',0
+aWarstrike	db 'Warstrike',0
+aInwo		db 'INWO',0
+aInstantWolf	db 'Instant Wolf',0
+aFlre		db 'FLRE',0
+aFleshRestore	db 'Flesh Restore',0
+aGrre		db 'GRRE',0
+aGreaterRev_	db 'Greater Rev.',0
+aShsp		db 'SHSP',0
+aShockSphere	db 'Shock-Sphere',0
+aFlan		db 'FLAN',0
+aFleshAnew	db 'Flesh Anew',0
+aMale		db 'MALE',0
+aMajorLev_	db 'Major Lev.',0
+aRegn		db 'REGN',0
+aRegeneration	db 'Regeneration',0
+aApar		db 'APAR',0
+aApportArcane	db 'Apport Arcane',0
+aFafo		db 'FAFO',0
+aFarFoe		db 'Far Foe',0
+aInsl		db 'INSL',0
+aInstantSlayer	db 'Instant Slayer',0
+aVopl		db 'VOPL',0
+aVorpalPlating	db 'Vorpal Plating',0
+aQufi		db 'QUFI',0
+aQuickFix	db 'Quick Fix',0
+aScsi		db 'SCSI',0
+aScrySight	db 'Scry Sight',0
+aHowa		db 'HOWA',0
+aHolyWater	db 'Holy Water',0
+aMaga		db 'MAGA',0
+aMageGauntlets	db 'Mage Gauntlets',0
+aAren		db 'AREN',0
+aAreaEnchant	db 'Area Enchant',0
+aMysh		db 'MYSH',0
+aMysticShield	db 'Mystic Shield',0
+aOgst		db 'OGST',0
+aOgreStrength	db 'Ogre Strength',0
+aStfl		db 'STFL',0
+aStarflare	db 'Starflare',0
+aSpto		db 'SPTO',0
+aSpectreTouch	db 'Spectre Touch',0
+aDrbr		db 'DRBR',0
+aDragonBreath	db 'Dragon Breath',0
+aAnma		db 'ANMA',0
+aAntiMagic	db 'Anti-Magic',0
+aGist		db 'GIST',0
+aGiantStrength	db 'Giant Strength',0
+aPhdo		db 'PHDO',0
+aPhaseDoor	db 'Phase Door',0
+aYmca		db 'YMCA',0
+aMysticalArmor	db 'Mystical Armor',0
+aRest		db 'REST',0
+aRestoration	db 'Restoration',0
+aDest		db 'DEST',0
+aDeathStrike	db 'Death Strike',0
+aIces		db 'ICES',0
+aIceStorm	db 'Ice Storm',0
+aSton		db 'STON',0
+aStoneToFlesh	db 'Stone to Flesh',0
+aMija		db 'MIJA',0
+aMindJab	db 'Mind Jab',0
+aPhbl		db 'PHBL',0
+aPhaseBlur	db 'Phase Blur',0
+aLotr		db 'LOTR',0
+aLocateTraps	db 'Locate Traps',0
+aDisb		db 'DISB',0
+aDisbelieve	db 'Disbelieve',0
+aWiwa		db 'WIWA',0
+aWindWarrior	db 'Wind Warrior',0
+aFear		db 'FEAR',0
+aWordOfFear	db 'Word of Fear',0
+aWiog		db 'WIOG',0
+aWindOgre	db 'Wind Ogre',0
+aInvi		db 'INVI',0
+aInvisibility	db 'Invisibility',0
+aSesi		db 'SESI',0
+aSecondSight	db 'Second Sight',0
+aCaey		db 'CAEY',0
+aCatEyes	db 'Cat Eyes',0
+aWidr		db 'WIDR',0
+aWindDragon	db 'Wind Dragon',0
+aDiil		db 'DIIL',0
+aDisruptIll_	db 'Disrupt Ill.',0
+aMibl		db 'MIBL',0
+aMindBlade	db 'Mind Blade',0
+aWigi		db 'WIGI',0
+aWindGiant	db 'Wind Giant',0
+aSosi		db 'SOSI',0
+aSorcerorSight	db 'Sorceror Sight',0
+aRime		db 'RIME',0
+aRimefang	db 'Rimefang',0
+aWihe		db 'WIHE',0
+aWindHero	db 'Wind Hero',0
+aMagm		db 'MAGM',0
+aMageMaelstrom	db 'Mage Maelstrom',0
+aPrec		db 'PREC',0
+aPreclusion	db 'Preclusion',0
+aSuel		db 'SUEL',0
 aSummonElementa	db 'Summon Elemental',0
-aFofo db 'FOFO',0
-aForceFocus db 'Force Focus',0
-aPrsu db 'PRSU',0
+aFofo		db 'FOFO',0
+aForceFocus	db 'Force Focus',0
+aPrsu		db 'PRSU',0
 aPrimeSummoning	db 'Prime Summoning',0
-aDeba db 'DEBA',0
-aDemonBane db 'Demon Bane',0
-aFlco db 'FLCO',0
-aFlameColumn db	'Flame Column',0
-aDisp db 'DISP',0
-aDispossess db 'Dispossess',0
-aHerb db 'HERB',0
-aSummonHerb db 'Summon Herb',0
-aAnde db 'ANDE',0
-aAnimateDead db	'Animate Dead',0
-aSpbi db 'SPBI',0
-aSpellBind db 'Spell Bind',0
-aSowh db 'SOWH',0
-aSoulWhip db 'Soul Whip',0
-aGrsu db 'GRSU',0
-aGreaterSummon db 'Greater Summon',0
-aBede db 'BEDE',0
-aBeyondDeath db	'Beyond Death',0
-aWizw db 'WIZW',0
-aWizardWar db 'Wizard War',0
-aDmst db 'DMST',0
-aDemonStrike db	'Demon Strike',0
-aHafo db 'HAFO',0
-aHaltfoe db 'Haltfoe',0
-aMeme db 'MEME',0
-aMeleeMen db 'Melee Men',0
-aBasp db 'BASP',0
-aBatchspell db 'Batchspell',0
-aCamr db 'CAMR',0
-aCamaraderie db	'Camaraderie',0
-aNila db 'NILA',0
-aNightLance db 'Night Lance',0
-aHeal db 'HEAL',0
-aHealAll db 'Heal All',0
-aBrkr db 'BRKR',0
-aKringleBros_ db 'Kringle Bros.',0
-aMama db 'MAMA',0
-aMangarSMallet db 'Mangar',27h,'s Mallet',0
-aVitl db 'VITL',0
-aVitality db 'Vitality',0
+aDeba		db 'DEBA',0
+aDemonBane	db 'Demon Bane',0
+aFlco		db 'FLCO',0
+aFlameColumn	db 'Flame Column',0
+aDisp		db 'DISP',0
+aDispossess	db 'Dispossess',0
+aHerb		db 'HERB',0
+aSummonHerb	db 'Summon Herb',0
+aAnde		db 'ANDE',0
+aAnimateDead	db 'Animate Dead',0
+aSpbi		db 'SPBI',0
+aSpellBind	db 'Spell Bind',0
+aSowh		db 'SOWH',0
+aSoulWhip	db 'Soul Whip',0
+aGrsu		db 'GRSU',0
+aGreaterSummon	db 'Greater Summon',0
+aBede		db 'BEDE',0
+aBeyondDeath	db 'Beyond Death',0
+aWizw		db 'WIZW',0
+aWizardWar	db 'Wizard War',0
+aDmst		db 'DMST',0
+aDemonStrike	db 'Demon Strike',0
+aHafo		db 'HAFO',0
+aHaltfoe	db 'Haltfoe',0
+aMeme		db 'MEME',0
+aMeleeMen	db 'Melee Men',0
+aBasp		db 'BASP',0
+aBatchspell	db 'Batchspell',0
+aCamr		db 'CAMR',0
+aCamaraderie	db 'Camaraderie',0
+aNila		db 'NILA',0
+aNightLance	db 'Night Lance',0
+aHeal		db 'HEAL',0
+aHealAll	db 'Heal All',0
+aBrkr		db 'BRKR',0
+aKringleBros_	db 'Kringle Bros.',0
+aMama		db 'MAMA',0
+aMangarSMallet	db 'Mangar',27h,'s Mallet',0
+aVitl		db 'VITL',0
+aVitality	db 'Vitality',0
 aArbo		db 'ARBO',0
 aArbo_0		db 'Arbo',0
 aEnik		db 'ENIK',0
 aEnik_0		db 'Enik',0
-aWifi db 'WIFI',0
-aWitherfist db 'Witherfist',0
-aCold db 'COLD',0
-aFrostForce db 'Frost Force',0
+aWifi		db 'WIFI',0
+aWitherfist	db 'Witherfist',0
+aCold		db 'COLD',0
+aFrostForce	db 'Frost Force',0
 aGeli		db 'GELI',0
 aGeli_0		db 'Geli',0
 aEcul		db 'ECUL',0
 aEcul_0		db 'Ecul',0
-aGofi db 'GOFI',0
-aGodFire db 'God Fire',0
-aStun db 'STUN',0
-aStunForce db 'Stun Force',0
+aGofi		db 'GOFI',0
+aGodFire	db 'God Fire',0
+aStun		db 'STUN',0
+aStunForce	db 'Stun Force',0
 aLuce		db 'LUCE',0
 aLuce_0		db 'Luce',0
 aIleg		db 'ILEG',0
 aIleg_0		db 'Ileg',0
-aLuck db 'LUCK',0
-aLuckChant db 'Luck Chant',0
-aFade db 'FADE',0
-aFarDeath db 'Far Death',0
+aLuck		db 'LUCK',0
+aLuckChant	db 'Luck Chant',0
+aFade		db 'FADE',0
+aFarDeath	db 'Far Death',0
 aKine		db 'KINE',0
 aKine_0		db 'Kine',0
 aObra		db 'OBRA',0
 aObra_0		db 'Obra',0
-aWhat db 'WHAT',0
-aIdentify db 'Identify',0
-aOlay db 'OLAY',0
-aYouth db 'Youth',0
+aWhat		db 'WHAT',0
+aIdentify	db 'Identify',0
+aOlay		db 'OLAY',0
+aYouth		db 'Youth',0
 aOluk		db 'OLUK',0
 aOluk_0		db 'Oluk',0
 aEcea		db 'ECEA',0
 aEcea_0		db 'Ecea',0
-aGrro db 'GRRO',0
-aGraveRobber db	'Grave Robber',0
-aFota db 'FOTA',0
-aForceOfTarjan db 'Force of Tarjan',0
+aGrro		db 'GRRO',0
+aGraveRobber	db 'Grave Robber',0
+aFota		db 'FOTA',0
+aForceOfTarjan	db 'Force of Tarjan',0
 aAece		db 'AECE',0
 aAece_0		db 'Aece',0
 aKulo		db 'KULO',0
 aKulo_0		db 'Kulo',0
-aShsh db 'SHSH',0
-aShadowShield db 'Shadow Shield',0
-aFafi db 'FAFI',0
-aFatalFist db 'Fatal Fist',0
+aShsh		db 'SHSH',0
+aShadowShield	db 'Shadow Shield',0
+aFafi		db 'FAFI',0
+aFatalFist	db 'Fatal Fist',0
 aEvil		db 'EVIL',0
 aEvil_0		db 'Evil',0
 aLive		db 'LIVE',0
 aLive_0		db 'Live',0
-aEada db 'EADA',0
-aEarthDagger db	'Earth Dagger',0
-aEaso db 'EASO',0
-aEarthSong db 'Earth Song',0
-aEawa db 'EAWA',0
-aEarthWard db 'Earth Ward',0
-aTreb db 'TREB',0
-aTrebuchet db 'Trebuchet',0
-aEael db 'EAEL',0
+aEada		db 'EADA',0
+aEarthDagger	db 'Earth Dagger',0
+aEaso		db 'EASO',0
+aEarthSong	db 'Earth Song',0
+aEawa		db 'EAWA',0
+aEarthWard	db 'Earth Ward',0
+aTreb		db 'TREB',0
+aTrebuchet	db 'Trebuchet',0
+aEael		db 'EAEL',0
 aEarthElemental	db 'Earth Elemental',0
-aWawa db 'WAWA',0
-aWallWarp db 'Wall Warp',0
-aRock db 'ROCK',0
-aPetrify db 'Petrify',0
-aRoal db 'ROAL',0
-aRoscoeSAlert db 'Roscoe',27h,'s Alert',0
-aSuso db 'SUSO',0
-aSuccorSong db 'Succor Song',0
-aSast db 'SAST',0
-aSandstorm db 'Sandstorm',0
-aSant db 'SANT',0
-aSanctuary db 'Sanctuary',0
-aGlst db 'GLST',0
-aGlacierStrike db 'Glacier Strike',0
-aPath db 'PATH',0
-aPathfinder db 'Pathfinder',0
-aMaba db 'MABA',0
-aMagmaBlast db 'Magma Blast',0
-aJobo db 'JOBO',0
-aJoltBolt db 'Jolt Bolt',0
-aEama db 'EAMA',0
-aEarthMaw db 'Earth Maw',0
-aGill db 'GILL',0
-aGillesGills db	'Gilles Gills',0
-aDiva db 'DIVA',0
-aDivineInt_ db 'Divine Int.',0
-aNuke db 'NUKE',0
+aWawa		db 'WAWA',0
+aWallWarp	db 'Wall Warp',0
+aRock		db 'ROCK',0
+aPetrify	db 'Petrify',0
+aRoal		db 'ROAL',0
+aRoscoeSAlert	db 'Roscoe',27h,'s Alert',0
+aSuso		db 'SUSO',0
+aSuccorSong	db 'Succor Song',0
+aSast		db 'SAST',0
+aSandstorm	db 'Sandstorm',0
+aSant		db 'SANT',0
+aSanctuary	db 'Sanctuary',0
+aGlst		db 'GLST',0
+aGlacierStrike	db 'Glacier Strike',0
+aPath		db 'PATH',0
+aPathfinder	db 'Pathfinder',0
+aMaba		db 'MABA',0
+aMagmaBlast	db 'Magma Blast',0
+aJobo		db 'JOBO',0
+aJoltBolt	db 'Jolt Bolt',0
+aEama		db 'EAMA',0
+aEarthMaw	db 'Earth Maw',0
+aGill		db 'GILL',0
+aGillesGills	db 'Gilles Gills',0
+aDiva		db 'DIVA',0
+aDivineInt_	db 'Divine Int.',0
+aNuke		db 'NUKE',0
 aGotterdamurung	db 'Gotterdamurung',0
-aItem db 'Item',0
-aWeapon	db 'Weapon',0
-aShield	db 'Shield',0
-aArmor db 'Armor',0
-aHelm db 'Helm',0
-aGloves	db 'Gloves',0
-aInstrument db 'Instrument',0
-aFigurine db 'Figurine',0
-aRing db 'Ring',0
-aWand db 'Wand',0
-aItem_0	db 'Item',0
-aBow db	'Bow',0
-aQuiver	db 'Quiver',0
-aContainer db 'Container',0
-aArmor_0 db 'Armor',0
-aNothing db 'Nothing',0
-aTorch db 'Torch',0
-aLamp db 'Lamp',0
-aBroadsword db 'Broadsword',0
-aShortSword db 'Short Sword',0
-aDagger	db 'Dagger',0
-aWarAxe	db 'War Axe',0
-aHalbard db 'Halbard',0
-aLongBow db 'Long Bow',0
-aStaff db 'Staff',0
-aBuckler db 'Buckler',0
-aTowerShield db	'Tower Shield',0
-aLeatherArmor db 'Leather Armor',0
-aChainMail db 'Chain Mail',0
-aScaleArmor db 'Scale Armor',0
-aPlateArmor db 'Plate Armor',0
-aRobes db 'Robes',0
-aHelm_0	db 'Helm',0
-aLeatherGloves db 'Leather Gloves',0
-aGauntlets db 'Gauntlets',0
-aMandolin db 'Mandolin',0
-aSpear db 'Spear',0
-aArrows	db 'Arrows',0
-aMthrSword db 'Mthr Sword',0
-aMthrShield db 'Mthr Shield',0
-aMthrChain db 'Mthr Chain',0
-aMthrScale db 'Mthr Scale',0
-aGiantFgn db 'Giant Fgn',0
-aMthrBracers db	'Mthr Bracers',0
-aBardsword db 'Bardsword',0
-aFireHorn db 'Fire Horn',0
-aLitewand db 'Litewand',0
-aMthrDagger db 'Mthr Dagger',0
-aMthrHelm db 'Mthr Helm',0
-aMthrGloves db 'Mthr Gloves',0
-aMthrAxe db 'Mthr Axe',0
-aShuriken db 'Shuriken',0
-aMthrPlate db 'Mthr Plate',0
-aMoltenFgn db 'Molten Fgn',0
-aSpellSpear db 'Spell Spear',0
-aShieldRing db 'Shield Ring',0
-aFinSFlute db 'Fin',27h,'s Flute',0
-aKaelSAxe db 'Kael',27h,'s Axe',0
-aMthrArrows db 'Mthr Arrows',0
-aDayblade db 'Dayblade',0
-aShieldStaff db	'Shield Staff',0
-aElfCloak db 'Elf Cloak',0
-aHawkblade db 'Hawkblade',0
-aAdmtSword db 'Admt Sword',0
-aAdmtShield db 'Admt Shield',0
-aAdmtHelm db 'Admt Helm',0
-aAdmtGloves db 'Admt Gloves',0
-aPureblade db 'Pureblade',0
-aBoomerang db 'Boomerang',0
-aAliSCarpet db 'Ali',27h,'s Carpet',0
-aLuckshield db 'Luckshield',0
-aDozerFgn db 'Dozer Fgn',0
-aAdmtChain db 'Admt Chain',0
-aDeathStars db 'Death Stars',0
-aAdmtPlate db 'Admt Plate',0
-aAdmtBracers db	'Admt Bracers',0
-aSlayerFgn db 'Slayer Fgn',0
-aPureShield db 'Pure Shield',0
-aMageStaff db 'Mage Staff',0
-aWarStaff db 'War Staff',0
-aThiefDagger db	'Thief Dagger',0
-aSoulMace db 'Soul Mace',0
-aOgrewand db 'Ogrewand',0
-aKatoSBracer db	'Kato',27h,'s bracer',0
-aSorcerstaff db	'Sorcerstaff',0
-aGaltSFlute db 'Galt',27h,'s Flute',0
-aFrostHorn db 'Frost Horn',0
-aAgSArrows db 'Ag',27h,'s Arrows',0
-aDmndShield db 'Dmnd Shield',0
-aBardBow db 'Bard Bow',0
-aDmndHelm db 'Dmnd Helm',0
-aElfBoots db 'Elf Boots',0
-aVanquisherFgn db 'Vanquisher Fgn',0
-aConjurstaff db	'Conjurstaff',0
-aStaffOfLor db 'Staff of Lor',0
-aFlameSword db 'Flame Sword',0
-aPowerstaff db 'Powerstaff',0
-aBreathRing db 'Breath Ring',0
-aDragonshield db 'Dragonshield',0
-aDmndPlate db 'Dmnd Plate',0
-aWargloves db 'Wargloves',0
-aWizhelm db 'Wizhelm',0
-aDragonwand db 'Dragonwand',0
-aDeathring db 'Deathring',0
-aCrystalSword db 'Crystal Sword',0
-aSpeedboots db 'Speedboots',0
-aFlameHorn db 'Flame Horn',0
-aZenArrows db 'Zen Arrows',0
-aDeathdrum db 'Deathdrum',0
-aPipesOfPan db 'Pipes of Pan',0
-aPowerRing db 'Power Ring',0
-aSongAxe db 'Song Axe',0
-aTrickBrick db 'Trick Brick',0
-aDragonFgn db 'Dragon Fgn',0
-aMageFgn db 'Mage Fgn',0
-aTrollRing db 'Troll Ring',0
-aAramSKnife db 'Aram',27h,'s Knife',0
-aAngraSEye db 'Angra',27h,'s Eye',0
-aHerbFgn db 'Herb Fgn',0
-aMasterWand db 'Master Wand',0
-aBrothersFgn db	'Brothers Fgn',0
-aDynamite db 'Dynamite',0
-aThorSHammer db	'Thor',27h,'s Hammer',0
-aStoneblade db 'Stoneblade',0
+aItem		db 'Item',0
+aWeapon		db 'Weapon',0
+aShield		db 'Shield',0
+aArmor		db 'Armor',0
+aHelm		db 'Helm',0
+aGloves		db 'Gloves',0
+aInstrument	db 'Instrument',0
+aFigurine	db 'Figurine',0
+aRing		db 'Ring',0
+aWand		db 'Wand',0
+aBow		db 'Bow',0
+aQuiver		db 'Quiver',0
+aContainer	db 'Container',0
+aNothing	db 'Nothing',0
+aTorch		db 'Torch',0
+aLamp		db 'Lamp',0
+aBroadsword	db 'Broadsword',0
+aShortSword	db 'Short Sword',0
+aDagger		db 'Dagger',0
+aWarAxe		db 'War Axe',0
+aHalbard	db 'Halbard',0
+aLongBow	db 'Long Bow',0
+aStaff		db 'Staff',0
+aBuckler	db 'Buckler',0
+aTowerShield	db 'Tower Shield',0
+aLeatherArmor	db 'Leather Armor',0
+aChainMail	db 'Chain Mail',0
+aScaleArmor	db 'Scale Armor',0
+aPlateArmor	db 'Plate Armor',0
+aRobes		db 'Robes',0
+aLeatherGloves	db 'Leather Gloves',0
+aGauntlets	db 'Gauntlets',0
+aMandolin	db 'Mandolin',0
+aSpear		db 'Spear',0
+aArrows		db 'Arrows',0
+aMthrSword	db 'Mthr Sword',0
+aMthrShield	db 'Mthr Shield',0
+aMthrChain	db 'Mthr Chain',0
+aMthrScale	db 'Mthr Scale',0
+aGiantFgn	db 'Giant Fgn',0
+aMthrBracers	db 'Mthr Bracers',0
+aBardsword	db 'Bardsword',0
+aFireHorn	db 'Fire Horn',0
+aLitewand	db 'Litewand',0
+aMthrDagger	db 'Mthr Dagger',0
+aMthrHelm	db 'Mthr Helm',0
+aMthrGloves	db 'Mthr Gloves',0
+aMthrAxe	db 'Mthr Axe',0
+aShuriken	db 'Shuriken',0
+aMthrPlate	db 'Mthr Plate',0
+aMoltenFgn	db 'Molten Fgn',0
+aSpellSpear	db 'Spell Spear',0
+aShieldRing	db 'Shield Ring',0
+aFinSFlute	db 'Fin',27h,'s Flute',0
+aKaelSAxe	db 'Kael',27h,'s Axe',0
+aMthrArrows	db 'Mthr Arrows',0
+aDayblade	db 'Dayblade',0
+aShieldStaff	db 'Shield Staff',0
+aElfCloak	db 'Elf Cloak',0
+aHawkblade	db 'Hawkblade',0
+aAdmtSword	db 'Admt Sword',0
+aAdmtShield	db 'Admt Shield',0
+aAdmtHelm	db 'Admt Helm',0
+aAdmtGloves	db 'Admt Gloves',0
+aPureblade	db 'Pureblade',0
+aBoomerang	db 'Boomerang',0
+aAliSCarpet	db 'Ali',27h,'s Carpet',0
+aLuckshield	db 'Luckshield',0
+aDozerFgn	db 'Dozer Fgn',0
+aAdmtChain	db 'Admt Chain',0
+aDeathStars	db 'Death Stars',0
+aAdmtPlate	db 'Admt Plate',0
+aAdmtBracers	db 'Admt Bracers',0
+aSlayerFgn	db 'Slayer Fgn',0
+aPureShield	db 'Pure Shield',0
+aMageStaff	db 'Mage Staff',0
+aWarStaff	db 'War Staff',0
+aThiefDagger	db 'Thief Dagger',0
+aSoulMace	db 'Soul Mace',0
+aOgrewand	db 'Ogrewand',0
+aKatoSBracer	db 'Kato',27h,'s bracer',0
+aSorcerstaff	db 'Sorcerstaff',0
+aGaltSFlute	db 'Galt',27h,'s Flute',0
+aFrostHorn	db 'Frost Horn',0
+aAgSArrows	db 'Ag',27h,'s Arrows',0
+aDmndShield	db 'Dmnd Shield',0
+aBardBow	db 'Bard Bow',0
+aDmndHelm	db 'Dmnd Helm',0
+aElfBoots	db 'Elf Boots',0
+aVanquisherFgn	db 'Vanquisher Fgn',0
+aConjurstaff	db 'Conjurstaff',0
+aStaffOfLor	db 'Staff of Lor',0
+aFlameSword	db 'Flame Sword',0
+aPowerstaff	db 'Powerstaff',0
+aBreathRing 	db 'Breath Ring',0
+aDragonshield	db 'Dragonshield',0
+aDmndPlate	db 'Dmnd Plate',0
+aWargloves	db 'Wargloves',0
+aWizhelm	db 'Wizhelm',0
+aDragonwand	db 'Dragonwand',0
+aDeathring	db 'Deathring',0
+aCrystalSword	db 'Crystal Sword',0
+aSpeedboots	db 'Speedboots',0
+aFlameHorn	db 'Flame Horn',0
+aZenArrows	db 'Zen Arrows',0
+aDeathdrum	db 'Deathdrum',0
+aPipesOfPan	db 'Pipes of Pan',0
+aPowerRing	db 'Power Ring',0
+aSongAxe	db 'Song Axe',0
+aTrickBrick	db 'Trick Brick',0
+aDragonFgn	db 'Dragon Fgn',0
+aMageFgn	db 'Mage Fgn',0
+aTrollRing	db 'Troll Ring',0
+aAramSKnife	db 'Aram',27h,'s Knife',0
+aAngraSEye	db 'Angra',27h,'s Eye',0
+aHerbFgn	db 'Herb Fgn',0
+aMasterWand	db 'Master Wand',0
+aBrothersFgn	db 'Brothers Fgn',0
+aDynamite	db 'Dynamite',0
+aThorSHammer	db 'Thor',27h,'s Hammer',0
+aStoneblade	db 'Stoneblade',0
 aHolyHandgrenad	db 'Holy Handgrenade',0
-aMasterkey db 'Masterkey',0
-aNospinRing db 'Nospin Ring',0
-aCrystalLens db	'Crystal Lens',0
-aSmokeyLens db 'Smokey Lens',0
-aBlackLens db 'Black Lens',0
+aMasterkey	db 'Masterkey',0
+aNospinRing	db 'Nospin Ring',0
+aCrystalLens	db 'Crystal Lens',0
+aSmokeyLens	db 'Smokey Lens',0
+aBlackLens	db 'Black Lens',0
 aSphereOfLanati	db 'Sphere of Lanatir',0
-aWandOfPower db	'Wand of Power',0
-aAcorn db 'Acorn',0
-aWineskin db 'Wineskin',0
-aNightspear db 'Nightspear',0
-aTslothaSHead db 'Tslotha',27h,'s Head',0
-aTslothaSHeart db 'Tslotha',27h,'s Heart',0
-aArefolia db 'Arefolia',0
-aValarianSBow db 'Valarian',27h,'s Bow',0
-aArwsOfLife db 'Arws of Life',0
-aCanteen db 'Canteen',0
-aTitanPlate db 'Titan Plate',0
-aTitanShield db	'Titan Shield',0
-aTitanHelm db 'Titan Helm',0
-aFireSpear db 'Fire Spear',0
-aWillowFlute db	'Willow Flute',0
-aFirebrand db 'Firebrand',0
-aHolySword db 'Holy Sword',0
-aWandOfFury db 'Wand of Fury',0
-aLightstar db 'Lightstar',0
-aCrownOfTruth db 'Crown of Truth',0
-aBeltOfAlliria db 'Belt of Alliria',0
-aCrystalKey db 'Crystal Key',0
-aTaoRing db 'Tao Ring',0
-aStealthArrows db 'Stealth Arrows',0
-aYellowStaff db	'Yellow Staff',0
-aSteadyEye db 'Steady Eye',0
-aDivineHalbard db 'Divine Halbard',0
-aIncense db 'Incense',0
-aIChing	db 'I-ching',0
-aWhiteRose db 'White Rose',0
-aBlueRose db 'Blue Rose',0
-aRedRose db 'Red Rose',0
-aYellowRose db 'Yellow Rose',0
-aRainbowRose db	'Rainbow Rose',0
-aMagicTriangle db 'Magic Triangle',0
-asc_455D5 db 'x',0
-aHammerOfWrath db 'Hammer of Wrath',0
-aFerofistSHelm db 'Ferofist',27h,'s Helm',0
-asc_455F7 db 'x',0
-asc_455F9 db 'x',0
-aHelmOfJustice db 'Helm of Justice',0
-aSceaduSCloak db 'Sceadu',27h,'s Cloak',0
-aShadelance db 'Shadelance',0
-aBlackArrows db	'Black Arrows',0
-aWerraSShield db 'Werra',27h,'s Shield',0
-aStrifespear db	'Strifespear',0
-aSheetmusic db 'Sheetmusic',0
-aRightKey db 'Right Key',0
-aLeftKey db 'Left Key',0
-aLever db 'Lever',0
-aNut db	'Nut',0
-aBolt db 'Bolt',0
-aSpanner db 'Spanner',0
-aShadowLock db 'Shadow Lock',0
-aShadowDoor db 'Shadow Door',0
-aMisericorde db	'Misericorde',0
-aHolyAvenger db	'Holy Avenger',0
-aShadowshiv db 'Shadowshiv',0
-aKaliSGarrote db 'Kali',27h,'s Garrote',0
-aFlameKnife db 'Flame Knife',0
-aRedSStiletto db 'Red',27h,'s Stiletto',0
-aHeartseeker db	'Heartseeker',0
-asc_456F4 db 'x',0
-asc_456F6 db 'x',0
-asc_456F8 db 'x',0
-aDmndScale db 'Dmnd Scale',0
-aHolyTnt db 'Holy TNT',0
-aEternalTorch db 'Eternal Torch',0
-aOsconSStaff db	'Oscon',27h,'s Staff',0
-aAngelSRing db 'Angel',27h,'s Ring',0
-aDeathhorn db 'Deathhorn',0
-aStaffOfMangar db 'Staff of Mangar',0
-aTeslaRing db 'Tesla Ring',0
-aDmndBracers db	'Dmnd Bracers',0
-aDeathFgn db 'Death Fgn',0
-aThunderSword db 'Thunder Sword',0
-aPoisonDagger db 'Poison Dagger',0
-aSparkBlade db 'Spark Blade',0
-aGalvanicOboe db 'Galvanic Oboe',0
-aHarmonicGem db	'Harmonic Gem',0
-aTungShield db 'Tung Shield',0
-aTungPlate db 'Tung Plate',0
+aWandOfPower	db 'Wand of Power',0
+aAcorn		db 'Acorn',0
+aWineskin	db 'Wineskin',0
+aNightspear	db 'Nightspear',0
+aTslothaSHead	db 'Tslotha',27h,'s Head',0
+aTslothaSHeart	db 'Tslotha',27h,'s Heart',0
+aArefolia	db 'Arefolia',0
+aValarianSBow	db 'Valarian',27h,'s Bow',0
+aArwsOfLife	db 'Arws of Life',0
+aCanteen	db 'Canteen',0
+aTitanPlate	db 'Titan Plate',0
+aTitanShield	db 'Titan Shield',0
+aTitanHelm	db 'Titan Helm',0
+aFireSpear	db 'Fire Spear',0
+aWillowFlute	db 'Willow Flute',0
+aFirebrand	db 'Firebrand',0
+aHolySword	db 'Holy Sword',0
+aWandOfFury	db 'Wand of Fury',0
+aLightstar	db 'Lightstar',0
+aCrownOfTruth	db 'Crown of Truth',0
+aBeltOfAlliria	db 'Belt of Alliria',0
+aCrystalKey	db 'Crystal Key',0
+aTaoRing	db 'Tao Ring',0
+aStealthArrows	db 'Stealth Arrows',0
+aYellowStaff	db 'Yellow Staff',0
+aSteadyEye	db 'Steady Eye',0
+aDivineHalbard	db 'Divine Halbard',0
+aIncense	db 'Incense',0
+aIChing		db 'I-ching',0
+aWhiteRose	db 'White Rose',0
+aBlueRose	db 'Blue Rose',0
+aRedRose	db 'Red Rose',0
+aYellowRose	db 'Yellow Rose',0
+aRainbowRose	db 'Rainbow Rose',0
+aMagicTriangle	db 'Magic Triangle',0
+aXChar		db 'x', 0
+aHammerOfWrath	db 'Hammer of Wrath',0
+aFerofistSHelm	db 'Ferofist',27h,'s Helm',0
+aHelmOfJustice	db 'Helm of Justice',0
+aSceaduSCloak	db 'Sceadu',27h,'s Cloak',0
+aShadelance	db 'Shadelance',0
+aBlackArrows	db 'Black Arrows',0
+aWerraSShield	db 'Werra',27h,'s Shield',0
+aStrifespear	db 'Strifespear',0
+aSheetmusic	db 'Sheetmusic',0
+aRightKey	db 'Right Key',0
+aLeftKey	db 'Left Key',0
+aLever		db 'Lever',0
+aNut		db 'Nut',0
+aBolt		db 'Bolt',0
+aSpanner	db 'Spanner',0
+aShadowLock	db 'Shadow Lock',0
+aShadowDoor	db 'Shadow Door',0
+aMisericorde	db 'Misericorde',0
+aHolyAvenger	db 'Holy Avenger',0
+aShadowshiv	db 'Shadowshiv',0
+aKaliSGarrote	db 'Kali',27h,'s Garrote',0
+aFlameKnife	db 'Flame Knife',0
+aRedSStiletto	db 'Red',27h,'s Stiletto',0
+aHeartseeker	db 'Heartseeker',0
+aDmndScale	db 'Dmnd Scale',0
+aHolyTnt	db 'Holy TNT',0
+aEternalTorch	db 'Eternal Torch',0
+aOsconSStaff	db 'Oscon',27h,'s Staff',0
+aAngelSRing	db 'Angel',27h,'s Ring',0
+aDeathhorn	db 'Deathhorn',0
+aStaffOfMangar	db 'Staff of Mangar',0
+aTeslaRing	db 'Tesla Ring',0
+aDmndBracers	db 'Dmnd Bracers',0
+aDeathFgn	db 'Death Fgn',0
+aThunderSword	db 'Thunder Sword',0
+aPoisonDagger	db 'Poison Dagger',0
+aSparkBlade	db 'Spark Blade',0
+aGalvanicOboe	db 'Galvanic Oboe',0
+aHarmonicGem	db 'Harmonic Gem',0
+aTungShield	db 'Tung Shield',0
+aTungPlate	db 'Tung Plate',0
 aMinstrelsGlove	db 'Minstrels Glove',0
-aHuntersCloak db 'Hunters Cloak',0
-aDeathHammer db	'Death Hammer',0
-aBloodMeshRobe db 'Blood Mesh Robe',0
-aSoothingBalm db 'Soothing Balm',0
-aMagesCloak db 'Mages Cloak',0
-aFamiliarFgn db	'Familiar Fgn',0
-aHourglass db 'Hourglass',0
-aThievesHood db	'Thieves Hood',0
+aHuntersCloak	db 'Hunters Cloak',0
+aDeathHammer	db 'Death Hammer',0
+aBloodMeshRobe	db 'Blood Mesh Robe',0
+aSoothingBalm	db 'Soothing Balm',0
+aMagesCloak	db 'Mages Cloak',0
+aFamiliarFgn	db 'Familiar Fgn',0
+aHourglass	db 'Hourglass',0
+aThievesHood	db 'Thieves Hood',0
 aSurehandAmulet	db 'Surehand Amulet',0
-aThievesDart db	'Thieves Dart',0
-aShrillFlute db	'Shrill Flute',0
-aAngelSHarp db 'Angel',27h,'s Harp',0
-aTheBook db 'The Book',0
-aTrothLance db 'Troth Lance',0
-aDmndSuit db 'Dmnd Suit',0
-aDmndFlail db 'Dmnd Flail',0
-aPurpleHeart db	'Purple Heart',0
-aTitanBracers db 'Titan Bracers',0
-aEelskinTunic db 'Eelskin Tunic',0
-aSorcererSHood db 'Sorcerer',27h,'s Hood',0
-aDmndStaff db 'Dmnd Staff',0
-aCrystalGem db 'Crystal Gem',0
-aWandOfForce db	'Wand of Force',0
-aCliLyre db 'Cli Lyre',0
-aYouthPotion db	'Youth Potion',0
-asc_4591B db 'x',0
-asc_4591D db 'x',0
-asc_4591F db 'x',0
-asc_45921 db 'x',0
-asc_45923 db 'x',0
-asc_45925 db 'x',0
-asc_45927 db 'x',0
-asc_45929 db 'x',0
-asc_4592B db 'x',0
-asc_4592D db 'x',0
-asc_4592F db 'x',0
-asc_45931 db 'x',0
-asc_45933 db 'x',0
-asc_45935 db 'x',0
-asc_45937 db 'x',0
-asc_45939 db 'x',0
-aMthrSuit db 'Mthr Suit',0
-aTitanSuit db 'Titan Suit',0
-aMagesGlove db 'Mages Glove',0
-aFlareCrystal db 'Flare Crystal',0
-aHolyMissile db	'Holy Missile',0
-aGodsBlade db 'Gods',27h,' Blade',0
-aHunterBlade db	'Hunter Blade',0
-aStaffOfGods db	'Staff of Gods',0
-aHornOfGods db 'Horn of Gods',0
-asc_459AB db 'x',0
-asc_459AD db 'x',0
-asc_459AF db 'x',0
-asc_459B1 db 'x',0
-asc_459B3 db 'x',0
-asc_459B5 db 'x',0
-asc_459B7 db 'x',0
-aWater db 'Water',0
-aSpirits db 'Spirits',0
-aWaterOfLife db	'Water of Life',0
-aDragonBlood db	'Dragon Blood',0
-aMoltenTar db 'Molten Tar',0
-aHuman db 'Human',0
-aElf db	'Elf',0
-aDwarf db 'Dwarf',0
-aHobbit	db 'Hobbit',0
-aHalfElf db 'Half-Elf',0
-aHalfOrc db 'Half-Orc',0
-aGnome db 'Gnome',0
-aMale_0	db 'Male',0
-aFemale	db 'Female',0
-nullStr	db 0
-db    0
-spellString spellString_t <aMafl, aMageFlame>; 0
-spellString_t <aArfi, aArcFire>; 1
-spellString_t <aTrzp, aTrapZap>; 2
-spellString_t <aFrfo, aFreezeFoes>; 3
-spellString_t <aMaco, aKielSCompass>; 4
-spellString_t <aWohl, aWordOfHealing>; 5
-spellString_t <aLere, aLesserRev_>; 6
-spellString_t <aLevi, aLevitation>; 7
-spellString_t <aWast, aWarstrike>; 8
-spellString_t <aInwo, aInstantWolf>; 9
-spellString_t <aFlre, aFleshRestore>; 10
-spellString_t <aGrre, aGreaterRev_>; 11
-spellString_t <aShsp, aShockSphere>; 12
-spellString_t <aFlan, aFleshAnew>; 13
-spellString_t <aMale, aMajorLev_>; 14
-spellString_t <aRegn, aRegeneration>; 15
-spellString_t <aApar, aApportArcane>; 16
-spellString_t <aFafo, aFarFoe>;	17
-spellString_t <aInsl, aInstantSlayer>; 18
-spellString_t <aVopl, aVorpalPlating>; 19
-spellString_t <aQufi, aQuickFix>; 20
-spellString_t <aScsi, aScrySight>; 21
-spellString_t <aHowa, aHolyWater>; 22
-spellString_t <aMaga, aMageGauntlets>; 23
-spellString_t <aAren, aAreaEnchant>; 24
-spellString_t <aMysh, aMysticShield>; 25
-spellString_t <aOgst, aOgreStrength>; 26
-spellString_t <aStfl, aStarflare>; 27
-spellString_t <aSpto, aSpectreTouch>; 28
-spellString_t <aDrbr, aDragonBreath>; 29
-spellString_t <aAnma, aAntiMagic>; 30
-spellString_t <aGist, aGiantStrength>; 31
-spellString_t <aPhdo, aPhaseDoor>; 32
-spellString_t <aYmca, aMysticalArmor>; 33
-spellString_t <aRest, aRestoration>; 34
-spellString_t <aDest, aDeathStrike_0>; 35
-spellString_t <aIces, aIceStorm>; 36
-spellString_t <aSton, aStoneToFlesh>; 37
-spellString_t <aMija, aMindJab>; 38
-spellString_t <aPhbl, aPhaseBlur>; 39
-spellString_t <aLotr, aLocateTraps>; 40
-spellString_t <aDisb, aDisbelieve>; 41
-spellString_t <aWiwa, aWindWarrior>; 42
-spellString_t <aFear, aWordOfFear>; 43
-spellString_t <aWiog, aWindOgre>; 44
-spellString_t <aInvi, aInvisibility>; 45
-spellString_t <aSesi, aSecondSight>; 46
-spellString_t <aCaey, aCatEyes>; 47
-spellString_t <aWidr, aWindDragon>; 48
-spellString_t <aDiil, aDisruptIll_>; 49
-spellString_t <aMibl, aMindBlade>; 50
-spellString_t <aWigi, aWindGiant>; 51
-spellString_t <aSosi, aSorcerorSight>; 52
-spellString_t <aRime, aRimefang>; 53
-spellString_t <aWihe, aWindHero>; 54
-spellString_t <aMagm, aMageMaelstrom>; 55
-spellString_t <aPrec, aPreclusion>; 56
-spellString_t <aSuel, aSummonElementa>;	57
-spellString_t <aFofo, aForceFocus>; 58
-spellString_t <aPrsu, aPrimeSummoning>;	59
-spellString_t <aDeba, aDemonBane>; 60
-spellString_t <aFlco, aFlameColumn>; 61
-spellString_t <aDisp, aDispossess>; 62
-spellString_t <aHerb, aSummonHerb>; 63
-spellString_t <aAnde, aAnimateDead>; 64
-spellString_t <aSpbi, aSpellBind>; 65
-spellString_t <aSowh, aSoulWhip>; 66
-spellString_t <aGrsu, aGreaterSummon>; 67
-spellString_t <aBede, aBeyondDeath>; 68
-spellString_t <aWizw, aWizardWar>; 69
-spellString_t <aDmst, aDemonStrike>; 70
-spellString_t <aHafo, aHaltfoe>; 71
-spellString_t <aMeme, aMeleeMen>; 72
-spellString_t <aBasp, aBatchspell>; 73
-spellString_t <aCamr, aCamaraderie>; 74
-spellString_t <aNila, aNightLance>; 75
-spellString_t <aHeal, aHealAll>; 76
-spellString_t <aBrkr, aKringleBros_>; 77
-spellString_t <aMama, aMangarSMallet>; 78
-spellString_t <aVitl, aVitality>; 79
-spellString_t <aArbo, aArbo_0>; 80
-spellString_t <aEnik, aEnik_0>; 81
-spellString_t <aWifi, aWitherfist>; 82
-spellString_t <aCold, aFrostForce>; 83
-spellString_t <aGeli, aGeli_0>; 84
-spellString_t <aEcul, aEcul_0>; 85
-spellString_t <aGofi, aGodFire>; 86
-spellString_t <aStun, aStunForce>; 87
-spellString_t <aLuce, aLuce_0>; 88
-spellString_t <aIleg, aIleg_0>; 89
-spellString_t <aLuck, aLuckChant>; 90
-spellString_t <aFade, aFarDeath>; 91
-spellString_t <aKine, aKine_0>; 92
-spellString_t <aObra, aObra_0>; 93
-spellString_t <aWhat, aIdentify>; 94
-spellString_t <aOlay, aYouth>; 95
-spellString_t <aOluk, aOluk_0>; 96
-spellString_t <aEcea, aEcea_0>; 97
-spellString_t <aGrro, aGraveRobber>; 98
-spellString_t <aFota, aForceOfTarjan>; 99
-spellString_t <aAece, aAece_0>; 100
-spellString_t <aKulo, aKulo_0>; 101
-spellString_t <aShsh, aShadowShield>; 102
-spellString_t <aFafi, aFatalFist>; 103
-spellString_t <aEvil, aEvil_0>; 104
-spellString_t <aLive, aLive_0>; 105
-spellString_t <aEada, aEarthDagger>; 106
-spellString_t <aEaso, aEarthSong>; 107
-spellString_t <aEawa, aEarthWard>; 108
-spellString_t <aTreb, aTrebuchet>; 109
-spellString_t <aEael, aEarthElemental>;	110
-spellString_t <aWawa, aWallWarp>; 111
-spellString_t <aRock, aPetrify>; 112
-spellString_t <aRoal, aRoscoeSAlert>; 113
-spellString_t <aSuso, aSuccorSong>; 114
-spellString_t <aSast, aSandstorm>; 115
-spellString_t <aSant, aSanctuary>; 116
-spellString_t <aGlst, aGlacierStrike>; 117
-spellString_t <aPath, aPathfinder>; 118
-spellString_t <aMaba, aMagmaBlast>; 119
-spellString_t <aJobo, aJoltBolt>; 120
-spellString_t <aEama, aEarthMaw>; 121
-spellString_t <aGill, aGillesGills>; 122
-spellString_t <aDiva, aDivineInt_>; 123
-spellString_t <aNuke, aGotterdamurung>;	124
-aSpellPoints db	'Spell Points:',0
-aExpr db 'Expr:',0
-aGold db 'Gold:',0
-aPoolGoldTradeG	db 0Ah
-db 0Ah
-db '     Pool  gold',0Ah
-db '     Trade gold',0
+aThievesDart	db 'Thieves Dart',0
+aShrillFlute	db 'Shrill Flute',0
+aAngelSHarp	db 'Angel',27h,'s Harp',0
+aTheBook	db 'The Book',0
+aTrothLance	db 'Troth Lance',0
+aDmndSuit	db 'Dmnd Suit',0
+aDmndFlail	db 'Dmnd Flail',0
+aPurpleHeart	db 'Purple Heart',0
+aTitanBracers	db 'Titan Bracers',0
+aEelskinTunic	db 'Eelskin Tunic',0
+aSorcererSHood	db 'Sorcerer',27h,'s Hood',0
+aDmndStaff	db 'Dmnd Staff',0
+aCrystalGem	db 'Crystal Gem',0
+aWandOfForce	db 'Wand of Force',0
+aCliLyre	db 'Cli Lyre',0
+aYouthPotion	db 'Youth Potion',0
+aMthrSuit	db 'Mthr Suit',0
+aTitanSuit	db 'Titan Suit',0
+aMagesGlove	db 'Mages Glove',0
+aFlareCrystal	db 'Flare Crystal',0
+aHolyMissile	db 'Holy Missile',0
+aGodsBlade	db 'Gods',27h,' Blade',0
+aHunterBlade	db 'Hunter Blade',0
+aStaffOfGods	db 'Staff of Gods',0
+aHornOfGods	db 'Horn of Gods',0
+aWater		db 'Water',0
+aSpirits	db 'Spirits',0
+aWaterOfLife	db 'Water of Life',0
+aDragonBlood	db 'Dragon Blood',0
+aMoltenTar	db 'Molten Tar',0
+aHuman		db 'Human',0
+aElf		db 'Elf',0
+aDwarf		db 'Dwarf',0
+aHobbit		db 'Hobbit',0
+aHalfElf	db 'Half-Elf',0
+aHalfOrc	db 'Half-Orc',0
+aGnome		db 'Gnome',0
+aMale_0		db 'Male',0
+aFemale		db 'Female',0
+nullStr		db 0
+		db    0
+spellString 	spellString_t <aMafl, aMageFlame>; 0
+		spellString_t <aArfi, aArcFire>; 1
+		spellString_t <aTrzp, aTrapZap>; 2
+		spellString_t <aFrfo, aFreezeFoes>; 3
+		spellString_t <aMaco, aKielSCompass>; 4
+		spellString_t <aWohl, aWordOfHealing>; 5
+		spellString_t <aLere, aLesserRev_>; 6
+		spellString_t <aLevi, aLevitation>; 7
+		spellString_t <aWast, aWarstrike>; 8
+		spellString_t <aInwo, aInstantWolf>; 9
+		spellString_t <aFlre, aFleshRestore>; 10
+		spellString_t <aGrre, aGreaterRev_>; 11
+		spellString_t <aShsp, aShockSphere>; 12
+		spellString_t <aFlan, aFleshAnew>; 13
+		spellString_t <aMale, aMajorLev_>; 14
+		spellString_t <aRegn, aRegeneration>; 15
+		spellString_t <aApar, aApportArcane>; 16
+		spellString_t <aFafo, aFarFoe>;	17
+		spellString_t <aInsl, aInstantSlayer>; 18
+		spellString_t <aVopl, aVorpalPlating>; 19
+		spellString_t <aQufi, aQuickFix>; 20
+		spellString_t <aScsi, aScrySight>; 21
+		spellString_t <aHowa, aHolyWater>; 22
+		spellString_t <aMaga, aMageGauntlets>; 23
+		spellString_t <aAren, aAreaEnchant>; 24
+		spellString_t <aMysh, aMysticShield>; 25
+		spellString_t <aOgst, aOgreStrength>; 26
+		spellString_t <aStfl, aStarflare>; 27
+		spellString_t <aSpto, aSpectreTouch>; 28
+		spellString_t <aDrbr, aDragonBreath>; 29
+		spellString_t <aAnma, aAntiMagic>; 30
+		spellString_t <aGist, aGiantStrength>; 31
+		spellString_t <aPhdo, aPhaseDoor>; 32
+		spellString_t <aYmca, aMysticalArmor>; 33
+		spellString_t <aRest, aRestoration>; 34
+		spellString_t <aDest, aDeathStrike>; 35
+		spellString_t <aIces, aIceStorm>; 36
+		spellString_t <aSton, aStoneToFlesh>; 37
+		spellString_t <aMija, aMindJab>; 38
+		spellString_t <aPhbl, aPhaseBlur>; 39
+		spellString_t <aLotr, aLocateTraps>; 40
+		spellString_t <aDisb, aDisbelieve>; 41
+		spellString_t <aWiwa, aWindWarrior>; 42
+		spellString_t <aFear, aWordOfFear>; 43
+		spellString_t <aWiog, aWindOgre>; 44
+		spellString_t <aInvi, aInvisibility>; 45
+		spellString_t <aSesi, aSecondSight>; 46
+		spellString_t <aCaey, aCatEyes>; 47
+		spellString_t <aWidr, aWindDragon>; 48
+		spellString_t <aDiil, aDisruptIll_>; 49
+		spellString_t <aMibl, aMindBlade>; 50
+		spellString_t <aWigi, aWindGiant>; 51
+		spellString_t <aSosi, aSorcerorSight>; 52
+		spellString_t <aRime, aRimefang>; 53
+		spellString_t <aWihe, aWindHero>; 54
+		spellString_t <aMagm, aMageMaelstrom>; 55
+		spellString_t <aPrec, aPreclusion>; 56
+		spellString_t <aSuel, aSummonElementa>;	57
+		spellString_t <aFofo, aForceFocus>; 58
+		spellString_t <aPrsu, aPrimeSummoning>;	59
+		spellString_t <aDeba, aDemonBane>; 60
+		spellString_t <aFlco, aFlameColumn>; 61
+		spellString_t <aDisp, aDispossess>; 62
+		spellString_t <aHerb, aSummonHerb>; 63
+		spellString_t <aAnde, aAnimateDead>; 64
+		spellString_t <aSpbi, aSpellBind>; 65
+		spellString_t <aSowh, aSoulWhip>; 66
+		spellString_t <aGrsu, aGreaterSummon>; 67
+		spellString_t <aBede, aBeyondDeath>; 68
+		spellString_t <aWizw, aWizardWar>; 69
+		spellString_t <aDmst, aDemonStrike>; 70
+		spellString_t <aHafo, aHaltfoe>; 71
+		spellString_t <aMeme, aMeleeMen>; 72
+		spellString_t <aBasp, aBatchspell>; 73
+		spellString_t <aCamr, aCamaraderie>; 74
+		spellString_t <aNila, aNightLance>; 75
+		spellString_t <aHeal, aHealAll>; 76
+		spellString_t <aBrkr, aKringleBros_>; 77
+		spellString_t <aMama, aMangarSMallet>; 78
+		spellString_t <aVitl, aVitality>; 79
+		spellString_t <aArbo, aArbo_0>; 80
+		spellString_t <aEnik, aEnik_0>; 81
+		spellString_t <aWifi, aWitherfist>; 82
+		spellString_t <aCold, aFrostForce>; 83
+		spellString_t <aGeli, aGeli_0>; 84
+		spellString_t <aEcul, aEcul_0>; 85
+		spellString_t <aGofi, aGodFire>; 86
+		spellString_t <aStun, aStunForce>; 87
+		spellString_t <aLuce, aLuce_0>; 88
+		spellString_t <aIleg, aIleg_0>; 89
+		spellString_t <aLuck, aLuckChant>; 90
+		spellString_t <aFade, aFarDeath>; 91
+		spellString_t <aKine, aKine_0>; 92
+		spellString_t <aObra, aObra_0>; 93
+		spellString_t <aWhat, aIdentify>; 94
+		spellString_t <aOlay, aYouth>; 95
+		spellString_t <aOluk, aOluk_0>; 96
+		spellString_t <aEcea, aEcea_0>; 97
+		spellString_t <aGrro, aGraveRobber>; 98
+		spellString_t <aFota, aForceOfTarjan>; 99
+		spellString_t <aAece, aAece_0>; 100
+		spellString_t <aKulo, aKulo_0>; 101
+		spellString_t <aShsh, aShadowShield>; 102
+		spellString_t <aFafi, aFatalFist>; 103
+		spellString_t <aEvil, aEvil_0>; 104
+		spellString_t <aLive, aLive_0>; 105
+		spellString_t <aEada, aEarthDagger>; 106
+		spellString_t <aEaso, aEarthSong>; 107
+		spellString_t <aEawa, aEarthWard>; 108
+		spellString_t <aTreb, aTrebuchet>; 109
+		spellString_t <aEael, aEarthElemental>;	110
+		spellString_t <aWawa, aWallWarp>; 111
+		spellString_t <aRock, aPetrify>; 112
+		spellString_t <aRoal, aRoscoeSAlert>; 113
+		spellString_t <aSuso, aSuccorSong>; 114
+		spellString_t <aSast, aSandstorm>; 115
+		spellString_t <aSant, aSanctuary>; 116
+		spellString_t <aGlst, aGlacierStrike>; 117
+		spellString_t <aPath, aPathfinder>; 118
+		spellString_t <aMaba, aMagmaBlast>; 119
+		spellString_t <aJobo, aJoltBolt>; 120
+		spellString_t <aEama, aEarthMaw>; 121
+		spellString_t <aGill, aGillesGills>; 122
+		spellString_t <aDiva, aDivineInt_>; 123
+		spellString_t <aNuke, aGotterdamurung>;	124
+aSpellPoints	db 'Spell Points:',0
+aExpr		db 'Expr:',0
+aGold		db 'Gold:',0
+aPoolGoldTradeG	db 0Ah,0Ah
+		db '     Pool  gold',0Ah
+		db '     Trade gold',0
 aTradeGoldToWho	db 'Trade gold to whom?',0
 aHowMuchGoldWil	db 'How much gold will you trade?',0
-aNotEnoughGol_0	db 'Not enough gold.',0
 align 2
-aDone db 'Done!',0
-aInventory db 'Inventory',0
+aDone		db 'Done!',0
+aInventory	db 'Inventory',0
 aDoYouWishTo@tr	db ' Do you wish to:',0Ah
-db 0Ah
-db 0Ah
-db 0Ah
-db '@Trade the item',0Ah
-db '@Discard the item',0Ah
-db '@Equip the item',0Ah
-db '@Unequip the item',0Ah
-db '@Identify the item',0
+		db 0Ah,0Ah,0Ah
+		db '@Trade the item',0Ah
+		db '@Discard the item',0Ah
+		db '@Equip the item',0Ah
+		db '@Unequip the item',0Ah
+		db '@Identify the item',0
 align 2
-aItSFilledWith db 'It',27h,'s filled with ',0
+aItSFilledWith	db 'It',27h,'s filled with ',0
 aTriesToIdentif	db ' tries to identify the item...',0Ah
-db 'and /succeed\fail\s!!',0
+		db 'and /succeed\fail\s!!',0
 align 2
-aWhoDoes db 'Who does ',0
+aWhoDoes	db 'Who does ',0
 aWantToGiveItTo	db ' want to give it to?',0
 align 2
-aAllFull_0 db 'All full!',0
 aYouDonTKnowAny	db 'You don',27h,'t know any spells.',0
 align 2
-aKnownSpells db	'Known spells',0
+aKnownSpells	db 'Known spells',0
 align 2
 aRogueAbilities	db 'Rogue abilities',0
-aDisarmTraps db	'Disarm traps ',0
-aIdentifyChest db 'Identify chest ',0
-aIdentifyItem db 'Identify item ',0
+aDisarmTraps	db 'Disarm traps ',0
+aIdentifyChest	db 'Identify chest ',0
+aIdentifyItem	db 'Identify item ',0
 align 2
-aHideInShadows db 'Hide in shadows ',0
+aHideInShadows	db 'Hide in shadows ',0
 align 2
-aCriticalHit db	'Critical hit ',0
-aBardAbilities db 'Bard abilities',0
+aCriticalHit	db 'Critical hit ',0
+aBardAbilities	db 'Bard abilities',0
 align 2
 aNumberOfTunesL	db 'Number of tunes left: ',0
 align 2
 aHunterAbilitie	db 'Hunter abilities',0
 align 2
 aYourPocketsAreEm db 'Your pockets are empty.',0
-aStiqdxcnlkhp db 'StIQDxCnLkHP',0
+aStiqdxcnlkhp	db 'StIQDxCnLkHP',0
 align 2
-genericItemStr dd aItem, aWeapon, aShield, aArmor, aHelm, aGloves, aInstrument,	aFigurine; 0
-dd aRing, aWand, aItem_0, aBow,	aQuiver, aContainer, aArmor_0; 8
-itemStr	dd aNothing, aTorch, aLamp, aBroadsword; 0
-dd aShortSword,	aDagger, aWarAxe, aHalbard; 4
-dd aLongBow, aStaff, aBuckler, aTowerShield; 8
-dd aLeatherArmor, aChainMail, aScaleArmor, aPlateArmor;	12
-dd aRobes, aHelm_0, aLeatherGloves, aGauntlets;	16
-dd aMandolin, aSpear, aArrows, aMthrSword; 20
-dd aMthrShield,	aMthrChain, aMthrScale,	aGiantFgn; 24
-dd aMthrBracers, aBardsword, aFireHorn,	aLitewand; 28
-dd aMthrDagger,	aMthrHelm, aMthrGloves,	aMthrAxe; 32
-dd aShuriken, aMthrPlate, aMoltenFgn, aSpellSpear; 36
-dd aShieldRing,	aFinSFlute, aKaelSAxe, aMthrArrows; 40
-dd aDayblade, aShieldStaff, aElfCloak, aHawkblade; 44
-dd aAdmtSword, aAdmtShield, aAdmtHelm, aAdmtGloves; 48
-dd aPureblade, aBoomerang, aAliSCarpet,	aLuckshield; 52
-dd aDozerFgn, aAdmtChain, aDeathStars, aAdmtPlate; 56
-dd aAdmtBracers, aSlayerFgn, aPureShield, aMageStaff; 60
-dd aWarStaff, aThiefDagger, aSoulMace, aOgrewand; 64
-dd aKatoSBracer, aSorcerstaff, aGaltSFlute, aFrostHorn;	68
-dd aAgSArrows, aDmndShield, aBardBow, aDmndHelm; 72
-dd aElfBoots, aVanquisherFgn, aConjurstaff, aStaffOfLor; 76
-dd aFlameSword,	aPowerstaff, aBreathRing, aDragonshield; 80
-dd aDmndPlate, aWargloves, aWizhelm, aDragonwand; 84
-dd aDeathring, aCrystalSword, aSpeedboots, aFlameHorn; 88
-dd aZenArrows, aDeathdrum, aPipesOfPan,	aPowerRing; 92
-dd aSongAxe, aTrickBrick, aDragonFgn, aMageFgn;	96
-dd aTrollRing, aAramSKnife, aAngraSEye,	aHerbFgn; 100
-dd aMasterWand,	aBrothersFgn, aDynamite, aThorSHammer; 104
-dd aStoneblade,	aHolyHandgrenad, aMasterkey, aNospinRing; 108
-dd aCrystalLens, aSmokeyLens, aBlackLens, aSphereOfLanati; 112
-dd aWandOfPower, aAcorn, aWineskin, aNightspear; 116
-dd aTslothaSHead, aTslothaSHeart, aArefolia, aValarianSBow; 120
-dd aArwsOfLife,	aCanteen, aTitanPlate, aTitanShield; 124
-dd aTitanHelm, aFireSpear, aWillowFlute, aFirebrand; 128
-dd aHolySword, aWandOfFury, aLightstar,	aCrownOfTruth; 132
-dd aBeltOfAlliria, aCrystalKey,	aTaoRing, aStealthArrows; 136
-dd aYellowStaff, aSteadyEye, aDivineHalbard, aIncense; 140
-dd aIChing, aWhiteRose,	aBlueRose, aRedRose; 144
-dd aYellowRose,	aRainbowRose, aMagicTriangle, asc_455D5; 148
-dd aHammerOfWrath, aFerofistSHelm, asc_455F7, asc_455F9; 152
-dd aHelmOfJustice, aSceaduSCloak, aShadelance, aBlackArrows; 156
-dd aWerraSShield, aStrifespear,	aSheetmusic, aRightKey;	160
-dd aLeftKey, aLever, aNut, aBolt; 164
-dd aSpanner, aShadowLock, aShadowDoor, aMisericorde; 168
-dd aHolyAvenger, aShadowshiv, aKaliSGarrote, aFlameKnife; 172
-dd aRedSStiletto, aHeartseeker,	asc_456F4, asc_456F6; 176
-dd asc_456F8, aDmndScale, aHolyTnt, aEternalTorch; 180
-dd aOsconSStaff, aAngelSRing, aDeathhorn, aStaffOfMangar; 184
-dd aTeslaRing, aDmndBracers, aDeathFgn,	aThunderSword; 188
-dd aPoisonDagger, aSparkBlade, aGalvanicOboe, aHarmonicGem; 192
-dd aTungShield,	aTungPlate, aMinstrelsGlove, aHuntersCloak; 196
-dd aDeathHammer, aBloodMeshRobe, aSoothingBalm,	aMagesCloak; 200
-dd aFamiliarFgn, aHourglass, aThievesHood, aSurehandAmulet; 204
-dd aThievesDart, aShrillFlute, aAngelSHarp, aTheBook; 208
-dd aTrothLance,	aDmndSuit, aDmndFlail, aPurpleHeart; 212
-dd aTitanBracers, aEelskinTunic, aSorcererSHood, aDmndStaff; 216
-dd aCrystalGem,	aWandOfForce, aCliLyre,	aYouthPotion; 220
-dd asc_4591B, asc_4591D, asc_4591F, asc_45921; 224
-dd asc_45923, asc_45925, asc_45927, asc_45929; 228
-dd asc_4592B, asc_4592D, asc_4592F, asc_45931; 232
-dd asc_45933, asc_45935, asc_45937, asc_45939; 236
-dd aMthrSuit, aTitanSuit, aMagesGlove, aFlareCrystal; 240
-dd aHolyMissile, aGodsBlade, aHunterBlade, aStaffOfGods; 244
-dd aHornOfGods,	asc_459AB, asc_459AD, asc_459AF; 248
-dd asc_459B1, asc_459B3, asc_459B5, asc_459B7; 252
-wineskinString dd aWater	       ; 0
-dd aSpirits		; 1
-dd aWaterOfLife		; 2
-dd aDragonBlood		; 3
-dd aMoltenTar		; 4
-byte_464B8 db 0FFh, 1, 1, 0FFh,	0FFh, 0FFh, 1, 0FFh, 0FFh, 0FFh; 0
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 10
-db 0FFh, 1, 18h, 0FFh, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh;	20
-db 32h,	50h, 0FFh, 0FFh, 0FFh, 1, 1, 0FFh, 1, 1; 30
-db 0FFh, 0FFh, 1, 0Ah, 50h, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh; 40
-db 0FFh, 0FFh, 0FFh, 0FFh, 32h,	0FFh, 1, 0FFh, 4, 0FFh;	50
-db 0FFh, 1, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 58h, 0FFh, 50h; 60
-db 58h,	41h, 0Ah, 0FFh,	0FFh, 0FFh, 0FFh, 1, 0FFh, 23h;	70
-db 0FFh, 33h, 0FFh, 14h, 0FFh, 0FFh, 19h, 23h, 40h, 0FFh; 80
-db 0FFh, 3Ch, 0Ah, 0Ah,	0FFh, 11h, 0FFh, 1Eh, 1, 1; 90
-db 0FFh, 1Eh, 7, 1, 0Bh, 1, 1, 0FFh, 0FFh, 1; 100
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 1,	0Ah, 0FFh; 110
-db 0FFh, 0FFh, 1, 0FFh,	18h, 0Ah, 0FFh,	0FFh, 0FFh, 1; 120
-db 5, 0FFh, 0FFh, 0Ah, 1, 0FFh,	0FFh, 0FFh, 0FFh, 18h; 130
-db 0FFh, 0FFh, 0FFh, 3,	19h, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 140
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 18h; 150
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 160
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 14h, 0FFh, 0FFh, 0FFh,	0FFh; 170
-db 0FFh, 0FFh, 2, 0FFh,	0Ah, 0FFh, 1Eh,	0FFh, 19h, 0FFh; 180
-db 1, 0FFh, 0FFh, 0FFh,	5, 1, 0FFh, 0FFh, 0FFh,	0FFh; 190
-db 0FFh, 0FFh, 5, 0Ah, 0FFh, 2,	0FFh, 0FFh, 1, 5; 200
-db 5, 4, 0FFh, 0FFh, 0FFh, 0Ah,	0FFh, 0FFh, 0FFh, 0FFh;	210
-db 3, 0Ah, 0Fh,	0Ah, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 220
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 230
-db 0FFh, 0FFh, 0FFh, 5,	1, 0FFh, 0FFh, 0Ah, 19h, 0FFh; 240
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 250
-itemDamageDice db 0, 0,	0, 33	       ; 0
-db 64, 0, 33, 96	; 4
-db 0, 64, 0, 0		; 8
-db 0, 0, 0, 0		; 12
-db 0, 0, 0, 0		; 16
-db 0, 64, 0, 33		; 20
-db 0, 0, 0, 0		; 24
-db 0, 65, 0, 0		; 28
-db 0, 0, 0, 33		; 32
-db 0, 0, 0, 96		; 36
-db 0, 0, 36, 0		; 40
-db 66, 96, 0, 66	; 44
-db 33, 0, 0, 0		; 48
-db 98, 0, 0, 0		; 52
-db 0, 0, 0, 0		; 56
-db 0, 0, 0, 66		; 60
-db 67, 52, 65, 0	; 64
-db 0, 34, 0, 0		; 68
-db 33, 0, 0, 0		; 72
-db 0, 0, 34, 36		; 76
-db 98, 66, 97, 0	; 80
-db 0, 0, 0, 0		; 84
-db 0, 98, 0, 0		; 88
-db 0, 0, 0, 0		; 92
-db 0, 0, 0, 0		; 96
-db 0, 33, 0, 0		; 100
-db 0, 0, 0, 99		; 104
-db 0, 0, 0, 0		; 108
-db 0, 0, 0, 0		; 112
-db 0, 0, 0, 100		; 116
-db 0, 0, 0, 0		; 120
-db 0, 0, 0, 0		; 124
-db 0, 99, 0, 72		; 128
-db 99, 0, 0, 0		; 132
-db 0, 0, 0, 0		; 136
-db 38, 0, 72, 0		; 140
-db 0, 0, 0, 0		; 144
-db 0, 0, 0, 0		; 148
-db 99, 0, 0, 0		; 152
-db 0, 0, 0, 0		; 156
-db 0, 0, 0, 0		; 160
-db 0, 0, 0, 0		; 164
-db 0, 0, 0, 165		; 168
-db 135,	98, 137, 105	; 172
-db 167,	32, 0, 0	; 176
-db 0, 0, 0, 0		; 180
-db 67, 0, 0, 99		; 184
-db 0, 0, 0, 99		; 188
-db 98, 99, 0, 0		; 192
-db 0, 0, 0, 0		; 196
-db 99, 0, 0, 0		; 200
-db 0, 0, 0, 0		; 204
-db 0, 0, 0, 0		; 208
-db 135,	0, 129,	0	; 212
-db 0, 0, 0, 39		; 216
-db 0, 99, 0, 0		; 220
-db 0, 0, 0, 0		; 224
-db 0, 0, 0, 0		; 228
-db 0, 0, 0, 0		; 232
-db 0, 0, 0, 0		; 236
-db 0, 0, 0, 0		; 240
-db 0, 137, 169,	41	; 244
-db 0, 0, 0, 0		; 248
-db 0, 0, 0, 0		; 252
+genericItemStr	dd aItem, aWeapon, aShield, aArmor, aHelm, aGloves, aInstrument, aFigurine; 0
+		dd aRing, aWand, aItem, aBow,	aQuiver, aContainer, aArmor; 8
+itemStr		dd aNothing, aTorch, aLamp, aBroadsword; 0
+		dd aShortSword,	aDagger, aWarAxe, aHalbard; 4
+		dd aLongBow, aStaff, aBuckler, aTowerShield; 8
+		dd aLeatherArmor, aChainMail, aScaleArmor, aPlateArmor;	12
+		dd aRobes, aHelm, aLeatherGloves, aGauntlets;	16
+		dd aMandolin, aSpear, aArrows, aMthrSword; 20
+		dd aMthrShield,	aMthrChain, aMthrScale,	aGiantFgn; 24
+		dd aMthrBracers, aBardsword, aFireHorn,	aLitewand; 28
+		dd aMthrDagger,	aMthrHelm, aMthrGloves,	aMthrAxe; 32
+		dd aShuriken, aMthrPlate, aMoltenFgn, aSpellSpear; 36
+		dd aShieldRing,	aFinSFlute, aKaelSAxe, aMthrArrows; 40
+		dd aDayblade, aShieldStaff, aElfCloak, aHawkblade; 44
+		dd aAdmtSword, aAdmtShield, aAdmtHelm, aAdmtGloves; 48
+		dd aPureblade, aBoomerang, aAliSCarpet,	aLuckshield; 52
+		dd aDozerFgn, aAdmtChain, aDeathStars, aAdmtPlate; 56
+		dd aAdmtBracers, aSlayerFgn, aPureShield, aMageStaff; 60
+		dd aWarStaff, aThiefDagger, aSoulMace, aOgrewand; 64
+		dd aKatoSBracer, aSorcerstaff, aGaltSFlute, aFrostHorn;	68
+		dd aAgSArrows, aDmndShield, aBardBow, aDmndHelm; 72
+		dd aElfBoots, aVanquisherFgn, aConjurstaff, aStaffOfLor; 76
+		dd aFlameSword,	aPowerstaff, aBreathRing, aDragonshield; 80
+		dd aDmndPlate, aWargloves, aWizhelm, aDragonwand; 84
+		dd aDeathring, aCrystalSword, aSpeedboots, aFlameHorn; 88
+		dd aZenArrows, aDeathdrum, aPipesOfPan,	aPowerRing; 92
+		dd aSongAxe, aTrickBrick, aDragonFgn, aMageFgn;	96
+		dd aTrollRing, aAramSKnife, aAngraSEye,	aHerbFgn; 100
+		dd aMasterWand,	aBrothersFgn, aDynamite, aThorSHammer; 104
+		dd aStoneblade,	aHolyHandgrenad, aMasterkey, aNospinRing; 108
+		dd aCrystalLens, aSmokeyLens, aBlackLens, aSphereOfLanati; 112
+		dd aWandOfPower, aAcorn, aWineskin, aNightspear; 116
+		dd aTslothaSHead, aTslothaSHeart, aArefolia, aValarianSBow; 120
+		dd aArwsOfLife,	aCanteen, aTitanPlate, aTitanShield; 124
+		dd aTitanHelm, aFireSpear, aWillowFlute, aFirebrand; 128
+		dd aHolySword, aWandOfFury, aLightstar,	aCrownOfTruth; 132
+		dd aBeltOfAlliria, aCrystalKey,	aTaoRing, aStealthArrows; 136
+		dd aYellowStaff, aSteadyEye, aDivineHalbard, aIncense; 140
+		dd aIChing, aWhiteRose,	aBlueRose, aRedRose; 144
+		dd aYellowRose,	aRainbowRose, aMagicTriangle, aXChar; 148
+		dd aHammerOfWrath, aFerofistSHelm, aXChar, aXChar; 152
+		dd aHelmOfJustice, aSceaduSCloak, aShadelance, aBlackArrows; 156
+		dd aWerraSShield, aStrifespear,	aSheetmusic, aRightKey;	160
+		dd aLeftKey, aLever, aNut, aBolt; 164
+		dd aSpanner, aShadowLock, aShadowDoor, aMisericorde; 168
+		dd aHolyAvenger, aShadowshiv, aKaliSGarrote, aFlameKnife; 172
+		dd aRedSStiletto, aHeartseeker,	aXChar, aXChar; 176
+		dd aXChar, aDmndScale, aHolyTnt, aEternalTorch; 180
+		dd aOsconSStaff, aAngelSRing, aDeathhorn, aStaffOfMangar; 184
+		dd aTeslaRing, aDmndBracers, aDeathFgn,	aThunderSword; 188
+		dd aPoisonDagger, aSparkBlade, aGalvanicOboe, aHarmonicGem; 192
+		dd aTungShield,	aTungPlate, aMinstrelsGlove, aHuntersCloak; 196
+		dd aDeathHammer, aBloodMeshRobe, aSoothingBalm,	aMagesCloak; 200
+		dd aFamiliarFgn, aHourglass, aThievesHood, aSurehandAmulet; 204
+		dd aThievesDart, aShrillFlute, aAngelSHarp, aTheBook; 208
+		dd aTrothLance,	aDmndSuit, aDmndFlail, aPurpleHeart; 212
+		dd aTitanBracers, aEelskinTunic, aSorcererSHood, aDmndStaff; 216
+		dd aCrystalGem,	aWandOfForce, aCliLyre,	aYouthPotion; 220
+		dd aXChar, aXChar, aXChar, aXChar; 224
+		dd aXChar, aXChar, aXChar, aXChar; 228
+		dd aXChar, aXChar, aXChar, aXChar; 232
+		dd aXChar, aXChar, aXChar, aXChar; 236
+		dd aMthrSuit, aTitanSuit, aMagesGlove, aFlareCrystal; 240
+		dd aHolyMissile, aGodsBlade, aHunterBlade, aStaffOfGods; 244
+		dd aHornOfGods,	aXChar, aXChar, aXChar; 248
+		dd aXChar, aXChar, aXChar, aXChar; 252
+wineskinString	dd aWater	       ; 0
+		dd aSpirits		; 1
+		dd aWaterOfLife		; 2
+		dd aDragonBlood		; 3
+		dd aMoltenTar		; 4
+byte_464B8	db 0FFh, 1, 1, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh, 0FFh; 0
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 10
+		db 0FFh, 1, 18h, 0FFh, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh;	20
+		db 32h,	50h, 0FFh, 0FFh, 0FFh, 1, 1, 0FFh, 1, 1; 30
+		db 0FFh, 0FFh, 1, 0Ah, 50h, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh; 40
+		db 0FFh, 0FFh, 0FFh, 0FFh, 32h,	0FFh, 1, 0FFh, 4, 0FFh;	50
+		db 0FFh, 1, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 58h, 0FFh, 50h; 60
+		db 58h,	41h, 0Ah, 0FFh,	0FFh, 0FFh, 0FFh, 1, 0FFh, 23h;	70
+		db 0FFh, 33h, 0FFh, 14h, 0FFh, 0FFh, 19h, 23h, 40h, 0FFh; 80
+		db 0FFh, 3Ch, 0Ah, 0Ah,	0FFh, 11h, 0FFh, 1Eh, 1, 1; 90
+		db 0FFh, 1Eh, 7, 1, 0Bh, 1, 1, 0FFh, 0FFh, 1; 100
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 1,	0Ah, 0FFh; 110
+		db 0FFh, 0FFh, 1, 0FFh,	18h, 0Ah, 0FFh,	0FFh, 0FFh, 1; 120
+		db 5, 0FFh, 0FFh, 0Ah, 1, 0FFh,	0FFh, 0FFh, 0FFh, 18h; 130
+		db 0FFh, 0FFh, 0FFh, 3,	19h, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 140
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 18h; 150
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 160
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 14h, 0FFh, 0FFh, 0FFh,	0FFh; 170
+		db 0FFh, 0FFh, 2, 0FFh,	0Ah, 0FFh, 1Eh,	0FFh, 19h, 0FFh; 180
+		db 1, 0FFh, 0FFh, 0FFh,	5, 1, 0FFh, 0FFh, 0FFh,	0FFh; 190
+		db 0FFh, 0FFh, 5, 0Ah, 0FFh, 2,	0FFh, 0FFh, 1, 5; 200
+		db 5, 4, 0FFh, 0FFh, 0FFh, 0Ah,	0FFh, 0FFh, 0FFh, 0FFh;	210
+		db 3, 0Ah, 0Fh,	0Ah, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 220
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 230
+		db 0FFh, 0FFh, 0FFh, 5,	1, 0FFh, 0FFh, 0Ah, 19h, 0FFh; 240
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 250
+itemDamageDice	db 0, 0, 0, 33	       ; 0
+		db 64, 0, 33, 96	; 4
+		db 0, 64, 0, 0		; 8
+		db 0, 0, 0, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 64, 0, 33		; 20
+		db 0, 0, 0, 0		; 24
+		db 0, 65, 0, 0		; 28
+		db 0, 0, 0, 33		; 32
+		db 0, 0, 0, 96		; 36
+		db 0, 0, 36, 0		; 40
+		db 66, 96, 0, 66	; 44
+		db 33, 0, 0, 0		; 48
+		db 98, 0, 0, 0		; 52
+		db 0, 0, 0, 0		; 56
+		db 0, 0, 0, 66		; 60
+		db 67, 52, 65, 0	; 64
+		db 0, 34, 0, 0		; 68
+		db 33, 0, 0, 0		; 72
+		db 0, 0, 34, 36		; 76
+		db 98, 66, 97, 0	; 80
+		db 0, 0, 0, 0		; 84
+		db 0, 98, 0, 0		; 88
+		db 0, 0, 0, 0		; 92
+		db 0, 0, 0, 0		; 96
+		db 0, 33, 0, 0		; 100
+		db 0, 0, 0, 99		; 104
+		db 0, 0, 0, 0		; 108
+		db 0, 0, 0, 0		; 112
+		db 0, 0, 0, 100		; 116
+		db 0, 0, 0, 0		; 120
+		db 0, 0, 0, 0		; 124
+		db 0, 99, 0, 72		; 128
+		db 99, 0, 0, 0		; 132
+		db 0, 0, 0, 0		; 136
+		db 38, 0, 72, 0		; 140
+		db 0, 0, 0, 0		; 144
+		db 0, 0, 0, 0		; 148
+		db 99, 0, 0, 0		; 152
+		db 0, 0, 0, 0		; 156
+		db 0, 0, 0, 0		; 160
+		db 0, 0, 0, 0		; 164
+		db 0, 0, 0, 165		; 168
+		db 135,	98, 137, 105	; 172
+		db 167,	32, 0, 0	; 176
+		db 0, 0, 0, 0		; 180
+		db 67, 0, 0, 99		; 184
+		db 0, 0, 0, 99		; 188
+		db 98, 99, 0, 0		; 192
+		db 0, 0, 0, 0		; 196
+		db 99, 0, 0, 0		; 200
+		db 0, 0, 0, 0		; 204
+		db 0, 0, 0, 0		; 208
+		db 135,	0, 129,	0	; 212
+		db 0, 0, 0, 39		; 216
+		db 0, 99, 0, 0		; 220
+		db 0, 0, 0, 0		; 224
+		db 0, 0, 0, 0		; 228
+		db 0, 0, 0, 0		; 232
+		db 0, 0, 0, 0		; 236
+		db 0, 0, 0, 0		; 240
+		db 0, 137, 169,	41	; 244
+		db 0, 0, 0, 0		; 248
+		db 0, 0, 0, 0		; 252
 item_acBonWeapDam db 0,	0, 0, 0		  ; 0
-db 0, 0, 0, 0		; 4
-db 0, 0, 1, 2		; 8
-db 2, 3, 4, 5		; 12
-db 1, 1, 1, 1		; 16
-db 0, 0, 0, 32		; 20
-db 3, 4, 5, 0		; 24
-db 4, 64, 0, 0		; 28
-db 32, 2, 2, 32		; 32
-db 0, 6, 0, 32		; 36
-db 2, 2, 32, 0		; 40
-db 16, 18, 3, 16	; 44
-db 64, 4, 3, 3		; 48
-db 0, 0, 2, 3		; 52
-db 0, 5, 0, 7		; 56
-db 6, 0, 5, 2		; 60
-db 0, 16, 48, 0		; 64
-db 0, 50, 0, 0		; 68
-db 96, 5, 2, 4		; 72
-db 0, 0, 34, 16		; 76
-db 17, 16, 16, 4	; 80
-db 8, 4, 3, 0		; 84
-db 1, 16, 0, 0		; 88
-db 0, 2, 2, 0		; 92
-db 3, 0, 0, 0		; 96
-db 0, 64, 0, 0		; 100
-db 0, 0, 0, 32		; 104
-db 48, 0, 0, 0		; 108
-db 0, 0, 0, 37		; 112
-db 51, 0, 0, 48		; 116
-db 0, 0, 0, 4		; 120
-db 32, 0, 10, 22	; 124
-db 5, 48, 2, 65		; 128
-db 66, 17, 0, 10	; 132
-db 0, 0, 37, 2		; 136
-db 36, 4, 49, 0		; 140
-db 0, 0, 0, 0		; 144
-db 0, 0, 0, 0		; 148
-db 0, 39, 0, 0		; 152
-db 9, 28, 0, 0		; 156
-db 8, 80, 0, 0		; 160
-db 0, 0, 0, 0		; 164
-db 0, 0, 0, 115		; 168
-db 84, 16, 49, 33	; 172
-db 66, 82, 0, 0		; 176
-db 0, 7, 0, 0		; 180
-db 51, 2, 0, 36		; 184
-db 2, 8, 0, 66		; 188
-db 49, 50, 0, 0		; 192
-db 23, 12, 7, 40	; 196
-db 81, 4, 0, 4		; 200
-db 0, 0, 4, 0		; 204
-db 0, 2, 2, 0		; 208
-db 81, 15, 80, 0	; 212
-db 10, 20, 3, 33	; 216
-db 0, 32, 5, 0		; 220
-db 0, 0, 0, 0		; 224
-db 0, 0, 0, 0		; 228
-db 0, 0, 0, 0		; 232
-db 0, 0, 0, 0		; 236
-db 10, 15, 4, 0		; 240
-db 0, 85, 83, 50	; 244
-db 0, 0, 0, 0		; 248
-db 0, 0, 0, 0		; 252
-itemTypeList db	itType_item, itType_item, itType_item; 0
-db itType_weapon, itType_weapon, itType_weapon;	3
-db itType_weapon, itType_weapon, itType_bow; 6
-db itType_weapon, itType_shield, itType_shield;	9
-db itType_armor, itType_armor, itType_armor; 12
-db itType_armor, itType_armor, itType_helm; 15
-db itType_gloves, itType_gloves, itType_instrument; 18
-db itType_weapon, itType_quiver, itType_weapon;	21
-db itType_shield, itType_armor,	itType_armor; 24
-db itType_figurine, itType_armor, itType_weapon; 27
-db itType_instrument, itType_item0, itType_weapon; 30
-db itType_helm,	itType_gloves, itType_weapon; 33
-db itType_item0, itType_armor, itType_figurine;	36
-db itType_weapon, itType_ring, itType_instrument; 39
-db 11h,	itType_quiver, itType_weapon; 42
-db itType_weapon, itType_armor0, itType_weapon;	45
-db itType_weapon, itType_shield, itType_helm; 48
-db itType_gloves, itType_weapon, itType_item0; 51
-db itType_item0, itType_shield,	itType_figurine; 54
-db itType_armor, itType_weapon,	itType_armor; 57
-db itType_armor, itType_figurine, itType_shield; 60
-db itType_weapon, itType_weapon, itType_weapon;	63
-db 51h,	itType_wand, itType_item0; 66
-db itType_weapon, itType_instrument, itType_instrument;	69
-db itType_quiver, itType_shield, itType_bow; 72
-db itType_helm,	itType_item0, itType_figurine; 75
-db itType_weapon, itType_weapon, itType_weapon;	78
-db itType_weapon, itType_ring, itType_shield; 81
-db itType_armor, itType_gloves,	itType_helm; 84
-db itType_wand,	itType_ring, itType_weapon; 87
-db itType_item0, itType_instrument, itType_quiver; 90
-db itType_instrument, itType_instrument, itType_ring; 93
-db itType_weapon, itType_item0,	itType_figurine; 96
-db itType_figurine, itType_ring, itType_weapon;	99
-db itType_item0, itType_figurine, itType_wand; 102
-db itType_figurine, itType_item0, itType_weapon; 105
-db 61h,	itType_item0, itType_item0; 108
-db itType_ring,	itType_item, itType_item; 111
-db itType_item,	itType_item0, itType_wand; 114
-db itType_item0, itType_container, itType_weapon; 117
-db itType_item0, itType_item0, itType_item0; 120
-db itType_bow, itType_quiver, itType_container;	123
-db itType_armor, itType_shield,	itType_helm; 126
-db itType_weapon, itType_instrument, 51h; 129
-db itType_weapon, itType_wand, itType_item0; 132
-db itType_helm,	itType_item0, itType_item0; 135
-db itType_ring,	itType_quiver, itType_weapon; 138
-db itType_item0, itType_weapon,	itType_item0; 141
-db itType_item0, itType_item0, itType_item0; 144
-db itType_item0, itType_item0, itType_item0; 147
-db itType_item0, itType_item0, itType_weapon; 150
-db itType_helm,	itType_item0, itType_item0; 153
-db itType_helm,	itType_armor, itType_weapon; 156
-db itType_item0, itType_shield,	71h; 159
-db itType_item0, itType_item0, itType_item0; 162
-db itType_item0, itType_item0, itType_item0; 165
-db itType_item0, itType_item0, itType_item0; 168
-db itType_weapon, itType_weapon, itType_weapon;	171
-db itType_weapon, itType_weapon, itType_weapon;	174
-db 71h,	itType_item0, itType_item0; 177
-db itType_item0, itType_armor, itType_item0; 180
-db itType_item0, 11h, itType_ring; 183
-db itType_instrument, 51h, itType_ring;	186
-db itType_armor, itType_figurine, itType_weapon; 189
-db 11h,	itType_weapon, itType_instrument; 192
-db itType_item0, itType_shield,	itType_armor; 195
-db itType_gloves, itType_armor,	itType_weapon; 198
-db itType_armor, itType_item0, itType_armor; 201
-db itType_figurine, itType_item0, itType_helm; 204
-db itType_item0, itType_item0, itType_instrument; 207
-db itType_instrument, itType_item0, itType_weapon; 210
-db itType_armor0, itType_weapon, itType_item0; 213
-db itType_armor, itType_instrument, itType_helm; 216
-db itType_weapon, itType_item0,	itType_wand; 219
-db itType_instrument, itType_item0, itType_item0; 222
-db itType_item0, itType_item0, itType_item0; 225
-db itType_item0, itType_item0, itType_item0; 228
-db itType_item0, itType_item0, itType_item0; 231
-db itType_item0, itType_item0, itType_item0; 234
-db itType_item0, itType_item0, itType_item0; 237
-db itType_armor, itType_armor, itType_gloves; 240
-db itType_item0, itType_weapon,	itType_weapon; 243
-db itType_weapon, itType_weapon, itType_instrument; 246
-db itType_item0, itType_item0, itType_item0; 249
-db itType_item0, itType_item0, itType_item0; 252
-db itType_item0		; 255
-classEquipMask db 80h, 40h, 40h, 40h, 40h, 10h,	8, 4; 0
-db 2, 1, 20h, 60h, 0E0h, 0, 0, 0; 8
-itemEquipMask db 0, 0FFh, 0FFh,	8Fh, 9Fh, 0FFh,	8Fh, 87h; 0
-db 9Fh,	0FFh, 9Fh, 8Eh,	9Fh, 8Fh, 8Eh, 86h; 8
-db 0FFh, 9Fh, 0FFh, 86h, 8, 9Fh, 9Fh, 9Eh; 16
-db 9Eh,	8Fh, 9Eh, 0FFh,	70h, 8,	8, 60h;	24
-db 0FFh, 9Fh, 8Ch, 8Fh,	9Bh, 86h, 0FFh,	9Fh; 32
-db 0FFh, 8, 8Eh, 9Fh, 8Eh, 0FFh, 71h, 8Eh; 40
-db 9Eh,	9Eh, 9Eh, 84h, 4, 99h, 0FFh, 9Eh; 48
-db 0FFh, 8Eh, 2, 86h, 70h, 0FFh, 4, 60h; 56
-db 0FFh, 10h, 8Eh, 60h,	70h, 60h, 8, 8;	64
-db 86h,	8Eh, 8,	86h, 0FFh, 8, 60h, 61h;	72
-db 86h,	0FCh, 0FFh, 9Eh, 8Ch, 84h, 60h,	60h; 80
-db 86h,	8Eh, 9Fh, 8, 9Fh, 8, 8,	62h; 88
-db 8, 60h, 0FFh, 0FFh, 0FFh, 86h, 6Ch, 0FFh; 96
-db 60h,	0FFh, 0FFh, 84h, 86h, 0FFh, 0FFh, 0FFh;	104
-db 0FFh, 0FFh, 0FFh, 60h, 60h, 0FFh, 0FFh, 9Fh;	112
-db 0FFh, 0FFh, 0FFh, 9Fh, 9Fh, 0FFh, 84h, 8Ch; 120
-db 86h,	9Fh, 8,	9Eh, 4,	60h, 2,	86h; 128
-db 0FFh, 0FFh, 1, 2, 60h, 2, 87h, 1; 136
-db 1, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh;	144
-db 84h,	86h, 0FFh, 0FFh, 10h, 10h, 86h,	9Fh; 152
-db 8Eh,	8Eh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 160
-db 0FFh, 0FFh, 0FFh, 10h, 4, 10h, 10h, 10h; 168
-db 10h,	10h, 0FFh, 0FFh, 0FFh, 8Eh, 0FFh, 0FFh;	176
-db 60h,	0FFh, 8, 20h, 60h, 70h,	0FFh, 8; 184
-db 10h,	80h, 8,	60h, 8Ch, 84h, 8, 2; 192
-db 80h,	60h, 0FFh, 20h,	20h, 60h, 10h, 10h; 200
-db 10h,	8, 8, 4, 86h, 84h, 84h,	0FFh; 208
-db 70h,	2, 60h,	20h, 60h, 60h, 8, 0FFh;	216
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 224
-db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 232
-db 86h,	80h, 60h, 60h, 9Fh, 84h, 2, 60h; 240
-db 8, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh;	248
-itemEffectList db itemEff_none,	itemEff_none, itemEff_none, itemEff_none; 0
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 4
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 8
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 12
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 16
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 20
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 24
-db itemEff_none, itemEff_freeSinging, itemEff_none, itemEff_none; 28
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 32
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 36
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 40
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 44
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 48
-db itemEff_none, itemEff_none, itemEff_none, itemEff_alwaysHide; 52
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 56
-db itemEff_none, itemEff_none, itemEff_none, itemEff_anotherSpptRegen; 60
-db itemEff_none, 8, itemEff_none, itemEff_none;	64
-db itemEff_calmMonster,	itemEff_none, itemEff_none, itemEff_none; 68
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 72
-db itemEff_none, itemEff_none, itemEff_halfSpptUsage, itemEff_none; 76
-db itemEff_none, itemEff_none, itemEff_breathDefense, itemEff_none; 80
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 84
-db itemEff_none, itemEff_none, itemEff_alwaysRunAway, itemEff_none; 88
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 92
-db itemEff_freeSinging,	itemEff_none, itemEff_none, itemEff_none; 96
-db itemEff_regenHP, itemEff_none, itemEff_none,	itemEff_none; 100
-db itemEff_none, itemEff_none, itemEff_none, itemEff_regenHP; 104
-db itemEff_none, itemEff_none, 0Bh, itemEff_noSpin; 108
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 112
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 116
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 120
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 124
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 128
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 132
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 136
-db itemEff_anotherSpptRegen, itemEff_none, itemEff_none, itemEff_none; 140
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 144
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 148
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 152
-db 8, itemEff_none, itemEff_none, itemEff_none;	156
-db itemEff_breathDefense, itemEff_none,	itemEff_none, itemEff_none; 160
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 164
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 168
-db itemEff_none, itemEff_alwaysHide, 8,	itemEff_none; 172
-db itemEff_none, itemEff_breathDefense,	itemEff_none, itemEff_none; 176
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 180
-db itemEff_regenSppt, itemEff_resurrect, itemEff_alwaysHide, itemEff_halfSpptUsage; 184
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 188
-db itemEff_none, itemEff_none, itemEff_freeSinging, itemEff_none; 192
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 196
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 200
-db itemEff_regenSppt, itemEff_none, 8, itemEff_alwaysHide; 204
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 208
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 212
-db itemEff_none, itemEff_none, itemEff_resurrect, itemEff_regenSppt; 216
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 220
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 224
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 228
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 232
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 236
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 240
-db itemEff_none, itemEff_none, itemEff_none, itemEff_quaterSpptUse; 244
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 248
-db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 252
-itemSpellNo db 255, 126, 127, 255   ; 0	; This array holds the spell number to call when
-db 255,	255, 131, 255	; 4 ; using the	particular item
-db 255,	255, 255, 255	; 8
-db 255,	255, 255, 255	; 12
-db 255,	255, 255, 255	; 16
-db 255,	131, 131, 255	; 20
-db 255,	255, 255, 132	; 24
-db 255,	255, 133, 6	; 28
-db 255,	255, 255, 131	; 32
-db 131,	255, 132, 131	; 36
-db 255,	255, 131, 131	; 40
-db 6, 255, 255,	255	; 44
-db 255,	255, 255, 255	; 48
-db 255,	131, 14, 255	; 52
-db 132,	255, 131, 255	; 56
-db 255,	132, 255, 255	; 60
-db 255,	255, 255, 51	; 64
-db 255,	49, 54,	133	; 68
-db 131,	255, 255, 255	; 72
-db 255,	132, 255, 34	; 76
-db 255,	66, 255, 133	; 80
-db 255,	255, 69, 133	; 84
-db 64, 255, 255, 133	; 88
-db 131,	35, 11,	55	; 92
-db 131,	36, 132, 132	; 96
-db 255,	131, 73, 63	; 100
-db 75, 77, 78, 131	; 104
-db 255,	78, 255, 255	; 108
-db 130,	130, 130, 130	; 112
-db 67, 128, 129, 131	; 116
-db 255,	130, 122, 130	; 120
-db 131,	129, 255, 255	; 124
-db 255,	131, 69, 255	; 128
-db 11, 133, 131, 255	; 132
-db 130,	130, 7,	131	; 136
-db 255,	255, 255, 15	; 140
-db 21, 130, 130, 130	; 144
-db 130,	130, 130, 255	; 148
-db 130,	130, 255, 255	; 152
-db 255,	130, 75, 131	; 156
-db 130,	91, 130, 130	; 160
-db 130,	130, 130, 130	; 164
-db 130,	130, 130, 11	; 168
-db 11, 255, 255, 61	; 172
-db 71, 255, 255, 255	; 176
-db 255,	255, 78, 126	; 180
-db 37, 255, 133, 255	; 184
-db 69, 255, 132, 11	; 188
-db 255,	12, 69,	134	; 192
-db 255,	255, 255, 255	; 196
-db 255,	255, 15, 73	; 200
-db 132,	87, 45,	255	; 204
-db 133,	17, 15,	62	; 208
-db 255,	255, 255, 34	; 212
-db 255,	255, 55, 255	; 216
-db 134,	99, 133, 95	; 220
-db 255,	255, 255, 255	; 224
-db 255,	255, 255, 255	; 228
-db 255,	255, 255, 255	; 232
-db 255,	255, 255, 255	; 236
-db 255,	255, 255, 134	; 240
-db 131,	255, 255, 120	; 244
-db 133,	255, 255, 255	; 248
-db 255,	255, 255, 255	; 252
-raceString dd aHuman		   ; 0
-dd aElf			; 1
-dd aDwarf		; 2
-dd aHobbit		; 3
-dd aHalfElf		; 4
-dd aHalfOrc		; 5
-dd aGnome		; 6
-genderString dd	aMale_0		     ; 0
-dd aFemale		; 1
-dd nullStr
-aIsAN db ' is a/n \ ',0
+		db 0, 0, 0, 0		; 4
+		db 0, 0, 1, 2		; 8
+		db 2, 3, 4, 5		; 12
+		db 1, 1, 1, 1		; 16
+		db 0, 0, 0, 32		; 20
+		db 3, 4, 5, 0		; 24
+		db 4, 64, 0, 0		; 28
+		db 32, 2, 2, 32		; 32
+		db 0, 6, 0, 32		; 36
+		db 2, 2, 32, 0		; 40
+		db 16, 18, 3, 16	; 44
+		db 64, 4, 3, 3		; 48
+		db 0, 0, 2, 3		; 52
+		db 0, 5, 0, 7		; 56
+		db 6, 0, 5, 2		; 60
+		db 0, 16, 48, 0		; 64
+		db 0, 50, 0, 0		; 68
+		db 96, 5, 2, 4		; 72
+		db 0, 0, 34, 16		; 76
+		db 17, 16, 16, 4	; 80
+		db 8, 4, 3, 0		; 84
+		db 1, 16, 0, 0		; 88
+		db 0, 2, 2, 0		; 92
+		db 3, 0, 0, 0		; 96
+		db 0, 64, 0, 0		; 100
+		db 0, 0, 0, 32		; 104
+		db 48, 0, 0, 0		; 108
+		db 0, 0, 0, 37		; 112
+		db 51, 0, 0, 48		; 116
+		db 0, 0, 0, 4		; 120
+		db 32, 0, 10, 22	; 124
+		db 5, 48, 2, 65		; 128
+		db 66, 17, 0, 10	; 132
+		db 0, 0, 37, 2		; 136
+		db 36, 4, 49, 0		; 140
+		db 0, 0, 0, 0		; 144
+		db 0, 0, 0, 0		; 148
+		db 0, 39, 0, 0		; 152
+		db 9, 28, 0, 0		; 156
+		db 8, 80, 0, 0		; 160
+		db 0, 0, 0, 0		; 164
+		db 0, 0, 0, 115		; 168
+		db 84, 16, 49, 33	; 172
+		db 66, 82, 0, 0		; 176
+		db 0, 7, 0, 0		; 180
+		db 51, 2, 0, 36		; 184
+		db 2, 8, 0, 66		; 188
+		db 49, 50, 0, 0		; 192
+		db 23, 12, 7, 40	; 196
+		db 81, 4, 0, 4		; 200
+		db 0, 0, 4, 0		; 204
+		db 0, 2, 2, 0		; 208
+		db 81, 15, 80, 0	; 212
+		db 10, 20, 3, 33	; 216
+		db 0, 32, 5, 0		; 220
+		db 0, 0, 0, 0		; 224
+		db 0, 0, 0, 0		; 228
+		db 0, 0, 0, 0		; 232
+		db 0, 0, 0, 0		; 236
+		db 10, 15, 4, 0		; 240
+		db 0, 85, 83, 50	; 244
+		db 0, 0, 0, 0		; 248
+		db 0, 0, 0, 0		; 252
+itemTypeList	db itType_item, itType_item, itType_item; 0
+		db itType_weapon, itType_weapon, itType_weapon;	3
+		db itType_weapon, itType_weapon, itType_bow; 6
+		db itType_weapon, itType_shield, itType_shield;	9
+		db itType_armor, itType_armor, itType_armor; 12
+		db itType_armor, itType_armor, itType_helm; 15
+		db itType_gloves, itType_gloves, itType_instrument; 18
+		db itType_weapon, itType_quiver, itType_weapon;	21
+		db itType_shield, itType_armor,	itType_armor; 24
+		db itType_figurine, itType_armor, itType_weapon; 27
+		db itType_instrument, itType_item0, itType_weapon; 30
+		db itType_helm,	itType_gloves, itType_weapon; 33
+		db itType_item0, itType_armor, itType_figurine;	36
+		db itType_weapon, itType_ring, itType_instrument; 39
+		db 11h,	itType_quiver, itType_weapon; 42
+		db itType_weapon, itType_armor0, itType_weapon;	45
+		db itType_weapon, itType_shield, itType_helm; 48
+		db itType_gloves, itType_weapon, itType_item0; 51
+		db itType_item0, itType_shield,	itType_figurine; 54
+		db itType_armor, itType_weapon,	itType_armor; 57
+		db itType_armor, itType_figurine, itType_shield; 60
+		db itType_weapon, itType_weapon, itType_weapon;	63
+		db 51h,	itType_wand, itType_item0; 66
+		db itType_weapon, itType_instrument, itType_instrument;	69
+		db itType_quiver, itType_shield, itType_bow; 72
+		db itType_helm,	itType_item0, itType_figurine; 75
+		db itType_weapon, itType_weapon, itType_weapon;	78
+		db itType_weapon, itType_ring, itType_shield; 81
+		db itType_armor, itType_gloves,	itType_helm; 84
+		db itType_wand,	itType_ring, itType_weapon; 87
+		db itType_item0, itType_instrument, itType_quiver; 90
+		db itType_instrument, itType_instrument, itType_ring; 93
+		db itType_weapon, itType_item0,	itType_figurine; 96
+		db itType_figurine, itType_ring, itType_weapon;	99
+		db itType_item0, itType_figurine, itType_wand; 102
+		db itType_figurine, itType_item0, itType_weapon; 105
+		db 61h,	itType_item0, itType_item0; 108
+		db itType_ring,	itType_item, itType_item; 111
+		db itType_item,	itType_item0, itType_wand; 114
+		db itType_item0, itType_container, itType_weapon; 117
+		db itType_item0, itType_item0, itType_item0; 120
+		db itType_bow, itType_quiver, itType_container;	123
+		db itType_armor, itType_shield,	itType_helm; 126
+		db itType_weapon, itType_instrument, 51h; 129
+		db itType_weapon, itType_wand, itType_item0; 132
+		db itType_helm,	itType_item0, itType_item0; 135
+		db itType_ring,	itType_quiver, itType_weapon; 138
+		db itType_item0, itType_weapon,	itType_item0; 141
+		db itType_item0, itType_item0, itType_item0; 144
+		db itType_item0, itType_item0, itType_item0; 147
+		db itType_item0, itType_item0, itType_weapon; 150
+		db itType_helm,	itType_item0, itType_item0; 153
+		db itType_helm,	itType_armor, itType_weapon; 156
+		db itType_item0, itType_shield,	71h; 159
+		db itType_item0, itType_item0, itType_item0; 162
+		db itType_item0, itType_item0, itType_item0; 165
+		db itType_item0, itType_item0, itType_item0; 168
+		db itType_weapon, itType_weapon, itType_weapon;	171
+		db itType_weapon, itType_weapon, itType_weapon;	174
+		db 71h,	itType_item0, itType_item0; 177
+		db itType_item0, itType_armor, itType_item0; 180
+		db itType_item0, 11h, itType_ring; 183
+		db itType_instrument, 51h, itType_ring;	186
+		db itType_armor, itType_figurine, itType_weapon; 189
+		db 11h,	itType_weapon, itType_instrument; 192
+		db itType_item0, itType_shield,	itType_armor; 195
+		db itType_gloves, itType_armor,	itType_weapon; 198
+		db itType_armor, itType_item0, itType_armor; 201
+		db itType_figurine, itType_item0, itType_helm; 204
+		db itType_item0, itType_item0, itType_instrument; 207
+		db itType_instrument, itType_item0, itType_weapon; 210
+		db itType_armor0, itType_weapon, itType_item0; 213
+		db itType_armor, itType_instrument, itType_helm; 216
+		db itType_weapon, itType_item0,	itType_wand; 219
+		db itType_instrument, itType_item0, itType_item0; 222
+		db itType_item0, itType_item0, itType_item0; 225
+		db itType_item0, itType_item0, itType_item0; 228
+		db itType_item0, itType_item0, itType_item0; 231
+		db itType_item0, itType_item0, itType_item0; 234
+		db itType_item0, itType_item0, itType_item0; 237
+		db itType_armor, itType_armor, itType_gloves; 240
+		db itType_item0, itType_weapon,	itType_weapon; 243
+		db itType_weapon, itType_weapon, itType_instrument; 246
+		db itType_item0, itType_item0, itType_item0; 249
+		db itType_item0, itType_item0, itType_item0; 252
+		db itType_item0		; 255
+classEquipMask	db 80h, 40h, 40h, 40h, 40h, 10h, 8, 4; 0
+		db 2, 1, 20h, 60h, 0E0h, 0, 0, 0; 8
+itemEquipMask	db 0, 0FFh, 0FFh, 8Fh, 9Fh, 0FFh, 8Fh, 87h; 0
+		db 9Fh,	0FFh, 9Fh, 8Eh,	9Fh, 8Fh, 8Eh, 86h; 8
+		db 0FFh, 9Fh, 0FFh, 86h, 8, 9Fh, 9Fh, 9Eh; 16
+		db 9Eh,	8Fh, 9Eh, 0FFh,	70h, 8,	8, 60h;	24
+		db 0FFh, 9Fh, 8Ch, 8Fh,	9Bh, 86h, 0FFh,	9Fh; 32
+		db 0FFh, 8, 8Eh, 9Fh, 8Eh, 0FFh, 71h, 8Eh; 40
+		db 9Eh,	9Eh, 9Eh, 84h, 4, 99h, 0FFh, 9Eh; 48
+		db 0FFh, 8Eh, 2, 86h, 70h, 0FFh, 4, 60h; 56
+		db 0FFh, 10h, 8Eh, 60h,	70h, 60h, 8, 8;	64
+		db 86h,	8Eh, 8,	86h, 0FFh, 8, 60h, 61h;	72
+		db 86h,	0FCh, 0FFh, 9Eh, 8Ch, 84h, 60h,	60h; 80
+		db 86h,	8Eh, 9Fh, 8, 9Fh, 8, 8,	62h; 88
+		db 8, 60h, 0FFh, 0FFh, 0FFh, 86h, 6Ch, 0FFh; 96
+		db 60h,	0FFh, 0FFh, 84h, 86h, 0FFh, 0FFh, 0FFh;	104
+		db 0FFh, 0FFh, 0FFh, 60h, 60h, 0FFh, 0FFh, 9Fh;	112
+		db 0FFh, 0FFh, 0FFh, 9Fh, 9Fh, 0FFh, 84h, 8Ch; 120
+		db 86h,	9Fh, 8,	9Eh, 4,	60h, 2,	86h; 128
+		db 0FFh, 0FFh, 1, 2, 60h, 2, 87h, 1; 136
+		db 1, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh;	144
+		db 84h,	86h, 0FFh, 0FFh, 10h, 10h, 86h,	9Fh; 152
+		db 8Eh,	8Eh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 160
+		db 0FFh, 0FFh, 0FFh, 10h, 4, 10h, 10h, 10h; 168
+		db 10h,	10h, 0FFh, 0FFh, 0FFh, 8Eh, 0FFh, 0FFh;	176
+		db 60h,	0FFh, 8, 20h, 60h, 70h,	0FFh, 8; 184
+		db 10h,	80h, 8,	60h, 8Ch, 84h, 8, 2; 192
+		db 80h,	60h, 0FFh, 20h,	20h, 60h, 10h, 10h; 200
+		db 10h,	8, 8, 4, 86h, 84h, 84h,	0FFh; 208
+		db 70h,	2, 60h,	20h, 60h, 60h, 8, 0FFh;	216
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 224
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 232
+		db 86h,	80h, 60h, 60h, 9Fh, 84h, 2, 60h; 240
+		db 8, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh;	248
+itemEffectList	db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 0
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 4
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 8
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 12
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 16
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 20
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 24
+		db itemEff_none, itemEff_freeSinging, itemEff_none, itemEff_none; 28
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 32
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 36
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 40
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 44
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 48
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_alwaysHide; 52
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 56
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_anotherSpptRegen; 60
+		db itemEff_none, 8, itemEff_none, itemEff_none;	64
+		db itemEff_calmMonster,	itemEff_none, itemEff_none, itemEff_none; 68
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 72
+		db itemEff_none, itemEff_none, itemEff_halfSpptUsage, itemEff_none; 76
+		db itemEff_none, itemEff_none, itemEff_breathDefense, itemEff_none; 80
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 84
+		db itemEff_none, itemEff_none, itemEff_alwaysRunAway, itemEff_none; 88
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 92
+		db itemEff_freeSinging,	itemEff_none, itemEff_none, itemEff_none; 96
+		db itemEff_regenHP, itemEff_none, itemEff_none,	itemEff_none; 100
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_regenHP; 104
+		db itemEff_none, itemEff_none, 0Bh, itemEff_noSpin; 108
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 112
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 116
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 120
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 124
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 128
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 132
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 136
+		db itemEff_anotherSpptRegen, itemEff_none, itemEff_none, itemEff_none; 140
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 144
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 148
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 152
+		db 8, itemEff_none, itemEff_none, itemEff_none;	156
+		db itemEff_breathDefense, itemEff_none,	itemEff_none, itemEff_none; 160
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 164
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 168
+		db itemEff_none, itemEff_alwaysHide, 8,	itemEff_none; 172
+		db itemEff_none, itemEff_breathDefense,	itemEff_none, itemEff_none; 176
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 180
+		db itemEff_regenSppt, itemEff_resurrect, itemEff_alwaysHide, itemEff_halfSpptUsage; 184
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 188
+		db itemEff_none, itemEff_none, itemEff_freeSinging, itemEff_none; 192
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 196
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 200
+		db itemEff_regenSppt, itemEff_none, 8, itemEff_alwaysHide; 204
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 208
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 212
+		db itemEff_none, itemEff_none, itemEff_resurrect, itemEff_regenSppt; 216
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 220
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 224
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 228
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 232
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 236
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 240
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_quaterSpptUse; 244
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 248
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 252
+itemSpellNo	db 255, 126, 127, 255   ; 0	; This array holds the spell number to call when
+		db 255,	255, 131, 255	; 4 ; using the	particular item
+		db 255,	255, 255, 255	; 8
+		db 255,	255, 255, 255	; 12
+		db 255,	255, 255, 255	; 16
+		db 255,	131, 131, 255	; 20
+		db 255,	255, 255, 132	; 24
+		db 255,	255, 133, 6	; 28
+		db 255,	255, 255, 131	; 32
+		db 131,	255, 132, 131	; 36
+		db 255,	255, 131, 131	; 40
+		db 6, 255, 255,	255	; 44
+		db 255,	255, 255, 255	; 48
+		db 255,	131, 14, 255	; 52
+		db 132,	255, 131, 255	; 56
+		db 255,	132, 255, 255	; 60
+		db 255,	255, 255, 51	; 64
+		db 255,	49, 54,	133	; 68
+		db 131,	255, 255, 255	; 72
+		db 255,	132, 255, 34	; 76
+		db 255,	66, 255, 133	; 80
+		db 255,	255, 69, 133	; 84
+		db 64, 255, 255, 133	; 88
+		db 131,	35, 11,	55	; 92
+		db 131,	36, 132, 132	; 96
+		db 255,	131, 73, 63	; 100
+		db 75, 77, 78, 131	; 104
+		db 255,	78, 255, 255	; 108
+		db 130,	130, 130, 130	; 112
+		db 67, 128, 129, 131	; 116
+		db 255,	130, 122, 130	; 120
+		db 131,	129, 255, 255	; 124
+		db 255,	131, 69, 255	; 128
+		db 11, 133, 131, 255	; 132
+		db 130,	130, 7,	131	; 136
+		db 255,	255, 255, 15	; 140
+		db 21, 130, 130, 130	; 144
+		db 130,	130, 130, 255	; 148
+		db 130,	130, 255, 255	; 152
+		db 255,	130, 75, 131	; 156
+		db 130,	91, 130, 130	; 160
+		db 130,	130, 130, 130	; 164
+		db 130,	130, 130, 11	; 168
+		db 11, 255, 255, 61	; 172
+		db 71, 255, 255, 255	; 176
+		db 255,	255, 78, 126	; 180
+		db 37, 255, 133, 255	; 184
+		db 69, 255, 132, 11	; 188
+		db 255,	12, 69,	134	; 192
+		db 255,	255, 255, 255	; 196
+		db 255,	255, 15, 73	; 200
+		db 132,	87, 45,	255	; 204
+		db 133,	17, 15,	62	; 208
+		db 255,	255, 255, 34	; 212
+		db 255,	255, 55, 255	; 216
+		db 134,	99, 133, 95	; 220
+		db 255,	255, 255, 255	; 224
+		db 255,	255, 255, 255	; 228
+		db 255,	255, 255, 255	; 232
+		db 255,	255, 255, 255	; 236
+		db 255,	255, 255, 134	; 240
+		db 131,	255, 255, 120	; 244
+		db 133,	255, 255, 255	; 248
+		db 255,	255, 255, 255	; 252
+raceString	dd aHuman		   ; 0
+		dd aElf			; 1
+		dd aDwarf		; 2
+		dd aHobbit		; 3
+		dd aHalfElf		; 4
+		dd aHalfOrc		; 5
+		dd aGnome		; 6
+genderString	dd aMale_0		     ; 0
+		dd aFemale		; 1
+		dd nullStr
+		aIsAN db ' is a/n \ ',0
 align 2
-aLevel db 'Level',0
+aLevel		db 'Level',0
 acDexterityBonus db 1, 1, 2, 2		 ; 0
-db 3, 3, 3, 4		; 4
-db 4, 4, 4, 4		; 8
-db 5, 5, 5, 5		; 12
-db 5, 0			; 16
-itemCharFlags db ' ', '|', '^', '?', 0, 0; 0 ; This is a list of characters used in the inventory
+		db 3, 3, 3, 4		; 4
+		db 4, 4, 4, 4		; 8
+		db 5, 5, 5, 5		; 12
+		db 5, 0			; 16
+itemCharFlags	db ' ', '|', '^', '?', 0, 0; 0 ; This is a list of characters used in the inventory
 			; string for flags.
 			
 			
 			
-off_46C1A dd item_trade, item_discard, item_equip, item_unequip, item_identify;	0
-aEscToContinue db 'ESC to continue',0
-aThereAreStairs	db 'There are stairs here, going /up\do'
-db 'wn\. ',0Ah
-db 'Do you wish to take them?',0
+off_46C1A	dd item_trade, item_discard, item_equip, item_unequip, item_identify;	0
+aEscToContinue	db 'ESC to continue',0
+aThereAreStairs	db 'There are stairs here, going /up\down\. ',0Ah
+		db 'Do you wish to take them?',0
 align 2
 aWhoWantsToGetT	db 'Who wants to get the ',0
-aSorryBut_0 db 'Sorry but ',0
 align 2
 aCanTCarryAny_0	db ' can',27h,'t carry any more items.',0
 align 2
-aGotThe	db ' got the ',0
+aGotThe		db ' got the ',0
 aYouDonTHaveEno	db 'You don',27h,'t have enough gold',0
-aZounds	db 'Zounds',0
-aD db '%d',0
-aBadOpcode db 'bad opcode',0
-off_46CFC dd mfunc_downStairs ;	0
-dd mfunc_upStairs	; 1
-dd sub_1942B		; 2
-dd mfunc_teleport	; 3
-dd mfunc_battle		; 4
-dd mfunc_clearPrintString ; 5
-dd mfunc_ffcode		; 6
-dd mfunc_drawBigpic	; 7
-dd mfunc_setTitle	; 8
-dd mfunc_getChMaybe	; 9
-dd mfunc_clearTextWindow ; a
-dd mfunc_ifFlag		; b
-dd mfunc_ifNotFlag	; c
-dd sub_19855		; d
-dd mfunc_setFlag	; e
-dd mfunc_clearFlag	; f
-dd mfunc_ifCurSpellEQ	; 10
-dd mfunc_setMapRval	; 11
-dd mfunc_printString	; 12
-dd mfunc_doNothing	; 13
-dd mfunc_ifChHasItemF	; 14
-dd mfunc_getItem	; 15
-dd mfunc_ifHasItem	; 16
-dd mfunc_ifNotHasItem	; 17
-dd mfunc_ifW4ee66	; 18
-dd mfunc_ifYesNo	; 19
-dd mfunc_goto		; 1a
-dd mfunc_battleNoCry	; 1b
-dd mfunc_zero4ee66	; 1c
-dd mfunc_turnAround	; 1d
-dd mfunc_removeItem	; 1e
-dd mfunc_incRegister	; 1f
-dd mfunc_decRegister	; 20
-dd mfunc_ifRegNotZero	; 21
-dd mfunc_ifRegister	; 22
-dd mfunc_drainHP	; 23
-dd mfunc_ifInBox	; 24
-dd mfunc_invANDc3	; 25
-dd mfunc_addToInv	; 26
-dd mfunc_subFromInv	; 27
-dd mfunc_addToRegister	; 28
-dd mfunc_subFromRegister ; 29
-dd mfunc_setDirFacing	; 2a
-dd mfunc_getStrFromUser	; 2b
-dd mfunc_ifStrEq	; 2c
-dd mfunc_setRegFromBuf	; 2d
-dd mfunc_getCharacter	; 2e
-dd mfunc_ifGiveGold	; 2f
-dd sub_1A5C0		; 30
-dd mfunc_ifRegLT	; 31
-dd mfunc_ifRegEQ	; 32
-dd mfunc_ifRegGE	; 33
-dd mfunc_learnSpell	; 34
-dd mfunc_setRegister	; 35
-dd mfunc_chHasItemNo	; 36
-dd mfunc_packInvMaybe	; 37
-dd mfunc_addMonToParty	; 38
-dd mfunc_ifMonInParty	; 39
-dd mfunc_clrPrtStrOffset ; 3a
-dd mfunc_ifIsNight	; 3b
-dd mfunc_rmMonFromParty	; 3c
-dd sub_1A9C8		; 3d
-dd sub_1AAD5		; 3e
-dd mfunc_setChronQuestFlag ; 3f
-dd sub_1AC20		; 40
-dd sub_1AC9E		; 41
-dd mfunc_isWildSqFlagSet ; 42
-dd mfunc_wildSetSqFlag	; 43
-dd mfunc_ifIsClass	; 44
-dd mfunc_printStrAtOffset ; 45
-dd mfunc_clrAndTeleport	; 46
+aZounds		db 'Zounds',0
+aD		db '%d',0
+aBadOpcode	db 'bad opcode',0
+off_46CFC	dd mfunc_downStairs ;	0
+		dd mfunc_upStairs	; 1
+		dd sub_1942B		; 2
+		dd mfunc_teleport	; 3
+		dd mfunc_battle		; 4
+		dd mfunc_clearPrintString ; 5
+		dd mfunc_ffcode		; 6
+		dd mfunc_drawBigpic	; 7
+		dd mfunc_setTitle	; 8
+		dd mfunc_getChMaybe	; 9
+		dd mfunc_clearTextWindow ; a
+		dd mfunc_ifFlag		; b
+		dd mfunc_ifNotFlag	; c
+		dd sub_19855		; d
+		dd mfunc_setFlag	; e
+		dd mfunc_clearFlag	; f
+		dd mfunc_ifCurSpellEQ	; 10
+		dd mfunc_setMapRval	; 11
+		dd mfunc_printString	; 12
+		dd mfunc_doNothing	; 13
+		dd mfunc_ifChHasItemF	; 14
+		dd mfunc_getItem	; 15
+		dd mfunc_ifHasItem	; 16
+		dd mfunc_ifNotHasItem	; 17
+		dd mfunc_ifW4ee66	; 18
+		dd mfunc_ifYesNo	; 19
+		dd mfunc_goto		; 1a
+		dd mfunc_battleNoCry	; 1b
+		dd mfunc_zero4ee66	; 1c
+		dd mfunc_turnAround	; 1d
+		dd mfunc_removeItem	; 1e
+		dd mfunc_incRegister	; 1f
+		dd mfunc_decRegister	; 20
+		dd mfunc_ifRegNotZero	; 21
+		dd mfunc_ifRegister	; 22
+		dd mfunc_drainHP	; 23
+		dd mfunc_ifInBox	; 24
+		dd mfunc_invANDc3	; 25
+		dd mfunc_addToInv	; 26
+		dd mfunc_subFromInv	; 27
+		dd mfunc_addToRegister	; 28
+		dd mfunc_subFromRegister ; 29
+		dd mfunc_setDirFacing	; 2a
+		dd mfunc_getStrFromUser	; 2b
+		dd mfunc_ifStrEq	; 2c
+		dd mfunc_setRegFromBuf	; 2d
+		dd mfunc_getCharacter	; 2e
+		dd mfunc_ifGiveGold	; 2f
+		dd sub_1A5C0		; 30
+		dd mfunc_ifRegLT	; 31
+		dd mfunc_ifRegEQ	; 32
+		dd mfunc_ifRegGE	; 33
+		dd mfunc_learnSpell	; 34
+		dd mfunc_setRegister	; 35
+		dd mfunc_chHasItemNo	; 36
+		dd mfunc_packInvMaybe	; 37
+		dd mfunc_addMonToParty	; 38
+		dd mfunc_ifMonInParty	; 39
+		dd mfunc_clrPrtStrOffset ; 3a
+		dd mfunc_ifIsNight	; 3b
+		dd mfunc_rmMonFromParty	; 3c
+		dd sub_1A9C8		; 3d
+		dd sub_1AAD5		; 3e
+		dd mfunc_setChronQuestFlag ; 3f
+		dd sub_1AC20		; 40
+		dd sub_1AC9E		; 41
+		dd mfunc_isWildSqFlagSet ; 42
+		dd mfunc_wildSetSqFlag	; 43
+		dd mfunc_ifIsClass	; 44
+		dd mfunc_printStrAtOffset ; 45
+		dd mfunc_clrAndTeleport	; 46
 aThisFunctionIs	db 'this function is not implemented',0
 align 2
-aKilling db ', killing ',0
-aPoisoning db ', poisoning ',0
-aDraining db ', draining ',0
-aCrazing db ', crazing ',0
-aWithering db ', withering ',0
-aPossessing db ', possessing ',0
-aStoning db ', stoning ',0
+aKilling	db ', killing ',0
+aPoisoning	db ', poisoning ',0
+aDraining	db ', draining ',0
+aCrazing	db ', crazing ',0
+aWithering	db ', withering ',0
+aPossessing 	db ', possessing ',0
+aStoning	db ', stoning ',0
 aCriticallyHitt	db ', critically hitting ',0
-aStealing db ', stealing ',0
-aPhazing db ', phazing ',0
-aSwingsAt db 'swings at',0
-aSlashesAt db 'slashes at',0
-aKicksAt db 'kicks at',0
-aPunchesAt db 'punches at',0
-aClawsAt db 'claws at',0
-aTearsAt db 'tears at',0
-aBitesAt db 'bites at',0
-aGnawsOn db 'gnaws on',0
-aStabsAt db 'stabs at',0
-aSlicesAt db 'slices at',0
-aSlams db 'slams',0
-aStrikesAt db 'strikes at',0
-aGropesAt db 'gropes at',0
-aReachesToward db 'reaches toward',0
-aPeersAt db 'peers at',0
-aStaresAt db 'stares at',0
+aStealing	db ', stealing ',0
+aPhazing	db ', phazing ',0
+aSwingsAt	db 'swings at',0
+aSlashesAt	db 'slashes at',0
+aKicksAt	db 'kicks at',0
+aPunchesAt	db 'punches at',0
+aClawsAt	db 'claws at',0
+aTearsAt	db 'tears at',0
+aBitesAt	db 'bites at',0
+aGnawsOn	db 'gnaws on',0
+aStabsAt	db 'stabs at',0
+aSlicesAt	db 'slices at',0
+aSlams		db 'slams',0
+aStrikesAt	db 'strikes at',0
+aGropesAt	db 'gropes at',0
+aReachesToward	db 'reaches toward',0
+aPeersAt	db 'peers at',0
+aStaresAt	db 'stares at',0
 aDissentionInYo	db 'Dissention in your ranks...',0Ah
 db 0Ah,0
-aWillThereEverB	db '"Will there ever be an end to them?'
-db '" you shout. You see ',0
-aEnjoyYourNextL	db '"Enjoy your next life!" you snarl. '
-db 'You see ',0
-aYourBattlecryI	db 'Your battlecry is heard by all as y'
-db 'ou face ',0
-aYourOnslaughtI	db 'Your onslaught is greeted with laug'
-db 'hter, you face ',0
+aWillThereEverB	db '"Will there ever be an end to them?" you shout. You see ',0
+aEnjoyYourNextL	db '"Enjoy your next life!" you snarl. You see ',0
+aYourBattlecryI	db 'Your battlecry is heard by all as you face ',0
+aYourOnslaughtI	db 'Your onslaught is greeted with laughter, you face ',0
 aNotAgainYouMoa	db '"Not again!" you moan as you face ',0
-aGimmeABreakWhe	db '"Gimme a break! Where do they come '
-db 'from?" You see ',0
+aGimmeABreakWhe	db '"Gimme a break! Where do they come from?" You see ',0
 align 2
 specialAttString dd aKilling, aPoisoning, aDraining, aCrazing, aWithering; 0
-dd aPossessing,	aStoning, aCriticallyHitt, aStealing, aPhazing;	5
-breathAttack breathAtt_t <0, 0,	0, 0, 0, 41h, 1>; 0
-db    0
-aYouStillFace db 'You still face ',0
+		dd aPossessing,	aStoning, aCriticallyHitt, aStealing, aPhazing;	5
+breathAttack	breathAtt_t <0, 0, 0, 0, 0, 41h, 1>; 0
+		db    0
+aYouStillFace	db 'You still face ',0
 aDoYouWishToCon	db 'Do you wish to continue?',0Ah,0
-db  0Ah
-db  0Ah
-db    0
-db    0
-aButMisses db ', but misses!',0Ah
-db 0Ah,0
+aButMisses	db ', but misses!',0Ah,0Ah,0
 aPeriodBlankLine	db '.', 0Ah, 0Ah,0
 aExclBlankLine		db '!',0Ah, 0Ah,0
-aJumpsIntoTheShadows db	' jumps into the shadows, ',0
-aAndSucceeds db	'and succeeds!',0Ah
-db 0Ah,0
-aButIsDiscovered db 'but is discovered!',0Ah
-db 0Ah,0
-db    0
+aJumpsIntoTheShadows	db ' jumps into the shadows, ',0
+aAndSucceeds	db 'and succeeds!',0Ah,0Ah,0
+aButIsDiscovered db 'but is discovered!',0Ah,0Ah,0
+		db    0
 aSummonsHelpAnd	db ' summons help and ',0
-db    0
-aNoneAppears___	db 'none appears...',0Ah
-db 0Ah,0
-aAnotherJoinsTheFray db	'another joins the fray!',0Ah
-db 0Ah,0
-aThe db	'The ',0
-db    0
-aAdvanceS db ' advance/s\!',0Ah
-db 0Ah,0
-db    0
-aButMisses_0 db	', but misses',0
-db    0
-db '!',0Ah
-db 0Ah,0
+		db    0
+aNoneAppears___	db 'none appears...',0Ah,0Ah,0
+aAnotherJoinsTheFray db	'another joins the fray!',0Ah,0Ah,0
+aThe		db	'The ',0
+		db    0
+aAdvanceS	db ' advance/s\!',0Ah,0Ah,0
+		db    0
+aButMisses_0	db ', but misses',0
+		db    0
 aWillYourGallantBand db	'Will your gallant band choose to:',0Ah
-db '@Fight bravely',0Ah
-db '@Advance ahead',0Ah
-db '@Run away',0Ah,0
-db    0
-aThePartyAdvances db 0Ah
-db 0Ah
-db 'The party advances!',0Ah
-db 0Ah,0
-aHasTheseOptionsThisBa db ' has these options this battle roun'
-db 'd:',0Ah
-db 0Ah
-db '@Attack foes ',0
-db    0
-byte_4724A db 31h
-db  30h	; 0
-db  27h	
-db    0
+		db '@Fight bravely',0Ah
+		db '@Advance ahead',0Ah
+		db '@Run away',0Ah,0
+		db    0
+aThePartyAdvances db 0Ah,0Ah,'The party advances!',0Ah,0Ah,0
+aHasTheseOptionsThisBa db ' has these options this battle round:',0Ah,0Ah
+		db '@Attack foes ',0
+		db    0
+byte_4724A	db 31h
+		db  30h	; 0
+		db  27h	
+		db    0
 a@defend@partyAttack@c db 0Ah
-db '@Defend',0Ah
-db '@Party attack',0Ah
-db '@Cast a spell',0Ah
-db '@Use an item',0Ah
-db '@Hide in shadows',0Ah
-db '@Bard Song',0Ah,0
-db    0
-aSelectAnOption_ db 0Ah
-db 0Ah
-db 'Select an option.',0
-aWhichItem?_0 db 'Which item?',0
-aUseOn_0 db 0Ah
-db 'Use on ',0
-db    0
+		db '@Defend',0Ah
+		db '@Party attack',0Ah
+		db '@Cast a spell',0Ah
+		db '@Use an item',0Ah
+		db '@Hide in shadows',0Ah
+		db '@Bard Song',0Ah,0
+		db    0
+aSelectAnOption_ db 0Ah,0Ah,'Select an option.',0
+aUseOn_0	db 0Ah,'Use on ',0
+		db    0
 aYouCanTUseThatItem_ db	'You can',27h,'t use that item.',0
-db    0
-aCastAt_0 db 0Ah
-db 'Cast at ',0
-aAttack	db 0Ah
-db 'Attack ',0
-db    0
-aUseTheseCommands? db 'Use these commands?',0Ah
-db 0Ah,0
-aAndHits db ', and hits ',0
-aTimesFor db ' times for ',0
-aAndHitsFor db ', and hits for ',0
-aPointSOfDamage_0 db ' point/\s\ of damage',0
-db    0
-aFirBreathEs db	' /fir\breath\es ',0
-db    0
-aJumpsIntoYourParty db ' jumps into your party!',0Ah
-db 0Ah,0
-aLost db ' lost ',0
-db    0
-aVoice db ' voice!',0Ah
-db 0Ah,0
-aPlays___ db ' plays...',0Ah
-db 0Ah,0
-aHostilePartyMembers db	'hostile party members!',0Ah
-db 0Ah,0
-db    0
-asc_473AE db ',',0
-aAnd_1 db 'and ',0
-db    0
-db ' (',0
-db    0
-a0 db '0',27h,')',0
-a__1 db	'.',0Ah
-db 0Ah,0
-aParty db 'Party',0
-aSorryBud db 'Sorry, Bud',0
-db    0
-aAlasYourPartyHasExp db	'Alas, your party has expired, but g'
-db 'one to adventurer heaven.',0
-db    0
-byte_47412 db ' ', '!', '"', '#', '$', '%', '&', 27h; 0
-db 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'è'; 8
+		db    0
+aAttack		db 0Ah,'Attack ',0
+		db    0
+aUseTheseCommands? db 'Use these commands?',0Ah,0Ah,0
+aAndHits	db ', and hits ',0
+aTimesFor	db ' times for ',0
+aAndHitsFor	db ', and hits for ',0
+aFirBreathEs	db ' /fir\breath\es ',0
+		db    0
+aLost		db ' lost ',0
+		db    0
+aVoice		db ' voice!',0Ah,0Ah,0
+aPlays___	db ' plays...',0Ah,0Ah,0
+aHostilePartyMembers db	'hostile party members!',0Ah,0Ah,0
+		db    0
+asc_473AE	db ',',0
+aAnd_1		db 'and ',0
+		db 0
+a__1		db '.',0Ah,0Ah,0
+aParty		db 'Party',0
+aSorryBud	db 'Sorry, Bud',0
+		db    0
+aAlasYourPartyHasExp db	'Alas, your party has expired, but gone to adventurer heaven.',0
+		db    0
+byte_47412	db ' ', '!', '"', '#', '$', '%', '&', 27h; 0
+		db 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'è'; 8
 monMeleeAttString dd aSwingsAt		  ; 0
-dd aSlashesAt		; 1
-dd aKicksAt		; 2
-dd aPunchesAt		; 3
-dd aClawsAt		; 4
-dd aTearsAt		; 5
-dd aBitesAt		; 6
-dd aGnawsOn		; 7
-dd aStabsAt		; 8
-dd aSlicesAt		; 9
-dd aSlams		; 10
-dd aStrikesAt		; 11
-dd aGropesAt		; 12
-dd aReachesToward	; 13
-dd aPeersAt		; 14
-dd aStaresAt		; 15
-itemLevMask db 0, 81h, 81h, 81h, 81h, 81h, 81h,	81h; 0
-db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 8
-db 81h,	81h, 81h, 81h, 81h, 81h, 0C1h, 41h; 16
-db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 41h; 24
-db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 41h; 32
-db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 31h; 40
-db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 48
-db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 56
-db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 64
-db 31h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 72
-db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 80
-db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 88
-db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 96
-db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 104
-db 0, 0, 0, 0, 0, 0, 0FFh, 0; 112
-db 0, 0, 0, 0, 0, 0FFh,	9, 9; 120
-db 9, 9, 9, 9, 9, 9, 9,	0; 128
-db 0, 0, 9, 9, 9, 9, 9,	9; 136
-db 9, 0, 0, 0, 0, 0, 0,	0; 144
-db 0, 0, 0, 0, 0, 0, 5,	5; 152
-db 0, 0, 0, 0, 0, 9, 9,	9; 160
-db 9, 0, 0, 3, 3, 41h, 9, 11h; 168
-db 5, 1, 0, 0, 0, 9, 9,	9; 176
-db 9, 9, 9, 9, 9, 9, 9,	9; 184
-db 9, 9, 9, 7Fh, 5, 5, 5, 5; 192
-db 5, 5, 5, 5, 5, 5, 5,	5; 200
-db 5, 5, 5, 5, 5, 3, 3,	3; 208
-db 3, 3, 3, 3, 3, 3, 3,	1Dh; 216
-db 0, 0, 0, 0, 0, 0, 0,	0; 224
-db 0, 0, 0, 0, 0, 0, 0,	0; 232
-db 1, 1, 1, 1, 1, 1, 1,	1; 240
-db 1, 0, 0, 0, 0, 0, 0,	0; 248
+		dd aSlashesAt		; 1
+		dd aKicksAt		; 2
+		dd aPunchesAt		; 3
+		dd aClawsAt		; 4
+		dd aTearsAt		; 5
+		dd aBitesAt		; 6
+		dd aGnawsOn		; 7
+		dd aStabsAt		; 8
+		dd aSlicesAt		; 9
+		dd aSlams		; 10
+		dd aStrikesAt		; 11
+		dd aGropesAt		; 12
+		dd aReachesToward	; 13
+		dd aPeersAt		; 14
+		dd aStaresAt		; 15
+itemLevMask	db 0, 81h, 81h, 81h, 81h, 81h, 81h,	81h; 0
+		db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 8
+		db 81h,	81h, 81h, 81h, 81h, 81h, 0C1h, 41h; 16
+		db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 41h; 24
+		db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 41h; 32
+		db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 31h; 40
+		db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 48
+		db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 56
+		db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 64
+		db 31h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 72
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 80
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 88
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 96
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 104
+		db 0, 0, 0, 0, 0, 0, 0FFh, 0; 112
+		db 0, 0, 0, 0, 0, 0FFh,	9, 9; 120
+		db 9, 9, 9, 9, 9, 9, 9,	0; 128
+		db 0, 0, 9, 9, 9, 9, 9,	9; 136
+		db 9, 0, 0, 0, 0, 0, 0,	0; 144
+		db 0, 0, 0, 0, 0, 0, 5,	5; 152
+		db 0, 0, 0, 0, 0, 9, 9,	9; 160
+		db 9, 0, 0, 3, 3, 41h, 9, 11h; 168
+		db 5, 1, 0, 0, 0, 9, 9,	9; 176
+		db 9, 9, 9, 9, 9, 9, 9,	9; 184
+		db 9, 9, 9, 7Fh, 5, 5, 5, 5; 192
+		db 5, 5, 5, 5, 5, 5, 5,	5; 200
+		db 5, 5, 5, 5, 5, 3, 3,	3; 208
+		db 3, 3, 3, 3, 3, 3, 3,	1Dh; 216
+		db 0, 0, 0, 0, 0, 0, 0,	0; 224
+		db 0, 0, 0, 0, 0, 0, 0,	0; 232
+		db 1, 1, 1, 1, 1, 1, 1,	1; 240
+		db 1, 0, 0, 0, 0, 0, 0,	0; 248
 battleCryString	dd aDissentionInYo	; 0
-dd aWillThereEverB	; 1
-dd aEnjoyYourNextL	; 2
-dd aYourBattlecryI	; 3
-dd aYourOnslaughtI	; 4
-dd aNotAgainYouMoa	; 5
-dd aGimmeABreakWhe	; 6
-aMember17 db 'member #(1-7)',0
-aADE db	'(A-D)',0
-aMember1 db 'member #(1)',0
-aA db '(A)',0
-aOr db ' or ',0
-db    0
-vowelList db 'A', 'E', 'I', 'O'   ; 0
-db 'U', 0               ; 4
-byte_475AE db 5, 7, 7, 3	   ; 0
-db 3, 0, 0, 5		; 4
-db 5, 0Ah, 0Fh,	0Fh	; 8
-db 16h			; 12
+		dd aWillThereEverB	; 1
+		dd aEnjoyYourNextL	; 2
+		dd aYourBattlecryI	; 3
+		dd aYourOnslaughtI	; 4
+		dd aNotAgainYouMoa	; 5
+		dd aGimmeABreakWhe	; 6
+aMember17	db 'member #(1-7)',0
+aMember1	db 'member #(1)',0
+aOr		db ' or ',0
+		db    0
+vowelList	db 'A', 'E', 'I', 'O', 'U', 0               ; 4
+byte_475AE	db 5, 7, 7, 3	   ; 0
+		db 3, 0, 0, 5		; 4
+		db 5, 0Ah, 0Fh,	0Fh	; 8
+		db 16h			; 12
 aBadDiceMaskRange db 'Bad dice mask range',0
-db    0
-off_475D0 dd party_fight
-dd party_advance
-dd party_run
-off_475DC dd bat_attackOpt, bat_defendOpt; 0
-dd bat_partyAttackOpt, bat_castOpt; 2
-dd bat_useItemOpt, bat_hideOpt;	4
-dd bat_songOpt		; 6
-byte_475F8 db 3, 1, 1, 1	   ; 0
-db 1, 0, 0, 3		; 4
-db 3, 4, 1, 1		; 8
-db 4, 0			; 12
-byte_47606 db 3, 2, 0, 0FEh	   ; 0
-byte_4760A db 0FFh, 0FFh, 0FFh,	0  ; 0
-db 0, 0, 0, 0		; 4
-db 1, 1			; 8
-aPoisonNeedle db 'Poison Needle',0
-aPoisonBlades db 'Poison Blades',0
-aBlades	db 'Blades',0
-aShockWave db 'Shock Wave',0
-aCrazycloud db 'Crazycloud',0
-aVortex	db 'Vortex',0
-aShocks	db 'Shocks',0
-aPoisonDarts db	'Poison Darts',0
-aAcidBurst db 'Acid Burst',0
-aGasCloud db 'Gas Cloud',0
-aPoisonSpikes db 'Poison Spikes',0
-aMindBlast db 'Mind Blast',0
-aMindJab_0 db 'Mind Jab',0
-aBasiliskSnare db 'Basilisk Snare',0
-aDeathBlades db	'Death Blades',0
-aCodgerBomb db 'Codger Bomb',0
-aSwindler db 'Swindler',0
-aHammer	db 'Hammer',0
-db    0
-db  30h	; 0
-db  27h	
-db  0Ah
-db    0
-aExperiencePointsForV db ' experience points for valor and ba'
-db 'ttle knowledge, and ',0
-aTheyDisbelieve	db 'They disbelieve!',0Ah
-db 0Ah,0
-db    0
-aInGold_ db ' in gold.',0Ah
-db 0Ah,0
-aFoundA	db ' found a ',0
-a__3 db	'.',0Ah
-db 0Ah,0
+		db    0
+off_475D0	dd party_fight
+		dd party_advance
+		dd party_run
+off_475DC	dd bat_attackOpt, bat_defendOpt; 0
+		dd bat_partyAttackOpt, bat_castOpt; 2
+		dd bat_useItemOpt, bat_hideOpt;	4
+		dd bat_songOpt		; 6
+byte_475F8	db 3, 1, 1, 1	   ; 0
+		db 1, 0, 0, 3		; 4
+		db 3, 4, 1, 1		; 8
+		db 4, 0			; 12
+byte_47606	db 3, 2, 0, 0FEh	   ; 0
+byte_4760A	db 0FFh, 0FFh, 0FFh,	0  ; 0
+		db 0, 0, 0, 0		; 4
+		db 1, 1			; 8
+aPoisonNeedle	db 'Poison Needle',0
+aPoisonBlades	db 'Poison Blades',0
+aBlades		db 'Blades',0
+aShockWave	db 'Shock Wave',0
+aCrazycloud	db 'Crazycloud',0
+aVortex		db 'Vortex',0
+aShocks		db 'Shocks',0
+aPoisonDarts	db 'Poison Darts',0
+aAcidBurst	db 'Acid Burst',0
+aGasCloud	db 'Gas Cloud',0
+aPoisonSpikes	db 'Poison Spikes',0
+aMindBlast	db 'Mind Blast',0
+aBasiliskSnare	db 'Basilisk Snare',0
+aDeathBlades	db 'Death Blades',0
+aCodgerBomb	db 'Codger Bomb',0
+aSwindler	db 'Swindler',0
+aHammer		db 'Hammer',0
+		db    0
+aExperiencePointsForV db ' experience points for valor and battle knowledge, and ',0
+aTheyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
+		db    0
+aInGold_	db ' in gold.',0Ah,0Ah,0
+aFoundA		db ' found a ',0
 aEachCharacterReceive db 'Each character receives ',0
-db    0
-aThePartyDisbelieves_ db 'The party disbelieves...',0Ah
-db 0Ah,0
-db    0
-aThereIsAChestHere_Wil db 'There is a chest here. Will you:',0Ah
-db 0Ah
-db '@Examine chest',0Ah
-db '@Open chest',0Ah
-db '@Disarm chest',0Ah
-db '@Trap Zap',0Ah
-db '@Leave chest',0
-aWhoWillCastATrzp? db 'Who will cast a TRZP?',0
-aYouDonTKnowThatSpell_ db 'You don',27h,'t know that spell.',0
-db    0
-aYouNeedAtLeast2SpellP db 'You need at least 2 spell points.',0
-aWhoWillExamineIt? db 'Who will examine it?',0
-db    0
-aItLooksLikeA db 'It looks like a ',0
-db    0
-aThatCharacterHasAlr db	'That character has already checked.'
-db 0
-aYouFoundNothing_ db 'You found nothing.',0
-db    0
-aWhoWillDisarmIt? db 'Who will disarm it?',0
-aEnterTrapName db 'Enter trap name:',0
-db    0
-aDisarmFailed db 'Disarm failed!',0
-db    0
-aYouDisarmedIt db 'You disarmed it!',0
-db    0
+		db    0
+aThePartyDisbelieves_ db 'The party disbelieves...',0Ah,0Ah,0
+		db    0
+aThereIsAChestHere_Wil db 'There is a chest here. Will you:',0Ah,0Ah
+		db '@Examine chest',0Ah
+		db '@Open chest',0Ah
+		db '@Disarm chest',0Ah
+		db '@Trap Zap',0Ah
+		db '@Leave chest',0
+aWhoWillCastATrzp?	db 'Who will cast a TRZP?',0
+aYouDonTKnowThatSpell_	db 'You don',27h,'t know that spell.',0
+		db    0
+aYouNeedAtLeast2SpellP	db 'You need at least 2 spell points.',0
+aWhoWillExamineIt?	db 'Who will examine it?',0
+		db    0
+aItLooksLikeA	db 'It looks like a ',0
+		db    0
+aThatCharacterHasAlr	db 'That character has already checked.'
+		db 0
+aYouFoundNothing_	db 'You found nothing.',0
+		db    0
+aWhoWillDisarmIt?	db 'Who will disarm it?',0
+aEnterTrapName	db 'Enter trap name:',0
+		db    0
+aDisarmFailed	db 'Disarm failed!',0
+		db    0
+aYouDisarmedIt	db 'You disarmed it!',0
+		db    0
 aWhoWillOpenIt?	db 'Who will open it?',0
-aYouSetOffA db 'You set off a ',0
-db    0
-trapFlags db 1,	1, 0, 80h, 1, 1, 80h, 3; 0
-db 1, 1, 80h, 9, 81h, 80h, 81h,	81h; 8
-db 1, 3, 0, 6, 81h, 84h, 8, 80h; 16
-db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 24
-trapDice db 41h, 41h, 44h, 41h,	43h, 43h, 46h, 42h; 0
-db 45h,	45h, 47h, 46h, 47h, 48h, 47h, 47h; 8
-db 49h,	47h, 49h, 21h, 49h, 47h, 45h, 49h; 16
-db 49h,	49h, 49h, 49h, 49h, 49h, 49h, 49h; 24
-stru_47938 saveStru 4 dup(<0Fh,	0Fh>); 0
-saveStru 4 dup(<13h, 13h>); 4
-saveStru 4 dup(<15h, 15h>); 8
-saveStru 4 dup(<18h, 18h>); 12
-saveStru 4 dup(<26h, 26h>); 16
-saveStru <27h, 27h>	; 20
-saveStru <28h, 28h>	; 21
-saveStru <27h, 27h>	; 22
-saveStru 9 dup(<28h, 28h>); 23
-db 1, 2, 4, 8, 10h, 20h, 40h, 80h; 0
-aChest db 'Chest!',0
-db    0
-byte_47988 db 0, 1, 2, 3, 0, 1,	3, 4; 0
-db 0, 1, 6, 5, 7, 8, 9,	9; 8
-db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h; 16
-db 0Eh,	0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh; 24
-trapName dd aPoisonNeedle	 ; 0
-dd aPoisonBlades	; 1
-dd aBlades		; 2
-dd aShockWave		; 3
-dd aCrazycloud		; 4
-dd aVortex		; 5
-dd aShocks		; 6
-dd aPoisonDarts		; 7
-dd aAcidBurst		; 8
-dd aGasCloud		; 9
-dd aPoisonSpikes	; 10
-dd aMindBlast		; 11
-dd aMindJab_0		; 12
-dd aBasiliskSnare	; 13
-dd aDeathBlades		; 14
-dd aCodgerBomb		; 15
-dd aSwindler		; 16
-dd aHammer		; 17
-byte_479F0 db 1, 2, 4, 8, 0Ah, 10h, 14h; 0
-aTreasure db 'Treasure',0
-off_47A00 dd chest_examine, chest_open,	chest_disarm, chest_trapZap; 0
-dd chest_returnOne
-aFried db 'fried',0
-aFrozen	db 'frozen',0
-aShocked db 'shocked',0
-aDrained db 'drained',0
-aBurnt db 'burnt',0
-aChoked	db 'choked',0
-aSteamed db 'steamed',0
-aBlasted db 'blasted',0
-aHit db	'hit',0
-aNuked db 'nuked',0
-aLessThirsty_ db 'less thirsty.',0Ah
-db 0Ah,0
-aHicHappier_ db	'(hic) happier.',0Ah
-db 0Ah,0
-aRefreshed db 'refreshed!',0Ah
-db 0Ah,0
-aTerrible_ db 'terrible.',0Ah
-db 0Ah,0
-aTerrible__0 db	'terrible.',0Ah
-db 0Ah,0
+aYouSetOffA	db 'You set off a ',0
+		db    0
+trapFlags	db 1,	1, 0, 80h, 1, 1, 80h, 3; 0
+		db 1, 1, 80h, 9, 81h, 80h, 81h,	81h; 8
+		db 1, 3, 0, 6, 81h, 84h, 8, 80h; 16
+		db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 24
+trapDice	db 41h, 41h, 44h, 41h,	43h, 43h, 46h, 42h; 0
+		db 45h,	45h, 47h, 46h, 47h, 48h, 47h, 47h; 8
+		db 49h,	47h, 49h, 21h, 49h, 47h, 45h, 49h; 16
+		db 49h,	49h, 49h, 49h, 49h, 49h, 49h, 49h; 24
+stru_47938	saveStru 4 dup(<0Fh,	0Fh>); 0
+		saveStru 4 dup(<13h, 13h>); 4
+		saveStru 4 dup(<15h, 15h>); 8
+		saveStru 4 dup(<18h, 18h>); 12
+		saveStru 4 dup(<26h, 26h>); 16
+		saveStru <27h, 27h>	; 20
+		saveStru <28h, 28h>	; 21
+		saveStru <27h, 27h>	; 22
+		saveStru 9 dup(<28h, 28h>); 23
+aChest		db 'Chest!',0
+		db    0
+byte_47988	db 0, 1, 2, 3, 0, 1,	3, 4; 0
+		db 0, 1, 6, 5, 7, 8, 9,	9; 8
+		db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h; 16
+		db 0Eh,	0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh; 24
+trapName	dd aPoisonNeedle	 ; 0
+		dd aPoisonBlades	; 1
+		dd aBlades		; 2
+		dd aShockWave		; 3
+		dd aCrazycloud		; 4
+		dd aVortex		; 5
+		dd aShocks		; 6
+		dd aPoisonDarts		; 7
+		dd aAcidBurst		; 8
+		dd aGasCloud		; 9
+		dd aPoisonSpikes	; 10
+		dd aMindBlast		; 11
+		dd aMindJab		; 12
+		dd aBasiliskSnare	; 13
+		dd aDeathBlades		; 14
+		dd aCodgerBomb		; 15
+		dd aSwindler		; 16
+		dd aHammer		; 17
+byte_479F0	db 1, 2, 4, 8, 0Ah, 10h, 14h; 0
+aTreasure	db 'Treasure',0
+off_47A00	dd chest_examine, chest_open,	chest_disarm, chest_trapZap, chest_returnOne
+aFried		db 'fried',0
+aFrozen		db 'frozen',0
+aShocked	db 'shocked',0
+aDrained	db 'drained',0
+aBurnt		db 'burnt',0
+aChoked		db 'choked',0
+aSteamed	db 'steamed',0
+aBlasted	db 'blasted',0
+aHit		db 'hit',0
+aNuked		db 'nuked',0
+aLessThirsty_	db 'less thirsty.',0Ah,0Ah,0
+aHicHappier_	db '(hic) happier.',0Ah,0Ah,0
+aRefreshed	db 'refreshed!',0Ah,0Ah,0
+aTerrible_	db 'terrible.',0Ah,0Ah,0
 aTheEntryStairs	db 'the entry stairs.',0
 aTheEntryPortal	db 'the entry portal.',0
-aTheEntryway_ db 'the entryway.',0
+aTheEntryway_	db 'the entryway.',0
 aTheBaseOfTheMo	db 'the base of the mountain.',0
 aAVantagePoint_	db 'a vantage point.',0
-aTheWayIn_ db 'the way in.',0
-aTheExit_ db 'the exit.',0
-aFried_0 db 'fried',0
-aFrozen_0 db 'frozen',0
-aShocked_0 db 'shocked',0
-aDrained_0 db 'drained',0
-aBurnt_0 db 'burnt',0
-aChoked_0 db 'choked',0
-aSteamed_0 db 'steamed',0
-aBlasted_0 db 'blasted',0
-aHit_0 db 'hit',0
-aNuked_0 db 'nuked',0
+aTheWayIn_	db 'the way in.',0
+aTheExit_	db 'the exit.',0
 align 2
-aYouCanOnlyCast	db 'You can only cast that in combat',0Ah
-db 0Ah,0
+aYouCanOnlyCast	db 'You can only cast that in combat',0Ah,0Ah,0
 align 2
-aAtTheParty___ db 'at the party...',0Ah
-db 0Ah,0
-aButThePartyWas	db 'But the party was too far away!',0Ah
-db 0Ah,0
-aAt db 'at ',0
-aSome db 'some ',0
-a___ db	'...',0Ah
-db 0Ah,0
-aOne db	'One ',0
+aAtTheParty___	db 'at the party...',0Ah,0Ah,0
+aButThePartyWas	db 'But the party was too far away!',0Ah,0Ah,0
+aAt		db 'at ',0
+aSome		db 'some ',0
+aElipsisNLNL	db '...',0Ah,0Ah,0
+aOne		db 'One ',0
 align 2
-aRepelledTheAtt	db 'repelled the attack!',0Ah
-db 0Ah,0
+aRepelledTheAtt	db 'repelled the attack!',0Ah,0Ah,0
 align 2
-aWasTooFarAway db 'was too far away!',0Ah
-db 0Ah,0
-aIs db 'is ',0
-aFor db	' for ',0
+aWasTooFarAway db 'was too far away!',0Ah,0Ah,0
+aIs		db 'is ',0
+aFor		db	' for ',0
 aPointSOfDamage	db ' point/\s\ of damage',0
 align 2
-a_ db '.',0Ah
-db 0Ah,0
-db '!',0Ah
-db 0Ah,0
-aAnd db	'And ',0
+aAnd		db	'And ',0
 align 2
-dd aFried
-dd aFrozen
-dd aShocked
-dd aDrained
-dd aBurnt
-dd aChoked
-dd aSteamed
-dd aBlasted
-dd aHit
-dd aNuked
 aAndThePartyFre	db 'and the party freezes',0
-aButItHadNoEffe	db 'but it had no effect!',0Ah
-db 0Ah,0
-a____0 db '...',0Ah
-db 0Ah,0
-aCloser	db 'closer',0
+aButItHadNoEffe	db 'but it had no effect!',0Ah,0Ah,0
+aCloser		db 'closer',0
 align 2
-aFartherAway db	'farther away',0
+aFartherAway	db 'farther away',0
 align 2
-aAndTheFoesAre db 'and the foes are ',0
-aASome db '/a some ',0
+aAndTheFoesAre	db 'and the foes are ',0
 align 2
-aTheParty db 'the party!',0
+aTheParty	db 'the party!',0
 align 2
 aAndTheEarthSwa	db 'and the earth swallows up ',0
 align 2
-aWhichItem? db 'Which item?',0
-aSpellAborted_ db 'Spell aborted.',0
+aWhichItem?	db 'Which item?',0
+aSpellAborted_	db 'Spell aborted.',0
 align 2
 aItemHasBeenIde	db 'Item has been identified!',0
-aDopplganger db	'Dopplganger',0
-aAteIt_	db 'ate it.',0Ah
-db 0Ah,0
+aDopplganger	db 'Dopplganger',0
+aAteIt_		db 'ate it.',0Ah,0Ah,0
 aDrinksAndFeels	db 'drinks and feels ',0
-off_47D32 dd aLessThirsty_, aHicHappier_, aRefreshed, aTerrible_, aTerrible__0;	0
-aCanTSeemToFind	db 'can',27h,'t seem to find a use for the'
-db ' item.',0Ah
-db 0Ah,0
+off_47D32	dd aLessThirsty_, aHicHappier_, aRefreshed, aTerrible_, aTerrible_;	0
+aCanTSeemToFind	db 'can',27h,'t seem to find a use for the item.',0Ah,0Ah,0
 align 2
 aInvokesAFiguri	db 'invokes a figurine ',0
-aIsReEnergized db 'is re-energized!',0Ah
-db 0Ah,0
+aIsReEnergized	db 'is re-energized!',0Ah,0Ah,0
 align 2
-aCastsAWeapon db 'casts a weapon ',0
-aBreathes db 'breathes ',0
+aCastsAWeapon	db 'casts a weapon ',0
+aBreathes	db 'breathes ',0
 aTeleportUseArr	db 'Teleport',0Ah
-db '<Use arrow keys and SPC to select>',0Ah
-db 0Ah
-db 'North:',0Ah
-db 'East :',0Ah,0
-aDownUp	db '/Down\Up  \ :',0Ah,0
+		db '<Use arrow keys and SPC to select>',0Ah,0Ah
+		db 'North:',0Ah
+		db 'East :',0Ah,0
+aDownUp		db '/Down\Up  \ :',0Ah,0
 align 2
-aTeleport? db 0Ah
-db 'Teleport?',0Ah
-db 0Ah,0
+aTeleport?	db 0Ah,'Teleport?',0Ah,0Ah,0
 align 2
 aTeleportCancel	db 'Teleport cancelled!',0
 aTeleportFailed	db 'Teleport failed!',0
 align 2
 aTeleportSucces	db 'Teleport successful!',0
 align 2
-aYouFace db 'You face ',0
-aLevelS	db ' level/\s',0
-aAboveBelow db ' /above\below\',0
+aYouFace	db 'You face ',0
+aLevelS		db ' level/\s',0
+aAboveBelow	db ' /above\below\',0
 align 2
-aPaceS db ' pace/\s',0
+aPaceS		db ' pace/\s',0
 align 2
-aNorthSouth db ' /north\south\',0
+aNorthSouth	db ' /north\south\',0
 align 2
-aPaceS_0 db ' pace/\s',0
+aEastWest	db ' /east\west\',0
 align 2
-aEastWest db ' /east\west\',0
+aAndAreAt	db ' and are at ',0
 align 2
-aAndAreAt db ' and are at ',0
+aOf		db ' of ',0
 align 2
-aOf db ' of ',0
-align 2
-aAndAre	db ' and /\are \',0
+aAndAre		db ' and /\are \',0
 align 2
 scryBaseStringList dd aTheEntryStairs, aTheEntryPortal,	aTheEntryway_
-dd aTheBaseOfTheMo, aAVantagePoint_, aTheWayIn_
-dd aTheExit_
-byte_47EDC db 0, 0, 4, 2	   ; 0
-db 2, 2, 2, 9		; 4
-db 0, 0, 0, 0		; 8
-db 0, 0, 0, 0		; 12
-db 4, 4, 4, 4		; 16
-db 8, 8, 0, 0		; 20
-db 0, 0, 0, 0		; 24
-db 0, 6, 6, 0		; 28
-db 0, 0, 0, 0		; 32
-db 0, 0, 0, 0		; 36
-db 0, 0, 0, 0		; 40
-db 0, 0Eh, 0, 0Ah	; 44
-db 0, 0, 0, 3		; 48
-db 0, 0, 0, 0		; 52
-db 10h,	15h, 1,	1	; 56
-db 1, 0			; 60
-byte_47F1A db 0, 0, 0Eh, 0	   ; 0
-db 0, 0, 0, 0		; 4
-db 0, 0, 0, 0		; 8
-db 4, 4, 4, 4		; 12
-db 0, 0, 0, 0		; 16
-db 2, 2, 1, 1		; 20
-db 9, 9, 0, 0		; 24
-db 0, 0, 0, 0		; 28
-db 0, 0, 0, 0		; 32
-db 0, 0, 0, 0		; 36
-db 0, 0, 0Ah, 0Ah	; 40
-db 0Ah,	0Bh, 0,	0	; 44
-db 6, 6, 6, 0Ch		; 48
-db 0Eh,	0Eh, 0Eh, 0Eh	; 52
-db 0Ah,	3, 1, 1		; 56
-db 0, 0			; 60
-byte_47F58 db 0, 0, 2, 0	   ; 0
-db 0, 0, 0, 2		; 4
-db 0, 0, 0, 0		; 8
-db 0, 0, 0, 0		; 12
-db 0, 0, 0, 0		; 16
-db 0, 0, 0, 0		; 20
-db 3, 3, 0, 0		; 24
-db 0, 0, 0, 4		; 28
-db 4, 4, 4, 4		; 32
-db 4, 4, 4, 4		; 36
-db 0, 0, 5, 5		; 40
-db 5, 6, 6, 6		; 44
-db 6, 6, 6, 1		; 48
-db 0, 0, 0, 0		; 52
-db 2, 2, 1, 2		; 56
-byte_47F94 db 1Ch, 0Bh,	14h, 0Ah, 1Ch, 38h, 1Ch, 1Ch; 0
-db 0Ah,	1Ch, 38h, 1Ch, 0Ah, 3Ch, 1Ch, 38h; 8
-db 14h,	0Ah, 1Ch, 28h, 38h, 14h, 0Bh, 28h; 16
-db 1Ch,	1Ch, 28h, 0Ah, 0Bh, 0Ah, 0Ch, 2Ch; 24
-db 14h,	1Ch, 3Ch, 0Bh, 0Ah, 38h, 0Bh, 0Ch; 32
-db 1Ch,	0Ch, 1Ch, 0Ah, 1Ch, 0Ch, 1Ch, 1Ch; 40
-db 1Ch,	0Ch, 0Ch, 1Ch, 1Ch, 0Ch, 1Ch, 0Ah; 48
-db 0FCh, 1Ch, 0Ah, 1Ch,	0Bh, 0Ah, 38h, 1Ch; 56
-db 8, 0Ah, 0Bh,	1Ch, 38h, 0Ah, 0Ah, 0Ch; 64
-db 0Ah,	1Ch, 0Ch, 0Ah, 1Ch, 1Ch, 0Ch, 38h; 72
-db 1Ch,	1Ch, 0Ah, 0Ah, 1Ch, 1Ch, 0Ah, 0Ch; 80
-db 1Ch,	1Ch, 0Ch, 0Bh, 1Ch, 1Ch, 14h, 38h; 88
-db 1Ch,	1Ch, 38h, 0Ah, 1Ch, 1Ch, 1Ch, 0Ch; 96
-db 1Ch,	1Ch, 0Ah, 14h, 14h, 0Ch, 1Ch, 14h; 104
-db 0Bh,	14h, 14h, 0Ah, 14h, 0Bh, 14h, 0Ah; 112
-db 0Ch,	0Ah, 14h, 0FCh,	0Ch, 1Ch, 1Ch, 1Ch; 120
-db 1Ch,	1Ch, 1Ch, 0Bh, 1Ch, 0Ah, 1Ch, 0Ch; 128
+		dd aTheBaseOfTheMo, aAVantagePoint_, aTheWayIn_
+		dd aTheExit_
+byte_47EDC	db 0, 0, 4, 2	   ; 0
+		db 2, 2, 2, 9		; 4
+		db 0, 0, 0, 0		; 8
+		db 0, 0, 0, 0		; 12
+		db 4, 4, 4, 4		; 16
+		db 8, 8, 0, 0		; 20
+		db 0, 0, 0, 0		; 24
+		db 0, 6, 6, 0		; 28
+		db 0, 0, 0, 0		; 32
+		db 0, 0, 0, 0		; 36
+		db 0, 0, 0, 0		; 40
+		db 0, 0Eh, 0, 0Ah	; 44
+		db 0, 0, 0, 3		; 48
+		db 0, 0, 0, 0		; 52
+		db 10h,	15h, 1,	1	; 56
+		db 1, 0			; 60
+byte_47F1A	db 0, 0, 0Eh, 0	   ; 0
+		db 0, 0, 0, 0		; 4
+		db 0, 0, 0, 0		; 8
+		db 4, 4, 4, 4		; 12
+		db 0, 0, 0, 0		; 16
+		db 2, 2, 1, 1		; 20
+		db 9, 9, 0, 0		; 24
+		db 0, 0, 0, 0		; 28
+		db 0, 0, 0, 0		; 32
+		db 0, 0, 0, 0		; 36
+		db 0, 0, 0Ah, 0Ah	; 40
+		db 0Ah,	0Bh, 0,	0	; 44
+		db 6, 6, 6, 0Ch		; 48
+		db 0Eh,	0Eh, 0Eh, 0Eh	; 52
+		db 0Ah,	3, 1, 1		; 56
+		db 0, 0			; 60
+byte_47F58	db 0, 0, 2, 0	   ; 0
+		db 0, 0, 0, 2		; 4
+		db 0, 0, 0, 0		; 8
+		db 0, 0, 0, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 0, 0, 0		; 20
+		db 3, 3, 0, 0		; 24
+		db 0, 0, 0, 4		; 28
+		db 4, 4, 4, 4		; 32
+		db 4, 4, 4, 4		; 36
+		db 0, 0, 5, 5		; 40
+		db 5, 6, 6, 6		; 44
+		db 6, 6, 6, 1		; 48
+		db 0, 0, 0, 0		; 52
+		db 2, 2, 1, 2		; 56
+byte_47F94	db 1Ch, 0Bh,	14h, 0Ah, 1Ch, 38h, 1Ch, 1Ch; 0
+		db 0Ah,	1Ch, 38h, 1Ch, 0Ah, 3Ch, 1Ch, 38h; 8
+		db 14h,	0Ah, 1Ch, 28h, 38h, 14h, 0Bh, 28h; 16
+		db 1Ch,	1Ch, 28h, 0Ah, 0Bh, 0Ah, 0Ch, 2Ch; 24
+		db 14h,	1Ch, 3Ch, 0Bh, 0Ah, 38h, 0Bh, 0Ch; 32
+		db 1Ch,	0Ch, 1Ch, 0Ah, 1Ch, 0Ch, 1Ch, 1Ch; 40
+		db 1Ch,	0Ch, 0Ch, 1Ch, 1Ch, 0Ch, 1Ch, 0Ah; 48
+		db 0FCh, 1Ch, 0Ah, 1Ch,	0Bh, 0Ah, 38h, 1Ch; 56
+		db 8, 0Ah, 0Bh,	1Ch, 38h, 0Ah, 0Ah, 0Ch; 64
+		db 0Ah,	1Ch, 0Ch, 0Ah, 1Ch, 1Ch, 0Ch, 38h; 72
+		db 1Ch,	1Ch, 0Ah, 0Ah, 1Ch, 1Ch, 0Ah, 0Ch; 80
+		db 1Ch,	1Ch, 0Ch, 0Bh, 1Ch, 1Ch, 14h, 38h; 88
+		db 1Ch,	1Ch, 38h, 0Ah, 1Ch, 1Ch, 1Ch, 0Ch; 96
+		db 1Ch,	1Ch, 0Ah, 14h, 14h, 0Ch, 1Ch, 14h; 104
+		db 0Bh,	14h, 14h, 0Ah, 14h, 0Bh, 14h, 0Ah; 112
+		db 0Ch,	0Ah, 14h, 0FCh,	0Ch, 1Ch, 1Ch, 1Ch; 120
+		db 1Ch,	1Ch, 1Ch, 0Bh, 1Ch, 0Ah, 1Ch, 0Ch; 128
 spellEffectFlags db 0, 0B6h, 0,	2	 ; 0
-db 20h,	4, 1, 4		; 4
-db 2Ah,	0, 0Ah,	2	; 8
-db 31h,	0Ah, 0FFh, 0FDh	; 12
-db 0, 4, 1, 2		; 16
-db 0FEh, 0, 69h, 4	; 20
-db 4, 4, 7, 38h		; 24
-db 0A8h, 3Fh, 2, 0Ah	; 28
-db 0, 0FFh, 0FDh, 0AFh	; 32
-db 70h,	0, 0BDh, 1	; 36
-db 4, 1, 82h, 1		; 40
-db 83h,	4, 6, 3		; 44
-db 84h,	80h, 0,	85h	; 48
-db 0FFh, 15h, 86h, 77h	; 52
-db 40h,	7, 46h,	8	; 56
-db 0C4h, 4Dh, 0, 9	; 60
-db 0E0h, 0, 0CBh, 0Ah	; 64
-db 0, 54h, 7Eh,	0	; 68
-db 0, 0, 0, 5Bh		; 72
-db 0FDh, 0Bh, 7, 0FFh	; 76
-db 0, 0, 62h, 85h	; 80
-db 0, 0, 8Ch, 0EEh	; 84
-db 0, 0, 8, 0D2h	; 88
-db 0, 0, 0, 0		; 92
-db 0, 0, 6, 9		; 96
-db 0, 0, 0FFh, 1Ch	; 100
-db 0, 0, 93h, 6		; 104
-db 0, 0A1h, 0Ch, 80h	; 108
-db 0D9h, 8, 4, 6	; 112
-db 2, 0E7h, 0Ah, 9Ah	; 116
-db 0Eh,	0, 0, 5		; 120
-db 23h,	0, 4, 5		; 124
-db 0, 0, 0, 0		; 128
-db 0, 0, 0, 0		; 132
-byte_480A4 db 0, 1, 0, 0Ah, 0, 0, 0, 0;	0
-db 2, 0, 1, 0, 83h, 81h, 0, 1; 8
-db 0, 0, 0, 0, 0, 0, 1,	0; 16
-db 1, 2, 0, 84h, 7, 83h, 0, 1; 24
-db 0, 2, 81h, 1, 5, 2, 84h, 0; 32
-db 0, 0, 0, 0, 0, 0, 2,	0; 40
-db 0, 0, 83h, 0, 2, 4, 0, 0Ah; 48
-db 0Ah,	0, 1, 0, 3, 3, 3, 0; 56
-db 0, 0, 7, 0, 4, 5, 85h, 0; 64
-db 0, 0, 0, 6, 86h, 0, 0Ah, 0; 72
-db 0, 0, 2, 8, 0, 0, 8,	5; 80
-db 0, 0, 0, 3, 0, 0, 0,	5; 88
-db 0, 0, 0, 0, 0, 0, 4,	0Ah; 96
-db 0, 0, 84h, 0, 0, 0Ah, 0, 0; 104
-db 6, 0, 0, 0, 0, 0Ah, 85h, 5; 112
-db 0Ah,	5, 0, 0Ah, 0Ah,	0, 1, 1; 120
-db 0, 0, 0, 0, 0, 0, 0,	0; 128
-spptRequired db	2, 3, 2, 3, 3, 4, 5, 4;	0
-db 5, 6, 6, 7, 7, 9, 8,	12; 8
-db 15, 18, 12, 3, 3, 2,	4, 5; 16
-db 5, 6, 6, 6, 8, 7, 8,	10; 24
-db 10, 10, 25, 16, 11, 20, 3, 2; 32
-db 2, 4, 5, 4, 6, 6, 6,	7; 40
-db 12, 8, 10, 11, 11, 20, 16, 40; 48
-db 50, 10, 11, 14, 11, 14, 12, 13; 56
-db 14, 16, 13, 22, 18, 16, 25, 15; 64
-db 20, 28, 26, 30, 50, 60, 80, 12; 72
-db 10, 10, 20, 20, 15, 15, 25, 30; 80
-db 20, 20, 45, 50, 25, 25, 60, 60; 88
-db 30, 30, 65, 70, 35, 35, 60, 100; 96
-db 50, 50, 5, 5, 8, 10,	15, 15;	104
-db 18, 20, 20, 25, 30, 40, 40, 50; 112
-db 60, 80, 10, 250, 150, 1; 120
-breathEffectStr	dd aFried_0, aFrozen_0,	aShocked_0, aDrained_0,	aBurnt_0; 0
-dd aChoked_0, aSteamed_0, aBlasted_0, aHit_0, aNuked_0;	5
+		db 20h,	4, 1, 4		; 4
+		db 2Ah,	0, 0Ah,	2	; 8
+		db 31h,	0Ah, 0FFh, 0FDh	; 12
+		db 0, 4, 1, 2		; 16
+		db 0FEh, 0, 69h, 4	; 20
+		db 4, 4, 7, 38h		; 24
+		db 0A8h, 3Fh, 2, 0Ah	; 28
+		db 0, 0FFh, 0FDh, 0AFh	; 32
+		db 70h,	0, 0BDh, 1	; 36
+		db 4, 1, 82h, 1		; 40
+		db 83h,	4, 6, 3		; 44
+		db 84h,	80h, 0,	85h	; 48
+		db 0FFh, 15h, 86h, 77h	; 52
+		db 40h,	7, 46h,	8	; 56
+		db 0C4h, 4Dh, 0, 9	; 60
+		db 0E0h, 0, 0CBh, 0Ah	; 64
+		db 0, 54h, 7Eh,	0	; 68
+		db 0, 0, 0, 5Bh		; 72
+		db 0FDh, 0Bh, 7, 0FFh	; 76
+		db 0, 0, 62h, 85h	; 80
+		db 0, 0, 8Ch, 0EEh	; 84
+		db 0, 0, 8, 0D2h	; 88
+		db 0, 0, 0, 0		; 92
+		db 0, 0, 6, 9		; 96
+		db 0, 0, 0FFh, 1Ch	; 100
+		db 0, 0, 93h, 6		; 104
+		db 0, 0A1h, 0Ch, 80h	; 108
+		db 0D9h, 8, 4, 6	; 112
+		db 2, 0E7h, 0Ah, 9Ah	; 116
+		db 0Eh,	0, 0, 5		; 120
+		db 23h,	0, 4, 5		; 124
+		db 0, 0, 0, 0		; 128
+		db 0, 0, 0, 0		; 132
+byte_480A4	db 0, 1, 0, 0Ah, 0, 0, 0, 0;	0
+		db 2, 0, 1, 0, 83h, 81h, 0, 1; 8
+		db 0, 0, 0, 0, 0, 0, 1,	0; 16
+		db 1, 2, 0, 84h, 7, 83h, 0, 1; 24
+		db 0, 2, 81h, 1, 5, 2, 84h, 0; 32
+		db 0, 0, 0, 0, 0, 0, 2,	0; 40
+		db 0, 0, 83h, 0, 2, 4, 0, 0Ah; 48
+		db 0Ah,	0, 1, 0, 3, 3, 3, 0; 56
+		db 0, 0, 7, 0, 4, 5, 85h, 0; 64
+		db 0, 0, 0, 6, 86h, 0, 0Ah, 0; 72
+		db 0, 0, 2, 8, 0, 0, 8,	5; 80
+		db 0, 0, 0, 3, 0, 0, 0,	5; 88
+		db 0, 0, 0, 0, 0, 0, 4,	0Ah; 96
+		db 0, 0, 84h, 0, 0, 0Ah, 0, 0; 104
+		db 6, 0, 0, 0, 0, 0Ah, 85h, 5; 112
+		db 0Ah,	5, 0, 0Ah, 0Ah,	0, 1, 1; 120
+		db 0, 0, 0, 0, 0, 0, 0,	0; 128
+spptRequired	db 2, 3, 2, 3, 3, 4, 5, 4;	0
+		db 5, 6, 6, 7, 7, 9, 8,	12; 8
+		db 15, 18, 12, 3, 3, 2,	4, 5; 16
+		db 5, 6, 6, 6, 8, 7, 8,	10; 24
+		db 10, 10, 25, 16, 11, 20, 3, 2; 32
+		db 2, 4, 5, 4, 6, 6, 6,	7; 40
+		db 12, 8, 10, 11, 11, 20, 16, 40; 48
+		db 50, 10, 11, 14, 11, 14, 12, 13; 56
+		db 14, 16, 13, 22, 18, 16, 25, 15; 64
+		db 20, 28, 26, 30, 50, 60, 80, 12; 72
+		db 10, 10, 20, 20, 15, 15, 25, 30; 80
+		db 20, 20, 45, 50, 25, 25, 60, 60; 88
+		db 30, 30, 65, 70, 35, 35, 60, 100; 96
+		db 50, 50, 5, 5, 8, 10,	15, 15;	104
+		db 18, 20, 20, 25, 30, 40, 40, 50; 112
+		db 60, 80, 10, 250, 150, 1; 120
+breathEffectStr	dd aFried, aFrozen, aShocked, aDrained, aBurnt; 0
+		dd aChoked, aSteamed, aBlasted, aHit, aNuked;	5
 damageSpellData	breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 1>; 0
-breathAtt_t <0,	4, 0, 0, 38h, 0C0h, 8>;	1
-breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 10h>	; 2
-breathAtt_t <0,	14h, 2,	0, 58h,	0C0h, 1>; 3
-breathAtt_t <0,	4, 10h,	0, 3Dh,	0C0h, 0Dh>	; 4
-breathAtt_t <0,	4, 12h,	0, 5Fh,	0C0h, 10h>	; 5
-breathAtt_t <0,	0Ch, 4,	0, 24h,	40h, 1>; 6
-breathAtt_t <0,	0Ch, 4,	0, 2Eh,	40h, 1>; 7
-breathAtt_t <0,	0Ch, 4,	0, 29h,	40h, 1>; 8
-breathAtt_t <0,	84h, 8,	0, 47h,	40h, 1>; 9
-breathAtt_t <0,	4, 10h,	0, 38h,	40h, 1>; 10
-breathAtt_t <0,	84h, 8,	0, 35h,	40h, 1>; 11
-breathAtt_t <0,	0Ch, 4,	0, 38h,	40h, 2>; 12
-breathAtt_t <0,	14h, 2,	0, 38h,	40h, 4>; 13
-breathAtt_t <4,	4, 6, 0, 1Dh, 40h, 0Ah>; 14
-breathAtt_t <0,	24h, 6,	80h, 25h, 0, 1>; 15
-breathAtt_t <0,	14h, 2,	0, 33h,	40h, 1>; 16
-breathAtt_t <0,	4, 0Ah,	20h, 3Dh, 40h, \
-	     2>		; 17
-breathAtt_t <0,	4, 10h,	40h, 13h, 40h, \
-	     0Ah>	; 18
-breathAtt_t <0,	14h, 2,	0, 58h,	40h, 2>; 19
-breathAtt_t <0,	24h, 0Eh, 0, 2Bh, 40h, \
-	     5>		; 20
-breathAtt_t <0,	24h, 0,	0, 38h,	40h, 8>; 21
-breathAtt_t <0,	84h, 8,	0, 3Dh,	40h, \
-	     0Ah>	; 22
-breathAtt_t <0,	4, 0, 0, 2Eh, 0C0h, 0Ah>; 23
-breathAtt_t <4,	4, 6, 0, 2Eh, 0, 1>; 24
-breathAtt_t <7,	4, 10h,	0, 0, 0, 1>; 25
-breathAtt_t <0,	84h, 8,	0, 20h,	0, 0>; 26
-breathAtt_t <0,	0Ch, 4,	0, 21h,	0, 0>; 27
-breathAtt_t <0,	84h, 8,	40h, 38h, 0, 4>; 28
-breathAtt_t <0,	24h, 6,	0, 38h,	0, 2>; 29
-breathAtt_t <7,	4, 10h,	0, 0, 0, 1>; 30
-breathAtt_t <6,	4, 10h,	0, 0, 0, 1>; 31
-breathAtt_t <5,	4, 10h,	0, 0, 0, 1>; 32
-breathAtt_t <0,	14h, 2,	0, 38h,	0, 10h>; 33
-breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 2>; 34
-db    0
+		breathAtt_t <0,	4, 0, 0, 38h, 0C0h, 8>;	1
+		breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 10h>	; 2
+		breathAtt_t <0,	14h, 2,	0, 58h,	0C0h, 1>; 3
+		breathAtt_t <0,	4, 10h,	0, 3Dh,	0C0h, 0Dh>	; 4
+		breathAtt_t <0,	4, 12h,	0, 5Fh,	0C0h, 10h>	; 5
+		breathAtt_t <0,	0Ch, 4,	0, 24h,	40h, 1>; 6
+		breathAtt_t <0,	0Ch, 4,	0, 2Eh,	40h, 1>; 7
+		breathAtt_t <0,	0Ch, 4,	0, 29h,	40h, 1>; 8
+		breathAtt_t <0,	84h, 8,	0, 47h,	40h, 1>; 9
+		breathAtt_t <0,	4, 10h,	0, 38h,	40h, 1>; 10
+		breathAtt_t <0,	84h, 8,	0, 35h,	40h, 1>; 11
+		breathAtt_t <0,	0Ch, 4,	0, 38h,	40h, 2>; 12
+		breathAtt_t <0,	14h, 2,	0, 38h,	40h, 4>; 13
+		breathAtt_t <4,	4, 6, 0, 1Dh, 40h, 0Ah>; 14
+		breathAtt_t <0,	24h, 6,	80h, 25h, 0, 1>; 15
+		breathAtt_t <0,	14h, 2,	0, 33h,	40h, 1>; 16
+		breathAtt_t <0,	4, 0Ah,	20h, 3Dh, 40h, 2>		; 17
+		breathAtt_t <0,	4, 10h,	40h, 13h, 40h, 0Ah>	; 18
+		breathAtt_t <0,	14h, 2,	0, 58h,	40h, 2>; 19
+		breathAtt_t <0,	24h, 0Eh, 0, 2Bh, 40h, 5>		; 20
+		breathAtt_t <0,	24h, 0,	0, 38h,	40h, 8>; 21
+		breathAtt_t <0,	84h, 8,	0, 3Dh,	40h, 0Ah>	; 22
+		breathAtt_t <0,	4, 0, 0, 2Eh, 0C0h, 0Ah>; 23
+		breathAtt_t <4,	4, 6, 0, 2Eh, 0, 1>; 24
+		breathAtt_t <7,	4, 10h,	0, 0, 0, 1>; 25
+		breathAtt_t <0,	84h, 8,	0, 20h,	0, 0>; 26
+		breathAtt_t <0,	0Ch, 4,	0, 21h,	0, 0>; 27
+		breathAtt_t <0,	84h, 8,	40h, 38h, 0, 4>; 28
+		breathAtt_t <0,	24h, 6,	0, 38h,	0, 2>; 29
+		breathAtt_t <7,	4, 10h,	0, 0, 0, 1>; 30
+		breathAtt_t <6,	4, 10h,	0, 0, 0, 1>; 31
+		breathAtt_t <5,	4, 10h,	0, 0, 0, 1>; 32
+		breathAtt_t <0,	14h, 2,	0, 38h,	0, 10h>; 33
+		breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 2>; 34
+		db    0
 weaponDamageList	anotherBreathAtt_t <0, 1, 25h, 2, 1,	2>; 0
 		anotherBreathAtt_t <0, 1, 24h, 2, 1, 2>; 1
 		anotherBreathAtt_t <0, 1, 22h, 2, 1, 3>; 2
@@ -53714,2641 +53459,1693 @@ byte_48382	db 6, 15h, 16h, 23h, 24h, 27h, 2Ah, 2Bh; 0
 		db 47h,	53h, 57h, 5Bh, 0BAh, 0DEh; 24
 		db 0F8h, 85h
 		db    0
-figurineItemNo db 27, 38	       ; 0
-db 56, 61		; 2
-db 77, 98		; 4
-db 99, 190		; 6
-db 204,	0		; 8
-byte_483AC db 0Dh, 0Eh		   ; 0
-db 0Fh,	1		; 2
-db 10h,	11h		; 4
-db 12h,	13h		; 6
-db 14h,	0		; 8
-aCastAt	db 'Cast at ',0
-db    0
+figurineItemNo	db 27, 38	       ; 0
+		db 56, 61		; 2
+		db 77, 98		; 4
+		db 99, 190		; 6
+		db 204,	0		; 8
+byte_483AC	db 0Dh, 0Eh		   ; 0
+		db 0Fh,	1		; 2
+		db 10h,	11h		; 4
+		db 12h,	13h		; 6
+		db 14h,	0		; 8
+aCastAt		db 'Cast at ',0
+		db    0
 aWhoWillCastASp	db 'Who will cast a spell?',0
-db    0
+		db    0
 aYouDonTKnowThatSpell db 'You don',27h,'t know that spell!',0
-db    0
+		db    0
 aNoSpellByThatName	db 'No spell by that name.', 0
-aNotEnoughSpellPoint db	'Not enough spell points!',0
-db    0
+aNotEnoughSpellPoint	db 'Not enough spell points!',0
+		db    0
 aSpellToCast db	'Spell to cast:',0
-db    0
+		db    0
 aWhichMagicArtShallYou db 'Which magic art shall you invoke?',0
-db ') ',0
-db    0
-aCastsASpell db	'casts a spell',0
-aButItFizzled db 'but it fizzled!',0
-aButItFizzledNL db 'but it fizzled!',0Ah,0Ah,0
-aMakesALight db	'makes a light',0
-mageSpellIndex db 255, 42, 28, 0       ; 0 ; This array	is an index into another array for
-db 14, 255, 255, 255	; 4 ; determining the spells that a magic user has.
-db 255,	255, 56, 70	; 8
-db 84, 255, 255, 0	; 12
+		db ') ',0
+		db    0
+aCastsASpell	db 'casts a spell',0
+aButItFizzled	db 'but it fizzled!',0
+aButItFizzledNL	db 'but it fizzled!',0Ah,0Ah,0
+aMakesALight	db 'makes a light',0
+mageSpellIndex	db 255, 42, 28, 0       ; 0 ; This array	is an index into another array for
+		db 14, 255, 255, 255	; 4 ; determining the spells that a magic user has.
+		db 255,	255, 56, 70	; 8
+		db 84, 255, 255, 0	; 12
 aThouArtNotAS_0	db 'Thou art not a spellcaster',0
-db    0
-lightDistList db 3, 4, 5, 5, 2,	2     ;	0
-byte_484B2 db 0, 0FFh, 0FFh, 0,	0, 0; 0
-lightDurList db	4, 0Ch,	10h, 0FFh, 4, 8; 0
-byte_484BE db 0, 0Ah, 0Ah, 5	   ; 0
-db 5, 0, 0, 5		; 4
-db 0, 0, 11h, 11h	; 8
-db 16h,	0		; 12
-word_484CC dw 1Eh
-db  1Eh
-db    0
-db    7
-db    0
-byte_484D2 db 0Bh
-db  21h	; !
-db  34h	; 4
-db  0Eh
-db    4
-db    0
-db  44h	; D
-db  0Fh
-db    0
-db 0D2h	; “
-unk_484DC db  73h ; s
-db    0
-geoSpMasks geomanSp_t <3, 20h>	   ; 0
-geomanSp_t <4, 40h>	; 1
-geomanSp_t <3, 4>	; 2
-geomanSp_t <3, 2>	; 3
-geoSpList dd dun_removeTrap	  ; 0 ;	0: Earth Ward. Remove all traps	from level
-dd dun_revealSpSquare	; 1 ; 1: Sanctuary. Reveal all mage regeneration squares
-dd dun_revealSpSquare	; 2 ; 2: Succor	Song. Reveal party heal	squares
-dd dun_revealSpSquare	; 3 ; 3: Roscoe's Alert. Reveal all anti-magic squares
-dd dun_revealSpSquare	; 4 ; 4: Earth song. Reveal all	drain HP squares
-dd sub_22300		; 5 ; 5:
-spellFuncList dd sp_lightSpell	      ;	0
-dd sp_damageSpell	; 1
-dd sp_trapZap		; 2
-dd sp_freezeFoes	; 3
-dd sp_compassSpell	; 4
-dd sp_healSpell		; 5
-dd sp_lightSpell	; 6
-dd sp_levitation	; 7
-dd sp_damageSpell	; 8
-dd sp_summonSpell	; 9
-dd sp_healSpell		; 10
-dd sp_lightSpell	; 11
-dd sp_damageSpell	; 12
-dd sp_healSpell		; 13
-dd sp_levitation	; 14
-dd sp_healSpell		; 15
-dd sp_teleport		; 16
-dd sp_farFoes		; 17
-dd sp_summonSpell	; 18
-dd sp_vorpalPlating	; 19
-dd sp_healSpell		; 20
-dd sp_scrySight		; 21
-dd sp_damageSpell	; 22
-dd sp_vorpalPlating	; 23
-dd sp_areaEnchant	; 24
-dd sp_shieldSpell	; 25
-dd sp_strengthBonus	; 26
-dd sp_damageSpell	; 27
-dd sp_damageSpell	; 28
-dd sp_damageSpell	; 29
-dd sp_antiMagic		; 30
-dd sp_strengthBonus	; 31
-dd sp_phaseDoor		; 32
-dd sp_shieldSpell	; 33
-dd sp_healSpell		; 34
-dd sp_damageSpell	; 35
-dd sp_damageSpell	; 36
-dd sp_healSpell		; 37
-dd sp_damageSpell	; 38
-dd sp_acBonus		; 39
-dd sp_areaEnchant	; 40
-dd sp_disbelieve	; 41
-dd sp_summonSpell	; 42
-dd sp_wordOfFear	; 43
-dd sp_summonSpell	; 44
-dd sp_acBonus		; 45
-dd sp_areaEnchant	; 46
-dd sp_lightSpell	; 47
-dd sp_summonSpell	; 48
-dd sp_disbelieve	; 49
-dd sp_damageSpell	; 50
-dd sp_summonSpell	; 51
-dd sp_areaEnchant	; 52
-dd sp_damageSpell	; 53
-dd sp_summonSpell	; 54
-dd sp_damageSpell	; 55
-dd sp_disbelieve	; 56
-dd sp_summonSpell	; 57
-dd sp_damageSpell	; 58
-dd sp_summonSpell	; 59
-dd sp_damageSpell	; 60
-dd sp_damageSpell	; 61
-dd sp_healSpell		; 62
-dd sp_summonSpell	; 63
-dd sp_possessChar	; 64
-dd sp_spellbind		; 65
-dd sp_damageSpell	; 66
-dd sp_summonSpell	; 67
-dd sp_healSpell		; 68
-dd sp_damageSpell	; 69
-dd sp_damageSpell	; 70
-dd sp_haltFoe		; 71
-dd sp_meleeMen		; 72
-dd sp_batchspell	; 73
-dd sp_camaraderie	; 74
-dd sp_damageSpell	; 75
-dd sp_healSpell		; 76
-dd sp_summonSpell	; 77
-dd sp_damageSpell	; 78
-dd sp_healSpell		; 79
-dd printSpellFizzled	; 80
-dd printSpellFizzled	; 81
-dd sp_damageSpell	; 82
-dd sp_damageSpell	; 83
-dd printSpellFizzled	; 84
-dd printSpellFizzled	; 85
-dd sp_damageSpell	; 86
-dd sp_damageSpell	; 87
-dd printSpellFizzled	; 88
-dd printSpellFizzled	; 89
-dd sp_luckSpell		; 90
-dd sp_damageSpell	; 91
-dd printSpellFizzled	; 92
-dd printSpellFizzled	; 93
-dd sp_identifySpell	; 94
-dd sp_healSpell		; 95
-dd printSpellFizzled	; 96
-dd printSpellFizzled	; 97
-dd sp_batchspell	; 98
-dd sp_batchspell	; 99
-dd printSpellFizzled	; 100
-dd printSpellFizzled	; 101
-dd sp_shieldSpell	; 102
-dd sp_damageSpell	; 103
-dd printSpellFizzled	; 104
-dd printSpellFizzled	; 105
-dd sp_damageSpell	; 106
-dd sp_geomancerSpell	; 107
-dd sp_geomancerSpell	; 108
-dd sp_damageSpell	; 109
-dd sp_summonSpell	; 110
-dd sp_phaseDoor		; 111
-dd sp_damageSpell	; 112
-dd sp_geomancerSpell	; 113
-dd sp_geomancerSpell	; 114
-dd sp_farFoes		; 115
-dd sp_geomancerSpell	; 116
-dd sp_damageSpell	; 117
-dd sp_geomancerSpell	; 118
-dd sp_damageSpell	; 119
-dd sp_damageSpell	; 120
-dd sp_earthMaw		; 121
-dd printNoEffect	; 122
-dd sp_divineIntervention; 123
-dd sp_damageSpell	; 124
-dd printNoEffect	; 125
-dd _sp_useLightObj	; 126
-dd _sp_useLightObj	; 127
-dd _sp_useAcorn		; 128
-dd _sp_useWineskin	; 129
-dd printCantFindUse	; 130
-dd _sp_useWeapon	; 131
-dd _sp_useFigurine	; 132
-dd _sp_useWeapon	; 133
-dd _sp_reenergizeMage	; 134
-aSirRobinSTune db 'Sir Robin',27h,'s Tune',0
-aSafetySong db 'Safety Song',0
+		db    0
+lightDistList	db 3, 4, 5, 5, 2, 2 ;0
+byte_484B2	db 0, 0FFh, 0FFh, 0, 0, 0; 0
+lightDurList	db 4, 0Ch, 10h, 0FFh, 4, 8; 0
+byte_484BE	db 0, 0Ah, 0Ah, 5	   ; 0
+		db 5, 0, 0, 5		; 4
+		db 0, 0, 11h, 11h	; 8
+		db 16h,	0		; 12
+word_484CC	dw 1Eh
+		db  1Eh
+		db    0
+		db    7
+		db    0
+byte_484D2	db 0Bh
+		db  21h	; !
+		db  34h	; 4
+		db  0Eh
+		db    4
+		db    0
+		db  44h	; D
+		db  0Fh
+		db    0
+		db 0D2h	; “
+unk_484DC	db  73h ; s
+		db    0
+geoSpMasks	geomanSp_t <3, 20h>	   ; 0
+		geomanSp_t <4, 40h>	; 1
+		geomanSp_t <3, 4>	; 2
+		geomanSp_t <3, 2>	; 3
+geoSpList	dd dun_removeTrap	  ; 0 ;	0: Earth Ward. Remove all traps	from level
+		dd dun_revealSpSquare	; 1 ; 1: Sanctuary. Reveal all mage regeneration squares
+		dd dun_revealSpSquare	; 2 ; 2: Succor	Song. Reveal party heal	squares
+		dd dun_revealSpSquare	; 3 ; 3: Roscoe's Alert. Reveal all anti-magic squares
+		dd dun_revealSpSquare	; 4 ; 4: Earth song. Reveal all	drain HP squares
+		dd sub_22300		; 5 ; 5:
+spellFuncList	dd sp_lightSpell	      ;	0
+		dd sp_damageSpell	; 1
+		dd sp_trapZap		; 2
+		dd sp_freezeFoes	; 3
+		dd sp_compassSpell	; 4
+		dd sp_healSpell		; 5
+		dd sp_lightSpell	; 6
+		dd sp_levitation	; 7
+		dd sp_damageSpell	; 8
+		dd sp_summonSpell	; 9
+		dd sp_healSpell		; 10
+		dd sp_lightSpell	; 11
+		dd sp_damageSpell	; 12
+		dd sp_healSpell		; 13
+		dd sp_levitation	; 14
+		dd sp_healSpell		; 15
+		dd sp_teleport		; 16
+		dd sp_farFoes		; 17
+		dd sp_summonSpell	; 18
+		dd sp_vorpalPlating	; 19
+		dd sp_healSpell		; 20
+		dd sp_scrySight		; 21
+		dd sp_damageSpell	; 22
+		dd sp_vorpalPlating	; 23
+		dd sp_areaEnchant	; 24
+		dd sp_shieldSpell	; 25
+		dd sp_strengthBonus	; 26
+		dd sp_damageSpell	; 27
+		dd sp_damageSpell	; 28
+		dd sp_damageSpell	; 29
+		dd sp_antiMagic		; 30
+		dd sp_strengthBonus	; 31
+		dd sp_phaseDoor		; 32
+		dd sp_shieldSpell	; 33
+		dd sp_healSpell		; 34
+		dd sp_damageSpell	; 35
+		dd sp_damageSpell	; 36
+		dd sp_healSpell		; 37
+		dd sp_damageSpell	; 38
+		dd sp_acBonus		; 39
+		dd sp_areaEnchant	; 40
+		dd sp_disbelieve	; 41
+		dd sp_summonSpell	; 42
+		dd sp_wordOfFear	; 43
+		dd sp_summonSpell	; 44
+		dd sp_acBonus		; 45
+		dd sp_areaEnchant	; 46
+		dd sp_lightSpell	; 47
+		dd sp_summonSpell	; 48
+		dd sp_disbelieve	; 49
+		dd sp_damageSpell	; 50
+		dd sp_summonSpell	; 51
+		dd sp_areaEnchant	; 52
+		dd sp_damageSpell	; 53
+		dd sp_summonSpell	; 54
+		dd sp_damageSpell	; 55
+		dd sp_disbelieve	; 56
+		dd sp_summonSpell	; 57
+		dd sp_damageSpell	; 58
+		dd sp_summonSpell	; 59
+		dd sp_damageSpell	; 60
+		dd sp_damageSpell	; 61
+		dd sp_healSpell		; 62
+		dd sp_summonSpell	; 63
+		dd sp_possessChar	; 64
+		dd sp_spellbind		; 65
+		dd sp_damageSpell	; 66
+		dd sp_summonSpell	; 67
+		dd sp_healSpell		; 68
+		dd sp_damageSpell	; 69
+		dd sp_damageSpell	; 70
+		dd sp_haltFoe		; 71
+		dd sp_meleeMen		; 72
+		dd sp_batchspell	; 73
+		dd sp_camaraderie	; 74
+		dd sp_damageSpell	; 75
+		dd sp_healSpell		; 76
+		dd sp_summonSpell	; 77
+		dd sp_damageSpell	; 78
+		dd sp_healSpell		; 79
+		dd printSpellFizzled	; 80
+		dd printSpellFizzled	; 81
+		dd sp_damageSpell	; 82
+		dd sp_damageSpell	; 83
+		dd printSpellFizzled	; 84
+		dd printSpellFizzled	; 85
+		dd sp_damageSpell	; 86
+		dd sp_damageSpell	; 87
+		dd printSpellFizzled	; 88
+		dd printSpellFizzled	; 89
+		dd sp_luckSpell		; 90
+		dd sp_damageSpell	; 91
+		dd printSpellFizzled	; 92
+		dd printSpellFizzled	; 93
+		dd sp_identifySpell	; 94
+		dd sp_healSpell		; 95
+		dd printSpellFizzled	; 96
+		dd printSpellFizzled	; 97
+		dd sp_batchspell	; 98
+		dd sp_batchspell	; 99
+		dd printSpellFizzled	; 100
+		dd printSpellFizzled	; 101
+		dd sp_shieldSpell	; 102
+		dd sp_damageSpell	; 103
+		dd printSpellFizzled	; 104
+		dd printSpellFizzled	; 105
+		dd sp_damageSpell	; 106
+		dd sp_geomancerSpell	; 107
+		dd sp_geomancerSpell	; 108
+		dd sp_damageSpell	; 109
+		dd sp_summonSpell	; 110
+		dd sp_phaseDoor		; 111
+		dd sp_damageSpell	; 112
+		dd sp_geomancerSpell	; 113
+		dd sp_geomancerSpell	; 114
+		dd sp_farFoes		; 115
+		dd sp_geomancerSpell	; 116
+		dd sp_damageSpell	; 117
+		dd sp_geomancerSpell	; 118
+		dd sp_damageSpell	; 119
+		dd sp_damageSpell	; 120
+		dd sp_earthMaw		; 121
+		dd printNoEffect	; 122
+		dd sp_divineIntervention; 123
+		dd sp_damageSpell	; 124
+		dd printNoEffect	; 125
+		dd _sp_useLightObj	; 126
+		dd _sp_useLightObj	; 127
+		dd _sp_useAcorn		; 128
+		dd _sp_useWineskin	; 129
+		dd printCantFindUse	; 130
+		dd _sp_useWeapon	; 131
+		dd _sp_useFigurine	; 132
+		dd _sp_useWeapon	; 133
+		dd _sp_reenergizeMage	; 134
+aSirRobinSTune	db 'Sir Robin',27h,'s Tune',0
+aSafetySong	db 'Safety Song',0
 aSanctuaryScore	db 'Sanctuary Score',0
 aBringaroundBal	db 'Bringaround Ballad',0
 aRhymeOfDuotime	db 'Rhyme of Duotime',0
 aWatchwoodMelod	db 'Watchwood Melody',0
-aKielSOverture db 'Kiel',27h,'s Overture',0
+aKielSOverture	db 'Kiel',27h,'s Overture',0
 aMinstrelShield	db 'Minstrel Shield',0
-aWhoWillPlay? db 'Who will play?',0
+aWhoWillPlay?	db 'Who will play?',0
 align 2
-aNotABard db 'Not a bard!',0
+aNotABard	db 'Not a bard!',0
 aYouArenTUsingA	db 'You aren',27h,'t using an instrument!',0
 aYourThroatIsDr	db 'Your throat is dry!',0
-songNames dd aSirRobinSTune, aSafetySong, aSanctuaryScore, aBringaroundBal; 0
-dd aRhymeOfDuotime, aWatchwoodMelod, aKielSOverture, aMinstrelShield; 4
+songNames	dd aSirRobinSTune, aSafetySong, aSanctuaryScore, aBringaroundBal; 0
+		dd aRhymeOfDuotime, aWatchwoodMelod, aKielSOverture, aMinstrelShield; 4
 aStopPlayingASo	db 'Stop playing a song',0
-byte_48820 db 0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    1
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    2
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    2
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    1
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    2
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    2
-db    3
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    1
-db    0
-db    0
-db    0
-db    0
-db    3
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
+byte_48820	db 14h dup(0), 1, 14h dup(0), 2, 0Ch dup(0), 2, 16h dup(0), 1
+		db 34h dup(0), 2, 4Eh dup(0), 2, 3, 6 dup(0), 1, 4 dup(0)
+		db 3, 21h dup(0)
 aGillesGillsFor	db 'Gilles Gills for ',0
 aDivineInterven	db 'Divine Intervention for ',0
 aGotterdamuru_0	db 'Gotterdamurung for ',0
-aStrength_ db 'strength.',0
-aIntelligence_ db 'intelligence.',0
-aDexterity_ db 'dexterity.',0
-aConstitution_ db 'constitution.',0
-aLuck_ db 'luck.',0
-aWizard_0 db 'Wizard',0Ah,0
-aSorcerer_0 db 'Sorcerer',0Ah,0
-aConjurer_0 db 'Conjurer',0Ah,0
-aMagician_0 db 'Magician',0Ah,0
-aArchmage_0 db 'Archmage',0Ah,0
+aStrength_	db 'strength.',0
+aIntelligence_	db 'intelligence.',0
+aDexterity_	db 'dexterity.',0
+aConstitution_	db 'constitution.',0
+aLuck_		db 'luck.',0
+aWizard_0	db 'Wizard',0Ah,0
+aSorcerer_0	db 'Sorcerer',0Ah,0
+aConjurer_0	db 'Conjurer',0Ah,0
+aMagician_0	db 'Magician',0Ah,0
+aArchmage_0	db 'Archmage',0Ah,0
 aChronomancer_0	db 'Chronomancer',0Ah,0
-spellLevelCost dw 100, 1000, 2000, 4000, 7000, 10000, 20000; 0
-stru_489E2 spellAdvance	<0, 3>	   ; 0
-spellAdvance <3, 3>	; 1
-spellAdvance <6, 3>	; 2
-spellAdvance <9, 2>	; 3
-spellAdvance <11, 2>	; 4
-spellAdvance <13, 2>	; 5
-spellAdvance <15, 4>	; 6
-spellAdvance <19, 3>	; 7
-spellAdvance <22, 3>	; 8
-spellAdvance <25, 3>	; 9
-spellAdvance <28, 2>	; 10
-spellAdvance <30, 2>	; 11
-spellAdvance <32, 2>	; 12
-spellAdvance <34, 4>	; 13
-spellAdvance <38, 3>	; 14
-spellAdvance <41, 3>	; 15
-spellAdvance <44, 3>	; 16
-spellAdvance <47, 2>	; 17
-spellAdvance <49, 2>	; 18
-spellAdvance <51, 2>	; 19
-spellAdvance <53, 4>	; 20
-spellAdvance <57, 2>	; 21
-spellAdvance <59, 2>	; 22
-spellAdvance <61, 2>	; 23
-spellAdvance <63, 2>	; 24
-spellAdvance <65, 2>	; 25
-spellAdvance <67, 2>	; 26
-spellAdvance <69, 2>	; 27
-spellAdvance <71, 2>	; 28
-spellAdvance <73, 1>	; 29
-spellAdvance <74, 1>	; 30
-spellAdvance <75, 1>	; 31
-spellAdvance <76, 1>	; 32
-spellAdvance <77, 1>	; 33
-spellAdvance <78, 1>	; 34
-spellAdvance <79, 3>	; 35
-spellAdvance <82, 2>	; 36
-spellAdvance <86, 2>	; 37
-spellAdvance <90, 2>	; 38
-spellAdvance <94, 2>	; 39
-spellAdvance <98, 2>	; 40
-spellAdvance <102, 2>	; 41
-spellAdvance <106, 3>	; 42
-spellAdvance <109, 3>	; 43
-spellAdvance <112, 2>	; 44
-spellAdvance <114, 2>	; 45
-spellAdvance <116, 2>	; 46
-spellAdvance <118, 2>	; 47
-spellAdvance <120, 2>	; 48
-specialSpellCost dd 10000, 50000, 50000	 ; 0
-aThouArtInTheHallOfW db	'Thou art in the hall of wizards. Wo'
-db 'uld thou like...',0Ah
-db 0Ah
-db 'Advancement',0Ah
-db 'Spell Acquiring',0Ah
-db 'Buy a new spell',0Ah
-db 'Exit the hall',0
-db    0
-aTheGuildEldersPrepare db 'The Guild elders prepare to weigh t'
-db 'hy merits.',0Ah
-db 0Ah
-db 'Who shall be reviewed?',0
-aTheGuildEldersDeemTha db 'The Guild elders deem that ',0
-aCannotBeRaisedLevels_ db ' cannot be raised levels.',0
-aTheEldersTeachYouTh db	'The Elders teach you the lore.',0
-db    0
-aWhoSeeksTheSpecialK db	'Who seeks the special knowledge of '
-db 'the mystic arts?',0
-aThouMayLearn db 'Thou may learn ',0
-nonClassSpellList dd aGillesGillsFor, aDivineInterven; 0
-dd aGotterdamuru_0	; 2
+spellLevelCost	dw 100, 1000, 2000, 4000, 7000, 10000, 20000; 0
+stru_489E2	spellAdvance <0, 3>	   ; 0
+		spellAdvance <3, 3>	; 1
+		spellAdvance <6, 3>	; 2
+		spellAdvance <9, 2>	; 3
+		spellAdvance <11, 2>	; 4
+		spellAdvance <13, 2>	; 5
+		spellAdvance <15, 4>	; 6
+		spellAdvance <19, 3>	; 7
+		spellAdvance <22, 3>	; 8
+		spellAdvance <25, 3>	; 9
+		spellAdvance <28, 2>	; 10
+		spellAdvance <30, 2>	; 11
+		spellAdvance <32, 2>	; 12
+		spellAdvance <34, 4>	; 13
+		spellAdvance <38, 3>	; 14
+		spellAdvance <41, 3>	; 15
+		spellAdvance <44, 3>	; 16
+		spellAdvance <47, 2>	; 17
+		spellAdvance <49, 2>	; 18
+		spellAdvance <51, 2>	; 19
+		spellAdvance <53, 4>	; 20
+		spellAdvance <57, 2>	; 21
+		spellAdvance <59, 2>	; 22
+		spellAdvance <61, 2>	; 23
+		spellAdvance <63, 2>	; 24
+		spellAdvance <65, 2>	; 25
+		spellAdvance <67, 2>	; 26
+		spellAdvance <69, 2>	; 27
+		spellAdvance <71, 2>	; 28
+		spellAdvance <73, 1>	; 29
+		spellAdvance <74, 1>	; 30
+		spellAdvance <75, 1>	; 31
+		spellAdvance <76, 1>	; 32
+		spellAdvance <77, 1>	; 33
+		spellAdvance <78, 1>	; 34
+		spellAdvance <79, 3>	; 35
+		spellAdvance <82, 2>	; 36
+		spellAdvance <86, 2>	; 37
+		spellAdvance <90, 2>	; 38
+		spellAdvance <94, 2>	; 39
+		spellAdvance <98, 2>	; 40
+		spellAdvance <102, 2>	; 41
+		spellAdvance <106, 3>	; 42
+		spellAdvance <109, 3>	; 43
+		spellAdvance <112, 2>	; 44
+		spellAdvance <114, 2>	; 45
+		spellAdvance <116, 2>	; 46
+		spellAdvance <118, 2>	; 47
+		spellAdvance <120, 2>	; 48
+specialSpellCost	dd 10000, 50000, 50000	 ; 0
+aThouArtInTheHallOfW	db	'Thou art in the hall of wizards. Would thou like...',0Ah,0Ah
+		db 'Advancement',0Ah
+		db 'Spell Acquiring',0Ah
+		db 'Buy a new spell',0Ah
+		db 'Exit the hall',0
+		db    0
+aTheGuildEldersPrepare	db 'The Guild elders prepare to weigh thy merits.',0Ah,0Ah
+		db 'Who shall be reviewed?',0
+aTheGuildEldersDeemTha	db 'The Guild elders deem that ',0
+aCannotBeRaisedLevels_	db ' cannot be raised levels.',0
+aTheEldersTeachYouTh	db 'The Elders teach you the lore.',0
+		db    0
+aWhoSeeksTheSpecialK	db 'Who seeks the special knowledge of the mystic arts?',0
+aThouMayLearn	db 'Thou may learn ',0
+nonClassSpellList	dd aGillesGillsFor, aDivineInterven; 0
+			dd aGotterdamuru_0	; 2
 aInGold_WhoWill	db ' in gold. Who will pay?',0
-aTheLastOfTheGu	db 'The last of the guild elders is her'
-db 'e. Would you like...',0Ah
-db 0Ah
-db 'Advancement',0Ah
-db 'Spell Acquiring',0Ah
-db 'Class Change',0Ah
-db 'Talk to the elder',0Ah
-db 'Exit the guild',0
+aTheLastOfTheGu	db 'The last of the guild elders is here. Would you like...',0Ah,0Ah
+		db 'Advancement',0Ah
+		db 'Spell Acquiring',0Ah
+		db 'Class Change',0Ah
+		db 'Talk to the elder',0Ah
+		db 'Exit the guild',0
 align 2
-aTheGuildElderP	db 'The Guild elder prepares to weigh y'
-db 'our merits.',0Ah
-db 0Ah
-db 'Who shall be reviewed?',0
+aTheGuildElderP	db 'The Guild elder prepares to weigh your merits.',0Ah,0Ah
+		db 'Who shall be reviewed?',0
 align 2
-aHmmm___ShouldI	db '"Hmmm... Should I make you into a z'
-db 'ombie perhaps?!?"',0
+aHmmm___ShouldI	db '"Hmmm... Should I make you into a zombie perhaps?!?"',0
 align 2
 aTheGuildElderD	db 'The Guild elder deems that ',0
 aCannotBeRaised	db ' cannot be raised levels.',0
-aStillNeedeth db ' still needeth ',0
-aExperiencePoin	db ' experience points prior to advance'
-db 'ment.',0
+aStillNeedeth	db ' still needeth ',0
+aExperiencePoin	db ' experience points prior to advancement.',0
 align 2
-aHathEarnedALev	db ' hath earned a level of advancement'
-db '...',0
+aHathEarnedALev	db ' hath earned a level of advancement...',0
 align 2
-a1To db	'+1 to ',0
+a1To		db	'+1 to ',0
 align 2
-fullAttributeString dd aStrength_, aIntelligence_, aDexterity_;	0
-dd aConstitution_, aLuck_; 3
-aWhoSeeksKnowle	db 'Who seeks knowledge of the mystic a'
-db 'rts?',0
-aThouHathLearne	db 'Thou hath learned all the spells in'
-db ' thy art.',0
+fullAttributeString	dd aStrength_, aIntelligence_, aDexterity_;	0
+			dd aConstitution_, aLuck_; 3
+aWhoSeeksKnowle	db 'Who seeks knowledge of the mystic arts?',0
+aThouHathLearne	db 'Thou hath learned all the spells in thy art.',0
 align 2
 aThouCannotAcqu	db 'Thou cannot acquire new spells yet.'
-db 0
-aSpellLevel db ' spell level ',0
-aWillCost db ' will cost ',0
-aInGold_WhoWi_0	db ' in gold. Who will pay?',0
-aNotEnoughGol_1	db 'Not enough gold.',0Ah,0
+		db 0
+aSpellLevel	db ' spell level ',0
+aWillCost	db ' will cost ',0
+aNotEnoughGoldNL	db 'Not enough gold.',0Ah,0
 aTheElderTeache	db 'The Elder teaches you the lore.',0
 aWhichMageSeeks	db 'Which mage seeks to change classes?'
-db 0
+		db 0
 aThouCannotChan	db 'Thou cannot change class.',0
-aYouMustKnowAtL	db 'You must know at least 3 spell leve'
-db 'ls in your present art first.',0
+aYouMustKnowAtL	db 'You must know at least 3 spell levels in your present art first.',0
 align 2
-db ') ',0
+aTheeDoesnTQual	db 'Thee doesn',27h,'t qualify for any new class.',0
+aWhichClassShal	db 0Ah,'Which class shall thee become?',0
+aTheeUnderstand	db 'Thee understands the sacrifice, dost thou not? Thee will be stripped of all thy spells and knowledge thereof. Thee will be more powerful than ever before, but more vulnerable as well.',0
+aDostThouAccept	db 'Dost thou accept this sacrifice?',0Ah,0Ah,0
 align 2
-aTheeDoesnTQual	db 'Thee doesn',27h,'t qualify for any new'
-db ' class.',0
-aWhichClassShal	db 0Ah
-db 'Which class shall thee become?',0
-aTheeUnderstand	db 'Thee understands the sacrifice, dos'
-db 't thou not? Thee will be stripped o'
-db 'f all thy spells and knowledge ther'
-db 'eof. Thee will be more powerful tha'
-db 'n ever before, but more vulnerable '
-db 'as well.',0
-aDostThouAccept	db 'Dost thou accept this sacrifice?',0Ah
-db 0Ah,0
+aKnowThisTheSpe	db '"Know this, the spell to enter Arboria is invoked by uttering ARBO and the spell to return is ENIK. Be wary, for the spells only work in one place in the land."',0
 align 2
-aKnowThisTheSpe	db '"Know this, the spell to enter Arbo'
-db 'ria is invoked by uttering ARBO and'
-db ' the spell to return is ENIK. Be wa'
-db 'ry, for the spells only work in one'
-db ' place in the land."',0
-align 2
-aThereIsALargeG	db '"There is a large grove of trees ju'
-db 'st south of Skara Brae. The spell w'
-db 'ill work there."',0
+aThereIsALargeG	db '"There is a large grove of trees just south of Skara Brae. The spell will work there."',0
 align 2
 aNowThouBeginsT	db 'Now thou begins thy new profession.'
-db 0
+		db 0
 aTheOldReviewBo	db 'The old review board is deserted.',0
 magicUserString	dd aWizard_0, aSorcerer_0, aConjurer_0,	aMagician_0; 0
-dd aArchmage_0,	aChronomancer_0; 4
+		dd aArchmage_0,	aChronomancer_0; 4
 aThouArtNotASpe	db 'Thou art not a spell caster!',0
 align 2
 aWhoWishsToSpea	db 'Who wishs to speak with the elder?',0
 align 2
-aGelidiaTheLand	db '"Gelidia, the land of cold, is ente'
-db 'red by uttering GELI and the spell '
-db 'to return is ECUL."',0
-aToTheNorthIsCo	db 'To the north is Cold Peak, your pas'
-db 'sage to Gelidia is there.',0
+aGelidiaTheLand	db '"Gelidia, the land of cold, is entered by uttering GELI and the spell to return is ECUL."',0
+aToTheNorthIsCo	db 'To the north is Cold Peak, your passage to Gelidia is there.',0
 align 2
-aLucenciaIsEnte	db '"Lucencia is entered by uttering LU'
-db 'CE and the spell to return is ILEG.'
-db '"',0
-aToTheEastIsACr	db 'To the east is a crystal spring, yo'
-db 'ur passage to Lucencia is there.',0
-aKinestiaTheDim	db '"Kinestia, the dimension of machine'
-db 's, is reached by casting KINE. OBRA'
-db ' will bring you back."',0
+aLucenciaIsEnte	db '"Lucencia is entered by uttering LUCE and the spell to return is ILEG."',0
+aToTheEastIsACr	db 'To the east is a crystal spring, your passage to Lucencia is there.',0
+aKinestiaTheDim	db '"Kinestia, the dimension of machines, is reached by casting KINE. OBRA will bring you back."',0
 align 2
-aToTheSouthWest	db '"To the south-west is an old mine, '
-db 'you may reach Kinestia from there."'
+aToTheSouthWest	db '"To the south-west is an old mine, you may reach Kinestia from there."'
 db 0
 align 2
-aTenebrosiaCanB	db '"Tenebrosia can be reached by utter'
-db 'ing OLUK and the spell to return is'
-db ' ECEA."',0
-aToTheSoutheast	db '"To the southeast is Shadow Rock, y'
-db 'our passage to Tenebrosia is there.'
-db '"',0
-aTarmitiaIsEnte	db '"Tarmitia is entered by uttering AE'
-db 'CE and the spell to return is KULO.'
-db '"',0
-aToTheSouthIsAV	db '"To the south is a vale, your passa'
-db 'ge to Tarmitia is there."',0
+aTenebrosiaCanB	db '"Tenebrosia can be reached by uttering OLUK and the spell to return is ECEA."',0
+aToTheSoutheast	db '"To the southeast is Shadow Rock, your passage to Tenebrosia is there."',0
+aTarmitiaIsEnte	db '"Tarmitia is entered by uttering AECE and the spell to return is KULO."',0
+aToTheSouthIsAV	db '"To the south is a vale, your passage to Tarmitia is there."',0
 align 2
 aHurryTimeIsRun	db '"Hurry! Time is running out!"',0
-aILlTeachOnlyAC	db '"I',27h,'ll teach only a Chronomancer '
-db 'the special magic that you need to '
-db 'journey on your quest."',0
+aILlTeachOnlyAC	db '"I',27h,'ll teach only a Chronomancer the special magic that you need to journey on your quest."',0
 align 2
 aSeekOutBrilhas	db '"Seek out Brilhasti ap Tarj!"',0
-aThereHasBeenAW	db 'There has been a write error. Check'
-db ' write protect on floppy.',0
 align 2
-aTheOldManAward	db 'The old man awards each member 6000'
-db '00 experience points.',0
+aTheOldManAward	db 'The old man awards each member 600000 experience points.',0
 align 2
-aWithAWaveOfHis	db 'With a wave of his hand, the old ma'
-db 'n re-energizes all magic users.',0
+aWithAWaveOfHis	db 'With a wave of his hand, the old man re-energizes all magic users.',0
 align 2
-aTheOldManInThe	db 'The old man in the Review Board scr'
-db 'atches his head. "Yes, you are the '
-db 'prophesied ones, but you have come '
-db 'too early. No matter."',0
-aBeneathSkaraBr	db '"Beneath Skara Brae you will find o'
-db 'ne of Tarjan',27h,'s devotees. Brilhas'
-db 'ti ap Tarj is a foul Necromancer, a'
-db 'nd his life impedes my efforts to s'
-db 'tave off disaster."',0
+aTheOldManInThe	db 'The old man in the Review Board scratches his head. "Yes, you are the prophesied ones, but you have come too early. No matter."',0
+aBeneathSkaraBr	db '"Beneath Skara Brae you will find one of Tarjan',27h,'s devotees. Brilhasti ap Tarj is a foul Necromancer, and his life impedes my efforts to stave off disaster."',0
 align 2
-aYouMayEnterThe	db '"You may enter the Catacombs under '
-db 'the Mad God',27h,'s Temple by uttering'
-db ' his master',27h,'s name... ',27h,'Tarjan'
-db 27h,'"',0
+aYouMayEnterThe	db '"You may enter the Catacombs under the Mad God',27h,'s Temple by uttering his master',27h,'s name... ',27h,'Tarjan"',0
 align 2
-aDestroyBrilhas	db '"Destroy Brilhasti ap Tarj, then re'
-db 'turn to me for your true quest."',0
-aWelcomeYeChild	db '"Welcome ye children of the prophec'
-db 'y. Upon your shoulders falls a grea'
-db 't weight, for you must embark on wh'
-db 'at will be your greatest adventure '
-db 'ever."',0
+aDestroyBrilhas	db '"Destroy Brilhasti ap Tarj, then return to me for your true quest."',0
+aWelcomeYeChild	db '"Welcome ye children of the prophecy. Upon your shoulders falls a great weight, for you must embark on what will be your greatest adventure ever."',0
 align 2
-aThatWhichHasLa	db '"That which has laid waste to Skara'
-db ' Brae is an ancient evil recently r'
-db 'eleased. It threatens to destroy al'
-db 'l reality and time as it has wrough'
-db 't havoc on Skara Brae."',0
-aIfYouCannotSto	db '"If you cannot stop it, it will con'
-db 'sume the universe. If you do stop i'
-db 't, you will be rewarded beyond all '
-db 'your dreams."',0
+aThatWhichHasLa	db '"That which has laid waste to Skara Brae is an ancient evil recently released. It threatens to destroy all reality and time as it has wrought havoc on Skara Brae."',0
+aIfYouCannotSto	db '"If you cannot stop it, it will consume the universe. If you do stop it, you will be rewarded beyond all your dreams."',0
 align 2
-aPrepareThyselv	db '"Prepare thyselves, and hasten to t'
-db 'he place of trees, for it is most l'
-db 'ike the first dimension you must so'
-db 'journ in to blunt the evil."',0
-aAboriaTheHomeO	db '"Aboria, the home of Valarian the b'
-db 'old, is reached through using power'
-db 'ful magic that only a Chronomancer '
-db 'can control."',0
+aPrepareThyselv	db '"Prepare thyselves, and hasten to the place of trees, for it is most like the first dimension you must sojourn in to blunt the evil."',0
+aAboriaTheHomeO	db '"Aboria, the home of Valarian the bold, is reached through using powerful magic that only a Chronomancer can control."',0
 align 2
-aBringToMeValar	db '"Bring to me Valarian',27h,'s Bow and '
-db 'The Arrows of Life if Valarian will'
-db ' not return here with you."',0
+aBringToMeValar	db '"Bring to me Valarian',27h,'s Bow and The Arrows of Life if Valarian will not return here with you."',0
 align 2
-aYesAndBeOnTheL	db '"Yes, and be on the lookout for an '
-db 'ally, for you are not the first I h'
-db 'ave sent on this quest. Though your'
-db ' paths are different, they may cros'
-db 's, and you will do well together."',0
+aYesAndBeOnTheL	db '"Yes, and be on the lookout for an ally, for you are not the first I have sent on this quest. Though your paths are different, they may cross, and you will do well together."',0
 align 2
-aTheOldManTakes	db 'The old man takes the news of Valar'
-db 'ian',27h,'s death hard, but he summons'
-db ' a smile to his lips and breathes d'
-db 'eeply.',0
+aTheOldManTakes	db 'The old man takes the news of Valarian',27h,'s death hard, but he summons a smile to his lips and breathes deeply.',0
 align 2
-aYouHaveDoneWel	db '"You have done well, children, and '
-db 'I take well the news that Hawkslaye'
-db 'r has survived this long. Now you a'
-db 're bound for a place far distant."',0
-aItIsTheDimensi	db '"It is the dimension of magic. It i'
-db 's known as Gelidia and if your Chro'
-db 'nomancer is able, I will share the '
-db 'spells to get you there and back ag'
-db 'ain."',0
-aBringLanatirWi	db '"Bring Lanatir with you, or, if you'
-db ' cannot convince him to come, coax '
-db 'from him the Wand of Power and the '
-db 'Sphere of Lanatir."',0
+aYouHaveDoneWel	db '"You have done well, children, and I take well the news that Hawkslayer has survived this long. Now you are bound for a place far distant."',0
+aItIsTheDimensi	db '"It is the dimension of magic. It is known as Gelidia and if your Chronomancer is able, I will share the spells to get you there and back again."',0
+aBringLanatirWi	db '"Bring Lanatir with you, or, if you cannot convince him to come, coax from him the Wand of Power and the Sphere of Lanatir."',0
 align 2
-aTheOldManAppea	db 'The old man appears visibly shaken '
-db 'by the news of Lanatir',27h,'s death. '
-db 'After a long silence he stares off '
-db 'into space and mumbles, "Is it to b'
-db 'e that way then?"',0
+aTheOldManAppea	db 'The old man appears visibly shaken by the news of Lanatir',27h,'s death. After a long silence he stares off into space and mumbles, "Is it to be that way then?"',0
 align 2
-aHisEyesFocusUp	db 'His eyes focus upon you again, and '
-db 'a grim look washes over his feature'
-db 's. "Now you are bound for Lucencia.'
-db '"',0
+aHisEyesFocusUp	db 'His eyes focus upon you again, and a grim look washes over his features. "Now you are bound for Lucencia."',0
 align 2
-aIDareNotHopeAl	db '"I dare not hope Alliria lives, so '
-db 'I want you to recover the Crown of '
-db 'Truth and the Belt of Alliria. Bewa'
-db 're, for she had a jealous consort, '
-db 'and he will protect her as best he '
-db 'can."',0
+aIDareNotHopeAl	db '"I dare not hope Alliria lives, so I want you to recover the Crown of Truth and the Belt of Alliria. Beware, for she had a jealous consort, and he will protect her as best he can."',0
 algn_49F1F:
 align 2
-aTheOldManSLook	db 'The old man',27h,'s look of grim deter'
-db 'mination withstands news of Alliria'
-db 27h,'s death, but the information saps '
-db 'some of his strength.',0
-aQuicklyThenMyC	db '"Quickly then, my children, to dist'
-db 'ant Kinestia!"',0
-aYouMustReturnH	db '"You must return here with The Hamm'
-db 'er of Wrath and Ferofist',27h,'s Helm.'
-db ' I know Ferofist yet lives, but I c'
-db 'annot be sure of how long he will s'
-db 'urvive."',0
-aHurryThePaceQu	db '"Hurry, the pace quickens, and the '
-db 'outlook is horrible if you fail!"',0
+aTheOldManSLook	db 'The old man',27h,'s look of grim determination withstands news of Alliria',27h,'s death, but the information saps some of his strength.',0
+aQuicklyThenMyC	db '"Quickly then, my children, to distant Kinestia!"',0
+aYouMustReturnH	db '"You must return here with The Hammer of Wrath and Ferofist',27h,'s Helm. I know Ferofist yet lives, but I cannot be sure of how long he will survive."',0
+aHurryThePaceQu	db '"Hurry, the pace quickens, and the outlook is horrible if you fail!"',0
 align 2
-aTheOldManSEyes	db 'The old man',27h,'s eyes narrow as you'
-db ' tell of Ferofist',27h,'s end. "An all'
-db 'iance with the dark one, did he say'
-db '? It is well he realized his folly '
-db 'in the end."',0
+aTheOldManSEyes	db 'The old man',27h,'s eyes narrow as you tell of Ferofist',27h,'s end. "An alliance with the dark one, did he say? It is well he realized his folly in the end."',0
 align 2
-aHePausesASecon	db 'He pauses a second, and you see utt'
-db 'er weariness send a tremor through '
-db 'him. "Now to Tenebrosia for all of '
-db 'you."',0
+aHePausesASecon	db 'He pauses a second, and you see utter weariness send a tremor through him. "Now to Tenebrosia for all of you."',0
 align 2
-aRememberInTheL	db '"Remember, in the land where night '
-db 'is day and day is night, nothing is'
-db ' as you know it to be. Paradox live'
-db 's there - trust no one but yourselv'
-db 'es."',0
+aRememberInTheL	db '"Remember, in the land where night is day and day is night, nothing is as you know it to be. Paradox lives there - trust no one but yourselves."',0
 align 2
-aFromThereIRequ	db '"From there I require the Helm of J'
-db 'ustice and Sceadu',27h,'s Cloak."',0
+aFromThereIRequ	db '"From there I require the Helm of Justice and Sceadu',27h,'s Cloak."',0
 align 2
-aNoTheOldManCri	db '"No!" the old man cries out, "not S'
-db 'ceadu as well. The dark one is utte'
-db 'rly mad. Still," the old man smiles'
-db ', "he burns the chaff while I sow t'
-db 'he seed."',0
-aOffWithYouToTa	db '"Off with you to Tarmitia, the land'
-db ' of unceasing warfare. A myriad of '
-db 'ages meld together there, and your '
-db 'success depends upon your ability t'
-db 'o adapt."',0
-aBringMeWerraSS	db '"Bring me Werra',27h,'s Shield and the'
-db ' Strifespear."',0
+aNoTheOldManCri	db '"No!" the old man cries out, "not Sceadu as well. The dark one is utterly mad. Still," the old man smiles, "he burns the chaff while I sow the seed."',0
+aOffWithYouToTa	db '"Off with you to Tarmitia, the land of unceasing warfare. A myriad of ages meld together there, and your success depends upon your ability to adapt."',0
+aBringMeWerraSS	db '"Bring me Werra',27h,'s Shield and the Strifespear."',0
 align 2
-aHisEyesLoseThe	db 'His eyes lose their focus. "It is a'
-db 'lmost done, the circle is almost jo'
-db 'ined."',0
+aHisEyesLoseThe	db 'His eyes lose their focus. "It is almost done, the circle is almost joined."',0
 align 2
-aIKnowTheOldMan	db '"I know," the old man gurgles, "Wer'
-db 'ra lies dead." Blood bubbles up on '
-db 'his lips and joins the dark stains '
-db 'on the rest of his clothing. "I, to'
-db 'o, have been slain by the Mad One."'
-db 0
-aGatherUpThePri	db '"Gather up the prizes you have won,'
-db ' the special ones, those I requeste'
-db 'd. Hawkslayer has already ventured '
-db 'into Malefia, the land of EVIL."',0
-aIHavePlacedThe	db '"I have placed the prizes in the st'
-db 'orage building near the entrance of'
-db ' Skara Brae."',0
-aGetYourselvesH	db '"Get yourselves hence and help him.'
-db ' Destroy the Mad God Tarjan before '
-db 'he destroys all reality!!"',0
+aIKnowTheOldMan	db '"I know," the old man gurgles, "Werra lies dead." Blood bubbles up on his lips and joins the dark stains on the rest of his clothing. "I, too, have been slain by the Mad One."',0
+aGatherUpThePri	db '"Gather up the prizes you have won, the special ones, those I requested. Hawkslayer has already ventured into Malefia, the land of EVIL."',0
+aIHavePlacedThe	db '"I have placed the prizes in the storage building near the entrance of Skara Brae."',0
+aGetYourselvesH	db '"Get yourselves hence and help him. Destroy the Mad God Tarjan before he destroys all reality!!"',0
 align 2
-aWithThoseFinal	db 'With those final words, the old man'
-db ' slumps over, and his body dissolve'
-db 's into a mist that a slight breeze '
-db 'stirs and blows away.',0
+aWithThoseFinal	db 'With those final words, the old man slumps over, and his body dissolves into a mist that a slight breeze stirs and blows away.',0
 align 2
 hpLevelBonusMask db 0Fh, 7, 7, 3, 3, 7,	0Fh, 0Fh, 0Fh, 7; 0 ; This array holds the mask	for bonus hit points for
-db 7, 7, 7, 0		; 10 ; each class at level-up time.
-off_4A6A4 dd mage_wizardReqCheck, mage_sorcererReqCheck; 0
-dd mage_conjurorReqCheck, mage_magicianReqCheck; 2
-dd mage_archmageReqCheck, mage_chronoReqCheck; 4
-byte_4A6BC db 1, 2, 3, 4, 0Ah, 0Bh ; 0
-aBuilding_0 db 'Building',0
-db    0
-aReviewBoard db	'Review Board',0
-db    0
-questFuncs dd chron_questBrilhasti, chron_questValarian; 0
-dd chron_questLanatir, chron_questAlliria; 2
-dd chron_questFerofist,	chron_questSceadu; 4
-dd chron_questWerra, chron_questTarjan;	6
-byte_4A6FA db 0, 1, 40h, 10h, 4, 1, 40h, 10h; 0
-byte_4A702 db 1, 1, 0, 0, 0, 0,	1, 1; 0
-aGuild db 'Guild',0
-aWelcomeBraveHe	db '"Welcome, brave heroes. You have su'
-db 'cceeded in destroying the threat to'
-db ' all reality. As you know, to do th'
-db 'is, you slipped the bonds of time, '
-db 'and traveled forbidden routes throu'
-db 'gh that which has forever been. You'
-db ' pressed your struggle forward desp'
-db 'ite danger and death, and you accom'
-db 'plished that which the gods themsel'
-db 'ves were unable to do."',0Ah
-db 0Ah
-db 'His praise washes over you like a w'
-db 'arm ocean wave, and you feel streng'
-db 'th infuse your body.',0
-aInDoingWhatYou	db '"In doing what you have done, you h'
-db 'ave proved youself worthy of nothin'
-db 'g less than the ultimate reward." H'
-db 'e closes his eyes and raises his ha'
-db 'nds. "The death of the gods tore re'
-db 'ality asunder, but you bound it up '
-db 'again. The gods of old are dead, th'
-db 'erefore I accept you as my new chil'
-db 'dren. You shall be gods yourselves!'
-db '"',0Ah
-db 0Ah,0
-aHisEyesOpenAga	db 'His eyes open again and you look up'
-db 'on infinity. At once you see Skara '
-db 'Brae restored to its former beauty.'
-db ' You see beyond it and the Six citi'
-db 'es of the Plains. You see the whole'
-db ' world and each of its cultures, an'
-db 'd you realize all of it is now your'
-db ' domain.',0Ah
-db 0Ah,0
-aAndSoItCameToP	db '"And so it came to pass that eight '
-db 'new stars burned in the night sky. '
-db 'The least of these, the Companion s'
-db 'tar, was named Hawkslayer after a h'
-db 'ero of legend. The other seven, tog'
-db 'ether known as the Company of Heroe'
-db 's, are each named for one of the Ne'
-db 'w Gods. Each night they can be seen'
-db ' is betokened a good night, and adv'
-db 'enturers know these gods smile espe'
-db 'cially upon them..."',0Ah
-db '-- excerpt from The Gospel of the N'
-db 'ew Gods (Chap I, Verses 5-9)',0Ah
-db 0Ah
-db 0Ah,0
-aYourPartyWillN	db 'Your party will now alter time back'
-db ' to the refugee camp.',0Ah
-db 'Who knows what new challenges await'
-db ' you in the future!',0
-aATrapIsNear db	'A trap is near!',0
+		db 7, 7, 7, 0		; 10 ; each class at level-up time.
+off_4A6A4	dd mage_wizardReqCheck, mage_sorcererReqCheck; 0
+		dd mage_conjurorReqCheck, mage_magicianReqCheck; 2
+		dd mage_archmageReqCheck, mage_chronoReqCheck; 4
+byte_4A6BC	db 1, 2, 3, 4, 0Ah, 0Bh ; 0
+aReviewBoard	db 'Review Board',0
+		db    0
+questFuncs	dd chron_questBrilhasti, chron_questValarian; 0
+		dd chron_questLanatir, chron_questAlliria; 2
+		dd chron_questFerofist,	chron_questSceadu; 4
+		dd chron_questWerra, chron_questTarjan;	6
+byte_4A6FA	db 0, 1, 40h, 10h, 4, 1, 40h, 10h; 0
+byte_4A702	db 1, 1, 0, 0, 0, 0,	1, 1; 0
+aGuild		db 'Guild',0
+aWelcomeBraveHe	db '"Welcome, brave heroes. You have succeeded in destroying the threat to all reality. As you know, to do this, you slipped the bonds of time, and traveled forbidden routes'
+		db 'through that which has forever been. You pressed your struggle forward despite danger and death, and you accomplished that which the gods themselves were unable to do."'
+		db 0Ah,0Ah
+		db 'His praise washes over you like a warm ocean wave, and you feel strength infuse your body.',0
+aInDoingWhatYou	db '"In doing what you have done, you have proved youself worthy of nothing less than the ultimate reward." He closes his eyes and raises his hands. '
+		db '"The death of the gods tore reality asunder, but you bound it up again. The gods of old are dead, therefore I accept you as my new children. You shall be gods yourselves!"'
+		db 0Ah,0Ah,0
+aHisEyesOpenAga	db 'His eyes open again and you look up on infinity. At once you see Skara Brae restored to its former beauty. You see beyond it and the Six cities of the Plains. '
+		db 'You see the whole world and each of its cultures, and you realize all of it is now your domain.',0Ah,0Ah,0
+aAndSoItCameToP	db '"And so it came to pass that eight new stars burned in the night sky. The least of these, the Companion star, was named Hawkslayer after a hero of legend. '
+		db 'The other seven, together known as the Company of Heroes, are each named for one of the New Gods. Each night they can be seen is betokened a good night, and '
+		db 'adventurers know these gods smile especially upon them..."',0Ah,'-- excerpt from The Gospel of the New Gods (Chap I, Verses 5-9)',0Ah,0Ah,0Ah,0
+aYourPartyWillN	db 'Your party will now alter time back to the refugee camp.',0Ah
+		db 'Who knows what new challenges await you in the future!',0
+aATrapIsNear	db 'A trap is near!',0
 aThereAreStai_0	db 'There are stairs near...',0
 aSomethingSpeci	db 'Something special is near...',0
 aASpinnerIsNear	db 'A spinner is near...',0
 aYourSpellsWave	db 'Your spells waver...',0
 aSomethingAhead	db 'Something ahead...',0
-aOdd___	db 'Odd...',0
+aOdd___		db 'Odd...',0
 aAwfullyQuietAh	db 'Awfully quiet ahead...',0
-aStoneBlock db 'stone block!',0
-aTripwire db 'tripwire!',0
-aPit db	'pit!',0
-aSpikedPit db 'spiked pit!',0
+aStoneBlock	db 'stone block!',0
+aTripwire	db 'tripwire!',0
+aPit		db 'pit!',0
+aSpikedPit	db 'spiked pit!',0
 aPoisonGasCloud	db 'poison gas cloud!',0
-aPunjiStakes db	'punji stakes!',0
-aCrossbowBolts db 'crossbow bolts!',0
-aShockWave_0 db	'shock wave!',0
-aAcidBath db 'acid bath!',0
-aMindZap db 'mind zap!',0
-aPoisonSpray db	'poison spray!',0
+aPunjiStakes	db 'punji stakes!',0
+aCrossbowBolts	db 'crossbow bolts!',0
+aShockWave_0	db 'shock wave!',0
+aAcidBath	db 'acid bath!',0
+aMindZap	db 'mind zap!',0
+aPoisonSpray	db 'poison spray!',0
 aPoisonSpikedPi	db 'poison spiked pit!',0
-aMageZap db 'mage zap!',0
-aDecapitator db	'decapitator!',0
+aMageZap	db 'mage zap!',0
+aDecapitator	db 'decapitator!',0
 aTimedWarstrike	db 'timed warstrike!',0
-aShockSphere_0 db 'shock sphere!',0
-aCrushingWalls db 'crushing walls!',0
-aRollingBall db	'rolling ball!',0
+aShockSphere_0	db 'shock sphere!',0
+aCrushingWalls	db 'crushing walls!',0
+aRollingBall	db 'rolling ball!',0
 aBasiliskSnar_0	db 'basilisk snare!',0
-aWitherStrike db 'wither strike!',0
-aSledgehammer db 'sledgehammer!',0
-aEarthquake db 'earthquake!',0
-aDeathstrike db	'deathstrike!',0
-aBonkers db 'bonkers!',0
-aAWanderingCreatureOff db 'A wandering creature offers to join'
-db ' your party. You can:',0Ah
-db 0Ah
-db '@Allow it to join',0Ah
-db '@Fight it',0Ah
-db '@Leave in peace',0
-aComeHearTheTaleOfSkar db 'Come hear the tale of Skara Brae - '
-db 'A god returned to have his way. Cre'
-db 'atures of darkness, spawn of night,'
-db ' The Mad One',27h,'s kin destroyed the'
-db ' site. Defenders fell, their bane c'
-db 'ome true, Garth, Roscoe, Kylearan t'
-db 'oo! As doom approached, the helples'
-db 's fled. It did no good, the streets'
-db ' ran red. Survivors few, they sit a'
-db 'nd mope, with but one final ray of '
-db 'hope: ',27h,'Cross time and space, the'
-db ' legends say, Heroes, at last! To s'
-db 'teal the day! ',0
-db    0
+aWitherStrike	db 'wither strike!',0
+aSledgehammer	db 'sledgehammer!',0
+aEarthquake	db 'earthquake!',0
+aDeathstrikeEXCL	db 'deathstrike!',0
+aBonkers	db 'bonkers!',0
+aAWanderingCreatureOff	db 'A wandering creature offers to join your party. You can:'
+		db 0Ah,0Ah
+		db '@Allow it to join',0Ah
+		db '@Fight it',0Ah
+		db '@Leave in peace',0
+aComeHearTheTaleOfSkar db 'Come hear the tale of Skara Brae - A god returned to have his way. Creatures of darkness, spawn of night, The Mad One',27h,'s kin destroyed the'
+		db ' site. Defenders fell, their bane come true, Garth, Roscoe, Kylearan too! As doom approached, the helpless fled. It did no good, the streets'
+		db ' ran red. Survivors few, they sit and mope, with but one final ray of hope: ',27h,'Cross time and space, the legends say, Heroes, at last! To steal the day! ',0
+		db    0
 someMessageList	dd aWelcomeBraveHe	; 0
-dd aInDoingWhatYou	; 1
-dd aHisEyesOpenAga	; 2
-dd aAndSoItCameToP	; 3
-dd aYourPartyWillN	; 4
-aStuck___ db 0Ah
-db 'Stuck...',0Ah,0
+		dd aInDoingWhatYou	; 1
+		dd aHisEyesOpenAga	; 2
+		dd aAndSoItCameToP	; 3
+		dd aYourPartyWillN	; 4
 align 2
-aAnExplosion db	0Ah
-db 'An explosion!',0
+aAnExplosion	db 0Ah,'An explosion!',0
 align 2
-aDarkness db 0Ah
-db 'Darkness!',0
+aDarkness	db 0Ah,'Darkness!',0
 align 2
-aThereIsAPortal	db 0Ah
-db 'There is a portal above you.',0
-aThereIsAPort_0	db 0Ah
-db 'There is a portal below.',0
-aTheSoundOfSile	db 0Ah
-db 'The sound of silence...',0
+aThereIsAPortAbove	db 0Ah,'There is a portal above you.',0
+aThereIsAPortBelow	db 0Ah,'There is a portal below.',0
+aTheSoundOfSile	db 0Ah,'The sound of silence...',0
 align 2
-detectMessages dd aATrapIsNear	       ; 0
-dd aThereAreStai_0	; 1
-dd aSomethingSpeci	; 2
-dd aASpinnerIsNear	; 3
-dd aYourSpellsWave	; 4
-dd aSomethingAhead	; 5
-dd aOdd___		; 6
-dd aAwfullyQuietAh	; 7
-aTrapYouVeHitA db 'TRAP! You',27h,'ve hit a ',0
-trapTypeString dd aStoneBlock, aTripwire, aPit,	aSpikedPit; 0
-dd aPoisonGasCloud, aPunjiStakes, aCrossbowBolts; 4
-dd aShockWave_0, aAcidBath, aMindZap, aPoisonSpray; 7
-dd aPoisonSpikedPi, aMageZap, aDecapitator; 11
-dd aTimedWarstrike, aShockSphere_0, aCrushingWalls; 14
-dd aRollingBall, aBasiliskSnar_0, aWitherStrike; 17
-dd aSledgehammer, aEarthquake, aDeathstrike; 20
-dd aBonkers		; 23
-byte_4B238 db 0, 0, 0, 0	   ; 0
-db 0, 1, 0, 0		; 4
-db 0, 0, 0, 0		; 8
-db 3, 1, 1, 0		; 12
-db 0, 0, 0, 0		; 16
-db 0, 0, 0, 0		; 20
-db 6, 4, 0, 0		; 24
-db 0, 7, 4, 0		; 28
-byte_4B258 db 0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-byte_4B278 db 0, 1, 2, 0	   ; 0
-db 3, 4, 5, 0		; 4
-db 6, 7, 8, 0		; 8
-db 9, 10, 11, 0		; 12
-db 12, 13, 14, 0	; 16
-db 15, 16, 17, 0	; 20
-db 18, 19, 20, 0	; 24
-db 21, 22, 23, 0	; 28
-byte_4B298 db 0Fh
-byte_4B299 db 0Fh
-db  0Eh
-db    0
-db  13h
-db  13h
-db  13h
-db    0
-db  15h
-db  14h
-db  14h
-db    0
-db  18h
-db  18h
-db  17h
-db    0
-db  26h	; &
-db  26h	; &
-db  28h	; (
-db    0
-db  27h	
-db  28h	; (
-db  28h	; (
-db    0
-db  2Ah	; *
-db  29h	; )
-db  2Ah	; *
-db    0
-db  2Bh	; +
-db  2Eh	; .
-db  2Bh	; +
-db    0
-byte_4B2B8 db 0, 2, 4, 0	   ; 0
-detectByte db 0, 0FFh, 0, 0FFh	   ; 0 ; This array holds the flag byte	to detect certain
-db 0, 0, 0, 1		; 4 ; types of squares
-db 1, 1, 1, 1		; 8
-db 1, 0FFh		; 12
-detectMask db 10h, 0, 1, 0	   ; 0 ; This array holds the bitmasks to detect certain
-db 10h,	1, 4, 1		; 4 ; types of squares
-db 2, 4, 8, 10h		; 8
-db 20h,	0		; 12
-detectMsgIndex db 0, 0,	1, 0	       ; 0
-db 0, 1, 2, 3		; 4
-db 4, 5, 6, 7		; 8
-db 5, 0			; 12
-off_4B2E6 dd dunsq_battleCheck,	dunsq_doTrap, dunsq_doDarkness;	0
-dd dunsq_doSpinner, dunsq_antiMagic, dunsq_drainHP; 3
-dd dunsq_somethingOdd, dunsq_doSilence,	dunsq_regenSppt; 6
-dd dunsq_drainSppt, dunsq_monHostile, dunsq_doStuck; 9
-dd dunsq_unknown3, dunsq_doExplosion, dunsq_portalAbove; 12
-dd dunsq_portalBelow
-byte_4B326 db 0, 0, 0		   ; 0
-db 1, 1, 1		; 3
-db 1, 1, 1		; 6
-db 1, 1, 2		; 9
-db 2, 2, 0		; 12
-db 0			; 15
-byte_4B336 db 80h, 10h,	8	   ; 0
-db 1, 2, 4		; 3
-db 8, 10h, 20h		; 6
-db 40h,	80h, 80h	; 9
-db 40h,	10h, 40h	; 12
-db 20h			; 15
-off_4B346 dd dun_randomMonJoin
-dd dun_randomMonFight
-dd dun_randomMonLeave
+detectMessages	dd aATrapIsNear	       ; 0
+		dd aThereAreStai_0	; 1
+		dd aSomethingSpeci	; 2
+		dd aASpinnerIsNear	; 3
+		dd aYourSpellsWave	; 4
+		dd aSomethingAhead	; 5
+		dd aOdd___		; 6
+		dd aAwfullyQuietAh	; 7
+aTrapYouVeHitA	db 'TRAP! You',27h,'ve hit a ',0
+trapTypeString	dd aStoneBlock, aTripwire, aPit, aSpikedPit; 0
+		dd aPoisonGasCloud, aPunjiStakes, aCrossbowBolts; 4
+		dd aShockWave_0, aAcidBath, aMindZap, aPoisonSpray; 7
+		dd aPoisonSpikedPi, aMageZap, aDecapitator; 11
+		dd aTimedWarstrike, aShockSphere_0, aCrushingWalls; 14
+		dd aRollingBall, aBasiliskSnar_0, aWitherStrike; 17
+		dd aSledgehammer, aEarthquake, aDeathstrikeEXCL; 20
+		dd aBonkers		; 23
+byte_4B238	db 0, 0, 0, 0	   ; 0
+		db 0, 1, 0, 0		; 4
+		db 0, 0, 0, 0		; 8
+		db 3, 1, 1, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 0, 0, 0		; 20
+		db 6, 4, 0, 0		; 24
+		db 0, 7, 4, 0		; 28
+byte_4B258	db 20h dup(0)
+byte_4B278	db 0, 1, 2, 0	   ; 0
+		db 3, 4, 5, 0		; 4
+		db 6, 7, 8, 0		; 8
+		db 9, 10, 11, 0		; 12
+		db 12, 13, 14, 0	; 16
+		db 15, 16, 17, 0	; 20
+		db 18, 19, 20, 0	; 24
+		db 21, 22, 23, 0	; 28
+trapSaveList	trapSave_t < 0Fh, 0Fh	>
+		trapSave_t < 0Eh, 0	>
+		trapSave_t < 13h, 13h	>
+		trapSave_t < 13h, 0	>
+		trapSave_t < 15h, 14h	>
+		trapSave_t < 14h, 0	>
+		trapSave_t < 18h, 18h	>
+		trapSave_t < 17h, 0	>
+		trapSave_t < 26h, 26h	>
+		trapSave_t < 28h, 0	>
+		trapSave_t < 27h, 28h	>
+		trapSave_t < 28h, 0	>
+		trapSave_t < 2Ah, 29h	>
+		trapSave_t < 2Ah, 0	>
+		trapSave_t < 2Bh, 2Eh	>
+		trapSave_t < 2Bh, 0	>
+byte_4B2B8	db 0, 2, 4, 0	   ; 0
+detectByte	db 0, 0FFh, 0, 0FFh	   ; 0 ; This array holds the flag byte	to detect certain
+		db 0, 0, 0, 1		; 4 ; types of squares
+		db 1, 1, 1, 1		; 8
+		db 1, 0FFh		; 12
+detectMask	db 10h, 0, 1, 0	   ; 0 ; This array holds the bitmasks to detect certain
+		db 10h,	1, 4, 1		; 4 ; types of squares
+		db 2, 4, 8, 10h		; 8
+		db 20h,	0		; 12
+detectMsgIndex	db 0, 0, 1, 0	       ; 0
+		db 0, 1, 2, 3		; 4
+		db 4, 5, 6, 7		; 8
+		db 5, 0			; 12
+off_4B2E6	dd dunsq_battleCheck,	dunsq_doTrap, dunsq_doDarkness;	0
+		dd dunsq_doSpinner, dunsq_antiMagic, dunsq_drainHP; 3
+		dd dunsq_somethingOdd, dunsq_doSilence,	dunsq_regenSppt; 6
+		dd dunsq_drainSppt, dunsq_monHostile, dunsq_doStuck; 9
+		dd dunsq_unknown3, dunsq_doExplosion, dunsq_portalAbove; 12
+		dd dunsq_portalBelow
+byte_4B326	db 0, 0, 0		   ; 0
+		db 1, 1, 1		; 3
+		db 1, 1, 1		; 6
+		db 1, 1, 2		; 9
+		db 2, 2, 0		; 12
+		db 0			; 15
+byte_4B336	db 80h, 10h, 8	   ; 0
+		db 1, 2, 4		; 3
+		db 8, 10h, 20h		; 6
+		db 40h,	80h, 80h	; 9
+		db 40h,	10h, 40h	; 12
+		db 20h			; 15
+off_4B346	dd dun_randomMonJoin
+		dd dun_randomMonFight
+		dd dun_randomMonLeave
 aDragonDragonWh	db 'Dragon, dragon,',0Ah
-db 'Why do you lair?',0Ah
-db 'Unfurl your wings, Take to the air!'
-db 0Ah
-db 'Soar high above, Far away fly,',0Ah
-db 'Or is that where, You wish to die?',0
+		db 'Why do you lair?',0Ah
+		db 'Unfurl your wings, Take to the air!',0Ah
+		db 'Soar high above, Far away fly,',0Ah
+		db 'Or is that where, You wish to die?',0
 aHawkslayerHawk	db 'Hawkslayer, Hawkslayer,',0Ah
-db 'Why do you ask? Killing me is a dif'
-db 'ficult task. My claws are sharp, my'
-db ' fangs sharper yet, And my breath f'
-db 'lames, let us not forget.',0
+		db 'Why do you ask? Killing me is a difficult task. My claws are sharp, my fangs sharper yet, And my breath flames, let us not forget.',0
 aDragonDragonTh	db 'Dragon, dragon,',0Ah
-db 'Thou art quite strong. Your scales '
-db 'are bright and talons are long, But'
-db ' a duty I have and it is clear: Wha'
-db 'tever it takes, I will drive you fr'
-db 'om here.',0
+		db 'Thou art quite strong. Your scales are bright and talons are long, But a duty I have and it is clear: Whatever it takes, I will drive you from here.',0
 aHawkslayerHa_0	db 'Hawkslayer, Hawkslayer,',0Ah
-db 'Such a brief life. Have you no wish'
-db ' to again see your wife? Imagine he'
-db 'r tears and grief and despair, Walk'
-db ' away from this fight, you have not'
-db ' a prayer.',0
+		db 'Such a brief life. Have you no wish to again see your wife? Imagine her tears and grief and despair, Walk away from this fight, you have not a prayer.',0
 aDragonDragonHo	db 'Dragon, dragon,',0Ah
-db 'How wise thou art.',0Ah
-db 'A massive beast with such a kind he'
-db 'art.',0Ah
-db 'I do wish to kiss my wife and my he'
-db 'ir,',0Ah
-db '"Pray, fly to the mountains and awa'
-db 'it me there.',0
+		db 'How wise thou art.',0Ah
+		db 'A massive beast with such a kind heart.',0Ah
+		db 'I do wish to kiss my wife and my heir,',0Ah
+		db '"Pray, fly to the mountains and await me there.',0
 aHawkslayerHa_1	db 'Hawkslayer, Hawkslayer,',0Ah
-db 'I thought you were brave. Here I aw'
-db 'ait you, deep in this cave. Come, l'
-db 'ittle man, and I',27h,'ll eat your bra'
-db 'in, Then ravage Lucencia again and '
-db 'again.',0
+		db 'I thought you were brave. Here I await you, deep in this cave. Come, little man, and I',27h,'ll eat your brain, Then ravage Lucencia again and again.',0
 aDragonDragonGr	db 'Dragon, dragon,',0Ah
-db 'Great is your heart. Massive your b'
-db 'ody, but you are not smart. The rum'
-db 'ble you hear and the dust in the ai'
-db 'r? I',27h,'ve closed the cave off and '
-db 'trapped you in there.',0
+		db 'Great is your heart. Massive your body, but you are not smart. The rumble you hear and the dust in the air? I',27h,'ve closed the cave off and trapped you in there.',0
 aHawkslayerHa_2	db 'Hawkslayer, Hawkslayer,',0Ah
-db 'Others will come.',0Ah
-db 'I will wait but I will not succumb.'
-db 0Ah
-db 'Hero you are, and incredibly sly,',0Ah
-db 'But the future I know and a hero yo'
-db 'u',27h,'ll die...',0
-aHeWasBornWithT	db 'He was born with the red, red rose,'
-db ' Sign of his blood, was the link to'
-db ' the past.',0
-aInBattleHeWonT	db 'In battle, he won the blue, blue ro'
-db 'se, Blossom of his valor, his weapo'
-db 'ns were cast.',0
-aSheWasForHimTh	db 'She was for him the yellow, yellow '
-db 'rose, Her spirit divine, his love w'
-db 'ould always last.',0
-aHisPledgeHeMad	db 'His pledge he made o',27h,'er the whit'
-db 'e, white rose, And she accepted it '
-db 'as sooth, and remained his steadfas'
-db 't.',0
-aSoHeMadeForHer	db 'So he made for her the rainbow rose'
-db ', Like Alliria',27h,'s beauty, a bloss'
-db 'om unsurpassed.',0
+		db 'Others will come.',0Ah
+		db 'I will wait but I will not succumb.',0Ah
+		db 'Hero you are, and incredibly sly,',0Ah
+		db 'But the future I know and a hero you',27h,'ll die...',0
+aHeWasBornWithT	db 'He was born with the red, red rose, Sign of his blood, was the link to the past.',0
+aInBattleHeWonT	db 'In battle, he won the blue, blue rose, Blossom of his valor, his weapons were cast.',0
+aSheWasForHimTh	db 'She was for him the yellow, yellow rose, Her spirit divine, his love would always last.',0
+aHisPledgeHeMad	db 'His pledge he made o',27h,'er the white, white rose, And she accepted it as sooth, and remained his steadfast.',0
+aSoHeMadeForHer	db 'So he made for her the rainbow rose, Like Alliria',27h,'s beauty, a blossom unsurpassed.',0
 aMadGodBadGodTh	db 'Mad god, bad god,',0Ah
-db 'Thrust from the sky,',0Ah
-db 'Foolish god, ghoulish god.',0Ah
-db 'We can',27h,'t hear you cry.',0
+		db 'Thrust from the sky,',0Ah
+		db 'Foolish god, ghoulish god.',0Ah
+		db 'We can',27h,'t hear you cry.',0
 aRudeGodCrudeGo	db 'Rude god, crude god,',0Ah
-db 'Why must you terrify?',0Ah
-db 'Error god, terror god,',0Ah
-db 'Do not your future scry.',0
+		db 'Why must you terrify?',0Ah
+		db 'Error god, terror god,',0Ah
+		db 'Do not your future scry.',0
 aCleverGodNever	db 'Clever god, never god,',0Ah
-db 'Your time is nigh.',0Ah
-db 'Dire god, liar god,',0Ah
-db 'Why won',27h,'t you just die?',0
+		db 'Your time is nigh.',0Ah
+		db 'Dire god, liar god,',0Ah
+		db 'Why won',27h,'t you just die?',0
 aInTheLandOfNoT	db 'In the land of no time,',0Ah
-db 'The Clock within burns like a flame'
-db ',',0
+		db 'The Clock within burns like a flame,',0
 aLockingEachInH	db 'Locking each in his own crime:',0Ah
-db 'One can only leave when he came.',0
-aWelcomeAndBeHa	db 'Welcome and be happy o',27h,' weary tr'
-db 'avelers! Step to the stage and list'
-db 'en to my tales.',0Ah
-db 0Ah
-db 'You can:',0Ah
-db 0Ah
-db 'Listen to the bard',0Ah
-db 'Exit the hall',0
+		db 'One can only leave when he came.',0
+aWelcomeAndBeHa	db 'Welcome and be happy o',27h,' weary travelers! Step to the stage and listen to my tales.',0Ah,0Ah
+		db 'You can:',0Ah,0Ah
+		db 'Listen to the bard',0Ah
+		db 'Exit the hall',0
 align 2
-aTheseAreTheSon	db 'These are the songs I know...',0Ah
-db 0Ah
-db '@Dragon Song',0Ah
-db '@Flower Ballad',0Ah
-db '@Kiel',27h,'s Overture',0Ah
-db '@Gale of Gods',0Ah
-db '@Evil',27h,'s Bane',0Ah
-db '@Minstrel Shield',0
-off_4BC98 dd aDragonDragonWh
-dd aHawkslayerHawk
-dd aDragonDragonTh
-dd aHawkslayerHa_0
-dd aDragonDragonHo
-dd aHawkslayerHa_1
-dd aDragonDragonGr
-dd aHawkslayerHa_2
-off_4BCB8 dd aHeWasBornWithT
-dd aInBattleHeWonT
-dd aSheWasForHimTh
-dd aHisPledgeHeMad
-dd aSoHeMadeForHer
-off_4BCCC dd aMadGodBadGodTh
-dd aRudeGodCrudeGo
-dd aCleverGodNever
-off_4BCD8 dd aInTheLandOfNoT
-dd aLockingEachInH
-aTheBardSmilesA	db 'The bard smiles and says, "That one'
-db ' will cost thee for your bards will'
-db ' learn the magic of my song."',0
-aItWillCostYou db '"It will cost you ',0
+aTheseAreTheSon	db 'These are the songs I know...',0Ah,0Ah
+		db '@Dragon Song',0Ah
+		db '@Flower Ballad',0Ah
+		db '@Kiel',27h,'s Overture',0Ah
+		db '@Gale of Gods',0Ah
+		db '@Evil',27h,'s Bane',0Ah
+		db '@Minstrel Shield',0
+off_4BC98	dd aDragonDragonWh
+		dd aHawkslayerHawk
+		dd aDragonDragonTh
+		dd aHawkslayerHa_0
+		dd aDragonDragonHo
+		dd aHawkslayerHa_1
+		dd aDragonDragonGr
+		dd aHawkslayerHa_2
+off_4BCB8	dd aHeWasBornWithT
+		dd aInBattleHeWonT
+		dd aSheWasForHimTh
+		dd aHisPledgeHeMad
+		dd aSoHeMadeForHer
+off_4BCCC	dd aMadGodBadGodTh
+		dd aRudeGodCrudeGo
+		dd aCleverGodNever
+off_4BCD8	dd aInTheLandOfNoT
+		dd aLockingEachInH
+aTheBardSmilesA	db 'The bard smiles and says, "That one will cost thee for your bards will learn the magic of my song."',0
+aItWillCostYou	db '"It will cost you ',0
 align 2
-aInGold_WhoWi_1	db ' in gold. Who will pay?"',0
-align 2
-aNotEnoughGol_2	db 'Not enough gold.',0Ah,0
-aTheBardPlaysTh	db 'The bard plays the song and you mem'
-db 'orize the lines.',0
-aBardSHall db 'Bard',27h,'s Hall',0
-word_4BDC4 dw 8, 5, 0, 3, 2, 0	   ; 0
-bardSongLyrics dd off_4BC98	       ; 0
-dd off_4BCB8		; 1
-dd offset word_42670	; 2
-dd off_4BCCC		; 3
-dd off_4BCD8		; 4
+aTheBardPlaysTh	db 'The bard plays the song and you memorize the lines.',0
+aBardSHall	db 'Bard',27h,'s Hall',0
+word_4BDC4	dw 8, 5, 0, 3, 2, 0    ; 0
+bardSongLyrics	dd off_4BC98	       ; 0
+		dd off_4BCB8		; 1
+		dd offset word_42670	; 2
+		dd off_4BCCC		; 3
+		dd off_4BCD8		; 4
 align 8
-bardSongPrice dd 30000,	60000	      ;	0
-byte_4BDF0 db 1, 2		   ; 0
-aButNoRoomForASummoni db 'but no room for a summoning!',0Ah
-db 0Ah,0
-db    0
-aAndA db 'and a ',0
-db    0
-aAppears db ' appears!',0Ah
-db 0Ah,0
-summonData db  57h ; W
-db  6Fh	; o
-db  6Ch	; l
-db  2Fh	; /
-db  66h	; f
-db  5Ch	; \
-db  76h	; v
-db  65h	; e
-db  73h	; s
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-summonHpDice db	0A1h ; °
-db  0Ah
-db    0
-db  11h
-db  8Ch	; å
-db    0
-db 0F0h	; 
-db  23h	; #
-db 0F0h	; 
-db  23h	; #
-db 0F0h	; 
-db  23h	; #
-db 0F0h	; 
-db  23h	; #
-db    0
-db    0
-db    4
-db  64h	; d
-db    0
-db    0
-db  43h	; C
-db  12h
-db  19h
-db  37h	; 7
-db  41h	; A
-db    0
-db    0
-db    8
-db  0Fh
-db  19h
-db  17h
-db  1Ch
-db  53h	; S
-db  6Ch	; l
-db  61h	; a
-db  79h	; y
-db  65h	; e
-db  72h	; r
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db  81h	; Å
-db  40h	; @
-db    0
-db  11h
-db  17h
-db    0
-db 0F7h	; ˜
-db  81h	; Å
-db 0F7h	; ˜
-db  81h	; Å
-db 0F7h	; ˜
-db  81h	; Å
-db 0F7h	; ˜
-db  81h	; Å
-db    0
-db    0
-db  21h	; !
-db  64h	; d
-db    0
-db    0
-db  80h	; Ä
-db  12h
-db  19h
-db  37h	; 7
-db  3Dh	; =
-db    8
-db    0
-db    4
-db  0Fh
-db  19h
-db  19h
-db  23h	; #
-db  57h	; W
-db  69h	; i
-db  6Eh	; n
-db  64h	; d
-db  20h
-db  57h	; W
-db  61h	; a
-db  72h	; r
-db  72h	; r
-db  69h	; i
-db  6Fh	; o
-db  72h	; r
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db  81h	; Å
-db  14h
-db    0
-db  11h
-db  17h
-db    0
-db 0F0h	; 
-db  62h	; b
-db 0F0h	; 
-db  62h	; b
-db 0F0h	; 
-db  62h	; b
-db 0F0h	; 
-db  62h	; b
-db    0
-db    0
-db  14h
-db  64h	; d
-db    0
-db    0
-db  94h	; î
-db  12h
-db  19h
-db  37h	; 7
-db  3Dh	; =
-db    0
-db    0
-db    0
-db  0Fh
-db  19h
-db  19h
-db  23h	; #
-db  57h	; W
-db  69h	; i
-db  6Eh	; n
-db  64h	; d
-db  20h
-db  4Fh	; O
-db  67h	; g
-db  72h	; r
-db  65h	; e
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db    0
-db 0A1h	; °
-db  0Ah
-db    0
-db  11h
-db  97h	; ó
-db    0
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db 0FFh
-db    0
-db 0FFh
-db    0
-db    0
-db    0
-db  33h	; 3
-db  64h	; d
-db    0
-db    0
-db  95h	; ï
-db  12h
-db  19h
-db  37h	; 7
-db  3Dh	; =
-db    0
-db    0
-db    0
-db  0Fh
-db  19h
-db  19h
-db  23h	; #
-db  57h	; W
-db  69h	; i
-db  6Eh	; n
-db  64h	; d
-db  20h
-db  44h	; D
-db  72h	; r
-db  61h	; a
-db  67h	; g
-db  6Fh	; o
-db  6Eh	; n
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db 0A2h	; ¢
-db  28h	; (
-db    0
-db  11h
-db  99h	; ô
-db    0
-db  80h	; Ä
-db  69h	; i
-db  80h	; Ä
-db  69h	; i
-db 0F0h	; 
-db  69h	; i
-db  80h	; Ä
-db  44h	; D
-db    0
-db    3
-db  3Dh	; =
-db  64h	; d
-db    0
-db    0
-db 0D2h	; “
-db  13h
-db  1Eh
-db  28h	; (
-db  46h	; F
-db  80h	; Ä
-db  10h
-db    1
-db  14h
-db  1Eh
-db  0Ah
-db  64h	; d
-db  57h	; W
-db  69h	; i
-db  6Eh	; n
-db  64h	; d
-db  20h
-db  47h	; G
-db  69h	; i
-db  61h	; a
-db  6Eh	; n
-db  74h	; t
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db 0A3h	; £
-db  0Fh
-db    0
-db  11h
-db  19h
-db    0
-db  80h	; Ä
-db  6Bh	; k
-db 0F0h	; 
-db  6Bh	; k
-db 0F0h	; 
-db  6Bh	; k
-db  23h	; #
-db  32h	; 2
-db    2
-db    4
-db  33h	; 3
-db  64h	; d
-db    0
-db    0
-db 0D5h	; ’
-db  15h
-db  20h
-db  1Eh
-db  3Ch	; <
-db    0
-db    0
-db    0
-db  19h
-db  23h	; #
-db  0Ah
-db  1Eh
-db  57h	; W
-db  69h	; i
-db  6Eh	; n
-db  64h	; d
-db  20h
-db  48h	; H
-db  65h	; e
-db  72h	; r
-db  2Fh	; /
-db  6Fh	; o
-db  5Ch	; \
-db  6Fh	; o
-db  65h	; e
-db  73h	; s
-db    0
-db    0
-db 0A4h	; §
-db  14h
-db    0
-db  11h
-db  1Bh
-db  20h
-db 0F0h	; 
-db  6Ch	; l
-db 0F0h	; 
-db  6Ch	; l
-db 0F0h	; 
-db  8Ch	; å
-db 0F0h	; 
-db  6Ch	; l
-db    0
-db    0
-db  0Ah
-db  64h	; d
-db    0
-db    0
-db  94h	; î
-db  16h
-db  21h	; !
-db  2Ah	; *
-db  48h	; H
-db    0
-db    0
-db    0
-db  19h
-db  23h	; #
-db  0Ah
-db  64h	; d
-db  46h	; F
-db  69h	; i
-db  72h	; r
-db  65h	; e
-db  20h
-db  45h	; E
-db  6Ch	; l
-db  65h	; e
-db  6Dh	; m
-db  65h	; e
-db  6Eh	; n
-db  74h	; t
-db  61h	; a
-db  6Ch	; l
-db  2Fh	; /
-db    0
-db  81h	; Å
-db  0Ah
-db    0
-db  11h
-db  97h	; ó
-db    0
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db    0
-db    0
-db    5
-db  64h	; d
-db    0
-db    0
-db  85h	; Ö
-db  12h
-db  19h
-db  37h	; 7
-db  3Dh	; =
-db  80h	; Ä
-db  10h
-db    0
-db  0Fh
-db  19h
-db  19h
-db  23h	; #
-db  44h	; D
-db  65h	; e
-db  6Dh	; m
-db  6Fh	; o
-db  6Eh	; n
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db 0A2h	; ¢
-db  0Ch
-db    0
-db  11h
-db  94h	; î
-db    0
-db  80h	; Ä
-db  44h	; D
-db  80h	; Ä
-db  44h	; D
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db    0
-db    4
-db  17h
-db  64h	; d
-db    0
-db    0
-db  80h	; Ä
-db  12h
-db  19h
-db  37h	; 7
-db  3Dh	; =
-db    0
-db  20h
-db  40h	; @
-db  0Fh
-db  19h
-db  19h
-db  23h	; #
-db  48h	; H
-db  65h	; e
-db  72h	; r
-db  62h	; b
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db 0E0h	; ‡
-db  28h	; (
-db    0
-db  11h
-db  16h
-db    0
-db 0F0h	; 
-db  69h	; i
-db 0F0h	; 
-db  69h	; i
-db 0F0h	; 
-db  69h	; i
-db  42h	; B
-db  20h
-db    0
-db    0
-db    5
-db  64h	; d
-db    0
-db    0
-db  82h	; Ç
-db  13h
-db  1Eh
-db  28h	; (
-db  46h	; F
-db    0
-db    0
-db    0
-db  14h
-db  1Eh
-db  0Ah
-db  64h	; d
-db  47h	; G
-db  72h	; r
-db  65h	; e
-db  61h	; a
-db  74h	; t
-db  65h	; e
-db  72h	; r
-db  20h
-db  44h	; D
-db  65h	; e
-db  6Dh	; m
-db  6Fh	; o
-db  6Eh	; n
-db    0
-db    0
-db    0
-db 0E1h	; ·
-db  0Ah
-db    0
-db  11h
-db  9Ch	; ú
-db    0
-db 0F0h	; 
-db  6Ch	; l
-db 0F0h	; 
-db  6Ch	; l
-db  80h	; Ä
-db  69h	; i
-db  80h	; Ä
-db  69h	; i
-db    2
-db    5
-db    5
-db  64h	; d
-db    0
-db    0
-db 0C5h	; ≈
-db  16h
-db  23h	; #
-db  20h
-db  48h	; H
-db    0
-db  20h
-db  40h	; @
-db  19h
-db  25h	; %
-db  0Fh
-db  64h	; d
-db 'Kringle Bro',27h,0,0,0,0; _name
-db 0E1h			; hpDice
-dw 0C8h			; hpBase
-db 11h			; distance
-db 1Eh			; packedGenAc
-db 0			; groupSize
-db 0F0h			; attackType._type
-db 73h			; attackType.damage
-db 0F0h			; attackType._type
-db 73h			; attackType.damage
-db 0F0h			; attackType._type
-db 73h			; attackType.damage
-db 4Bh			; attackType._type
-db 19h			; attackType.damage
-db 0			; breathFlag
-db 0			; breathRange
-db 0Ah			; picIndex
-db 64h			; rewardLo
-db 0			; rewardMid
-db 0			; rewardHi
-db 85h			; flags
-db 16h			; breathSaveLo
-db 23h			; breathSaveHi
-db 32h			; oppPriorityLo
-db 50h			; oppPriorityHi
-db 0			; strongElement
-db 0			; weakElement
-db 0			; repelFlags
-db 23h			; toHitLo
-db 2Dh			; toHitHi
-db 0Ah			; spellSaveLo
-db 64h			; spellSaveHi
-db  45h	; E
-db  61h	; a
-db  72h	; r
-db  74h	; t
-db  68h	; h
-db  20h
-db  45h	; E
-db  6Ch	; l
-db  65h	; e
-db  6Dh	; m
-db  65h	; e
-db  6Eh	; n
-db  74h	; t
-db  61h	; a
-db  6Ch	; l
-db    0
-db 0E2h	; ‚
-db  2Ch	; ,
-db    1
-db  11h
-db  9Fh	; ü
-db    0
-db 0F0h	; 
-db  8Eh	; é
-db 0F0h	; 
-db  8Eh	; é
-db 0F0h	; 
-db  8Eh	; é
-db  6Eh	; n
-db  32h	; 2
-db    0
-db    0
-db    5
-db  64h	; d
-db    0
-db    0
-db 0C5h	; ≈
-db  16h
-db  23h	; #
-db  32h	; 2
-db  50h	; P
-db    0
-db    0
-db    0
-db  23h	; #
-db  2Dh	; -
-db  0Ah
-db  64h	; d
-db  46h	; F
-db  72h	; r
-db  6Fh	; o
-db  73h	; s
-db  74h	; t
-db  20h
-db  47h	; G
-db  69h	; i
-db  61h	; a
-db  6Eh	; n
-db  74h	; t
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db 0A1h	; °
-db  14h
-db    0
-db  11h
-db  17h
-db    0
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db 0FFh
-db    0
-db    0
-db    0
-db  33h	; 3
-db  64h	; d
-db    0
-db    0
-db 0C5h	; ≈
-db  12h
-db  19h
-db  37h	; 7
-db  3Dh	; =
-db  10h
-db  80h	; Ä
-db    0
-db  0Fh
-db  19h
-db  19h
-db  23h	; #
-db  4Dh	; M
-db  6Fh	; o
-db  6Ch	; l
-db  74h	; t
-db  65h	; e
-db  6Eh	; n
-db  20h
-db  4Dh	; M
-db  2Fh	; /
-db  61h	; a
-db  6Eh	; n
-db  5Ch	; \
-db  65h	; e
-db  6Eh	; n
-db    0
-db    0
-db 0C0h	; ¿
-db  32h	; 2
-db    0
-db  11h
-db  94h	; î
-db    0
-db  80h	; Ä
-db  62h	; b
-db  80h	; Ä
-db  62h	; b
-db 0F0h	; 
-db  64h	; d
-db 0F0h	; 
-db  64h	; d
-db    4
-db    4
-db    5
-db  64h	; d
-db    0
-db    0
-db  80h	; Ä
-db  13h
-db  1Ah
-db  38h	; 8
-db  3Eh	; >
-db  80h	; Ä
-db  10h
-db    0
-db  10h
-db  1Ah
-db  19h
-db  24h	; $
-db  42h	; B
-db  75h	; u
-db  6Ch	; l
-db  6Ch	; l
-db  64h	; d
-db  6Fh	; o
-db  7Ah	; z
-db  65h	; e
-db  72h	; r
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db    0
-db 0E0h	; ‡
-db  30h	; 0
-db    0
-db    1
-db  98h	; ò
-db    0
-db 0F0h	; 
-db  69h	; i
-db 0F0h	; 
-db  69h	; i
-db 0F0h	; 
-db  6Bh	; k
-db 0F0h	; 
-db  6Bh	; k
-db    0
-db    0
-db  0Bh
-db  64h	; d
-db    0
-db    0
-db 0C0h	; ¿
-db  13h
-db  1Eh
-db  28h	; (
-db  46h	; F
-db    0
-db    0
-db    0
-db  14h
-db  1Eh
-db  0Ah
-db  64h	; d
-db  56h	; V
-db  61h	; a
-db  6Eh	; n
-db  71h	; q
-db  75h	; u
-db  69h	; i
-db  73h	; s
-db  68h	; h
-db  65h	; e
-db  72h	; r
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db 0E1h	; ·
-db  40h	; @
-db    0
-db  11h
-db  9Dh	; ù
-db    0
-db  32h	; 2
-db  1Eh
-db  3Dh	; =
-db  1Eh
-db  32h	; 2
-db  1Eh
-db  42h	; B
-db  1Eh
-db    0
-db    0
-db  36h	; 6
-db  64h	; d
-db    0
-db    0
-db  82h	; Ç
-db  16h
-db  23h	; #
-db  32h	; 2
-db  50h	; P
-db    0
-db    0
-db    0
-db  23h	; #
-db  2Dh	; -
-db  0Ah
-db  64h	; d
-db  42h	; B
-db  6Ch	; l
-db  61h	; a
-db  73h	; s
-db  74h	; t
-db  20h
-db  44h	; D
-db  72h	; r
-db  61h	; a
-db  67h	; g
-db  6Fh	; o
-db  6Eh	; n
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db 0E3h	; „
-db  20h
-db    0
-db  11h
-db  9Dh	; ù
-db    0
-db 0F0h	; 
-db  6Eh	; n
-db  80h	; Ä
-db  6Eh	; n
-db  80h	; Ä
-db  6Eh	; n
-db 0F0h	; 
-db  6Eh	; n
-db    2
-db    5
-db  3Dh	; =
-db  64h	; d
-db    0
-db    0
-db 0C2h	; ¬
-db  17h
-db  24h	; $
-db  34h	; 4
-db  52h	; R
-db  80h	; Ä
-db    0
-db    1
-db  24h	; $
-db  2Eh	; .
-db  0Ah
-db  64h	; d
-db  4Fh	; O
-db  6Eh	; n
-db  65h	; e
-db  2Dh	; -
-db  65h	; e
-db  79h	; y
-db  65h	; e
-db  64h	; d
-db  20h
-db  41h	; A
-db  6Eh	; n
-db  67h	; g
-db  72h	; r
-db  61h	; a
-db    0
-db    0
-db 0E2h	; ‚
-db  82h	; Ç
-db    0
-db  11h
-db 0DAh	; ⁄
-db    0
-db  48h	; H
-db  20h
-db  4Bh	; K
-db  23h	; #
-db  4Bh	; K
-db  23h	; #
-db  2Dh	; -
-db  23h	; #
-db    0
-db    0
-db  36h	; 6
-db  64h	; d
-db    0
-db    0
-db  80h	; Ä
-db  19h
-db  28h	; (
-db  28h	; (
-db  46h	; F
-db    0
-db    0
-db    0
-db  22h	; "
-db  2Eh	; .
-db  0Ah
-db  5Ah	; Z
-db  42h	; B
-db  6Ch	; l
-db  61h	; a
-db  63h	; c
-db  6Bh	; k
-db  20h
-db  44h	; D
-db  65h	; e
-db  61h	; a
-db  74h	; t
-db  68h	; h
-db    0
-db    0
-db    0
-db    0
-db    0
-db 0E9h	; È
-db  64h	; d
-db    0
-db  11h
-db 0A0h	; †
-db  20h
-db 0F7h	; ˜
-db 0C9h	; …
-db 0F7h	; ˜
-db 0E9h	; È
-db  5Bh	; [
-db  28h	; (
-db  63h	; c
-db    0
-db    0
-db    0
-db  24h	; $
-db  64h	; d
-db    0
-db    0
-db  80h	; Ä
-db  1Eh
-db  28h	; (
-db  3Ch	; <
-db  5Ah	; Z
-db    0
-db  20h
-db    0
-db  28h	; (
-db  2Fh	; /
-db  14h
-db  64h	; d
-db  46h	; F
-db  61h	; a
-db  6Dh	; m
-db  69h	; i
-db  6Ch	; l
-db  69h	; i
-db  61h	; a
-db  72h	; r
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db    0
-db    0
-db    0
-db  49h	; I
-db  32h	; 2
-db    0
-db  11h
-db  99h	; ô
-db    0
-db  4Ch	; L
-db  32h	; 2
-db  22h	; "
-db  32h	; 2
-db  2Dh	; -
-db  32h	; 2
-db  5Ah	; Z
-db  32h	; 2
-db    0
-db    0
-db  12h
-db  64h	; d
-db    0
-db    0
-db    3
-db  1Eh
-db  28h	; (
-db  0Ah
-db  14h
-db    4
-db    0
-db    0
-db  0Ah
-db  0Ah
-db  0Ah
-db  0Ah
-db  42h	; B
-db  6Ch	; l
-db  61h	; a
-db  63h	; c
-db  6Bh	; k
-db  20h
-db  53h	; S
-db  6Ch	; l
-db  61h	; a
-db  79h	; y
-db  65h	; e
-db  72h	; r
-db  2Fh	; /
-db  5Ch	; \
-db  73h	; s
-db    0
-db    0
-db 0A0h	; †
-db  0Fh
-db  12h
-db 0A7h	; ß
-db  23h	; #
-db 0F7h	; ˜
-db  64h	; d
-db 0F7h	; ˜
-db  84h	; Ñ
-db 0F7h	; ˜
-db  85h	; Ö
-db 0F7h	; ˜
-db  65h	; e
-db    0
-db    0
-db  41h	; A
-db  50h	; P
-db 0C3h	; √
-db    0
-db  80h	; Ä
-db  28h	; (
-db  32h	; 2
-db  5Ah	; Z
-db  78h	; x
-db    0
-db  20h
-db  10h
-db  28h	; (
-db  3Ch	; <
-db  28h	; (
-db  46h	; F
-unk_4C246 db  0Ah
-db    0
-aWhatTypeOfDisp	db 'What type of display do you wish to'
-db ' use?',0
-a1CompositeOrTv	db 0Ah
-db 0Ah
-db '1) Composite or TV monitor.',0
-a2RgbMonitor_ db 0Ah
-db '2) RGB monitor.',0
-a3EgaMonitor_ db 0Ah
-db '3) EGA monitor.',0
-a4TandyComputer	db 0Ah
-db '4) Tandy computer with RGB monitor.'
-db 0
-aPleaseEnterThe	db 0Ah
-db 0Ah
-db 'Please enter the appropriate number'
-db ' for your system type:',0
+bardSongPrice	dd 30000, 60000       ;	0
+byte_4BDF0	db 1, 2     ; 0
+aButNoRoomForASummoni db 'but no room for a summoning!',0Ah,0Ah,0
+		db    0
+aAndA		db 'and a ',0
+		db    0
+aAppears	db ' appears!',0Ah,0Ah,0
+summonData      db 'Wol/f\ves',0,0,0,0,0,0,0; _name
+summonHpDice    db 0A1h                 ; [0].hpDice
+                dw 0Ah                  ; [0].hpBase
+                db 11h                  ; [0].distance
+                db 8Ch                  ; [0].packedGenAc
+                db 0                    ; [0].groupSize
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0                    ; [0].breathFlag
+                db 0                    ; [0].breathRange
+                db 4                    ; [0].picIndex
+                db 64h                  ; [0].rewardLo
+                db 0                    ; [0].rewardMid
+                db 0                    ; [0].rewardHi
+                db 43h                  ; [0].flags
+                db 12h                  ; [0].breathSaveLo
+                db 19h                  ; [0].breathSaveHi
+                db 37h                  ; [0].oppPriorityLo
+                db 41h                  ; [0].oppPriorityHi
+                db 0                    ; [0].strongElement
+                db 0                    ; [0].weakElement
+                db 8                    ; [0].repelFlags
+                db 0Fh                  ; [0].toHitLo
+                db 19h                  ; [0].toHitHi
+                db 17h                  ; [0].spellSaveLo
+                db 1Ch                  ; [0].spellSaveHi
+                db 'Slayer/\s',0,0,0,0,0,0,0; _name
+                db 81h                  ; [1].hpDice
+                dw 40h                  ; [1].hpBase
+                db 11h                  ; [1].distance
+                db 17h                  ; [1].packedGenAc
+                db 0                    ; [1].groupSize
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0                    ; [1].breathFlag
+                db 0                    ; [1].breathRange
+                db 21h                  ; [1].picIndex
+                db 64h                  ; [1].rewardLo
+                db 0                    ; [1].rewardMid
+                db 0                    ; [1].rewardHi
+                db 80h                  ; [1].flags
+                db 12h                  ; [1].breathSaveLo
+                db 19h                  ; [1].breathSaveHi
+                db 37h                  ; [1].oppPriorityLo
+                db 3Dh                  ; [1].oppPriorityHi
+                db 8                    ; [1].strongElement
+                db 0                    ; [1].weakElement
+                db 4                    ; [1].repelFlags
+                db 0Fh                  ; [1].toHitLo
+                db 19h                  ; [1].toHitHi
+                db 19h                  ; [1].spellSaveLo
+                db 23h                  ; [1].spellSaveHi
+                db 'Wind Warrior/\s',0  ; _name
+                db 81h                  ; [2].hpDice
+                dw 14h                  ; [2].hpBase
+                db 11h                  ; [2].distance
+                db 17h                  ; [2].packedGenAc
+                db 0                    ; [2].groupSize
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0                    ; [2].breathFlag
+                db 0                    ; [2].breathRange
+                db 14h                  ; [2].picIndex
+                db 64h                  ; [2].rewardLo
+                db 0                    ; [2].rewardMid
+                db 0                    ; [2].rewardHi
+                db 94h                  ; [2].flags
+                db 12h                  ; [2].breathSaveLo
+                db 19h                  ; [2].breathSaveHi
+                db 37h                  ; [2].oppPriorityLo
+                db 3Dh                  ; [2].oppPriorityHi
+                db 0                    ; [2].strongElement
+                db 0                    ; [2].weakElement
+                db 0                    ; [2].repelFlags
+                db 0Fh                  ; [2].toHitLo
+                db 19h                  ; [2].toHitHi
+                db 19h                  ; [2].spellSaveLo
+                db 23h                  ; [2].spellSaveHi
+                db 'Wind Ogre/\s',0,0,0,0; _name
+                db 0A1h                 ; [3].hpDice
+                dw 0Ah                  ; [3].hpBase
+                db 11h                  ; [3].distance
+                db 97h                  ; [3].packedGenAc
+                db 0                    ; [3].groupSize
+                db 0F0h                 ; [3].attackType._type
+                db 64h                  ; [3].attackType.damage
+                db 0F0h                 ; [3].attackType._type
+                db 64h                  ; [3].attackType.damage
+                db 0FFh                 ; [3].attackType._type
+                db 0                    ; [3].attackType.damage
+                db 0FFh                 ; [3].attackType._type
+                db 0                    ; [3].attackType.damage
+                db 0                    ; [3].breathFlag
+                db 0                    ; [3].breathRange
+                db 33h                  ; [3].picIndex
+                db 64h                  ; [3].rewardLo
+                db 0                    ; [3].rewardMid
+                db 0                    ; [3].rewardHi
+                db 95h                  ; [3].flags
+                db 12h                  ; [3].breathSaveLo
+                db 19h                  ; [3].breathSaveHi
+                db 37h                  ; [3].oppPriorityLo
+                db 3Dh                  ; [3].oppPriorityHi
+                db 0                    ; [3].strongElement
+                db 0                    ; [3].weakElement
+                db 0                    ; [3].repelFlags
+                db 0Fh                  ; [3].toHitLo
+                db 19h                  ; [3].toHitHi
+                db 19h                  ; [3].spellSaveLo
+                db 23h                  ; [3].spellSaveHi
+                db 'Wind Dragon/\s',0,0 ; _name
+                db 0A2h                 ; [4].hpDice
+                dw 28h                  ; [4].hpBase
+                db 11h                  ; [4].distance
+                db 99h                  ; [4].packedGenAc
+                db 0                    ; [4].groupSize
+                db 80h                  ; [4].attackType._type
+                db 69h                  ; [4].attackType.damage
+                db 80h                  ; [4].attackType._type
+                db 69h                  ; [4].attackType.damage
+                db 0F0h                 ; [4].attackType._type
+                db 69h                  ; [4].attackType.damage
+                db 80h                  ; [4].attackType._type
+                db 44h                  ; [4].attackType.damage
+                db 0                    ; [4].breathFlag
+                db 3                    ; [4].breathRange
+                db 3Dh                  ; [4].picIndex
+                db 64h                  ; [4].rewardLo
+                db 0                    ; [4].rewardMid
+                db 0                    ; [4].rewardHi
+                db 0D2h                 ; [4].flags
+                db 13h                  ; [4].breathSaveLo
+                db 1Eh                  ; [4].breathSaveHi
+                db 28h                  ; [4].oppPriorityLo
+                db 46h                  ; [4].oppPriorityHi
+                db 80h                  ; [4].strongElement
+                db 10h                  ; [4].weakElement
+                db 1                    ; [4].repelFlags
+                db 14h                  ; [4].toHitLo
+                db 1Eh                  ; [4].toHitHi
+                db 0Ah                  ; [4].spellSaveLo
+                db 64h                  ; [4].spellSaveHi
+                db 'Wind Giant/\s',0,0,0; _name
+                db 0A3h                 ; [5].hpDice
+                dw 0Fh                  ; [5].hpBase
+                db 11h                  ; [5].distance
+                db 19h                  ; [5].packedGenAc
+                db 0                    ; [5].groupSize
+                db 80h                  ; [5].attackType._type
+                db 6Bh                  ; [5].attackType.damage
+                db 0F0h                 ; [5].attackType._type
+                db 6Bh                  ; [5].attackType.damage
+                db 0F0h                 ; [5].attackType._type
+                db 6Bh                  ; [5].attackType.damage
+                db 23h                  ; [5].attackType._type
+                db 32h                  ; [5].attackType.damage
+                db 2                    ; [5].breathFlag
+                db 4                    ; [5].breathRange
+                db 33h                  ; [5].picIndex
+                db 64h                  ; [5].rewardLo
+                db 0                    ; [5].rewardMid
+                db 0                    ; [5].rewardHi
+                db 0D5h                 ; [5].flags
+                db 15h                  ; [5].breathSaveLo
+                db 20h                  ; [5].breathSaveHi
+                db 1Eh                  ; [5].oppPriorityLo
+                db 3Ch                  ; [5].oppPriorityHi
+                db 0                    ; [5].strongElement
+                db 0                    ; [5].weakElement
+                db 0                    ; [5].repelFlags
+                db 19h                  ; [5].toHitLo
+                db 23h                  ; [5].toHitHi
+                db 0Ah                  ; [5].spellSaveLo
+                db 1Eh                  ; [5].spellSaveHi
+                db 'Wind Her/o\oes',0,0 ; _name
+                db 0A4h                 ; [6].hpDice
+                dw 14h                  ; [6].hpBase
+                db 11h                  ; [6].distance
+                db 1Bh                  ; [6].packedGenAc
+                db 20h                  ; [6].groupSize
+                db 0F0h                 ; [6].attackType._type
+                db 6Ch                  ; [6].attackType.damage
+                db 0F0h                 ; [6].attackType._type
+                db 6Ch                  ; [6].attackType.damage
+                db 0F0h                 ; [6].attackType._type
+                db 8Ch                  ; [6].attackType.damage
+                db 0F0h                 ; [6].attackType._type
+                db 6Ch                  ; [6].attackType.damage
+                db 0                    ; [6].breathFlag
+                db 0                    ; [6].breathRange
+                db 0Ah                  ; [6].picIndex
+                db 64h                  ; [6].rewardLo
+                db 0                    ; [6].rewardMid
+                db 0                    ; [6].rewardHi
+                db 94h                  ; [6].flags
+                db 16h                  ; [6].breathSaveLo
+                db 21h                  ; [6].breathSaveHi
+                db 2Ah                  ; [6].oppPriorityLo
+                db 48h                  ; [6].oppPriorityHi
+                db 0                    ; [6].strongElement
+                db 0                    ; [6].weakElement
+                db 0                    ; [6].repelFlags
+                db 19h                  ; [6].toHitLo
+                db 23h                  ; [6].toHitHi
+                db 0Ah                  ; [6].spellSaveLo
+                db 64h                  ; [6].spellSaveHi
+                db 'Fire Elemental/',0  ; _name
+                db 81h                  ; [7].hpDice
+                dw 0Ah                  ; [7].hpBase
+                db 11h                  ; [7].distance
+                db 97h                  ; [7].packedGenAc
+                db 0                    ; [7].groupSize
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0                    ; [7].breathFlag
+                db 0                    ; [7].breathRange
+                db 5                    ; [7].picIndex
+                db 64h                  ; [7].rewardLo
+                db 0                    ; [7].rewardMid
+                db 0                    ; [7].rewardHi
+                db 85h                  ; [7].flags
+                db 12h                  ; [7].breathSaveLo
+                db 19h                  ; [7].breathSaveHi
+                db 37h                  ; [7].oppPriorityLo
+                db 3Dh                  ; [7].oppPriorityHi
+                db 80h                  ; [7].strongElement
+                db 10h                  ; [7].weakElement
+                db 0                    ; [7].repelFlags
+                db 0Fh                  ; [7].toHitLo
+                db 19h                  ; [7].toHitHi
+                db 19h                  ; [7].spellSaveLo
+                db 23h                  ; [7].spellSaveHi
+                db 'Demon/\s',0,0,0,0,0,0,0,0; _name
+                db 0A2h                 ; [8].hpDice
+                dw 0Ch                  ; [8].hpBase
+                db 11h                  ; [8].distance
+                db 94h                  ; [8].packedGenAc
+                db 0                    ; [8].groupSize
+                db 80h                  ; [8].attackType._type
+                db 44h                  ; [8].attackType.damage
+                db 80h                  ; [8].attackType._type
+                db 44h                  ; [8].attackType.damage
+                db 0F0h                 ; [8].attackType._type
+                db 64h                  ; [8].attackType.damage
+                db 0F0h                 ; [8].attackType._type
+                db 64h                  ; [8].attackType.damage
+                db 0                    ; [8].breathFlag
+                db 4                    ; [8].breathRange
+                db 17h                  ; [8].picIndex
+                db 64h                  ; [8].rewardLo
+                db 0                    ; [8].rewardMid
+                db 0                    ; [8].rewardHi
+                db 80h                  ; [8].flags
+                db 12h                  ; [8].breathSaveLo
+                db 19h                  ; [8].breathSaveHi
+                db 37h                  ; [8].oppPriorityLo
+                db 3Dh                  ; [8].oppPriorityHi
+                db 0                    ; [8].strongElement
+                db 20h                  ; [8].weakElement
+                db 40h                  ; [8].repelFlags
+                db 0Fh                  ; [8].toHitLo
+                db 19h                  ; [8].toHitHi
+                db 19h                  ; [8].spellSaveLo
+                db 23h                  ; [8].spellSaveHi
+                db 'Herb/\s',0,0,0,0,0,0,0,0,0; _name
+                db 0E0h                 ; [9].hpDice
+                dw 28h                  ; [9].hpBase
+                db 11h                  ; [9].distance
+                db 16h                  ; [9].packedGenAc
+                db 0                    ; [9].groupSize
+                db 0F0h                 ; [9].attackType._type
+                db 69h                  ; [9].attackType.damage
+                db 0F0h                 ; [9].attackType._type
+                db 69h                  ; [9].attackType.damage
+                db 0F0h                 ; [9].attackType._type
+                db 69h                  ; [9].attackType.damage
+                db 42h                  ; [9].attackType._type
+                db 20h                  ; [9].attackType.damage
+                db 0                    ; [9].breathFlag
+                db 0                    ; [9].breathRange
+                db 5                    ; [9].picIndex
+                db 64h                  ; [9].rewardLo
+                db 0                    ; [9].rewardMid
+                db 0                    ; [9].rewardHi
+                db 82h                  ; [9].flags
+                db 13h                  ; [9].breathSaveLo
+                db 1Eh                  ; [9].breathSaveHi
+                db 28h                  ; [9].oppPriorityLo
+                db 46h                  ; [9].oppPriorityHi
+                db 0                    ; [9].strongElement
+                db 0                    ; [9].weakElement
+                db 0                    ; [9].repelFlags
+                db 14h                  ; [9].toHitLo
+                db 1Eh                  ; [9].toHitHi
+                db 0Ah                  ; [9].spellSaveLo
+                db 64h                  ; [9].spellSaveHi
+                db 'Greater Demon',0,0,0; _name
+                db 0E1h                 ; [10].hpDice
+                dw 0Ah                  ; [10].hpBase
+                db 11h                  ; [10].distance
+                db 9Ch                  ; [10].packedGenAc
+                db 0                    ; [10].groupSize
+                db 0F0h                 ; [10].attackType._type
+                db 6Ch                  ; [10].attackType.damage
+                db 0F0h                 ; [10].attackType._type
+                db 6Ch                  ; [10].attackType.damage
+                db 80h                  ; [10].attackType._type
+                db 69h                  ; [10].attackType.damage
+                db 80h                  ; [10].attackType._type
+                db 69h                  ; [10].attackType.damage
+                db 2                    ; [10].breathFlag
+                db 5                    ; [10].breathRange
+                db 5                    ; [10].picIndex
+                db 64h                  ; [10].rewardLo
+                db 0                    ; [10].rewardMid
+                db 0                    ; [10].rewardHi
+                db 0C5h                 ; [10].flags
+                db 16h                  ; [10].breathSaveLo
+                db 23h                  ; [10].breathSaveHi
+                db 20h                  ; [10].oppPriorityLo
+                db 48h                  ; [10].oppPriorityHi
+                db 0                    ; [10].strongElement
+                db 20h                  ; [10].weakElement
+                db 40h                  ; [10].repelFlags
+                db 19h                  ; [10].toHitLo
+                db 25h                  ; [10].toHitHi
+                db 0Fh                  ; [10].spellSaveLo
+                db 64h                  ; [10].spellSaveHi
+                db 'Kringle Bro',27h,0,0,0,0; _name
+                db 0E1h                 ; [11].hpDice
+                dw 0C8h                 ; [11].hpBase
+                db 11h                  ; [11].distance
+                db 1Eh                  ; [11].packedGenAc
+                db 0                    ; [11].groupSize
+                db 0F0h                 ; [11].attackType._type
+                db 73h                  ; [11].attackType.damage
+                db 0F0h                 ; [11].attackType._type
+                db 73h                  ; [11].attackType.damage
+                db 0F0h                 ; [11].attackType._type
+                db 73h                  ; [11].attackType.damage
+                db 4Bh                  ; [11].attackType._type
+                db 19h                  ; [11].attackType.damage
+                db 0                    ; [11].breathFlag
+                db 0                    ; [11].breathRange
+                db 0Ah                  ; [11].picIndex
+                db 64h                  ; [11].rewardLo
+                db 0                    ; [11].rewardMid
+                db 0                    ; [11].rewardHi
+                db 85h                  ; [11].flags
+                db 16h                  ; [11].breathSaveLo
+                db 23h                  ; [11].breathSaveHi
+                db 32h                  ; [11].oppPriorityLo
+                db 50h                  ; [11].oppPriorityHi
+                db 0                    ; [11].strongElement
+                db 0                    ; [11].weakElement
+                db 0                    ; [11].repelFlags
+                db 23h                  ; [11].toHitLo
+                db 2Dh                  ; [11].toHitHi
+                db 0Ah                  ; [11].spellSaveLo
+                db 64h                  ; [11].spellSaveHi
+                db 'Earth Elemental',0  ; _name
+                db 0E2h                 ; [12].hpDice
+                dw 12Ch                 ; [12].hpBase
+                db 11h                  ; [12].distance
+                db 9Fh                  ; [12].packedGenAc
+                db 0                    ; [12].groupSize
+                db 0F0h                 ; [12].attackType._type
+                db 8Eh                  ; [12].attackType.damage
+                db 0F0h                 ; [12].attackType._type
+                db 8Eh                  ; [12].attackType.damage
+                db 0F0h                 ; [12].attackType._type
+                db 8Eh                  ; [12].attackType.damage
+                db 6Eh                  ; [12].attackType._type
+                db 32h                  ; [12].attackType.damage
+                db 0                    ; [12].breathFlag
+                db 0                    ; [12].breathRange
+                db 5                    ; [12].picIndex
+                db 64h                  ; [12].rewardLo
+                db 0                    ; [12].rewardMid
+                db 0                    ; [12].rewardHi
+                db 0C5h                 ; [12].flags
+                db 16h                  ; [12].breathSaveLo
+                db 23h                  ; [12].breathSaveHi
+                db 32h                  ; [12].oppPriorityLo
+                db 50h                  ; [12].oppPriorityHi
+                db 0                    ; [12].strongElement
+                db 0                    ; [12].weakElement
+                db 0                    ; [12].repelFlags
+                db 23h                  ; [12].toHitLo
+                db 2Dh                  ; [12].toHitHi
+                db 0Ah                  ; [12].spellSaveLo
+                db 64h                  ; [12].spellSaveHi
+                db 'Frost Giant/\s',0,0 ; _name
+                db 0A1h                 ; [13].hpDice
+                dw 14h                  ; [13].hpBase
+                db 11h                  ; [13].distance
+                db 17h                  ; [13].packedGenAc
+                db 0                    ; [13].groupSize
+                db 0F0h                 ; [13].attackType._type
+                db 64h                  ; [13].attackType.damage
+                db 0F0h                 ; [13].attackType._type
+                db 64h                  ; [13].attackType.damage
+                db 0F0h                 ; [13].attackType._type
+                db 64h                  ; [13].attackType.damage
+                db 0FFh                 ; [13].attackType._type
+                db 0                    ; [13].attackType.damage
+                db 0                    ; [13].breathFlag
+                db 0                    ; [13].breathRange
+                db 33h                  ; [13].picIndex
+                db 64h                  ; [13].rewardLo
+                db 0                    ; [13].rewardMid
+                db 0                    ; [13].rewardHi
+                db 0C5h                 ; [13].flags
+                db 12h                  ; [13].breathSaveLo
+                db 19h                  ; [13].breathSaveHi
+                db 37h                  ; [13].oppPriorityLo
+                db 3Dh                  ; [13].oppPriorityHi
+                db 10h                  ; [13].strongElement
+                db 80h                  ; [13].weakElement
+                db 0                    ; [13].repelFlags
+                db 0Fh                  ; [13].toHitLo
+                db 19h                  ; [13].toHitHi
+                db 19h                  ; [13].spellSaveLo
+                db 23h                  ; [13].spellSaveHi
+                db 'Molten M/an\en',0,0 ; _name
+                db 0C0h                 ; [14].hpDice
+                dw 32h                  ; [14].hpBase
+                db 11h                  ; [14].distance
+                db 94h                  ; [14].packedGenAc
+                db 0                    ; [14].groupSize
+                db 80h                  ; [14].attackType._type
+                db 62h                  ; [14].attackType.damage
+                db 80h                  ; [14].attackType._type
+                db 62h                  ; [14].attackType.damage
+                db 0F0h                 ; [14].attackType._type
+                db 64h                  ; [14].attackType.damage
+                db 0F0h                 ; [14].attackType._type
+                db 64h                  ; [14].attackType.damage
+                db 4                    ; [14].breathFlag
+                db 4                    ; [14].breathRange
+                db 5                    ; [14].picIndex
+                db 64h                  ; [14].rewardLo
+                db 0                    ; [14].rewardMid
+                db 0                    ; [14].rewardHi
+                db 80h                  ; [14].flags
+                db 13h                  ; [14].breathSaveLo
+                db 1Ah                  ; [14].breathSaveHi
+                db 38h                  ; [14].oppPriorityLo
+                db 3Eh                  ; [14].oppPriorityHi
+                db 80h                  ; [14].strongElement
+                db 10h                  ; [14].weakElement
+                db 0                    ; [14].repelFlags
+                db 10h                  ; [14].toHitLo
+                db 1Ah                  ; [14].toHitHi
+                db 19h                  ; [14].spellSaveLo
+                db 24h                  ; [14].spellSaveHi
+                db 'Bulldozer/\s',0,0,0,0; _name
+                db 0E0h                 ; [15].hpDice
+                dw 30h                  ; [15].hpBase
+                db 1                    ; [15].distance
+                db 98h                  ; [15].packedGenAc
+                db 0                    ; [15].groupSize
+                db 0F0h                 ; [15].attackType._type
+                db 69h                  ; [15].attackType.damage
+                db 0F0h                 ; [15].attackType._type
+                db 69h                  ; [15].attackType.damage
+                db 0F0h                 ; [15].attackType._type
+                db 6Bh                  ; [15].attackType.damage
+                db 0F0h                 ; [15].attackType._type
+                db 6Bh                  ; [15].attackType.damage
+                db 0                    ; [15].breathFlag
+                db 0                    ; [15].breathRange
+                db 0Bh                  ; [15].picIndex
+                db 64h                  ; [15].rewardLo
+                db 0                    ; [15].rewardMid
+                db 0                    ; [15].rewardHi
+                db 0C0h                 ; [15].flags
+                db 13h                  ; [15].breathSaveLo
+                db 1Eh                  ; [15].breathSaveHi
+                db 28h                  ; [15].oppPriorityLo
+                db 46h                  ; [15].oppPriorityHi
+                db 0                    ; [15].strongElement
+                db 0                    ; [15].weakElement
+                db 0                    ; [15].repelFlags
+                db 14h                  ; [15].toHitLo
+                db 1Eh                  ; [15].toHitHi
+                db 0Ah                  ; [15].spellSaveLo
+                db 64h                  ; [15].spellSaveHi
+                db 'Vanquisher/\s',0,0,0; _name
+                db 0E1h                 ; [16].hpDice
+                dw 40h                  ; [16].hpBase
+                db 11h                  ; [16].distance
+                db 9Dh                  ; [16].packedGenAc
+                db 0                    ; [16].groupSize
+                db 32h                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 3Dh                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 32h                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 42h                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 0                    ; [16].breathFlag
+                db 0                    ; [16].breathRange
+                db 36h                  ; [16].picIndex
+                db 64h                  ; [16].rewardLo
+                db 0                    ; [16].rewardMid
+                db 0                    ; [16].rewardHi
+                db 82h                  ; [16].flags
+                db 16h                  ; [16].breathSaveLo
+                db 23h                  ; [16].breathSaveHi
+                db 32h                  ; [16].oppPriorityLo
+                db 50h                  ; [16].oppPriorityHi
+                db 0                    ; [16].strongElement
+                db 0                    ; [16].weakElement
+                db 0                    ; [16].repelFlags
+                db 23h                  ; [16].toHitLo
+                db 2Dh                  ; [16].toHitHi
+                db 0Ah                  ; [16].spellSaveLo
+                db 64h                  ; [16].spellSaveHi
+                db 'Blast Dragon/\s',0  ; _name
+                db 0E3h                 ; [17].hpDice
+                dw 20h                  ; [17].hpBase
+                db 11h                  ; [17].distance
+                db 9Dh                  ; [17].packedGenAc
+                db 0                    ; [17].groupSize
+                db 0F0h                 ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 80h                  ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 80h                  ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 0F0h                 ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 2                    ; [17].breathFlag
+                db 5                    ; [17].breathRange
+                db 3Dh                  ; [17].picIndex
+                db 64h                  ; [17].rewardLo
+                db 0                    ; [17].rewardMid
+                db 0                    ; [17].rewardHi
+                db 0C2h                 ; [17].flags
+                db 17h                  ; [17].breathSaveLo
+                db 24h                  ; [17].breathSaveHi
+                db 34h                  ; [17].oppPriorityLo
+                db 52h                  ; [17].oppPriorityHi
+                db 80h                  ; [17].strongElement
+                db 0                    ; [17].weakElement
+                db 1                    ; [17].repelFlags
+                db 24h                  ; [17].toHitLo
+                db 2Eh                  ; [17].toHitHi
+                db 0Ah                  ; [17].spellSaveLo
+                db 64h                  ; [17].spellSaveHi
+                db 'One-eyed Angra',0,0 ; _name
+                db 0E2h                 ; [18].hpDice
+                dw 82h                  ; [18].hpBase
+                db 11h                  ; [18].distance
+                db 0DAh                 ; [18].packedGenAc
+                db 0                    ; [18].groupSize
+                db 48h                  ; [18].attackType._type
+                db 20h                  ; [18].attackType.damage
+                db 4Bh                  ; [18].attackType._type
+                db 23h                  ; [18].attackType.damage
+                db 4Bh                  ; [18].attackType._type
+                db 23h                  ; [18].attackType.damage
+                db 2Dh                  ; [18].attackType._type
+                db 23h                  ; [18].attackType.damage
+                db 0                    ; [18].breathFlag
+                db 0                    ; [18].breathRange
+                db 36h                  ; [18].picIndex
+                db 64h                  ; [18].rewardLo
+                db 0                    ; [18].rewardMid
+                db 0                    ; [18].rewardHi
+                db 80h                  ; [18].flags
+                db 19h                  ; [18].breathSaveLo
+                db 28h                  ; [18].breathSaveHi
+                db 28h                  ; [18].oppPriorityLo
+                db 46h                  ; [18].oppPriorityHi
+                db 0                    ; [18].strongElement
+                db 0                    ; [18].weakElement
+                db 0                    ; [18].repelFlags
+                db 22h                  ; [18].toHitLo
+                db 2Eh                  ; [18].toHitHi
+                db 0Ah                  ; [18].spellSaveLo
+                db 5Ah                  ; [18].spellSaveHi
+                db 'Black Death',0,0,0,0,0; _name
+                db 0E9h                 ; [19].hpDice
+                dw 64h                  ; [19].hpBase
+                db 11h                  ; [19].distance
+                db 0A0h                 ; [19].packedGenAc
+                db 20h                  ; [19].groupSize
+                db 0F7h                 ; [19].attackType._type
+                db 0C9h                 ; [19].attackType.damage
+                db 0F7h                 ; [19].attackType._type
+                db 0E9h                 ; [19].attackType.damage
+                db 5Bh                  ; [19].attackType._type
+                db 28h                  ; [19].attackType.damage
+                db 63h                  ; [19].attackType._type
+                db 0                    ; [19].attackType.damage
+                db 0                    ; [19].breathFlag
+                db 0                    ; [19].breathRange
+                db 24h                  ; [19].picIndex
+                db 64h                  ; [19].rewardLo
+                db 0                    ; [19].rewardMid
+                db 0                    ; [19].rewardHi
+                db 80h                  ; [19].flags
+                db 1Eh                  ; [19].breathSaveLo
+                db 28h                  ; [19].breathSaveHi
+                db 3Ch                  ; [19].oppPriorityLo
+                db 5Ah                  ; [19].oppPriorityHi
+                db 0                    ; [19].strongElement
+                db 20h                  ; [19].weakElement
+                db 0                    ; [19].repelFlags
+                db 28h                  ; [19].toHitLo
+                db 2Fh                  ; [19].toHitHi
+                db 14h                  ; [19].spellSaveLo
+                db 64h                  ; [19].spellSaveHi
+                db 'Familiar/\s',0,0,0,0,0; _name
+                db 49h                  ; [20].hpDice
+                dw 32h                  ; [20].hpBase
+                db 11h                  ; [20].distance
+                db 99h                  ; [20].packedGenAc
+                db 0                    ; [20].groupSize
+                db 4Ch                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 22h                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 2Dh                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 5Ah                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 0                    ; [20].breathFlag
+                db 0                    ; [20].breathRange
+                db 12h                  ; [20].picIndex
+                db 64h                  ; [20].rewardLo
+                db 0                    ; [20].rewardMid
+                db 0                    ; [20].rewardHi
+                db 3                    ; [20].flags
+                db 1Eh                  ; [20].breathSaveLo
+                db 28h                  ; [20].breathSaveHi
+                db 0Ah                  ; [20].oppPriorityLo
+                db 14h                  ; [20].oppPriorityHi
+                db 4                    ; [20].strongElement
+                db 0                    ; [20].weakElement
+                db 0                    ; [20].repelFlags
+                db 0Ah                  ; [20].toHitLo
+                db 0Ah                  ; [20].toHitHi
+                db 0Ah                  ; [20].spellSaveLo
+                db 0Ah                  ; [20].spellSaveHi
+                db 'Black Slayer/\s',0  ; _name
+                db 0                    ; [21].hpDice
+                dw 0FA0h                ; [21].hpBase
+                db 12h                  ; [21].distance
+                db 0A7h                 ; [21].packedGenAc
+                db 23h                  ; [21].groupSize
+                db 0F7h                 ; [21].attackType._type
+                db 64h                  ; [21].attackType.damage
+                db 0F7h                 ; [21].attackType._type
+                db 84h                  ; [21].attackType.damage
+                db 0F7h                 ; [21].attackType._type
+                db 85h                  ; [21].attackType.damage
+                db 0F7h                 ; [21].attackType._type
+                db 65h                  ; [21].attackType.damage
+                db 0                    ; [21].breathFlag
+                db 0                    ; [21].breathRange
+                db 41h                  ; [21].picIndex
+                db 50h                  ; [21].rewardLo
+                db 0C3h                 ; [21].rewardMid
+                db 0                    ; [21].rewardHi
+                db 80h                  ; [21].flags
+                db 28h                  ; [21].breathSaveLo
+                db 32h                  ; [21].breathSaveHi
+                db 5Ah                  ; [21].oppPriorityLo
+                db 78h                  ; [21].oppPriorityHi
+                db 0                    ; [21].strongElement
+                db 20h                  ; [21].weakElement
+                db 10h                  ; [21].repelFlags
+                db 28h                  ; [21].toHitLo
+                db 3Ch                  ; [21].toHitHi
+                db 28h                  ; [21].spellSaveLo
+                db 46h                  ; [21].spellSaveHi
+unk_4C246	db  0Ah
+		db    0
+aWhatTypeOfDisp	db 'What type of display do you wish to use?',0
+a1CompositeOrTv	db 0Ah,0Ah
+		db '1) Composite or TV monitor.',0
+a2RgbMonitor_	db 0Ah,'2) RGB monitor.',0
+a3EgaMonitor_	db 0Ah,'3) EGA monitor.',0
+a4TandyComputer	db 0Ah,'4) Tandy computer with RGB monitor.',0
+aPleaseEnterThe	db 0Ah,0Ah
+		db 'Please enter the appropriate number for your system type:',0
 asc_4C312	db  0Ah, 0
-aWhatTypeOfSoundOutput db 'What type of sound output device do'
-db ' you wish to use?',0
-a1Mt32_	db 0Ah
-db 0Ah
-db '1) MT32.',0
-a2AdLib_ db 0Ah
-db '2) Ad Lib.',0
-a3InternalIbmSpeaker_ db 0Ah
-db '3) Internal IBM speaker.',0
-a4Tandy_ db 0Ah
-db '4) Tandy.',0
-a5Ps1 db 0Ah
-db '5) PS/1',0
-aPleaseEnterTheAppropr db 0Ah
-db 0Ah
-db 'Please enter the appropriate number'
-db ' for your system type:',0
+aWhatTypeOfSoundOutput db 'What type of sound output device do you wish to use?',0
+a1Mt32_		db 0Ah,0Ah,'1) MT32.',0
+a2AdLib_	db 0Ah,'2) Ad Lib.',0
+a3InternalIbmSpeaker_ db 0Ah,'3) Internal IBM speaker.',0
+a4Tandy_	db 0Ah,'4) Tandy.',0
+a5Ps1		db 0Ah,'5) PS/1',0
+aPleaseEnterTheAppropr db 0Ah,0Ah,'Please enter the appropriate number for your system type:',0
 aDiskToTransfer	db 'Disk to transfer characters from?',0
-aWhoShallTransfer? db 'Who shall transfer?',0
-aThisCharacterAlready db 'This character already exists',0
-aNoCharactersFoundOn db	'No characters found on',0
-db    0
-aNoPartiesFoundOn db 'No parties found on',0
+aWhoShallTransfer?	db 'Who shall transfer?',0
+aThisCharacterAlready	db 'This character already exists',0
+aNoCharactersFoundOn	db 'No characters found on',0
+		db    0
+aNoPartiesFoundOn	db 'No parties found on',0
 aTransferCharac	db 'Transfer characters from:',0Ah
-db '1) Bards I',0Ah
-db '2) Bards II',0Ah
-db '3) Bards III',0Ah
-db 'E) Exit',0
+		db '1) Bards I',0Ah
+		db '2) Bards II',0Ah
+		db '3) Bards III',0Ah
+		db 'E) Exit',0
 bi_inventoryMap	db 0, 1, 2, 3, 4, 5, 6,	7, 6, 9; 0
-db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h, 12h,	13h; 10
-db 14h,	14h, 14h, 17h, 18h, 19h, 1Ah, 0, 1Ch, 1Dh; 20
-db 1Eh,	1Fh, 20h, 21h, 22h, 23h, 0, 25h, 0, 0; 30
-db 28h,	0, 29h,	2Ah, 0,	2Ch, 2Dh, 2Eh, 2Fh, 30h; 40
-db 31h,	0, 32h,	33h, 0,	0, 34h,	0, 36h,	0; 50
-db 37h,	1Bh, 39h, 0, 3Bh, 3Ch, 0, 3Eh, 3Fh, 40h; 60
-db 41h,	42h, 0,	45h, 0,	0, 46h,	47h, 59h, 49h; 70
-db 0, 4Bh, 0, 0, 4Eh, 0, 4Fh, 51h, 0, 53h; 80
-db 54h,	55h, 0,	57h, 0,	5Ah, 5Bh, 0, 0,	5Eh; 90
-db 5Fh,	58h, 0,	0, 0, 0, 43h, 0, 62h, 0; 100
-db 64h,	64h, 0,	59h, 6Ch, 0, 0,	0, 0, 0; 110
-db 0, 0, 0, 0, 0, 0, 0,	0; 120
+		db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h, 12h,	13h; 10
+		db 14h,	14h, 14h, 17h, 18h, 19h, 1Ah, 0, 1Ch, 1Dh; 20
+		db 1Eh,	1Fh, 20h, 21h, 22h, 23h, 0, 25h, 0, 0; 30
+		db 28h,	0, 29h,	2Ah, 0,	2Ch, 2Dh, 2Eh, 2Fh, 30h; 40
+		db 31h,	0, 32h,	33h, 0,	0, 34h,	0, 36h,	0; 50
+		db 37h,	1Bh, 39h, 0, 3Bh, 3Ch, 0, 3Eh, 3Fh, 40h; 60
+		db 41h,	42h, 0,	45h, 0,	0, 46h,	47h, 59h, 49h; 70
+		db 0, 4Bh, 0, 0, 4Eh, 0, 4Fh, 51h, 0, 53h; 80
+		db 54h,	55h, 0,	57h, 0,	5Ah, 5Bh, 0, 0,	5Eh; 90
+		db 5Fh,	58h, 0,	0, 0, 0, 43h, 0, 62h, 0; 100
+		db 64h,	64h, 0,	59h, 6Ch, 0, 0,	0, 0, 0; 110
+		db 0, 0, 0, 0, 0, 0, 0,	0; 120
 bii_inventoryMap db 0, 1, 2, 3,	4, 5, 6, 7, 8, 9; 0
-db 10, 11, 12, 13, 14, 15, 16, 17, 18, 19; 10
-db 20, 21, 22, 23, 24, 25, 26, 27, 28, 29; 20
-db 30, 31, 32, 33, 34, 35, 36, 37, 38, 39; 30
-db 40, 41, 42, 43, 44, 45, 46, 47, 48, 49; 40
-db 50, 51, 52, 53, 54, 55, 56, 57, 58, 59; 50
-db 60, 61, 62, 63, 64, 65, 66, 67, 68, 69; 60
-db 70, 71, 72, 73, 74, 75, 76, 77, 78, 79; 70
-db 80, 81, 82, 83, 84, 85, 86, 87, 88, 89; 80
-db 90, 91, 92, 93, 94, 95, 96, 97, 98, 99; 90
-db 100,	101, 102, 103, 104, 105, 106, 107, 108,	109; 100
-db 110,	111, 0,	0, 0, 0, 0, 0, 0, 0; 110
-db 0, 0, 0, 0, 0, 0, 0,	0; 120
-bii_classMap db	0, 7, 5, 6, 8, 9, 3, 4,	2, 1, 0Ah; 0
-db 0Dh,	0Eh		; 11
-aThieves_inf_1 db 'thieves.inf',0
-aParties_inf_1 db 'parties.inf',0
-a_tpw db '*.tpw',0
-a_tw db	'*.tw',0
-oldCharFilters dd a_tpw, a_tw	       ; 0
-aArefolia_0 db 'Arefolia',0
-aAcorns	db 'Acorns',0
-aArrowsOfLife db 'Arrows of Life',0
-aCrystalKey_0 db 'Crystal Key',0
-aCrownOfTruth_0	db 'Crown of Truth',0
-aStrifespear_0 db 'Strifespear',0
-aRainbowRose_0 db 'Rainbow Rose',0
-aCrystalLens_0 db 'Crystal Lens',0
-aSmokeyLens_0 db 'Smokey Lens',0
-aBlackLens_0 db	'Black Lens',0
-aShadowDoor_0 db 'Shadow Door',0
-aShadowLock_0 db 'Shadow Lock',0
-aWineskin_0 db 'Wineskin',0
-aNightspear_0 db 'Nightspear',0
-aHammerOfWrat_0	db 'Hammer of Wrath',0
-aWandOfPower_0 db 'Wand of Power',0
-aMalefia db 'Malefia',0
-aValarian db 'Valarian',0
-aLanatir db 'Lanatir',0
-aAlliria_0 db 'Alliria',0
-aFerofist db 'Ferofist',0
-aSceadu	db 'Sceadu',0
-aWerra db 'Werra',0
-aTarjan	db 'Tarjan',0
-aSkaraBrae db 'Skara Brae',0
-aUnterbrae db 'UnterBrae',0
-aArboria db 'Arboria',0
-aGelidia db 'Gelidia',0
-aLucencia db 'Lucencia',0
-aKinestia db 'Kinestia',0
-aTenebrosia db 'Tenebrosia',0
-aTarmitia db 'Tarmitia',0
-aCieraBrannia db 'Ciera Brannia',0
-aCelariaBree db	'Celaria Bree',0
-aBlackScar db 'Black Scar',0
-aDarkCopse db 'Dark Copse',0
-aNowhere db 'Nowhere',0
-aFesteringPit db 'Festering Pit',0
-aSacredGrove db	'Sacred Grove',0
-aIceKeep db 'Ice Keep',0
-aShadowCanyon db 'Shadow Canyon',0
-aTarQuarry db 'Tar Quarry',0
-aColdPeak db 'Cold Peak',0
-aCrystalSpring db 'Crystal Spring',0
-aOldDwarfMine db 'Old Dwarf Mine',0
-aShadowRock db 'Shadow Rock',0
+		db 10, 11, 12, 13, 14, 15, 16, 17, 18, 19; 10
+		db 20, 21, 22, 23, 24, 25, 26, 27, 28, 29; 20
+		db 30, 31, 32, 33, 34, 35, 36, 37, 38, 39; 30
+		db 40, 41, 42, 43, 44, 45, 46, 47, 48, 49; 40
+		db 50, 51, 52, 53, 54, 55, 56, 57, 58, 59; 50
+		db 60, 61, 62, 63, 64, 65, 66, 67, 68, 69; 60
+		db 70, 71, 72, 73, 74, 75, 76, 77, 78, 79; 70
+		db 80, 81, 82, 83, 84, 85, 86, 87, 88, 89; 80
+		db 90, 91, 92, 93, 94, 95, 96, 97, 98, 99; 90
+		db 100,	101, 102, 103, 104, 105, 106, 107, 108,	109; 100
+		db 110,	111, 0,	0, 0, 0, 0, 0, 0, 0; 110
+		db 0, 0, 0, 0, 0, 0, 0,	0; 120
+bii_classMap	db 0, 7, 5, 6, 8, 9, 3, 4,	2, 1, 0Ah; 0
+		db 0Dh,	0Eh		; 11
+a_tpw		db '*.tpw',0
+a_tw		db '*.tw',0
+oldCharFilters	dd a_tpw, a_tw	       ; 0
+aAcorns		db 'Acorns',0
+aArrowsOfLife	db 'Arrows of Life',0
+aMalefia	db 'Malefia',0
+aValarian	db 'Valarian',0
+aLanatir	db 'Lanatir',0
+aFerofist	db 'Ferofist',0
+aSceadu		db 'Sceadu',0
+aWerra		db 'Werra',0
+aTarjan		db 'Tarjan',0
+aSkaraBrae	db 'Skara Brae',0
+aUnterbrae	db 'UnterBrae',0
+aArboria	db 'Arboria',0
+aGelidia	db 'Gelidia',0
+aLucencia	db 'Lucencia',0
+aKinestia	db 'Kinestia',0
+aTenebrosia	db 'Tenebrosia',0
+aTarmitia	db 'Tarmitia',0
+aCieraBrannia	db 'Ciera Brannia',0
+aCelariaBree	db 'Celaria Bree',0
+aBlackScar	db 'Black Scar',0
+aDarkCopse	db 'Dark Copse',0
+aNowhere	db 'Nowhere',0
+aFesteringPit	db 'Festering Pit',0
+aSacredGrove	db 'Sacred Grove',0
+aIceKeep	db 'Ice Keep',0
+aShadowCanyon	db 'Shadow Canyon',0
+aTarQuarry	db 'Tar Quarry',0
+aColdPeak	db 'Cold Peak',0
+aCrystalSpring	db 'Crystal Spring',0
+aOldDwarfMine	db 'Old Dwarf Mine',0
+aShadowRock	db 'Shadow Rock',0
 aSulphurSprings	db 'Sulphur Springs',0
-aWarriorsVale db 'Warriors Vale',0
-aBrilhasti db 'Brilhasti',0
-aUrmech	db 'Urmech',0
-aTslotha db 'Tslotha',0
-aCyanis	db 'Cyanis',0
-aTheOldMan db 'The Old Man',0
-aHawkslayer db 'Hawkslayer',0
-aScrapwood_0 db	'Scrapwood',0
-aBardSHall_0 db	'Bard',27h,'s Hall',0
-aStaggerInn_0 db 'Stagger Inn',0
-aHicHaven_0 db 'Hic Haven',0
+aWarriorsVale	db 'Warriors Vale',0
+aBrilhasti	db 'Brilhasti',0
+aUrmech		db 'Urmech',0
+aTslotha	db 'Tslotha',0
+aCyanis		db 'Cyanis',0
+aTheOldMan	db 'The Old Man',0
+aHawkslayer	db 'Hawkslayer',0
 aVioletMountain	db 'Violet Mountains',0
-aCrystalPalace db 'Crystal Palace',0
-aCatacombs db 'Catacombs',0
-aTunnels db 'Tunnels',0
-aWorkshop db 'Workshop',0
-aWizardSGuild db 'Wizard',27h,'s Guild',0
+aCrystalPalace	db 'Crystal Palace',0
+aCatacombs	db 'Catacombs',0
+aTunnels	db 'Tunnels',0
+aWorkshop	db 'Workshop',0
+aWizardSGuild	db 'Wizard',27h,'s Guild',0
 align 2
-aToTraverseTime	db 'To traverse time and space, you mus'
-db 't first recite the alignment value '
-db 'of ',0
-aAnd_0 db ', and ',0
+aToTraverseTime	db 'To traverse time and space, you must first recite the alignment value of ',0
+aAnd_0		db ', and ',0
 align 2
-asc_4C8DA db ', ',0
+asc_4C8DA	db ', ',0
 align 2
-a__0 db	'.',0
-aYouHaveFailedT	db 'You have failed to recite the prope'
-db 'r alignment pattern!',0
-off_4C918 dd aArefolia_0, aAcorns ; 0
-dd aArrowsOfLife, aCrystalKey_0; 2
-dd aCrownOfTruth_0, aStrifespear_0; 4
-dd aRainbowRose_0, aCrystalLens_0; 6
-dd aSmokeyLens_0, aBlackLens_0;	8
-dd aShadowDoor_0, aShadowLock_0; 10
-dd aWineskin_0,	aNightspear_0; 12
-dd aHammerOfWrat_0, aWandOfPower_0; 14
-off_4C958 dd aMalefia, aValarian  ; 0
-dd aLanatir, aAlliria_0	; 2
-dd aFerofist, aSceadu	; 4
-dd aWerra, aTarjan	; 6
-dd aSkaraBrae, aUnterbrae; 8
-dd aArboria, aGelidia	; 10
-dd aLucencia, aKinestia	; 12
-dd aTenebrosia,	aTarmitia; 14
-off_4C998 dd aCieraBrannia, aCelariaBree; 0
-dd aBlackScar, aDarkCopse; 2
-dd aNowhere, aFesteringPit; 4
-dd aSacredGrove, aIceKeep; 6
-dd aShadowCanyon, aTarQuarry; 8
-dd aColdPeak, aCrystalSpring; 10
-dd aOldDwarfMine, aShadowRock; 12
-dd aSulphurSprings, aWarriorsVale; 14
-off_4C9D8 dd aBrilhasti, aUrmech  ; 0
-dd aTslotha, aCyanis	; 2
-dd aTheOldMan, aHawkslayer; 4
-dd aScrapwood_0, aBardSHall_0; 6
-dd aStaggerInn_0, aHicHaven_0; 8
-dd aVioletMountain, aCrystalPalace; 10
-dd aCatacombs, aTunnels	; 12
-dd aWorkshop, aWizardSGuild; 14
-byte_4CA18 db 0, 4		   ; 0
-db 12h,	17h		; 2
-db 25h,	31h		; 4
-db 33h,	46h		; 6
-db 54h,	62h		; 8
-db 66h,	70h		; 10
-db 83h,	85h		; 12
-db 91h,	97h		; 14
-byte_4CA28 db 0Dh
-byte_4CA29 db 7
-db    0
-db    2
-db    6
-db    9
-db  0Fh
-db    3
-db    5
-db  0Ch
-db  0Ah
-db    1
-db  0Eh
-db    8
-db    4
-db  0Bh
-byte_4CA38 db 1
-db  0Fh
-db  7Fh	; 
-db 0FFh
-db    0
-db    0
-db    0
-byte_4CA3F db 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3, 3
-db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3
-db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
-db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
-db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
-db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
-db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
-db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
-db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
-db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
-db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
-db 8, 8, 8, 8, 8, 8, 8,	8, 8, 8, 8, 8, 8, 8, 8,	8
-byte_4CB3F db 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0, 0; 0
-db 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0; 16
-db 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,	1; 32
-db 2, 2, 2, 2, 2, 2, 2,	2, 2, 2, 2, 2, 2, 2, 2,	2; 48
-db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3; 64
-db 4, 4, 4, 4, 4, 4, 4,	4, 5, 5, 5, 5, 5, 5, 5,	5; 80
-db 6, 6, 6, 6, 6, 6, 6,	6, 7, 7, 7, 7, 7, 7, 7,	7; 96
-db 8, 8, 8, 8, 8, 8, 8,	8, 9, 9, 9, 9, 9, 9, 9,	9; 112
-db 0Ah,	0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Bh,	0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh; 128
-db 0Ch,	0Ch, 0Ch, 0Ch, 0Dh, 0Dh, 0Dh, 0Dh, 0Eh,	0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh; 144
-db 10h,	10h, 10h, 10h, 11h, 11h, 11h, 11h, 12h,	12h, 12h, 12h, 13h, 13h, 13h, 13h; 160
-db 14h,	14h, 14h, 14h, 15h, 15h, 15h, 15h, 16h,	16h, 16h, 16h, 17h, 17h, 17h, 17h; 176
-db 18h,	18h, 19h, 19h, 1Ah, 1Ah, 1Bh, 1Bh, 1Ch,	1Ch, 1Dh, 1Dh, 1Eh, 1Eh, 1Fh, 1Fh; 192
-db 20h,	20h, 21h, 21h, 22h, 22h, 23h, 23h, 24h,	24h, 25h, 25h, 26h, 26h, 27h, 27h; 208
-db 28h,	28h, 29h, 29h, 2Ah, 2Ah, 2Bh, 2Bh, 2Ch,	2Ch, 2Dh, 2Dh, 2Eh, 2Eh, 2Fh, 2Fh; 224
-db 30h,	31h, 32h, 33h, 34h, 35h, 36h, 37h, 38h,	39h, 3Ah, 3Bh, 3Ch, 3Dh, 3Eh, 3Fh; 240
+a__0		db '.',0
+aYouHaveFailedT	db 'You have failed to recite the proper alignment pattern!',0
+off_4C918	dd aArefolia, aAcorns ; 0
+		dd aArrowsOfLife, aCrystalKey; 2
+		dd aCrownOfTruth, aStrifespear; 4
+		dd aRainbowRose, aCrystalLens; 6
+		dd aSmokeyLens, aBlackLens;	8
+		dd aShadowDoor, aShadowLock; 10
+		dd aWineskin,	aNightspear; 12
+		dd aHammerOfWrath, aWandOfPower; 14
+off_4C958	dd aMalefia, aValarian  ; 0
+		dd aLanatir, aAlliria	; 2
+		dd aFerofist, aSceadu	; 4
+		dd aWerra, aTarjan	; 6
+		dd aSkaraBrae, aUnterbrae; 8
+		dd aArboria, aGelidia	; 10
+		dd aLucencia, aKinestia	; 12
+		dd aTenebrosia,	aTarmitia; 14
+off_4C998	dd aCieraBrannia, aCelariaBree; 0
+		dd aBlackScar, aDarkCopse; 2
+		dd aNowhere, aFesteringPit; 4
+		dd aSacredGrove, aIceKeep; 6
+		dd aShadowCanyon, aTarQuarry; 8
+		dd aColdPeak, aCrystalSpring; 10
+		dd aOldDwarfMine, aShadowRock; 12
+		dd aSulphurSprings, aWarriorsVale; 14
+off_4C9D8	dd aBrilhasti, aUrmech  ; 0
+		dd aTslotha, aCyanis	; 2
+		dd aTheOldMan, aHawkslayer; 4
+		dd aScrapwood, aBardSHall; 6
+		dd aStaggerInn, aHicHaven; 8
+		dd aVioletMountain, aCrystalPalace; 10
+		dd aCatacombs, aTunnels	; 12
+		dd aWorkshop, aWizardSGuild; 14
+byte_4CA18	db 0, 4		   ; 0
+		db 12h,	17h		; 2
+		db 25h,	31h		; 4
+		db 33h,	46h		; 6
+		db 54h,	62h		; 8
+		db 66h,	70h		; 10
+		db 83h,	85h		; 12
+		db 91h,	97h		; 14
+byte_4CA28	db 0Dh
+byte_4CA29	db 7
+		db    0
+		db    2
+		db    6
+		db    9
+		db  0Fh
+		db    3
+		db    5
+		db  0Ch
+		db  0Ah
+		db    1
+		db  0Eh
+		db    8
+		db    4
+		db  0Bh
+byte_4CA38	db 1
+		db  0Fh
+		db  7Fh	; 
+		db 0FFh
+		db    0
+		db    0
+		db    0
+byte_4CA3F	db 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
+		db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
+		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
+		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
+		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
+		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
+		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
+		db 8, 8, 8, 8, 8, 8, 8,	8, 8, 8, 8, 8, 8, 8, 8,	8
+byte_4CB3F	db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0; 0
+		db 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0; 16
+		db 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,	1; 32
+		db 2, 2, 2, 2, 2, 2, 2,	2, 2, 2, 2, 2, 2, 2, 2,	2; 48
+		db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3; 64
+		db 4, 4, 4, 4, 4, 4, 4,	4, 5, 5, 5, 5, 5, 5, 5,	5; 80
+		db 6, 6, 6, 6, 6, 6, 6,	6, 7, 7, 7, 7, 7, 7, 7,	7; 96
+		db 8, 8, 8, 8, 8, 8, 8,	8, 9, 9, 9, 9, 9, 9, 9,	9; 112
+		db 0Ah,	0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Bh,	0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh; 128
+		db 0Ch,	0Ch, 0Ch, 0Ch, 0Dh, 0Dh, 0Dh, 0Dh, 0Eh,	0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh; 144
+		db 10h,	10h, 10h, 10h, 11h, 11h, 11h, 11h, 12h,	12h, 12h, 12h, 13h, 13h, 13h, 13h; 160
+		db 14h,	14h, 14h, 14h, 15h, 15h, 15h, 15h, 16h,	16h, 16h, 16h, 17h, 17h, 17h, 17h; 176
+		db 18h,	18h, 19h, 19h, 1Ah, 1Ah, 1Bh, 1Bh, 1Ch,	1Ch, 1Dh, 1Dh, 1Eh, 1Eh, 1Fh, 1Fh; 192
+		db 20h,	20h, 21h, 21h, 22h, 22h, 23h, 23h, 24h,	24h, 25h, 25h, 26h, 26h, 27h, 27h; 208
+		db 28h,	28h, 29h, 29h, 2Ah, 2Ah, 2Bh, 2Bh, 2Ch,	2Ch, 2Dh, 2Dh, 2Eh, 2Eh, 2Fh, 2Fh; 224
+		db 30h,	31h, 32h, 33h, 34h, 35h, 36h, 37h, 38h,	39h, 3Ah, 3Bh, 3Ch, 3Dh, 3Eh, 3Fh; 240
 _d3cmp_baseAddr	dw 0
-word_4CC41 dw 0
-_d3cmp_offset dw 0
-countMaybe dd 0
-db    0
-db    0
-word_4CC4B dw 2196 dup(0)
-dataHeader dd 0
-db    0
-db    0
-db    0
-db    0
-byte_4DD7B db 103Bh dup(20h)	   ; 0
-workBuf	dw 40h dup(0)		; 0
-db    0
-db    0
-workBufIndex dw	0
-curFromOffset dw 0
-curFromSegment dw 0
-db    0
-db    0
-db    0
-db    0
-curToSegment dw	0
-curToOffset dw 0
-word_4EE46 dw 0
-word_4EE48 dw 0
-word_4EE4A dw 0
-word_4EE4C dw 0
-word_4EE4E dw 0
-word_4EE50 dw 0
-randomSeed dw 0
-dw seg seg024
+word_4CC41	dw 0
+_d3cmp_offset	dw 0
+countMaybe	dd 0
+		db 0
+		db 0
+word_4CC4B	dw 2196 dup(0)
+dataHeader	dd 0
+		db    0
+		db    0
+		db    0
+		db    0
+byte_4DD7B	db 103Bh dup(20h)	   ; 0
+workBuf		dw 40h dup(0)		; 0
+		db    0
+		db    0
+workBufIndex	dw	0
+curFromOffset	dw 0
+curFromSegment	dw 0
+		db    0
+		db    0
+		db    0
+		db    0
+curToSegment	dw	0
+curToOffset	dw 0
+word_4EE46	dw 0
+word_4EE48	dw 0
+word_4EE4A	dw 0
+word_4EE4C	dw 0
+word_4EE4E	dw 0
+word_4EE50	dw 0
+randomSeed	dw 0
 currentLocationMaybe dw	0
-dunLevelIndex dw 0
-dunLevelNum dw 0
-sq_north dw 0
-sq_east	dw 0
-dirFacing dw 0
-inDungeonMaybe dw 0
+dunLevelIndex	dw 0
+dunLevelNum	dw 0
+sq_north	dw 0
+sq_east		dw 0
+dirFacing	dw 0
+inDungeonMaybe	dw 0
 buildingRvalMaybe dw 0
-word_4EE66 dw 0
-curSpellNo dw 0
-mfuncFlags db 7	dup(0)		   ; 0
-byte_4EE71 db 0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-_mfunc_regs dw 20h dup(0)	    ; 0
-byte_4EEBA db 0
-lightDistance db 0
-byte_4EEBC db 0
+word_4EE66	dw 0
+curSpellNo	dw 0
+mfuncFlags	db 7 dup(0)     ; 0
+byte_4EE71	db 0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+_mfunc_regs	dw 20h dup(0)	    ; 0
+byte_4EEBA	db 0
+lightDistance	db 0
+byte_4EEBC	db 0
 lightDuration		db 0
 compassDuration		db 0
 detectDuration		db 0
 shieldDuration		db 0
 levitationDuration	db 0
 detectType		db 0
-byte_4EEC3 db 0
-byte_4EEC4 db 0
-levelNoMaybe db	0
-levFlags db 0
-dunWidth db 0
-dunHeight db 0
-byte_4EEC9 db 0
+byte_4EEC3	db 0
+byte_4EEC4	db 0
+levelNoMaybe	db 0
+levFlags	db 0
+dunWidth	db 0
+dunHeight	db 0
+byte_4EEC9	db 0
 partyAttackFlag	db 0
-byte_4EECB db 0
-byte_4EECC db 0
+byte_4EECB	db 0
+byte_4EECC	db 0
 byte_4EECD	db 0FFh, 7 dup(0), 8 dup(1), 7 dup(0)
 		db 0FFh, 8 dup(80h), 6Bh, 8; 23
 		db 6 dup(0), 2 dup(1), 0, 2 dup(6); 34
@@ -56362,722 +55159,109 @@ byte_4EECD	db 0FFh, 7 dup(0), 8 dup(1), 7 dup(0)
 		db 3 dup(0), 66h, 3Ch, 2 dup(18h); 102
 		db 3Ch, 66h, 0, 8 dup(0FFh); 109
 		db 2 dup(0)           
-word_4EF47 dw 0
-word_4EF49 dw 0
-byte_4EF4B db 0
-byte_4EF4C db 0
-byte_4EF4D db 0
+aFaster		db 0Ah,'<Faster...>',0Ah,0
+aSlower		db 0Ah,'<Slower...>',0Ah,0
+txtDelayTable	db 1, 4, 7, 0Bh, 0Eh, 11h, 14h, 17h, 1Ah, 1Dh
+txtDelayIndex	db 7
+_clockTicks	dw 0
+word_4EF49	dw 0
+byte_4EF4B	db 0
+byte_4EF4C	db 0
+byte_4EF4D	db 0
 align 4
-byte_4EF50 db 0
-byte_4EF51 db 0
-byte_4EF52 db 0
-byte_4EF53 db 0
+byte_4EF50	db 0
+byte_4EF51	db 0
+byte_4EF52	db 0
+byte_4EF53	db 0
 spell_mouseClicked	db 0
 mouse_moved	db 0
 mouse_x		dw 0DCh
 mouse_y		dw 0
-word_4EF59 dw 0
-word_4EF5B dw 0
-byte_4EF5D db 0
-byte_4EF5E db 0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db  0Ah
-db    0
-db    0
-db    0
-db    0
-db    0
-word_4EF6F dw 3F8h
-db    4
-db    0
-db    0
-db 0B8h	; ∏
-db    1
-db    0
-db    0
-db    0
-byte_4EF79 db 1
-byte_4EF7A db 0
+word_4EF59	dw 0
+word_4EF5B	dw 0
+byte_4EF5D	db 0
+byte_4EF5E	db 0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db  0Ah
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+word_4EF6F	dw 3F8h
+		db    4
+		db    0
+		db    0
+		db 0B8h	; ∏
+		db    1
+		db    0
+		db    0
+		db    0
+byte_4EF79	db 1
+byte_4EF7A	db 0
 align 2
-word_4EF7C dw 0
-word_4EF7E dw 0
-off_4EF80 dw offset sub_2843B
-word_4EF82 dw 0
-dw seg dseg
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
+word_4EF7C	dw 0
+word_4EF7E	dw 0
+off_4EF80	dw offset sub_2843B
+word_4EF82	dw 0
+		dw seg dseg
+		db 4Ch dup(0)
 off_4EFD2	dw offset word_4EF82
-aC_file_info db	';C_FILE_INFO',0
-dword_4EFE1 dd 0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-word_4EFED dw 0
-db    0
-db    0
-db    0
-db    0
+aC_file_info	db ';C_FILE_INFO',0
+dword_4EFE1	dd 0
+		db 8 dup(0)
+word_4EFED	dw 0
+		db 4 dup(0)
 word_4EFF3	dw 0
 word_4EFF5	dw 0
 		db 0
-byte_4EFF8 db 0
+byte_4EFF8	db 0
 align 2
-word_4EFFA dw 14h
-byte_4EFFC db 81h
-db  81h	; Å
-db  81h	; Å
-db    1
-db    1
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-word_4F010 dw 0
-word_4F012 dw 0
-word_4F014 dw 0
-word_4F016 dw 0
-word_4F018 dw 0
-word_4F01A dw 0C9AEh
-seg_4F01C dw seg dseg
-db  43h	; C
-db    0
-db    0
-db    0
-byte_4F022 db 0
-byte_4F023 db 0
-dword_4F024 dd 0
-unk_4F028 db	0
-db    0
-word_4F02A dw 0
-dword_4F02C dd 0FFFFFFFFh
-;word_4F030	 dw 0DB00h
-word_4F030	 dw (offset dseg_end+102h)
-dword_4F032 dd 0
+word_4EFFA	dw 14h
+byte_4EFFC	db 3 dup(81h), 2 dup(1), 0Fh dup(0)
+word_4F010	dw 0
+word_4F012	dw 0
+word_4F014	dw 0
+word_4F016	dw 0
+word_4F018	dw 0
+off_4F01A	dd unk_4F01E
+unk_4F01E	db  43h	; C
+		db    0
+		db    0
+		db    0
+byte_4F022	db 0
+byte_4F023	db 0
+dword_4F024	dd 0
+unk_4F028	db	0
+		db    0
+word_4F02A	dw 0
+dword_4F02C	dd 0FFFFFFFFh
+word_4F030	dw (offset dseg_end+102h)
+dword_4F032	dd 0
 byte_4F036	db 0, 16h, 2 dup(2), 18h
 		db 0Dh, 9, 3 dup(0Ch), 7; 5
 		db 8, 2 dup(16h), 0FFh, 12h; 11
 		db 0Dh, 12h, 2, 0FFh    ; 16
-word_4F04A dw 0
-unk_4F04C db	0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
-db    0
+word_4F04A	dw 0
+byte_4F04C	db 200h dup(0)
 byte_4F24C	db 200h dup(0)
 byte_4F44C	db 200h dup(0)
-off_4F64C	dw offset unk_4F04C
+off_4F64C	dw offset byte_4F04C
 		dw seg dseg
-db    0
-db    0
-dd unk_4F04C
-db    1
-db    0
+		db    0
+		db    0
+		dd byte_4F04C
+		db    1
+		db    0
 byte_4F658	db 0Ah dup(0), 2, 1
 byte_4F664	db 0Ah dup(0), 2 dup(2), 0Ah dup(0), 84h, 3, 0Ah dup(0), 2, 4
 		db 0A8h dup(0)
@@ -57090,68 +55274,68 @@ aNull		db '(null)',0
 aNull_0		db '(null)',0
 asc_4F7C8	db '+- #',0
 align 2
-word_4F7CE dw 0
-word_4F7D0 dw 0
+word_4F7CE	dw 0
+word_4F7D0	dw 0
 align 4
-word_4F7D4 dw 0
+word_4F7D4	dw 0
 align 4
-word_4F7D8 dw 0
-word_4F7DA dw 0
-word_4F7DC dw 0
-word_4F7DE dw 2000h
-word_4F7E0 dw 0
-byte_4F7E2 db 0
+word_4F7D8	dw 0
+word_4F7DA	dw 0
+word_4F7DC	dw 0
+word_4F7DE	dw 2000h
+word_4F7E0	dw 0
+byte_4F7E2	db 0
 align 2
-off_4F7E4 dd sub_284E6
-off_4F7E8 dd sub_284E6
-off_4F7EC dd sub_284E6
-off_4F7F0 dd sub_284E6
-off_4F7F4 dd sub_284E6
-db    0
-db    0
-db    0
-db    0
-db    1
-db    1
-db    0
-sscanf_charFlags db 32, 32, 32, 32, 32, 32, 32, 32
-db 32, 40, 40, 40, 40, 40, 32, 32
-db 32, 32, 32, 32, 32, 32, 32, 32
-db 32, 32, 32, 32, 32, 32, 32, 32
-db 72, 16, 16, 16, 16, 16, 16, 16
-db 16, 16, 16, 16, 16, 16, 16, 16
-db 132,	132, 132, 132, 132, 132, 132, 132
-db 132,	132, 16, 16, 16, 16, 16, 16
-db 16, 129, 129, 129, 129, 129,	129, 1
-db 1, 1, 1, 1, 1, 1, 1,	1
-db 1, 1, 1, 1, 1, 1, 1,	1
-db 1, 1, 1, 16,	16, 16,	16, 16
-db 16, 130, 130, 130, 130, 130,	130, 2
-db 2, 2, 2, 2, 2, 2, 2,	2
-db 2, 2, 2, 2, 2, 2, 2,	2
-db 2, 2, 2, 16,	16, 16,	16, 32
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0, 0, 0, 0, 0, 0, 0,	0
-db 0
-word_4F900 dw 0FFFFh
+off_4F7E4	dd sub_284E6
+off_4F7E8	dd sub_284E6
+off_4F7EC	dd sub_284E6
+off_4F7F0	dd sub_284E6
+off_4F7F4	dd sub_284E6
+		db    0
+		db    0
+		db    0
+		db    0
+		db    1
+		db    1
+		db    0
+sscanf_charFlags	db 32, 32, 32, 32, 32, 32, 32, 32
+		db 32, 40, 40, 40, 40, 40, 32, 32
+		db 32, 32, 32, 32, 32, 32, 32, 32
+		db 32, 32, 32, 32, 32, 32, 32, 32
+		db 72, 16, 16, 16, 16, 16, 16, 16
+		db 16, 16, 16, 16, 16, 16, 16, 16
+		db 132,	132, 132, 132, 132, 132, 132, 132
+		db 132,	132, 16, 16, 16, 16, 16, 16
+		db 16, 129, 129, 129, 129, 129,	129, 1
+		db 1, 1, 1, 1, 1, 1, 1,	1
+		db 1, 1, 1, 1, 1, 1, 1,	1
+		db 1, 1, 1, 16,	16, 16,	16, 16
+		db 16, 130, 130, 130, 130, 130,	130, 2
+		db 2, 2, 2, 2, 2, 2, 2,	2
+		db 2, 2, 2, 2, 2, 2, 2,	2
+		db 2, 2, 2, 16,	16, 16,	16, 32
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0
+word_4F900	dw 0FFFFh
 align 4
-unk_4F904 db	0
+unk_4F904	db	0
 db    0
-word_4F906 dw 0
+word_4F906	dw 0
 dword_4F908	dd 0
 dword_4F90C	dd 0
 off_4F910	dd sub_28846
@@ -57160,252 +55344,241 @@ dseg_x		dw seg dseg
 seg027_x	dw seg	seg027
 seg022_x	dw seg	seg022
 seg023_x	dw seg seg023
-aNmsg db '<<NMSG>>',0
+aNmsg		db '<<NMSG>>',0
 align 2
 aR6000StackOver	db 'R6000',0Dh,0Ah
-db '- stack overflow',0Dh,0Ah,0
-db    3
-db    0
-db  52h	; R
-db  36h	; 6
-db  30h	; 0
-db  30h	; 0
-db  33h	; 3
-db  0Dh
-db  0Ah
-db  2Dh	; -
-db  20h
-db  69h	; i
-db  6Eh	; n
-db  74h	; t
-db  65h	; e
-db  67h	; g
-db  65h	; e
-db  72h	; r
-db  20h
-db  64h	; d
-db  69h	; i
-db  76h	; v
-db  69h	; i
-db  64h	; d
-db  65h	; e
-db  20h
-db  62h	; b
-db  79h	; y
-db  20h
-db  30h	; 0
-db  0Dh
-db  0Ah
-db    0
-db    9
-db    0
-db  52h	; R
-db  36h	; 6
-db  30h	; 0
-db  30h	; 0
-db  39h	; 9
-db  0Dh
-db  0Ah
-db  2Dh	; -
-db  20h
-db  6Eh	; n
-db  6Fh	; o
-db  74h	; t
-db  20h
-db  65h	; e
-db  6Eh	; n
-db  6Fh	; o
-db  75h	; u
-db  67h	; g
-db  68h	; h
-db  20h
-db  73h	; s
-db  70h	; p
-db  61h	; a
-db  63h	; c
-db  65h	; e
-db  20h
-db  66h	; f
-db  6Fh	; o
-db  72h	; r
-db  20h
-db  65h	; e
-db  6Eh	; n
-db  76h	; v
-db  69h	; i
-db  72h	; r
-db  6Fh	; o
-db  6Eh	; n
-db  6Dh	; m
-db  65h	; e
-db  6Eh	; n
-db  74h	; t
-db  0Dh
-db  0Ah
-db    0
-db 0FCh	; ¸
-db    0
-db  0Dh
-db  0Ah
-db    0
-db 0FFh
-db    0
-db  72h	; r
-db  75h	; u
-db  6Eh	; n
-db  2Dh	; -
-db  74h	; t
-db  69h	; i
-db  6Dh	; m
-db  65h	; e
-db  20h
-db  65h	; e
-db  72h	; r
-db  72h	; r
-db  6Fh	; o
-db  72h	; r
-db  20h
-db    0
-db    2
-db    0
-db  52h	; R
-db  36h	; 6
-db  30h	; 0
-db  30h	; 0
-db  32h	; 2
-db  0Dh
-db  0Ah
-db  2Dh	; -
-db  20h
-db  66h	; f
-db  6Ch	; l
-db  6Fh	; o
-db  61h	; a
-db  74h	; t
-db  69h	; i
-db  6Eh	; n
-db  67h	; g
-db  20h
-db  70h	; p
-db  6Fh	; o
-db  69h	; i
-db  6Eh	; n
-db  74h	; t
-db  20h
-db  6Eh	; n
-db  6Fh	; o
-db  74h	; t
-db  20h
-db  6Ch	; l
-db  6Fh	; o
-db  61h	; a
-db  64h	; d
-db  65h	; e
-db  64h	; d
-db  0Dh
-db  0Ah
-db    0
-db    1
-db    0
-db  52h	; R
-db  36h	; 6
-db  30h	; 0
-db  30h	; 0
-db  31h	; 1
-db  0Dh
-db  0Ah
-db  2Dh	; -
-db  20h
-db  6Eh	; n
-db  75h	; u
-db  6Ch	; l
-db  6Ch	; l
-db  20h
-db  70h	; p
-db  6Fh	; o
-db  69h	; i
-db  6Eh	; n
-db  74h	; t
-db  65h	; e
-db  72h	; r
-db  20h
-db  61h	; a
-db  73h	; s
-db  73h	; s
-db  69h	; i
-db  67h	; g
-db  6Eh	; n
-db  6Dh	; m
-db  65h	; e
-db  6Eh	; n
-db  74h	; t
-db  0Dh
-db  0Ah
-db    0
-db 0FFh
-db 0FFh
-db 0FFh
-db    0
-word_4FD56 dw 0
-tav_drunkLevel db 8 dup(0)	       ; 0
-curStrByte db ?
+		db '- stack overflow',0Dh,0Ah,0
+		db    3
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  33h	; 3
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  69h	; i
+		db  6Eh	; n
+		db  74h	; t
+		db  65h	; e
+		db  67h	; g
+		db  65h	; e
+		db  72h	; r
+		db  20h
+		db  64h	; d
+		db  69h	; i
+		db  76h	; v
+		db  69h	; i
+		db  64h	; d
+		db  65h	; e
+		db  20h
+		db  62h	; b
+		db  79h	; y
+		db  20h
+		db  30h	; 0
+		db  0Dh
+		db  0Ah
+		db    0
+		db    9
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  39h	; 9
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  6Eh	; n
+		db  6Fh	; o
+		db  74h	; t
+		db  20h
+		db  65h	; e
+		db  6Eh	; n
+		db  6Fh	; o
+		db  75h	; u
+		db  67h	; g
+		db  68h	; h
+		db  20h
+		db  73h	; s
+		db  70h	; p
+		db  61h	; a
+		db  63h	; c
+		db  65h	; e
+		db  20h
+		db  66h	; f
+		db  6Fh	; o
+		db  72h	; r
+		db  20h
+		db  65h	; e
+		db  6Eh	; n
+		db  76h	; v
+		db  69h	; i
+		db  72h	; r
+		db  6Fh	; o
+		db  6Eh	; n
+		db  6Dh	; m
+		db  65h	; e
+		db  6Eh	; n
+		db  74h	; t
+		db  0Dh
+		db  0Ah
+		db    0
+		db 0FCh	; ¸
+		db    0
+		db  0Dh
+		db  0Ah
+		db    0
+		db 0FFh
+		db    0
+		db  72h	; r
+		db  75h	; u
+		db  6Eh	; n
+		db  2Dh	; -
+		db  74h	; t
+		db  69h	; i
+		db  6Dh	; m
+		db  65h	; e
+		db  20h
+		db  65h	; e
+		db  72h	; r
+		db  72h	; r
+		db  6Fh	; o
+		db  72h	; r
+		db  20h
+		db    0
+		db    2
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  32h	; 2
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  66h	; f
+		db  6Ch	; l
+		db  6Fh	; o
+		db  61h	; a
+		db  74h	; t
+		db  69h	; i
+		db  6Eh	; n
+		db  67h	; g
+		db  20h
+		db  70h	; p
+		db  6Fh	; o
+		db  69h	; i
+		db  6Eh	; n
+		db  74h	; t
+		db  20h
+		db  6Eh	; n
+		db  6Fh	; o
+		db  74h	; t
+		db  20h
+		db  6Ch	; l
+		db  6Fh	; o
+		db  61h	; a
+		db  64h	; d
+		db  65h	; e
+		db  64h	; d
+		db  0Dh
+		db  0Ah
+		db    0
+		db    1
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  31h	; 1
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  6Eh	; n
+		db  75h	; u
+		db  6Ch	; l
+		db  6Ch	; l
+		db  20h
+		db  70h	; p
+		db  6Fh	; o
+		db  69h	; i
+		db  6Eh	; n
+		db  74h	; t
+		db  65h	; e
+		db  72h	; r
+		db  20h
+		db  61h	; a
+		db  73h	; s
+		db  73h	; s
+		db  69h	; i
+		db  67h	; g
+		db  6Eh	; n
+		db  6Dh	; m
+		db  65h	; e
+		db  6Eh	; n
+		db  74h	; t
+		db  0Dh
+		db  0Ah
+		db    0
+		db 0FFh
+		db 0FFh
+		db 0FFh
+		db    0
+word_4FD56	dw 0
+tav_drunkLevel	db 8 dup(0)	       ; 0
+curStrByte	db ?
 align 2
-dataBufOff dw ?
-dataBufSeg dw ?
-bitsLeft dw ?
-_str_capFlag dw	?
+dataBufOff	dw ?
+dataBufSeg	dw ?
+bitsLeft	dw ?
+_str_capFlag	dw	?
 align 4
-word_4FD6C dw ?
-sscanf_structP dd ?
-word_4FD72 dw ?
-word_4FD74 dw ?
-sscanf_argSizeFlag dw ?
-sscanf_charListFlag dw ?
-word_4FD7A dw ?
-dword_4FD7C dd ?
-sscanf_bufp dd ?
-word_4FD84 dw ?
-sscanf_buf db 100h dup(?)
+word_4FD6C	dw ?
+sscanf_structP	dd ?
+word_4FD72	dw ?
+word_4FD74	dw ?
+sscanf_argSizeFlag	dw ?
+sscanf_charListFlag	dw ?
+word_4FD7A	dw ?
+dword_4FD7C	dd ?
+sscanf_bufp	dd ?
+word_4FD84	dw ?
+sscanf_buf	db 100h dup(?)
 sscanf_minWidth dw ?
 sscanf_noAssign dw ?
-word_4FE8A dw ?
-word_4FE8C dw ?
-_sscanf_floatBuf db 42h dup(?)
-word_4FED0 dw ?
-word_4FED2 dw ?
-word_4FED4 dw ?
-dword_4FED6 dd ?
-word_4FEDA dw ?
-word_4FEDC dw ?
-word_4FEDE dw ?
-word_4FEE0 dw ?
-byte_4FEE2	db    ?	
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-db    ?	;
-word_4FEEE dw ?
-dword_4FEF0 dd ?
-word_4FEF4 dw ?
-word_4FEF6 dw ?
-word_4FEF8 dw ?
-word_4FEFA dw ?
-word_4FEFC dw ?
-word_4FEFE dw ?
-word_4FF00 dw ?
-word_4FF02 dw ?
-word_4FF04 dw ?
-word_4FF06 dw ?
+word_4FE8A	dw ?
+word_4FE8C	dw ?
+_sscanf_floatBuf	db 42h dup(?)
+word_4FED0	dw ?
+word_4FED2	dw ?
+word_4FED4	dw ?
+dword_4FED6	dd ?
+word_4FEDA	dw ?
+word_4FEDC	dw ?
+word_4FEDE	dw ?
+word_4FEE0	dw ?
+byte_4FEE2	db 0Ch dup(?)
+word_4FEEE	dw ?
+dword_4FEF0	dd ?
+word_4FEF4	dw ?
+word_4FEF6	dw ?
+word_4FEF8	dw ?
+word_4FEFA	dw ?
+word_4FEFC	dw ?
+word_4FEFE	dw ?
+word_4FF00	dw ?
+word_4FF02	dw ?
+word_4FF04	dw ?
+word_4FF06	dw ?
 byte_4FF08	db 15Eh dup(?)
-word_50066 dw ?
-word_50068 dw ?
+word_50066	dw ?
+word_50068	dw ?
 byte_5006A	db 4 dup(?)
 dseg_end	db ?
 		db ?

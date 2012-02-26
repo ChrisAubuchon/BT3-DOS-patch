@@ -51,9 +51,13 @@ wait4IO		macro
 	add	sp, 2
 	endm
 
+delayWithTable	macro
+	call	txt_delayWithTable
+	endm
+
 delayNoTable	macro _count
 	push_imm	_count
-	std_call	getIOwithDelay, 2
+	std_call	txt_delayNoTable, 2
 	endm
 
 do_strcat	macro _dest
