@@ -9,6 +9,7 @@ all: thiefp.exe
 
 thiefp.exe: $(OBJS)
 	link16 $<,$@,nul.map,.lib,nul.def
+#	link16 /exepack $<,$@,nul.map,.lib,nul.def
 
 thief.obj: thief.asm
 seg000.obj: seg000.asm

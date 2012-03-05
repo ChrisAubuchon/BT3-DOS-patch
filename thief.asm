@@ -40,6 +40,9 @@ include macros.h
 ; Removed wait4IO from dunsq_doTrap
 ; Made the outdoor levels outdoor. Basically just call a different setBG routine and make lightDistance 4 in dun_buildView
 ; COSMETIC: Clear the screen after certain actions in dunMainLoop and wildMainLoop. Messages would linger and be confusing.
+; COSMETIC: Fixed the spacing of "XX points of damage" in a breath attack
+; Add poison damage check to the periodic check loop
+; Fixed the drop rate for Harmonic Gems
 
 .686p
 .mmx
@@ -2283,13 +2286,13 @@ l_pauseGame:
 	jnz	short loc_117E1
 	jmp	loc_getKeyboardCmd_fail
 loc_117E1:
-	mov	gs:word_42450, 1
+	mov	gs:advanceTimeFlag, 1
 	mov	ax, offset aPausing
 	push	ds
 	push	ax
 	call	anotherPrintString
 	add	sp, 4
-	mov	gs:word_42450, 0
+	mov	gs:advanceTimeFlag, 0
 	jmp	loc_getKeyboardCmd_success
 l_partyAttack:
 	mov	partyAttackFlag, 1
@@ -8676,10 +8679,11 @@ loc_15256:
 	cmp	gs:word_41E6C, si
 	jz	short loc_15296
 	mov	gs:word_41E6C, si
-	cmp	gs:word_42450, 0
-	jnz	short $+2
+	cmp	gs:advanceTimeFlag, 0
+	jnz	short loc_15296
+	call	bat_doPoisonEffect
 loc_15296:
-	cmp	gs:word_42450, 0
+	cmp	gs:advanceTimeFlag, 0
 	jz	short loc_152A5
 	jmp	loc_1538E
 loc_152A5:
@@ -8751,7 +8755,7 @@ loc_1538E:
 	cmp	gs:word_42330, ax
 	jz	short loc_153ED
 	mov	gs:word_42330, ax
-	cmp	gs:word_42450, 0
+	cmp	gs:advanceTimeFlag, 0
 	jnz	short loc_153ED
 	mov	al, byte_4EEBA
 	inc	byte_4EEBA
@@ -26320,18 +26324,13 @@ loc_1F3B0:
 loc_1F3C8:
 	call	_random
 	sub	ah, ah
-	mov	[bp+var_104], ax
 	cmp	ax, 224
 	jl	short loc_1F3E9
 	cmp	ax, 240
 	jge	short loc_1F3E9
-	cmp	ax, 195
-	jnz	short loc_1F3E7
-	mov	ax, 1
-	jmp	short loc_1F3E9
-loc_1F3E7:
-	sub	ax, ax
+	mov	ax, 195
 loc_1F3E9:
+	mov	[bp+var_104], ax
 	mov	bl, levelNoMaybe
 	sub	bh, bh
 	mov	al, byteMaskList[bx]
@@ -28185,7 +28184,7 @@ loc_206A1:
 	add	sp, 8
 	mov	word ptr [bp+var_116], ax
 	mov	word ptr [bp+var_116+2], dx
-	mov	ax, 4
+	xor	ax, ax
 	push	ax
 	mov	ax, gs:damageAmount
 	cwd
@@ -50550,7 +50549,7 @@ align 2
 word_4244C	dw 0
 byte_4244E	db 0
 align 2
-word_42450	dw 0
+advanceTimeFlag	dw 0
 breakAfterFunc	dw 0
 sq_antiMagicFlag		db 0
 align 2
