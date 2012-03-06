@@ -1,0 +1,65 @@
+- Monsters now do breath attacks properly
+
+- Monster attacks now inflict special status (critical hit, stoning, etc)
+
+- Divine Intervention spell correctly converts illusions to monsters
+
+- The Up Arrow key now works as the 'K' key
+
+- Fixed a bug where a monster would not get to attack if its attack priority
+  was lower than the party's
+
+- Horn of Gods and Wand of Fury now work correctly.
+
+- Set a maximum negative AC of -50 to match the Apple version. It would wrap
+  if the AC got too low.
+
+- Use the proper saving throw values for monsters. This brings the DOS version
+  in line with the Apple II version.
+
+- Fixed the group size when a new monster group is create by summoning.
+
+- Clear the "make monster hostile" dungeon square flag after it is checked.
+
+- The "make monster hostile" dungeon square now only effects the party if there
+  is a monster in the party.
+
+- Fixed Tarjan's attack to call the summon() routine 10 times with Black Slayers
+
+- COSMETIC: Print a blank line between attacks from a breath attack or spell
+
+- COSMETIC: Print an '!' after the kill string
+
+- COSMETIC: Fix the reward output after (L)eaving a chest. It would print
+  "Each character receives XX XP, and". Added " you received 0 pieces of gold"
+
+- Added casting of spells by 4-letter code as in BT1 and BT2
+
+- Light spells now stay active when hitting an anti-magic square
+
+- Fixed Sorcerer Sight spell to detect all special squares ahead
+
+- Corrected the monster rosters for the levels.
+
+- When on an anti-magic square, spells that are cast now fizzle.
+
+- Print full spell name under "Known Spells" screen of a magic user
+
+- Removed getc() from dunsq_doTrap().
+
+- Made the outdoor levels use the outdoor background and ignore the light
+  spell value. This matches behavior on the Apple II
+
+- COSMETIC: Clear the screen after certain actions in the dungeon main loop.
+  For example, detect messages would stay in the text window when turning on
+  a square.
+
+- Added scrolling speed commands to battle text as in BT1 and BT2
+
+- COSMETIC: Fixed the spacing of "XX points of damage" in a breath attack or
+  spell attack.
+
+- Added check for poisoned status to the periodic check loop. Character HP
+  will now be drained as expected when poisoned.
+
+- Fixed the drop rate for Harmonic Gems
