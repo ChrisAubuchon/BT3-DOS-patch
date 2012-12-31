@@ -43,6 +43,8 @@ include macros.h
 ; COSMETIC: Fixed the spacing of "XX points of damage" in a breath attack
 ; Add poison damage check to the periodic check loop
 ; Fixed the drop rate for Harmonic Gems
+; Fix HP Regen squares
+; Fixed the level of chest traps
 
 .686p
 .mmx
@@ -2154,7 +2156,7 @@ txt_castSpell proc far
 	push_ss_string	_instr
 	std_call	_strlen, 4
 	cmp	ax, 4
-	jl	loc_txt_castSpell_exit
+	jl	loc_txt_castSpell_fail_no_print
 
 	lea	si, [bp+_instr]
 	mov	[bp+counter], 0
@@ -2217,6 +2219,7 @@ loc_txt_castSpell_fail:
 
 	delayNoTable	2
 
+loc_txt_castSpell_fail_no_print:
 	func_return	0FFFFh
 
 loc_txt_castSpell_exit:
@@ -8744,6 +8747,11 @@ loc_15362:
 	call	regenSppt
 loc_15378:
 	call	doEquipmentEffect
+	cmp	gs:sqRegenHPFlag, 0
+	jz	loc_sub_15226_label_1
+	call	do_partyHPRegen
+
+loc_sub_15226_label_1:
 	cmp	gs:byte_41E81, 0
 	jz	short loc_1538E
 	call	dunsq_drainHP
@@ -22829,14 +22837,11 @@ loc_1CFB5:
 	push	[bp+arg_0]
 	call	sub_22821
 	add	sp, 4
+	jmp	short loc_1D00E
 loc_1CFCE:
 	mov	gs:songHalfDamage, 1
 	mov	al, byte ptr [bp+var_2]
 	mov	gs:byte_4244E, al
-	jmp	short loc_1D00E
-loc_1CFE5:
-	jmp	short loc_1D00E
-	jmp	short loc_1D00E
 loc_1CFE9:
 	or	ax, ax
 	jnz	short loc_1CFF0
@@ -22854,7 +22859,6 @@ loc_1CFF8:
 	jz	short loc_1CFB5
 	cmp	ax, song_shield
 	jz	short loc_1CFCE
-	jmp	short loc_1CFE5
 loc_1D00E:
 	mov	sp, bp
 	pop	bp
@@ -24579,7 +24583,8 @@ loc_1E228:
 loc_1E232:
 	getCharP	[bp+arg_0], si
 	cmp	gs:roster.class[si], class_hunter
-	jnz	short loc_1E267
+	;;jnz	short loc_1E267
+	jnz	short loc_1E272
 	call	_random
 	cmp	gs:roster.specAbil[si],	al
 	jbe	short loc_1E25B
@@ -24590,8 +24595,8 @@ loc_1E25B:
 loc_1E25D:
 	mov	gs:specialAttackVal, ax
 	jmp	short loc_1E272
-loc_1E267:
-	mov	gs:specialAttackVal, 0
+;;loc_1E267:
+;;	mov	gs:specialAttackVal, 0
 loc_1E272:
 	mov	ax, [bp+var_1A]
 	jmp	short $+2
@@ -25570,7 +25575,7 @@ bat_doPoisonEffect proc	far
 	push	si
 	mov	bl, levelNoMaybe
 	sub	bh, bh
-	mov	al, byte_479F0[bx]
+	mov	al, poisonDmg[bx]
 	cbw
 	mov	[bp+var_2], ax
 	mov	[bp+charNo], 0
@@ -26186,7 +26191,7 @@ bat_getReward proc far
 	_chkstk	114h
 	delayNoTable	2
 	call	clearTextWindow
-	mov	gs:word_41E6E, 0
+	mov	gs:trapIndex, 0
 	mov	ax, gs:batRewardLo
 	or	ax, gs:batRewardHi
 	jnz	short loc_1F239
@@ -26246,7 +26251,7 @@ loc_1F279:
 	add	sp, 8
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
-	cmp	gs:word_41E6E, 0
+	cmp	gs:trapIndex, 0
 	jz	short loc_1F2F1
 	sub	ax, ax
 	cwd
@@ -26318,7 +26323,7 @@ loc_1F38E:
 	jz	short loc_1F3B0
 	jmp	loc_1F544
 loc_1F3B0:
-	cmp	gs:word_41E6E, 0
+	cmp	gs:trapIndex, 0
 	jnz	short loc_1F3C8
 	delayNoTable	1
 loc_1F3C8:
@@ -26573,7 +26578,7 @@ loc_1F690:
 	add	sp, 8
 	mov	[bp+var_104], ax
 	mov	[bp+var_102], dx
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, byte_47988[bx]
 	cbw
 	mov	bx, ax
@@ -26627,7 +26632,7 @@ chest_setOffTrap proc far
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, byte_47988[bx]
 	cbw
 	mov	bx, ax
@@ -26641,20 +26646,20 @@ chest_setOffTrap proc far
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, trapDice[bx]
 	sub	ah, ah
 	push	ax
 	call	dice_doYDX
 	add	sp, 2
 	mov	[bp+var_108], ax
-	mov	si, gs:word_41E6E
+	mov	si, gs:trapIndex
 	shl	si, 1
 	mov	al, byte ptr stru_47938.lo[si]
 	mov	gs:monGroups.breathSaveLo, al
 	mov	al, stru_47938.hi[si]
 	mov	gs:monGroups.breathSaveHi, al
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	test	trapFlags[bx], 80h
 	jz	short loc_1F7A6
 	push	[bp+var_108]
@@ -26678,7 +26683,7 @@ loc_1F7B2:
 	add	sp, 4
 	jmp	short loc_1F7AE
 loc_1F7CA:
-	mov	gs:word_41E6E, 0
+	mov	gs:trapIndex, 0
 	lea	ax, [bp+var_100]
 	push	ss
 	push	ax
@@ -26713,7 +26718,7 @@ chest_doTrapAttack proc	far
 	jnz	short loc_1F88B
 	mov	al, byte ptr [bp+arg_0]
 	mov	gs:bat_curTarget, al
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, trapFlags[bx]
 	sub	ah, ah
 	and	ax, 7Fh
@@ -26784,7 +26789,7 @@ loc_1F8E4:
 	add	sp, 2
 	jmp	short loc_1F90F
 loc_1F8F9:
-	mov	gs:word_41E6E, 0
+	mov	gs:trapIndex, 0
 	mov	gs:word_42560, 1
 loc_1F90F:
 	delayNoTable	5
@@ -26838,7 +26843,7 @@ loc_1F967:
 	push	ax
 	call	_readString
 	add	sp, 6
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, byte_47988[bx]
 	cbw
 	mov	bx, ax
@@ -26865,7 +26870,7 @@ loc_1F967:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	mov	gs:word_41E6E, 0
+	mov	gs:trapIndex, 0
 	mov	ax, 1
 	jmp	short loc_1FA16
 	jmp	short loc_1FA05
@@ -26948,7 +26953,7 @@ loc_1FA72:
 loc_1FAAA:
 	getCharP	[bp+var_2], bx
 	sub	gs:roster.currentSppt[bx], 2
-	mov	gs:word_41E6E, 0
+	mov	gs:trapIndex, 0
 	mov	byte ptr word_44166,	0
 	mov	ax, offset aYouDisarmedIt
 	push	ds
@@ -27077,13 +27082,13 @@ bat_doChest proc far
 	call	setTitle
 	add	sp, 4
 	call	_random
+	and	ax, 3
 	mov	cl, levelNoMaybe
 	sub	ch, ch
 	shl	cx, 1
 	shl	cx, 1
 	add	cx, ax
-	and	cx, 3
-	mov	gs:word_41E6E, cx
+	mov	gs:trapIndex, cx
 	mov	gs:word_42298, 0
 	mov	[bp+var_1A], 0
 	jmp	short loc_1FBE6
@@ -28891,6 +28896,8 @@ curePossession:
 	getCharP	[bp+target], bx
 	test	gs:roster.status[bx], stat_possessed
 	jz	short loc_20E52
+	mov	ax, gs:roster.maxHP[si]
+	mov	gs:roster.currentHP[si], ax
 	getCharP	[bp+target], bx
 	and	gs:roster.status[bx], 0DFh
 	push	[bp+target]
@@ -30988,6 +30995,8 @@ loc_22233:
 loc_2225B:
 	getCharP	[bp+var_2], bx
 	and	gs:roster.status[bx], stat_old or stat_unknown
+	mov	ax, gs:roster.maxHP[bx]
+	mov	gs:roster.currentHP[bx], ax
 	jmp	short loc_22230
 loc_2226B:
 	cmp	gs:byte_422A4, 0
@@ -35832,7 +35841,7 @@ loc_24DDE:
 	shl	ax, 1
 	shl	ax, 1
 	or	ax, [bp+var_10A]
-	mov	gs:word_41E6E, ax
+	mov	gs:trapIndex, ax
 	mov	ax, offset aTrapYouVeHitA
 	push	ds
 	push	ax
@@ -35843,7 +35852,7 @@ loc_24DDE:
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, byte_4B278[bx]
 	cbw
 	mov	bx, ax
@@ -35862,14 +35871,14 @@ loc_24DDE:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, byte_4B258[bx]
 	cbw
 	push	ax
 	call	dice_doYDX
 	add	sp, 2
 	mov	[bp+var_10C], ax
-	mov	si, gs:word_41E6E
+	mov	si, gs:trapIndex
 	shl	si, 1
 	mov	al, trapSaveList._low[si]
 	mov	gs:monGroups.breathSaveLo, al
@@ -35925,7 +35934,7 @@ trap_doDamage proc far
 	jnz	short loc_24F77
 	mov	al, byte ptr [bp+arg_0]
 	mov	gs:bat_curTarget, al
-	mov	bx, gs:word_41E6E
+	mov	bx, gs:trapIndex
 	mov	al, byte_4B238[bx]
 	and	ax, 7Fh
 	mov	gs:specialAttackVal, ax
@@ -36140,6 +36149,33 @@ loc_25118:
 	retf
 dunsq_drainHP endp
 
+do_partyHPRegen	proc far
+	push		cx
+	xor		cx, cx
+
+loc_do_partyHPRegen_loopStart:
+	cmp		cx, 7
+	jge		loc_do_partyHPRegen_exit
+	getCharP	cx, bx
+	test		gs:roster.status[si], stat_dead or stat_stoned
+	jnz		loc_do_partyHPRegen_incCounter
+	mov		al, levelNoMaybe
+	sub		ah, ah
+	add		gs:roster.currentHP[bx], ax
+	mov		ax, gs:roster.maxHP[bx]
+	cmp		roster.currentHP[bx], ax
+	jbe		loc_do_partyHPRegen_incCounter
+	mov		gs:roster.currentHP[bx], ax
+
+loc_do_partyHPRegen_incCounter:
+	inc		cx
+	jmp		loc_do_partyHPRegen_loopStart
+
+loc_do_partyHPRegen_exit:
+	pop		cx
+	retf
+do_partyHPRegen	endp
+
 ; Attributes: bp-based frame
 dunsq_somethingOdd proc	far
 	push	bp
@@ -36323,18 +36359,18 @@ dunsq_doStuck endp
 
 ; Attributes: bp-based frame
 
-dunsq_unknown3 proc far
+dunsq_regenHP proc far
 	push	bp
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	inc	gs:byte_4229B
+	inc	gs:sqRegenHPFlag
 	sub	ax, ax
 	jmp	short $+2
 	mov	sp, bp
 	pop	bp
 	retf
-dunsq_unknown3 endp
+dunsq_regenHP endp
 
 ; Attributes: bp-based frame
 
@@ -36410,7 +36446,7 @@ dun_doSpecialSquare proc far
 	call	someStackOperation
 	push	si
 	sub	al, al
-	mov	gs:byte_4229B, al
+	mov	gs:sqRegenHPFlag, al
 	mov	gs:stuckFlag, al
 	mov	gs:sq_antiMagicFlag, al
 	mov	gs:regenSpptSq,	al
@@ -50410,7 +50446,7 @@ byte_41E63	db 0
 charActionList db 7	dup(0)		   ; 0
 unk_41E6B	db	0
 word_41E6C	dw 0
-word_41E6E	dw 0
+trapIndex	dw 0
 byte_41E70	db 0
 byte_41E71	db 0
 strengthBonus	db 7 dup(0)	      ;	0
@@ -50477,7 +50513,7 @@ byte_42296	db 0
 align 2
 word_42298	dw 0
 byte_4229A	db 0
-byte_4229B	db 0
+sqRegenHPFlag	db 0
 byte_4229C	db 4	dup(0)		   ; 0
 byte_422A0	db 0
 align 2
@@ -53149,7 +53185,7 @@ trapName	dd aPoisonNeedle	 ; 0
 		dd aCodgerBomb		; 15
 		dd aSwindler		; 16
 		dd aHammer		; 17
-byte_479F0	db 1, 2, 4, 8, 0Ah, 10h, 14h; 0
+poisonDmg	db 1, 2, 4, 8, 0Ah, 10h, 14h, 18h; 0
 aTreasure	db 'Treasure',0
 off_47A00	dd chest_examine, chest_open,	chest_disarm, chest_trapZap, chest_returnOne
 aFried		db 'fried',0
@@ -54049,7 +54085,7 @@ off_4B2E6	dd dunsq_battleCheck,	dunsq_doTrap, dunsq_doDarkness;	0
 		dd dunsq_doSpinner, dunsq_antiMagic, dunsq_drainHP; 3
 		dd dunsq_somethingOdd, dunsq_doSilence,	dunsq_regenSppt; 6
 		dd dunsq_drainSppt, dunsq_monHostile, dunsq_doStuck; 9
-		dd dunsq_unknown3, dunsq_doExplosion, dunsq_portalAbove; 12
+		dd dunsq_regenHP, dunsq_doExplosion, dunsq_portalAbove; 12
 		dd dunsq_portalBelow
 byte_4B326	db 0, 0, 0		   ; 0
 		db 1, 1, 1		; 3
