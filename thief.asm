@@ -14623,7 +14623,7 @@ item_discard endp
 
 ; Attributes: bp-based frame
 
-	item_equip proc	far
+item_equip proc	far
 	itemType= word ptr -0Ah
 	var_8= word ptr	-8
 	counter= word ptr -6
@@ -14988,6 +14988,7 @@ loc_187FA:
 	call	off_46C1A[bx]
 	add	sp, 4
 	mov	byte ptr word_44166,	0
+	call	printRoster
 	mov	[bp+var_114], 1
 loc_18823:
 	inc	[bp+var_52]
