@@ -13922,63 +13922,67 @@ loc_17DE9:
 sub_17D8E endp
 
 ; Attributes: bp-based frame
+;
+; Return:
+;   0 - has effect and is equipped
+;   1 - has effect and not equipped
+;  -1 - does not have effect
+;
 
 hasEffectEquipped proc far
 
+	rval= word ptr -6
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 	playerNo= word ptr  6
 	effectNo= word ptr  8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	push		bp
+	mov		bp, sp
+	mov		ax, 6
+	call		someStackOperation
+	mov		[bp+rval], 0FFFFh
 	getCharP	[bp+playerNo], bx
-	cmp	byte ptr gs:roster._name[bx], 0
-	jz	short loc_17E85
-	mov	[bp+var_4], 1
-	jmp	short loc_17E1C
-loc_17E18:
-	add	[bp+var_4], 3
-loc_17E1C:
-	cmp	[bp+var_4], 24h	
-	jge	short loc_17E85
+	cmp		byte ptr gs:roster._name[bx], 0
+	jz		short l_hasEffectEquipped_return
+	mov		[bp+var_4], 1
+l_hasEffectEquipped_do:
 	getCharP	[bp+playerNo], bx
-	add	bx, [bp+var_4]
-	mov	al, gs:roster.inventory.itemFlags[bx]
-	sub	ah, ah
-	mov	[bp+var_2], ax
-	mov	bx, ax
-	mov	al, itemEffectList[bx]
-	and	ax, 0Fh
-	cmp	ax, [bp+effectNo]
-	jnz	short loc_17E83
-	mov	ax, [bp+var_4]
-	dec	ax
-	mov	gs:word_42416, ax
-	mov	ax, [bp+playerNo]
-	mov	gs:word_4244C, ax
+	add		bx, [bp+var_4]
+	mov		al, gs:roster.inventory.itemFlags[bx]
+	sub		ah, ah
+	mov		[bp+var_2], ax
+	mov		bx, ax
+	mov		al, itemEffectList[bx]
+	and		ax, 0Fh
+	cmp		ax, [bp+effectNo]
+	jnz		l_hasEffectEquipped_while
+
+	; Effect found. Determine if the item is equipped or not.
+	;
+	mov		[bp+rval], 1
+	mov		ax, [bp+var_4]
+	dec		ax
+	mov		gs:word_42416, ax
+	mov		ax, [bp+playerNo]
+	mov		gs:word_4244C, ax
 	getCharP	[bp+playerNo], bx
-	add	bx, [bp+var_4]
-	mov	al, gs:roster.acBase[bx]
-	and	al, 3
-	cmp	al, 1
-	jnz	short loc_17E7E
-	sub	ax, ax
-	jmp	short loc_17E81
-loc_17E7E:
-	mov	ax, 1
-loc_17E81:
-	jmp	short loc_17E8A
-loc_17E83:
-	jmp	short loc_17E18
-loc_17E85:
-	mov	ax, 0FFFFh
-	jmp	short $+2
-loc_17E8A:
-	mov	sp, bp
-	pop	bp
+	add		bx, [bp+var_4]
+	mov		al, gs:roster.acBase[bx]
+	and		al, 3
+	cmp		al, 1
+	jnz		short l_hasEffectEquipped_while
+	sub		ax, ax
+	mov		[bp+rval], ax
+	jmp		short l_hasEffectEquipped_return
+l_hasEffectEquipped_while:
+	add		[bp+var_4], 3
+	cmp		[bp+var_4], 24h
+	jl		l_hasEffectEquipped_do
+l_hasEffectEquipped_return:
+	mov		ax, [bp+rval]
+	mov		sp, bp
+	pop		bp
 	retf
 hasEffectEquipped endp
 
@@ -23362,14 +23366,17 @@ loc_1D4ED:
 	push	cs
 	call	near ptr getTarget
 	add	sp, 6
+	or	ax,ax
+	jge	l_bat_castOpt_gotTarget
+
+	mov	ax, 0				; Return 0 if no target selected.
+	jmp	loc_1D541
+
+l_bat_castOpt_gotTarget:
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42276[bx], al
 	mov	ax, 1
-	jmp	short loc_1D529
-	sub	ax, ax
-loc_1D529:
 	jmp	short loc_1D541
-	jmp	short loc_1D53C
 loc_1D52D:
 	mov	al, byte ptr [bp+var_2]
 	mov	bx, [bp+arg_0]
