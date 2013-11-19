@@ -16232,11 +16232,11 @@ sub_1942B proc far
 	sub	ah, ah
 	mov	[bp+var_2], ax
 	jmp	short loc_1949E
-convertToGeomancer:
+l_convertToGeomancer:
 	mov	al, gs:byte_42288
 	sub	ah, ah
 	push	ax
-	call	convertToGeomancer
+	call	far ptr convertToGeomancer
 	add	sp, 2
 	jmp	short loc_194B4
 loc_1945B:
@@ -16266,7 +16266,7 @@ loc_1948B:
 	jmp	short loc_194B4
 loc_1949E:
 	cmp	ax, 3
-	jz	short convertToGeomancer
+	jz	short l_convertToGeomancer
 	cmp	ax, 4
 	jz	short loc_1945B
 	cmp	ax, 5
@@ -23954,8 +23954,13 @@ loc_1DA4B:
 	mov	byte ptr fs:[bx+1], 1
 	mov	byte ptr fs:[bx+2], 1
 	getCharP	[bp+arg_4], bx
-	mov	al, byte ptr gs:roster.currentSppt[bx]
+	mov	ax, gs:roster.currentSppt[bx]
 	lfs	bx, [bp+arg_0]
+	or	ax, ax
+	jz	l_bat_getCharOptions_sppts
+	mov	al, 1
+
+l_bat_getCharOptions_sppts:
 	mov	fs:[bx+3], al
 	mov	byte ptr fs:[bx+4], 1
 	mov	bx, [bp+arg_4]
