@@ -23460,6 +23460,10 @@ loc_1D58F:
 	push	cs
 	call	near ptr getTarget
 	add	sp, 6
+
+	or	ax, ax
+	jl	l_bat_useItem_opt_return_zero
+
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42276[bx], al
 	mov	ax, 1
@@ -23475,7 +23479,6 @@ loc_1D609:
 loc_1D618:
 	mov	ax, 1
 	jmp	short loc_1D663
-	jmp	short loc_1D641
 loc_1D61F:
 	mov	ax, offset aYouCanTUseThatItem_
 	push	ds
@@ -23496,6 +23499,7 @@ loc_1D643:
 	call	printStringWClear
 	add	sp, 4
 	wait4IO
+l_bat_useItem_opt_return_zero:
 	sub	ax, ax
 	jmp	short $+2
 loc_1D663:
@@ -23743,7 +23747,7 @@ loc_1D827:
 	cmp	gs:byte_42280[bx], 0
 	jz	short loc_1D89A
 	mov	al, gs:byte_42280[bx]
-	add	al, 30h	
+	add	al, '1'
 	mov	byte_4724A, al
 	mov	ax, offset byte_4724A
 	push	ds
@@ -29477,7 +29481,7 @@ _sp_teleportPrintNum proc far
 loc_213A8:
 	lfs	bx, [bp+var_24]
 	mov	byte ptr fs:[bx], 0
-	mov	fs:byte_42419, 30h 
+	mov	gs:byte_42419, 30h 
 	lea	ax, [bp+var_20]
 	push	ss
 	push	ax
@@ -53269,7 +53273,7 @@ align 2
 aCastsAWeapon	db 'casts a weapon ',0
 aBreathes	db 'breathes ',0
 aTeleportUseArr	db 'Teleport',0Ah
-		db '<Use arrow keys and SPC to select>',0Ah,0Ah
+		db '<Use arrow keys and SPC to select>',0Ah
 		db 'North:',0Ah
 		db 'East :',0Ah,0
 aDownUp		db '/Down\Up  \ :',0Ah,0
