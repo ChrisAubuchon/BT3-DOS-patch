@@ -1789,10 +1789,10 @@ loc_11444:
 loc_dun_buildView_inDungeon:
 	mov	bl, lightDistance
 	sub	bh, bh
-	mov	al, byte_44494[bx]
-	sub	ah, ah
 
 loc_dun_buildView_loop_preamble:
+	mov	al, byte_44494[bx]
+	sub	ah, ah
 	mov	[bp+counter], ax
 	jmp	short loc_11462
 loc_1145F:
