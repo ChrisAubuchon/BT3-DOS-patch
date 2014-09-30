@@ -3554,8 +3554,11 @@ camp_addMember proc far
 	jnz	short loc_12422
 	jmp	loc_1258F
 loc_12422:
+	mov	[bp+var_15A], 0
 	mov	[bp+var_15C], 0
 loc_12428:
+	cmp	[bp+var_15A], 10
+	jge	l_addMember_partyLimitReached
 	mov	si, [bp+var_15C]
 	shl	si, 1
 	shl	si, 1
@@ -3567,15 +3570,20 @@ loc_12428:
 	mov	word ptr [bp+si+partyBuf+2], seg seg022
 	mov	si, [bp+var_15C]
 	inc	[bp+var_15C]
+	inc	[bp+var_15A]
 	shl	si, 1
 	shl	si, 1
 	lfs	bx, [bp+si+partyBuf]
 	cmp	byte ptr fs:[bx], 0
 	jnz	short loc_12428
+l_addMember_partyLimitReached:
 	dec	[bp+var_15C]
 	mov	ax, [bp+var_15C]
 	mov	[bp+var_156], ax
+	mov	[bp+var_15A], 0
 loc_12467:
+	cmp	[bp+var_15A], 75
+	jge	l_addMember_charLimitReached
 	mov	ax, [bp+var_15C]
 	sub	ax, [bp+var_156]
 	getCharIndex	cx, cx
@@ -3587,11 +3595,13 @@ loc_12467:
 	mov	word ptr [bp+si+partyBuf+2], seg seg022
 	mov	si, [bp+var_15C]
 	inc	[bp+var_15C]
+	inc	[bp+var_15A]
 	shl	si, 1
 	shl	si, 1
 	lfs	bx, [bp+si+partyBuf]
 	cmp	byte ptr fs:[bx], 0
 	jnz	short loc_12467
+l_addMember_charLimitReached:
 	dec	[bp+var_15C]
 loc_124A3:
 	push	[bp+var_15C]
@@ -3998,7 +4008,10 @@ camp_renameMember proc far
 	jmp	loc_1297E
 loc_12835:
 	mov	[bp+var_25A], 0
+	mov	[bp+var_258], 0
 loc_1283B:
+	cmp	[bp+var_258], 75
+	jge	l_rename_charLimitReached
 	getCharIndex	ax, [bp+var_25A]
 	add	ax, 0
 	mov	si, [bp+var_25A]
@@ -4008,11 +4021,13 @@ loc_1283B:
 	mov	word ptr [bp+si+var_22C+2], seg	seg022
 	mov	si, [bp+var_25A]
 	inc	[bp+var_25A]
+	inc	[bp+var_258]
 	shl	si, 1
 	shl	si, 1
 	lfs	bx, [bp+si+var_22C]
 	cmp	byte ptr fs:[bx], 0
 	jnz	short loc_1283B
+l_rename_charLimitReached:
 	dec	[bp+var_25A]
 	push	[bp+var_25A]
 	lea	ax, [bp+var_22C]
@@ -4774,7 +4789,10 @@ camp_deleteCharacter proc far
 	jmp	loc_13120
 loc_12F95:
 	mov	[bp+counter], 0
+	mov	[bp+var_15A], 0
 loc_12F9B:
+	cmp	[bp+var_15A], 10
+	jge	l_delete_partyLimitReached
 	mov	si, [bp+counter]
 	shl	si, 1
 	shl	si, 1
@@ -4786,15 +4804,20 @@ loc_12F9B:
 	mov	word ptr [bp+si+var_154+2], seg	seg022
 	mov	si, [bp+counter]
 	inc	[bp+counter]
+	inc	[bp+var_15A]
 	shl	si, 1
 	shl	si, 1
 	lfs	bx, [bp+si+var_154]
 	cmp	byte ptr fs:[bx], 0
 	jnz	short loc_12F9B
+l_delete_partyLimitReached:
 	dec	[bp+counter]
 	mov	ax, [bp+counter]
 	mov	[bp+var_156], ax
+	mov	[bp+var_15A], 0
 loc_12FDA:
+	cmp	[bp+var_15A], 75
+	jge	l_delete_charLimitReached
 	mov	ax, [bp+counter]
 	sub	ax, [bp+var_156]
 	getCharIndex	cx, cx
@@ -4806,11 +4829,13 @@ loc_12FDA:
 	mov	word ptr [bp+si+var_154+2], seg	seg022
 	mov	si, [bp+counter]
 	inc	[bp+counter]
+	inc	[bp+var_15A]
 	shl	si, 1
 	shl	si, 1
 	lfs	bx, [bp+si+var_154]
 	cmp	byte ptr fs:[bx], 0
 	jnz	short loc_12FDA
+l_delete_charLimitReached:
 	dec	[bp+counter]
 	push	[bp+counter]
 	lea	ax, [bp+var_154]
@@ -5757,6 +5782,8 @@ countSavedChars	proc far
 	mov	word ptr [bp+var_6+2], seg seg022
 	mov	[bp+counter], 0
 loc_13842:
+	cmp	[bp+counter], 75
+	jge	loc_13858
 	getCharP	[bp+counter], bx
 	lfs	si, [bp+var_6]
 	cmp	fs:[bx+si+character_t._name], 0
@@ -38469,7 +38496,7 @@ getTransferCharacters proc far
 	mov	ax, 1CAh
 	call	someStackOperation
 	push	si
-	mov	ax, offset aDest
+	mov	ax, 9000
 	push	ax
 	call	_mallocMaybe
 	add	sp, 2
@@ -38636,7 +38663,10 @@ loc_2663C:
 	add	sp, 8
 loc_26654:
 	mov	[bp+var_1C2], 0
+	mov	[bp+var_1C0], 0
 loc_2665A:
+	cmp	[bp+var_1C0], 10
+	jge	l_transfer_partyLimitReached
 	mov	si, [bp+var_1C2]
 	shl	si, 1
 	shl	si, 1
@@ -38649,15 +38679,20 @@ loc_2665A:
 	mov	word ptr [bp+si+var_17A+2], dx
 	mov	si, [bp+var_1C2]
 	inc	[bp+var_1C2]
+	inc	[bp+var_1C0]
 	shl	si, 1
 	shl	si, 1
 	lfs	bx, [bp+si+var_17A]
 	cmp	byte ptr fs:[bx], 0
 	jnz	short loc_2665A
+l_transfer_partyLimitReached:
 	dec	[bp+var_1C2]
 	mov	ax, [bp+var_1C2]
 	mov	[bp+var_1BC], ax
+	mov	[bp+var_1C0], 0
 loc_2669C:
+	cmp	[bp+var_1C0], 75
+	jge	l_transfer_charLimitReached
 	mov	ax, [bp+var_1C2]
 	sub	ax, [bp+var_1BC]
 	getCharIndex	cx, cx
@@ -38670,11 +38705,13 @@ loc_2669C:
 	mov	word ptr [bp+si+var_17A+2], dx
 	mov	si, [bp+var_1C2]
 	inc	[bp+var_1C2]
+	inc	[bp+var_1C0]
 	shl	si, 1
 	shl	si, 1
 	lfs	bx, [bp+si+var_17A]
 	cmp	byte ptr fs:[bx], 0
 	jnz	short loc_2669C
+l_transfer_charLimitReached:
 	dec	[bp+var_1C2]
 loc_266DB:
 	push	[bp+var_1C2]
