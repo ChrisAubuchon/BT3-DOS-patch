@@ -3904,10 +3904,18 @@ loc_12786:
 	mov	ax, [bp+var_22]
 	dec	ax
 	push	ax
+	std_call	roster_writeCharacter,2
+
+	mov	ax, [bp+var_22]
+	dec	ax
+	push	ax
 	push	cs
 	call	near ptr rost_removeMember
 	add	sp, 2
 loc_12792:
+	call		countSavedChars
+	push		ax
+	std_call	saveCharsInf,2
 	mov	byte ptr word_44166,	0
 loc_1279C:
 	pop	si
@@ -3967,6 +3975,7 @@ rost_clearRoster proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+	call	roster_writeParty
 	mov	[bp+slotNo], 0
 	jmp	short loc_127FB
 loc_127F8:
@@ -5263,7 +5272,7 @@ saveAndExitMaybe proc far
 	call	printStringWClear
 	add	sp, 4
 	push	cs
-	call	near ptr sub_1374D
+	call	near ptr roster_writeParty
 	sub	ax, ax
 	push	ax
 	call	sub_14E41
@@ -5304,7 +5313,7 @@ enterWilderness	proc far
 	mov	ax, 2
 	call	someStackOperation
 	push	cs
-	call	near ptr sub_1374D
+	call	near ptr roster_writeParty
 	push	cs
 	call	near ptr countSavedChars
 	mov	[bp+var_2], ax
@@ -5368,7 +5377,7 @@ loc_134AE:
 	push	cs
 	call	near ptr camp_readCharsParties
 	push	cs
-	call	near ptr sub_1374D
+	call	near ptr roster_writeParty
 	mov	ax, offset aTheRuin
 	push	ds
 	push	ax
@@ -5663,12 +5672,10 @@ savePartiesInf endp
 
 ; Attributes: bp-based frame
 
-sub_1374D proc far
+roster_writeParty proc far
 
-	emptySlot= word	ptr -8
-	counter= word ptr -6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	emptySlot= word ptr -4
+	counter= word ptr -2
 
 	push	bp
 	mov	bp, sp
@@ -5687,7 +5694,27 @@ loc_13769:
 	jl	short loc_13774
 	jmp	loc_137FD
 loc_13774:
-	getCharP	[bp+counter], bx
+	push_var_stack		counter
+	std_call		roster_writeCharacter,2
+	jmp	loc_13766
+loc_137FD:
+	mov	sp, bp
+	pop	bp
+	retf
+roster_writeParty endp
+
+; Attributes: bp-based frame
+
+roster_writeCharacter proc far
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr  6
+
+	func_enter
+	mov	ax, 4
+	call	someStackOperation
+
+	getCharP	[bp+arg_0], bx
 	lea	ax, roster._name[bx]
 	mov	dx, seg	seg027
 	push	dx
@@ -5697,7 +5724,7 @@ loc_13774:
 	add	sp, 4
 	mov	[bp+var_4], ax
 	or	ax, ax
-	jge	short loc_137D1
+	jge	short loc_wc_overwrite
 	push	cs
 	call	near ptr countSavedChars
 	mov	[bp+var_2], ax
@@ -5714,15 +5741,14 @@ loc_13774:
 	push	cs
 	call	near ptr copyCharacterBuf
 	add	sp, 8
-	wait4IO
-	jmp	short loc_137FA
-loc_137D1:
+	jmp	short loc_wc_exit
+loc_wc_overwrite:
 	getCharP	[bp+var_4], bx
 	lea	ax, characterIOBuf[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	getCharP	[bp+counter], bx
+	getCharP	[bp+arg_0], bx
 	lea	ax, roster._name[bx]
 	mov	dx, seg	seg027
 	push	dx
@@ -5730,13 +5756,11 @@ loc_137D1:
 	push	cs
 	call	near ptr copyCharacterBuf
 	add	sp, 8
-loc_137FA:
-	jmp	loc_13766
-loc_137FD:
-	mov	sp, bp
-	pop	bp
+
+loc_wc_exit:
+	func_exit
 	retf
-sub_1374D endp
+roster_writeCharacter endp
 
 ; Attributes: bp-based frame
 
