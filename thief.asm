@@ -35468,11 +35468,11 @@ loc_24991:
 	mov	dx, word ptr gs:(roster.experience+2)[si]
 	add	ax, 27C0h
 	adc	dx, 9
-	push	dx
-	push	ax
-	push	cs
-	call	near ptr sub_22FC7
-	add	sp, 4
+;	push	dx
+;	push	ax
+;	push	cs
+;	call	near ptr sub_22FC7
+;	add	sp, 4
 	mov	word ptr gs:roster.experience[si], ax
 	mov	word ptr gs:(roster.experience+2)[si], dx
 	getCharP	[bp+var_2], si
