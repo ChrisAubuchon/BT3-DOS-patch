@@ -2866,7 +2866,7 @@ loc_11D4B:
 	push_reg	ax
 	push_ss_string	var_32
 	push_ds_string	aWhichItem?
-	std_call	printStringGetInput, 0Ah
+	std_call	text_scrollingWindow, 0Ah
 
 	mov	[bp+var_34], ax
 	or	ax, ax
@@ -3611,7 +3611,7 @@ loc_124A3:
 	mov	ax, offset aWhoShallJoin?
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_15A], ax
 	or	ax, ax
@@ -3888,7 +3888,7 @@ loc_1275A:
 	mov	ax, offset aSelectWhichPar
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_22], ax
 	or	ax, ax
@@ -4045,7 +4045,7 @@ l_rename_charLimitReached:
 	mov	ax, offset aRenameWho?
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_258], ax
 	or	ax, ax
@@ -4853,7 +4853,7 @@ l_delete_charLimitReached:
 	mov	ax, offset aDeleteWho?
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_15A], ax
 	or	ax, ax
@@ -7812,7 +7812,7 @@ loc_14A28:
 	lea	ax, [bp+var_138]
 	push	ss
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_13A], ax
 	or	ax, ax
@@ -9606,7 +9606,7 @@ decryptName endp
 
 ; Attributes: bp-based frame
 
-printStringGetInput proc far
+text_scrollingWindow proc far
 
 	var_20=	word ptr -20h
 	var_1E=	word ptr -1Eh
@@ -10028,7 +10028,7 @@ loc_15D07:
 	mov	sp, bp
 	pop	bp
 	retf
-printStringGetInput endp
+text_scrollingWindow endp
 
 ; Attributes: bp-based frame
 
@@ -14937,7 +14937,7 @@ loc_186E1:
 	mov	ax, offset aInventory
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_1C], ax
 	call	clearTextWindow
@@ -15888,10 +15888,10 @@ loc_190A5:
 	mov	ax, offset aKnownSpells
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_2], ax
-	jmp	short loc_190D3
+	jmp	l_printCharAbilities_exitNoKey
 loc_190C6:
 	mov	ax, offset aYouDonTKnowAny
 	push	ds
@@ -15916,6 +15916,7 @@ loc_190ED:
 	jmp	loc_1905C
 loc_190F0:
 	wait4IO
+l_printCharAbilities_exitNoKey:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -23477,7 +23478,7 @@ loc_1D570:
 	mov	ax, offset aWhichItem?
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_4], ax
 	or	ax, ax
@@ -23767,7 +23768,7 @@ loc_1D809:
 	jmp	loc_1D97A
 loc_1D814:
 	test	gs:roster.status[si], stat_possessed or	stat_nuts
-	jnz	short loc_1D827
+	jz	short loc_1D827
 	cmp	gs:(roster.specAbil+3)[si], 0
 	jz	short loc_1D827
 	jmp	loc_1D96C
@@ -27423,7 +27424,7 @@ loc_1FE1A:
 	mov	ax, offset aSpellToCast
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_102], ax
 	jmp	short loc_1FE5F
@@ -30884,7 +30885,7 @@ loc_22080:
 	mov	ax, offset aWhichItem?
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_2], ax
 loc_22098:
@@ -38745,7 +38746,7 @@ loc_266DB:
 	mov	ax, offset aWhoShallTransfer?
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_1C0], ax
 	or	ax, ax
@@ -39100,7 +39101,7 @@ loc_26A0D:
 	mov	ax, offset aWhoShallTransfer?
 	push	ds
 	push	ax
-	call	printStringGetInput
+	call	text_scrollingWindow
 	add	sp, 0Ah
 	mov	[bp+var_1E6], ax
 	or	ax, ax
