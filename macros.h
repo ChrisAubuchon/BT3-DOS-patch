@@ -65,6 +65,16 @@ do_strcat	macro _dest
 	save_ptr_stack	dx,ax,_dest
 	endm
 
+do_pluralize	macro _dest
+	std_call	str_pluralize, 0Ah
+	save_ptr_stack	dx,ax,_dest
+	endm
+
+do_itoa		macro _dest
+	std_call	_itoa, 0Ah
+	save_ptr_stack	dx,ax,_dest
+	endm
+
 strcat_offset	macro src,dest
 	mov	ax, offset src
 	push	ds
@@ -135,6 +145,13 @@ std_call	macro _func,_sp_add
 _chkstk		macro _size
 	mov	ax, _size
 	call	someStackOperation
+	endm
+
+rangeWithMax	macro _max, _srcReg, _tmpReg
+	sub	_srcReg, _max
+	sbb	_tmpReg, _tmpReg
+	and	_srcReg, _tmpReg
+	add	_srcReg, _max
 	endm
 
 ; Function calls

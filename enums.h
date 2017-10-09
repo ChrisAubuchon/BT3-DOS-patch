@@ -30,6 +30,18 @@ inventorySize  = 24h
 monStruSize  = 30h
 charSize  = 78h
 
+; enum disbelieveFlags
+disb_disbelieve = 1
+disb_nohelp = 2
+disb_nosummon = 40h
+disb_disruptill = 80h
+
+; enum spLightFlags
+splf_mageflame = 0
+splf_lesserrev = 1
+splf_greaterrev = 2
+splf_cateyes = 3
+
 ; enum iconList
 icon_light  = 0
 icon_compass  =	1
