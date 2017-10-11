@@ -66,7 +66,7 @@ savingThrowCheck proc far
 	near_call	_savingThrowCheck,4
 	mov	[bp+sourceSaveValue], ax
 
-	mov	gs:byte_4228E, 0			; Doesn't seem to do anything
+	mov	gs:byte_4228E, 0			; Doesnt seem to do anything
 
 	push	[bp+saveType]
 	mov	al, gs:bat_curTarget
@@ -75,7 +75,7 @@ savingThrowCheck proc far
 	near_call	_savingThrowCheck, 4
 	mov	[bp+targetSaveValue], ax
 
-	; Always seems to be zero. byte_41E63 isn't set anywhere
+	; Always seems to be zero. byte_41E63 isnt set anywhere
 	mov	al, gs:byte_41E63
 	sub	ah, ah
 
@@ -125,7 +125,7 @@ _savingThrowCheck proc far
 	jl	short l_isPartyMember
 	and	[bp+indexNo], 7Fh
 
-	; This block looks to be useless. byte_4228E doesn't have any
+	; This block looks to be useless. byte_4228E doesnt have any
 	; value besides 0 written to it. Might be a bug.
 	cmp	gs:byte_4228E, 0
 	jz	short l_enemySave

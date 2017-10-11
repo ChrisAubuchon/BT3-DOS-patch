@@ -1,6 +1,6 @@
 ; Attributes: bp-based frame
 
-sp_levitation proc far
+sp_antiMagic proc far
 
 	spellIndexNumber= word ptr	 8
 
@@ -10,12 +10,8 @@ sp_levitation proc far
 	call	someStackOperation
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
-	mov	levitationDuration, al
-	mov	ax, icon_levitation
-	push	ax
-	call	icon_activate
-	add	sp, 2
+	add	gs:antiMagicFlag, al
 	mov	sp, bp
 	pop	bp
 	retf
-sp_levitation endp
+sp_antiMagic endp

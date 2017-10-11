@@ -1,6 +1,6 @@
 ; Attributes: bp-based frame
 
-sp_summonSpell proc far
+_sp_useLightObj	proc far
 
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
@@ -9,14 +9,12 @@ sp_summonSpell proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
-	sub	ah, ah
-	push	ax
+	push_ds_string	aMakesALight
+	func_printString
+	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	call	doSummon
-	add	sp, 4
+	near_call	sp_lightSpell,4
 	mov	sp, bp
 	pop	bp
 	retf
-sp_summonSpell endp
+_sp_useLightObj	endp

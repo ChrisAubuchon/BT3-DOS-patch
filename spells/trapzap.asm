@@ -18,7 +18,7 @@ sp_trapZap proc	far
 	jz	l_return
 	mov	[bp+loopCounter], 4
 l_loop:
-	mov	al, dunHeight
+	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
 	mov	ax, [bp+_sq_north]
@@ -28,7 +28,7 @@ l_loop:
 	push	ax
 	std_call	wrapNumber, 4
 	mov	[bp+_sq_north],	ax
-	mov	al, dunWidth
+	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
 	mov	bx, dirFacing
