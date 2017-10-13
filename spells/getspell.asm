@@ -1,5 +1,9 @@
 ; Attributes: bp-based frame
 
+; Returns:
+;   0FFFFh if failed
+;   spell targeting flag if successful
+
 getSpellNumber proc far
 
 	var_306= word ptr -306h
@@ -28,7 +32,7 @@ getSpellNumber proc far
 	std_call	txt_castSpell,2
 	cmp	ax, 0FFFFh
 	jz	l_return
-	jmp	loc_getSpellNumber_spellFound
+	jmp	l_spellFound
 
 loc_mouse_spell_select:
 	mov	[bp+var_106], 0
@@ -92,7 +96,7 @@ loc_1FE5F:
 	shl	si, 1
 	mov	ax, [bp+si+var_100]
 
-loc_getSpellNumber_spellFound:
+l_spellFound:
 	mov	g_curSpellNumber, ax
 	push	ax
 	push	[bp+partySlotNumber]
@@ -100,17 +104,16 @@ loc_getSpellNumber_spellFound:
 	mov	cx, ax
 	getCharP	[bp+partySlotNumber], bx
 	cmp	gs:roster.currentSppt[bx], cx
-	jnb	short loc_1FEBB
-	mov	ax, offset aNotEnoughSpellPoint
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	jnb	short l_enoughSppt
+
+	push_ds_string	aNotEnoughSpellPoint
+	std_call	printStringWClear,4
 	wait4IO
 	jmp	short l_returnFailed
-loc_1FEBB:
+
+l_enoughSppt:
 	mov	bx, g_curSpellNumber
-	mov	al, byte_47F94[bx]
+	mov	al, spellCastFlags[bx]
 	sub	ah, ah
 	and	ax, 7
 	jmp	short l_return

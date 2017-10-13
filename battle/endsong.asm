@@ -5,10 +5,10 @@ bat_endCombatSong proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	cmp	gs:byte_4266B, 0
+	cmp	gs:g_currentSongPlusOne, 0
 	jz	short l_return
-	mov	gs:byte_4266B, 0
-	mov	al, gs:byte_42420
+	mov	gs:g_currentSongPlusOne, 0
+	mov	al, gs:g_currentSong
 	sub	ah, ah
 	jmp	short l_songSwitch
 l_sirrobin:
@@ -16,7 +16,7 @@ l_sirrobin:
 	jmp	short l_endAndReturn
 l_shield:
 	mov	gs:songHalfDamage, 0
-	mov	gs:byte_4244E, 0
+	mov	gs:partySpellAcBonus, 0
 	jmp	short l_endAndReturn
 l_sanctuary:
 	mov	gs:songACBonus,	0

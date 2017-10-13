@@ -33,7 +33,7 @@ l_partyLoopEnter:
 	cmp	[bp+loopCounter], 7
 	jl	short l_partyLoopEnter
 
-	call	sub_22DA1
+	call	endNoncombatSong
 	push_ds_string	aTheParty
 	push_ss_string	var_100
 	std_call	_strcat,8
@@ -57,7 +57,7 @@ l_monTarget:
 	push	si
 	push	[bp+var_104]
 	push	[bp+var_106]
-	near_call	bat_getTargetName,8
+	near_call	strcatTargetName,8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
 	mov	al, gs:bat_curTarget

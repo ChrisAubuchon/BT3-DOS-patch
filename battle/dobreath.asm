@@ -42,7 +42,7 @@ bat_doBreathAttack proc	far
 l_partyMultiplier:
 	getCharP	[bp+partySlotNumber], bx
 	push	gs:roster.level[bx]
-	far_call _returnXor255,2
+	near_call _returnXor255,2
 	mov	[bp+levelMultiplier], al
 
 l_allFoesCheck:
@@ -94,7 +94,7 @@ loc_201E6:
 	inc	[bp+partyAttackRval]
 	push	[bp+spellRange]
 	push	[bp+partySlotNumber]
-	far_call bat_isPartyInRange, 4
+	near_call bat_isPartyInRange, 4
 	or	ax, ax
 	jnz	loc_20324
 	strcat_offset aButThePartyWas, outputStringP
@@ -150,7 +150,7 @@ loc_202B3:
 	push	ax
 	push	dx
 	push	word ptr [bp+outputStringP]
-	far_call bat_getTargetName,8
+	near_call strcatTargetName,8
 	mov	word ptr [bp+outputStringP], ax
 	mov	word ptr [bp+outputStringP+2], dx
 	mov	ax, offset aElipsisNLNL
@@ -210,7 +210,7 @@ loc_203AA:
 	sub	ah, ah
 	push	ax
 	push	bx
-	far_call _canAttackChar, 4
+	near_call _canAttackChar, 4
 	or	ax, ax
 	jz	loc_2047A
 	getCharP	[bp+target], bx
@@ -299,7 +299,7 @@ loc_2053B:
 	and	ax, 2
 	push	ax
 	push	[bp+partySlotNumber]
-	far_call savingThrowCheck, 4
+	near_call savingThrowCheck, 4
 	mov	[bp+var_118], ax
 	or	ax, ax
 	jnz	short loc_20559

@@ -1,99 +1,80 @@
 noncombatCast proc far
 
-	var_6= word ptr	-6
-	var_4= word ptr	-4
+	castSlotNumber= word ptr	-6
+	spellTargetFlag= word ptr	-4
 	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	inFunctionKey= word ptr	 6
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
-	cmp	[bp+arg_0], 0
-	jz	short loc_1FCAA
-	mov	ax, [bp+arg_0]
-	sub	ax, 3B00h
+	cmp	[bp+inFunctionKey], 0
+	jz	short l_askForCaster
+	mov	ax, [bp+inFunctionKey]
+	sub	ax, dosKeys_F1
 	mov	cl, 8
 	sar	ax, cl
-	mov	[bp+var_6], ax
-	jmp	short loc_1FCBF
-loc_1FCAA:
-	mov	ax, offset aWhoWillCastASp
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	mov	[bp+castSlotNumber], ax
+	jmp	short l_checkCaster
+l_askForCaster:
+	push_ds_string	aWhoWillCastASp
+	std_call	printStringWClear,4
 	call	getCharNumber
-	mov	[bp+var_6], ax
-loc_1FCBF:
-	cmp	[bp+var_6], 0
-	jge	short loc_1FCC8
-	jmp	loc_1FD85
-loc_1FCC8:
-	getCharP	[bp+var_6], bx
+	mov	[bp+castSlotNumber], ax
+l_checkCaster:
+	cmp	[bp+castSlotNumber], 0
+	jl	l_returnOne
+
+	getCharP	[bp+castSlotNumber], bx
 	test	gs:roster.status[bx], stat_dead	or stat_stoned or stat_paralyzed
-	jz	short loc_1FCE1
-	sub	ax, ax
-	jmp	loc_1FD8A
-loc_1FCE1:
-	getCharP	[bp+var_6], bx
+	jnz	l_returnZero
+
+	getCharP	[bp+castSlotNumber], bx
 	mov	bl, gs:roster.class[bx]
 	sub	bh, bh
 	cmp	mageSpellIndex[bx], 0FFh
-	jnz	short loc_1FD14
-	mov	ax, offset aThouArtNotAS_0
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	jnz	short l_isSpellCaster
+
+	push_ds_string	aThouArtNotAS_0
+	std_call	printStringWClear,4
 	wait4IO
-	sub	ax, ax
-	jmp	short loc_1FD8A
-loc_1FD14:
+	jmp	short l_returnZero
+l_isSpellCaster:
 	sub	ax, ax
 	push	ax
-	push	[bp+var_6]
-	push	cs
-	call	near ptr getSpellNumber
-	add	sp, 4
-	mov	[bp+var_4], ax
+	push	[bp+castSlotNumber]
+	near_call	getSpellNumber,4
+	mov	[bp+spellTargetFlag], ax
 	or	ax, ax
-	jge	short loc_1FD2C
-	sub	ax, ax
-	jmp	short loc_1FD8A
-loc_1FD2C:
-	cmp	[bp+var_4], 4
-	jge	short loc_1FD5A
-	mov	ax, offset aCastAt
-	push	ds
-	push	ax
-	push	[bp+var_4]
-	call	getTarget
-	add	sp, 6
+	jl	l_returnZero
+
+	cmp	[bp+spellTargetFlag], 4
+	jge	short l_doCast
+	push_ds_string	aCastAt
+	push	[bp+spellTargetFlag]
+	std_call	getTarget,6
 	mov	[bp+var_2], ax
 	or	ax, ax
-	jge	short loc_1FD4F
-	sub	ax, ax
-	jmp	short loc_1FD8A
-loc_1FD4F:
+	jl	l_returnZero
 	mov	al, byte ptr [bp+var_2]
 	mov	gs:bat_curTarget, al
-loc_1FD5A:
+l_doCast:
 	call	clearTextWindow
 	mov	ax, 1
 	push	ax
 	sub	ax, ax
 	push	ax
 	push	g_curSpellNumber
-	push	[bp+var_6]
-	push	cs
-	call	near ptr doCastSpell
-	add	sp, 8
+	push	[bp+castSlotNumber]
+	near_call	doCastSpell,8
 	delayNoTable	2
-loc_1FD85:
+l_returnOne:
 	mov	ax, 1
-	jmp	short $+2
-loc_1FD8A:
+	jmp	short l_return
+l_returnZero:
+	sub	ax, ax
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf

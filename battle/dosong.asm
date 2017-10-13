@@ -12,7 +12,7 @@ bat_doCombatSong proc far
 	call	someStackOperation
 	push	[bp+songNumber]
 	push	[bp+partySlotNumber]
-	call	sub_22CD5
+	call	song_playSong
 	add	sp, 4
 
 	getCharP	[bp+partySlotNumber], bx
@@ -37,12 +37,12 @@ l_sirrobin:
 
 l_sanctuary:
 	mov	al, charSize
-	mul	gs:byte_41E62
+	mul	gs:g_currentSinger
 	mov	bx, ax
 	cmp	gs:roster.level[bx], 60
 	jnb	short loc_1CF7E
 	mov	al, charSize
-	mul	gs:byte_41E62
+	mul	gs:g_currentSinger
 	mov	bx, ax
 	mov	ax, gs:roster.level[bx]
 	shr	ax, 1
@@ -76,14 +76,14 @@ l_overture:
 	mov	ax, 237
 	push	ax
 	push	[bp+partySlotNumber]
-	call	sub_22821
+	call	_batchSpellCast
 	add	sp, 4
 	jmp	short l_return
 
 l_shield:
 	mov	gs:songHalfDamage, 1
 	mov	al, byte ptr [bp+l_songLevel]
-	mov	gs:byte_4244E, al
+	mov	gs:partySpellAcBonus, al
 
 l_songSwitch:
 	or	ax, ax
