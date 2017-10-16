@@ -16,7 +16,7 @@ l_ioLoopEntry:
 	add	sp, 4
 	mov	ax, 1FCh
 	push	ax
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_2], ax
 	cmp	ax, 1Bh

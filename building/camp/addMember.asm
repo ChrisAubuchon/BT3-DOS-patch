@@ -27,7 +27,7 @@ loc_12428:
 	mov	ax, [bp+var_15C]
 	mov	cl, 7
 	shl	ax, cl
-	add	ax, offset partyIOBuf
+	add	ax, offset g_rosterPartyBuffer
 	mov	word ptr [bp+si+savedList], ax
 	mov	word ptr [bp+si+savedList+2], seg seg022
 	mov	si, [bp+var_15C]
@@ -122,7 +122,7 @@ l_loopComparison:
 	cmp	ax, 7
 	jge	short l_shortReturnLabel
 	getCharP [bp+var_158], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -130,7 +130,7 @@ l_loopComparison:
 	sub	ax, [bp+var_156]
 	getCharIndex	cx, cx
 	mov	bx, ax
-	lea	ax, characterIOBuf[bx]
+	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax

@@ -31,7 +31,7 @@ l_partyLoopEntry:
 	mov	ax, [bp+counter]
 	mov	cl, 7
 	shl	ax, cl
-	add	ax, offset partyIOBuf
+	add	ax, offset g_rosterPartyBuffer
 	mov	word ptr [bp+si+var_154], ax
 	mov	word ptr [bp+si+var_154+2], seg	seg022
 	mov	si, [bp+counter]

@@ -171,7 +171,7 @@ loc_12B30:
 	mov	[bp+var_34], 1
 loc_12B3A:
 	push	[bp+var_2]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_22], ax
 	mov	ax, [bp+var_8]
@@ -357,7 +357,7 @@ loc_12D6F:
 	call	near ptr countSavedChars
 	mov	[bp+var_30], ax
 	getCharP	[bp+var_30], bx
-	lea	ax, characterIOBuf[bx]
+	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
@@ -371,7 +371,7 @@ loc_12D6F:
 	getCharP	[bp+var_30], bx
 	mov	fs, seg022_x
 	assume fs:seg022
-	mov	fs:(characterIOBuf+78h)[bx], 0
+	mov	fs:(g_rosterCharacterBuffer+78h)[bx], 0
 loc_12DAE:
 	pop	si
 	pop	di

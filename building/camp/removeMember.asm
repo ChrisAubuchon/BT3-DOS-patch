@@ -22,10 +22,10 @@ loc_12723:
 	cmp	[bp+loopCounter], 7
 	jge	short loc_1275A
 	getCharP	[bp+loopCounter], bx
-	cmp	byte ptr gs:roster._name[bx], 0
+	cmp	byte ptr gs:party._name[bx], 0
 	jz	short loc_1275A
 	getCharIndex	ax, [bp+loopCounter]
-	add	ax, offset roster
+	add	ax, offset party
 	mov	si, [bp+loopCounter]
 	shl	si, 1
 	shl	si, 1

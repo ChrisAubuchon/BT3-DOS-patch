@@ -9,7 +9,7 @@ loc_loop_start:
 
 	mov	ax, 0Ch
 	push	ax
-	std_call	sub_14E41, 2
+	std_call	getKey, 2
 
 	cmp	ax, 1Bh
 	jz	loc_return_ff

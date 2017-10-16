@@ -25,7 +25,7 @@ camp_saveParty proc far
 	or	ax, ax
 	jz	short l_return
 	push	cs
-	call	near ptr countSavedParties
+	call	near ptr roster_countParties
 	mov	[bp+savedPartyCount], ax
 	lea	ax, [bp+partyName]
 	push	ss
@@ -46,7 +46,7 @@ loc_13291:
 	push	ax
 	push	[bp+var_2]
 	push	cs
-	call	near ptr sub_132F7
+	call	near ptr roster_makeParty
 	add	sp, 6
 l_return:
 	mov	sp, bp

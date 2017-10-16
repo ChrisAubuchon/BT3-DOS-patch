@@ -1,10 +1,12 @@
 ; Attributes: bp-based frame
 
-sub_132F7 proc far
+; Create the party in the roster's party buffer
+
+roster_makeParty proc far
 
 	var_6= word ptr	-6
-	var_4= dword ptr -4
-	arg_0= word ptr	 6
+	partyBufP= dword ptr -4
+	partyIndexNumber= word ptr	 6
 	arg_2= word ptr	 8
 	arg_4= word ptr	 0Ah
 
@@ -12,22 +14,22 @@ sub_132F7 proc far
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
-	mov	ax, [bp+arg_0]
+	mov	ax, [bp+partyIndexNumber]
 	mov	cl, 7
 	shl	ax, cl
-	add	ax, offset partyIOBuf
-	mov	word ptr [bp+var_4], ax
-	mov	word ptr [bp+var_4+2], seg seg022
-	lfs	bx, [bp+var_4]
+	add	ax, offset g_rosterPartyBuffer
+	mov	word ptr [bp+partyBufP], ax
+	mov	word ptr [bp+partyBufP+2], seg seg022
+	lfs	bx, [bp+partyBufP]
 	mov	byte ptr fs:[bx], '>'
 	push	[bp+arg_4]
 	push	[bp+arg_2]
-	mov	ax, word ptr [bp+var_4]
-	mov	dx, word ptr [bp+var_4+2]
+	mov	ax, word ptr [bp+partyBufP]
+	mov	dx, word ptr [bp+partyBufP+2]
 	inc	ax
 	push	dx
 	push	ax
-	call	sub_2A912
+	call	_strcpy
 	add	sp, 8
 	mov	[bp+var_6], 0
 	jmp	short loc_1333C
@@ -37,23 +39,23 @@ loc_1333C:
 	cmp	[bp+var_6], 7
 	jge	short loc_1336F
 	getCharP	[bp+var_6], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	mov	ax, [bp+var_6]
 	mov	cl, 4
 	shl	ax, cl
-	add	ax, word ptr [bp+var_4]
-	mov	dx, word ptr [bp+var_4+2]
+	add	ax, word ptr [bp+partyBufP]
+	mov	dx, word ptr [bp+partyBufP+2]
 	add	ax, 10h
 	push	dx
 	push	ax
-	call	sub_2A912
+	call	_strcpy
 	add	sp, 8
 	jmp	short loc_13339
 loc_1336F:
 	mov	sp, bp
 	pop	bp
 	retf
-sub_132F7 endp
+roster_makeParty endp

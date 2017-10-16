@@ -16,7 +16,7 @@ roster_nameExists proc far
 	mov	[bp+counter], 0
 l_loopEntry:
 	getCharP	[bp+counter], bx
-	lea	ax, characterIOBuf[bx]
+	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax

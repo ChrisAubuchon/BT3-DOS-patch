@@ -16,7 +16,7 @@ camp_insertParty proc far
 	mov	ax, [bp+savedPartyNumber]
 	mov	cl, 7
 	shl	ax, cl
-	add	ax, offset partyIOBuf
+	add	ax, offset g_rosterPartyBuffer
 	mov	word ptr [bp+savedPartiesP], ax
 	mov	word ptr [bp+savedPartiesP+2], seg seg022
 	call	clearTextWindow
@@ -103,12 +103,12 @@ l_findEmptySlot:
 	jmp	l_incrementCounter
 l_addCharacter:
 	getCharP [bp+var_2], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	getCharP [bp+var_4], bx
-	lea	ax, characterIOBuf[bx]
+	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax

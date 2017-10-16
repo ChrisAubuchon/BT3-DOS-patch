@@ -11,12 +11,11 @@ roster_partyExists proc far
 	mov	ax, 2
 	call	someStackOperation
 	mov	[bp+loopCounter], 0
-loc_132BC:
-	jge	short l_returnMinusOne
+l_loopEntry:
 	mov	bx, [bp+loopCounter]
 	mov	cl, 7
 	shl	bx, cl
-	lea	ax, partyIOBuf[bx]
+	lea	ax, g_rosterPartyBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
@@ -28,7 +27,7 @@ loc_132BC:
 	jz	l_returnPartyIndex
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 0Ah
-	jl	loc_132BF
+	jl	l_loopEntry
 l_returnMinusOne:
 	mov	ax, 0FFFFh
 	jmp	short l_return
