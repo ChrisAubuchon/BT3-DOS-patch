@@ -11,14 +11,12 @@ camp_renameMember proc far
 	characterNameList= dword ptr -22Ch
 	var_100= word ptr -100h
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 25Eh
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(25Eh)
 	push	si
-	call	clearTextWindow
-	push	cs
-	call	near ptr countSavedChars
+
+	CALL(clearTextWindow)
+	NEAR_CALL(roster_countCharacters)
 	or	ax, ax
 	jz	l_noSavedCharacters
 loc_12835:
@@ -27,7 +25,7 @@ loc_12835:
 l_createListLoopEntry:
 	cmp	[bp+nameSelected], 75
 	jge	l_selectFromList
-	getCharIndex	ax, [bp+loopCounter]
+	CHARINDEX(ax, STACKVAR(loopCounter))
 	add	ax, 0
 	mov	si, [bp+loopCounter]
 	shl	si, 1
@@ -45,26 +43,16 @@ l_createListLoopEntry:
 l_selectFromList:
 	dec	[bp+loopCounter]
 	push	[bp+loopCounter]
-	lea	ax, [bp+characterNameList]
-	push	ss
-	push	ax
-	mov	ax, offset aRenameWho?
-	push	ds
-	push	ax
-	call	text_scrollingWindow
-	add	sp, 0Ah
+	PUSH_STACK_ADDRESS(characterNameList)
+	PUSH_OFFSET(s_renameWho)
+	CALL(text_scrollingWindow, 0Ah)
 	mov	[bp+nameSelected], ax
 	or	ax, ax
 	jl	l_return
 
-	mov	ax, offset aWhatIs
-	push	ds
-	push	ax
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	_strcat
-	add	sp, 8
+	PUSH_OFFSET(s_whatIs)
+	PUSH_STACK_ADDRESS(var_100)
+	STRCAT()
 	mov	[bp+var_25E], ax
 	mov	[bp+var_25C], dx
 	mov	si, [bp+nameSelected]
@@ -74,24 +62,17 @@ l_selectFromList:
 	push	word ptr [bp+si+characterNameList]
 	push	dx
 	push	ax
-	call	_strcat
-	add	sp, 8
+	STRCAT()
 	mov	[bp+var_25E], ax
 	mov	[bp+var_25C], dx
-	mov	ax, offset aSNewName?
-	push	ds
-	push	ax
+	PUSH_OFFSET(s_newName)
 	push	dx
 	push	[bp+var_25E]
-	call	_strcat
-	add	sp, 8
+	STRCAT()
 	mov	[bp+var_25E], ax
 	mov	[bp+var_25C], dx
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	PUSH_STACK_ADDRESS(var_100)
+	PRINTSTRING(true)
 	mov	[bp+loopCounter], 0
 
 l_clearNameLoopEntry:
@@ -105,21 +86,15 @@ l_clearNameLoopEntry:
 	lea	ax, [bp+nameBuf]
 	push	ss
 	push	ax
-	call	_readString
-	add	sp, 6
+	CALL(_readString, 6)
 	or	ax, ax
 	jz	short l_return
-	lea	ax, [bp+nameBuf]
-	push	ss
-	push	ax
-	near_call	roster_nameExists, 4
+	PUSH_STACK_ADDRESS(nameBuf)
+	NEAR_CALL(roster_nameExists, 4)
 	or	ax, ax
 	jl	short l_renameCharacter
-	mov	ax, offset aThereIsAlready
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	PUSH_OFFSET(s_nameAlreadyExists)
+	PRINTSTRING(true)
 	jmp	short l_return
 l_renameCharacter:
 	mov	[bp+loopCounter], 0
@@ -137,15 +112,11 @@ l_renameLoopEntry:
 	jl	short l_renameLoopEntry
 	jmp	short l_return
 l_noSavedCharacters:
-	mov	ax, offset aThereAreNoChar
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	wait4IO
+	PUSH_OFFSET(s_noCharsOnDisk)
+	PRINTSTRING
+	IOWAIT
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_renameMember endp

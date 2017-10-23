@@ -10,22 +10,19 @@ sp_phaseDoor proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 0Ah
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(0Ah)
 	cmp	inDungeonMaybe, 0
 	jz	loc_216E2
 	push	sq_north
 	push	sq_east
-	std_call	dun_getWalls,4
+	CALL(dun_getWalls,4)
 	mov	[bp+var_2], ax
 	mov	ax, dirFacing
 	dec	ax
 	push	ax
 	push	[bp+var_2]
-	call	sub_27E13
-	add	sp, 4
+	CALL(sub_27E13, 4)
 	mov	[bp+var_8], ax
 	mov	al, byte ptr [bp+var_8]
 	and	al, 0Fh
@@ -33,9 +30,7 @@ sp_phaseDoor proc far
 	jb	short loc_21671
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	push	cs
-	call	near ptr printSpellFizzled
-	add	sp, 4
+	NEAR_CALL(printSpellFizzled, 4)
 	jmp	short l_return
 loc_21671:
 	mov	gs:wallIsPhased, 1
@@ -72,10 +67,9 @@ loc_216E0:
 loc_216E2:
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	near_call	printSpellFizzled,4
+	NEAR_CALL(printSpellFizzled,4)
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_phaseDoor endp
 

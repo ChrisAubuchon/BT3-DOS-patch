@@ -9,22 +9,20 @@ camp_removeMember proc far
 	var_1C=	word ptr -1Ch
 	var_1A=	word ptr -1Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 24h	
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(24h)
 	push	si
 	mov	[bp+loopCounter], 0
-	mov	ax, offset aRemoveThemAll
+	mov	ax, offset s_removeAll
 	mov	[bp+partyMemberList], ax
 	mov	[bp+var_1E], ds
 loc_12723:
 	cmp	[bp+loopCounter], 7
 	jge	short loc_1275A
-	getCharP	[bp+loopCounter], bx
+	CHARINDEX(ax, STACKVAR(loopCounter), bx)
 	cmp	byte ptr gs:party._name[bx], 0
 	jz	short loc_1275A
-	getCharIndex	ax, [bp+loopCounter]
+	CHARINDEX(ax, STACKVAR(loopCounter))
 	add	ax, offset party
 	mov	si, [bp+loopCounter]
 	shl	si, 1
@@ -37,42 +35,36 @@ loc_1275A:
 	mov	ax, [bp+loopCounter]
 	inc	ax
 	push	ax
-	lea	ax, [bp+partyMemberList]
-	push	ss
-	push	ax
-	mov	ax, offset aSelectWhichPar
-	push	ds
-	push	ax
-	call	text_scrollingWindow
-	add	sp, 0Ah
+	PUSH_STACK_ADDRESS(partyMemberList)
+	PUSH_OFFSET(s_whichPartyMemberToRemove)
+	CALL(text_scrollingWindow, 0Ah)
+
 	mov	[bp+slotToRemove], ax
 	or	ax, ax
 	jl	l_return
 l_removeAll:
 	cmp	[bp+slotToRemove], 0
 	jnz	short l_removeOneCharacter
-	push	cs
-	call	near ptr party_clear
+	NEAR_CALL(party_clear)
 	jmp	short l_saveAndReturn
 l_removeOneCharacter:
 	mov	ax, [bp+slotToRemove]
 	dec	ax
 	push	ax
-	std_call	roster_writeCharacter,2
+	CALL(roster_writeCharacter,2)
 
 	mov	ax, [bp+slotToRemove]
 	dec	ax
 	push	ax
-	near_call	part_pack, 2
+	NEAR_CALL(party_pack, 2)
 l_saveAndReturn:
-	call		countSavedChars
-	push		ax
-	std_call	saveCharsInf,2
+	CALL(roster_countCharacters)
+	push	ax
+	CALL(writeCharacterFile,2)
 	mov	byte ptr word_44166,	0
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_removeMember endp
 

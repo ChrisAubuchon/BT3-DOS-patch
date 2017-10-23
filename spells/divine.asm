@@ -5,22 +5,22 @@ sp_divineIntervention proc far
 	loopCounter= word ptr	-2
 	spellCaster= word ptr	 6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2)
+
 	mov	[bp+loopCounter], 0
 l_loopEnter:
-	getCharP	[bp+loopCounter], bx
-	cmp	gs:roster.class[bx], class_illusion
+	CHARINDEX(ax, STACKVAR(loopCounter), bx)
+	cmp	gs:party.class[bx], class_illusion
 	jnz	short l_notIllusion
-	getCharP	[bp+loopCounter], bx
-	mov	gs:roster.class[bx], class_monster
+
+	CHARINDEX(ax, STACKVAR(loopCounter), bx)
+	mov	gs:party.class[bx], class_monster
 l_notIllusion:
-	getCharP	[bp+loopCounter], bx
-	and	gs:roster.status[bx], stat_old or stat_unknown
-	mov	ax, gs:roster.maxHP[bx]
-	mov	gs:roster.currentHP[bx], ax
+	CHARINDEX(ax, STACKVAR(loopCounter), bx)
+	and	gs:party.status[bx], stat_old or stat_unknown
+	mov	ax, gs:party.maxHP[bx]
+	mov	gs:party.currentHP[bx], ax
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 7
 	jl	short l_loopEnter
@@ -36,9 +36,7 @@ l_notIllusion:
 	mov	ax, 0CEh 
 	push	ax
 	push	[bp+spellCaster]
-	push	cs
-	call	near ptr _batchSpellCast
-	add	sp, 4
+	NEAR_CALL(_batchSpellCast, 4)
 l_return:
 	mov	sp, bp
 	pop	bp

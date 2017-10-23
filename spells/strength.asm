@@ -5,10 +5,9 @@ sp_strengthBonus proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
+
 	test	byte ptr [bp+spellCaster], 80h
 	jz	short l_partCaster
 	mov	bx, [bp+spellIndexNumber]
@@ -24,7 +23,6 @@ l_partCaster:
 	and	bx, 7
 	mov	gs:strengthBonus[bx], al
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_strengthBonus endp

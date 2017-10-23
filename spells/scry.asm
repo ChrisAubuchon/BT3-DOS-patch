@@ -1,6 +1,8 @@
 ; Attributes: bp-based frame
 
 ; XXX - Not low hanging fruit
+; DWORD - var_114 & var_116
+; UNUSED - var_A & var_C
 
 sp_scrySight proc far
 
@@ -18,27 +20,20 @@ sp_scrySight proc far
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 11Ah
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(11Ah)
 	push	si
 
 	mov	[bp+var_6], 0
-	mov	word ptr [bp+var_110], offset characterIOBuf
+	mov	word ptr [bp+var_110], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+var_110+2], seg seg022
 	lfs	bx, [bp+var_110]
-	mov	al, fs:(characterIOBuf+11h)[bx]
+	mov	al, fs:(g_rosterCharacterBuffer+11h)[bx]
 	sub	ah, ah
 	mov	[bp+var_118], ax
-	mov	ax, offset aYouFace
-	push	ds
-	push	ax
-	lea	ax, [bp+var_10C]
-	push	ss
-	push	ax
-	call	_strcat
-	add	sp, 8
+	PUSH_OFFSET(s_youFace)
+	PUSH_STACK_ADDRESS(var_10C)
+	STRCAT
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	bx, dirFacing
@@ -48,13 +43,11 @@ sp_scrySight proc far
 	push	word ptr dirStringList[bx]
 	push	dx
 	push	ax
-	call	_strcat
-	add	sp, 8
+	STRCAT
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	cmp	[bp+var_118], 0
-	jnz	short loc_21840
-	jmp	loc_218D5
+	jz	loc_218D5
 loc_21840:
 	mov	ax, [bp+var_6]
 	inc	[bp+var_6]
@@ -64,11 +57,8 @@ loc_21840:
 	push	cx
 	push	dx
 	push	[bp+var_116]
-	mov	ax, offset aAndAre
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_andAre)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	sub	ax, ax
@@ -79,8 +69,7 @@ loc_21840:
 	push	ax
 	push	[bp+var_114]
 	push	[bp+var_116]
-	call	_itoa
-	add	sp, 0Ah
+	ITOA
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	ax, [bp+var_118]
@@ -88,11 +77,8 @@ loc_21840:
 	push	ax
 	push	dx
 	push	[bp+var_116]
-	mov	ax, offset aLevelS
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_levels)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	al, levFlags
@@ -103,11 +89,8 @@ loc_21840:
 	push	cx
 	push	dx
 	push	[bp+var_116]
-	mov	ax, offset aAboveBelow
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_aboveBelow)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 loc_218D5:
@@ -125,9 +108,7 @@ loc_218D5:
 	sub	cx, ax
 	mov	[bp+var_11A], cx
 	or	cx, cx
-	jnz	short loc_2190D
-	jmp	loc_219BD
-loc_2190D:
+	jz	loc_219BD
 	mov	ax, [bp+var_6]
 	inc	[bp+var_6]
 	cmp	ax, 1
@@ -136,11 +117,8 @@ loc_2190D:
 	push	cx
 	push	[bp+var_114]
 	push	[bp+var_116]
-	mov	ax, offset aAndAre
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_andAre)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	cmp	[bp+var_11A], 0
@@ -160,8 +138,7 @@ loc_2194B:
 	push	ax
 	push	[bp+var_114]
 	push	[bp+var_116]
-	call	_itoa
-	add	sp, 0Ah
+	ITOA
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	ax, [bp+var_112]
@@ -169,11 +146,8 @@ loc_2194B:
 	push	ax
 	push	dx
 	push	[bp+var_116]
-	mov	ax, offset aPaceS
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_paces)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	cmp	[bp+var_11A], 0
@@ -186,11 +160,8 @@ loc_2199F:
 	push	ax
 	push	[bp+var_114]
 	push	[bp+var_116]
-	mov	ax, offset aNorthSouth
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_northSouth)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 loc_219BD:
@@ -219,11 +190,8 @@ loc_219F4:
 	push	cx
 	push	[bp+var_114]
 	push	[bp+var_116]
-	mov	ax, offset aAndAre
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_andAre)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	cmp	[bp+var_4], 0
@@ -243,8 +211,7 @@ loc_21A2F:
 	push	ax
 	push	[bp+var_114]
 	push	[bp+var_116]
-	call	_itoa
-	add	sp, 0Ah
+	ITOA
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	ax, [bp+var_112]
@@ -252,11 +219,8 @@ loc_21A2F:
 	push	ax
 	push	dx
 	push	[bp+var_116]
-	mov	ax, offset aPaceS
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_paces)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	cmp	[bp+var_4], 0
@@ -269,20 +233,17 @@ loc_21A82:
 	push	ax
 	push	[bp+var_114]
 	push	[bp+var_116]
-	mov	ax, offset aEastWest
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
+	PUSH_OFFSET(s_eastWest)
+	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 loc_21AA0:
 	cmp	[bp+var_6], 0
 	jz	short loc_21AAB
-	mov	ax, offset aOf
+	mov	ax, offset s_of
 	jmp	short loc_21AAE
 loc_21AAB:
-	mov	ax, offset aAndAreAt
+	mov	ax, offset s_andAreAt
 loc_21AAE:
 	mov	[bp+var_C], ax
 	mov	[bp+var_A], ds
@@ -290,8 +251,7 @@ loc_21AAE:
 	push	ax
 	push	[bp+var_114]
 	push	[bp+var_116]
-	call	_strcat
-	add	sp, 8
+	STRCAT
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	si, [bp+var_118]
@@ -309,18 +269,16 @@ loc_21AAE:
 	push	word ptr scryBaseStringList[bx]
 	push	dx
 	push	[bp+var_116]
-	call	_strcat
-	add	sp, 8
+	STRCAT
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	lea	ax, [bp+var_10C]
 	push	ss
 	push	ax
-	call	printStringWClear
-	add	sp, 4
-	wait4IO
+	PRINTSTRING(true)
+	IOWAIT
+
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_scrySight endp

@@ -5,10 +5,8 @@ roster_countParties proc far
 	loopCounter= word ptr	-6
 	partyBufferP= dword ptr -4
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 6
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(6)
 	push	si
 	mov	word ptr [bp+partyBufferP], offset g_rosterPartyBuffer
 	mov	word ptr [bp+partyBufferP+2], seg seg022
@@ -29,8 +27,7 @@ l_returnCounter:
 	mov	ax, [bp+loopCounter]
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 roster_countParties endp
 

@@ -1,5 +1,7 @@
 ; Attributes: bp-based frame
 
+; DWORD - var_2 & var_4
+
 sp_meleeMen proc far
 
 	stringBuffer=	word ptr -56h
@@ -7,13 +9,11 @@ sp_meleeMen proc far
 	var_2= word ptr	-2
 	spellCaster= word ptr	 6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 56h	
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(56h)
 
 	push	[bp+spellCaster]
-	near_call spellSavingThrowHelper,2
+	NEAR_CALL(spellSavingThrowHelper,2)
 	or	ax, ax
 	jz	short l_return
 
@@ -24,7 +24,7 @@ sp_meleeMen proc far
 	mov	ax, [bp+spellCaster]
 	and	ax, 3
 	push	ax
-	near_call	_sp_setMonDistance,4
+	NEAR_CALL(_sp_setMonDistance,4)
 	jmp	short l_printMessage
 l_partyCaster:
 	mov	ax, 1
@@ -33,31 +33,22 @@ l_partyCaster:
 	sub	ah, ah
 	and	ax, 3
 	push	ax
-	push	cs
-	call	near ptr _sp_setMonDistance
-	add	sp, 4
+	NEAR_CALL(_sp_setMonDistance, 4)
 l_printMessage:
-	mov	ax, offset aAndTheFoesAre
-	push	ds
-	push	ax
-	lea	ax, [bp+stringBuffer]
-	push	ss
-	push	ax
-	std_call	_strcat,8
+	PUSH_OFFSET(s_andTheFoesAre)
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
-	mov	ax, offset aCloser
-	push	ds
+	PUSH_OFFSET(s_closer)
 	push	ax
 	push	dx
 	push	[bp+var_4]
-	std_call	_strcat,8
+	STRCAT
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
-	lea	ax, [bp+stringBuffer]
-	push	ss
-	push	ax
-	func_printString
+	PUSH_STACK_ADDRESS(stringBuffer)
+	PRINTSTRING
 l_return:
 	mov	sp, bp
 	pop	bp

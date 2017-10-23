@@ -4,10 +4,9 @@ sp_areaEnchant proc far
 
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
+
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
 	mov	detectDuration, al
@@ -15,8 +14,7 @@ sp_areaEnchant proc far
 	mov	detectType, al
 	mov	ax, icon_areaEnchant
 	push	ax
-	call	icon_activate
-	add	sp, 2
+	CALL(icon_activate, 2)
 	mov	sp, bp
 	pop	bp
 	retf

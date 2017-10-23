@@ -9,22 +9,22 @@ doCastSpell proc far
 	itemUsedFlag= word ptr	 0Ah
 	useSppt= word ptr	 0Ch
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 108h
-	call	someStackOperation
-	push	[bp+partySlotNumber]
+	FUNC_ENTER
+	CHKSTK(108h)
 
-	push_ss_string	stringBuf
-	std_call	bat_getAttackerName,6
-	save_ptr_stack	dx,ax,stringBufP
-	dword_appendChar	stringBufP, ' '
+	push	[bp+partySlotNumber]
+	PUSH_STACK_ADDRESS(stringBuf)
+	CALL(bat_getAttackerName,6)
+	SAVE_PTR_STACK(dx, ax, stringBufP)
+	APPEND_CHAR(STACKVAR(stringBufP), ' ')
 
 	cmp	[bp+spellNumber], 7Eh 
 	jge	short l_spptCheck
 
-	strcat_offset aCastsASpell,stringBufP
-	dword_appendChar stringBufP, ' '
+	PUSH_OFFSET(s_castsASpell)
+	PUSH_STACK_PTR(stringBufP)
+	STRCAT(stringBufP)
+	APPEND_CHAR(STACKVAR(stringBufP), ' ')
 
 	; Append full spell name to output string
 	mov	bx, [bp+spellNumber]
@@ -34,14 +34,14 @@ doCastSpell proc far
 	push	word ptr spellString.fullName[bx]
 	push	word ptr [bp+stringBufP+2]
 	push	word ptr [bp+stringBufP]
-	do_strcat stringBufP
+	STRCAT(stringBufP)
 
 l_spptCheck:
 	cmp	[bp+useSppt], 0
 	jz	short l_castIt
 	push	[bp+spellNumber]
 	push	[bp+partySlotNumber]
-	near_call	_sp_checkSPPT,4
+	NEAR_CALL(_sp_checkSPPT,4)
 	or	ax, ax
 	jz	short l_fizzled
 	mov	al, gs:sq_antiMagicFlag
@@ -50,24 +50,21 @@ l_spptCheck:
 	jz	short l_castIt
 
 l_fizzled:
-	null_terminate	[bp+stringBufP]
-	push_ss_string	stringBuf
-	std_call	printString,4
+	NULL_TERMINATE(STACKVAR(stringBufP))
+	PUSH_STACK_ADDRESS(stringBuf)
+	PRINTSTRING
 
-	call	printSpellFizzled
+	CALL(printSpellFizzled)
 
 	sub	ax, ax
 	jmp	short l_return
 l_castIt:
-	lea	ax, [bp+stringBuf]
-	push	ss
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_STACK_ADDRESS(stringBuf)
+	PRINTSTRING
 	push	[bp+itemUsedFlag]
 	push	[bp+spellNumber]
 	push	[bp+partySlotNumber]
-	near_call	spell_cast,6
+	NEAR_CALL(spell_cast,6)
 	mov	ax, 1
 l_return:
 	mov	sp, bp

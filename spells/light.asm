@@ -5,10 +5,9 @@ sp_lightSpell proc far
 	spellEffect= word ptr	-2
 	spellNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2)
+
 	mov	bx, [bp+spellNumber]
 	mov	al, spellEffectFlags[bx]
 	sub	ah, ah
@@ -20,18 +19,14 @@ sp_lightSpell proc far
 	mov	lightDuration, al
 	sub	ax, ax
 	push	ax
-	call	icon_activate
-	add	sp, 2
+	CALL(icon_activate, 2)
 	mov	bx, [bp+spellEffect]
 	mov	al, lightDetectList[bx]
 	mov	gs:gl_detectSecretDoorFlag, al
-	mov	ax, offset aElipsisNLNL
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	delayNoTable	2
-	mov	sp, bp
-	pop	bp
+	PUSH_OFFSET(s_elipsisNl)
+	PRINTSTRING
+	DELAY(2)
+
+	FUNC_EXIT
 	retf
 sp_lightSpell endp

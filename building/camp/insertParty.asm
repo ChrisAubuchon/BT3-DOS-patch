@@ -8,10 +8,8 @@ camp_insertParty proc far
 	var_2= word ptr	-2
 	savedPartyNumber= word ptr	 6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 0Ah
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(0Ah)
 	push	si
 	mov	ax, [bp+savedPartyNumber]
 	mov	cl, 7
@@ -19,7 +17,7 @@ camp_insertParty proc far
 	add	ax, offset g_rosterPartyBuffer
 	mov	word ptr [bp+savedPartiesP], ax
 	mov	word ptr [bp+savedPartiesP+2], seg seg022
-	call	clearTextWindow
+	CALL(clearTextWindow)
 	mov	[bp+loopCounter], 0
 	jmp	short l_loopComparison
 l_incrementCounter:
@@ -42,7 +40,7 @@ l_loopComparison:
 	add	ax, 10h
 	push	dx
 	push	ax
-	near_call	party_nameExists, 4
+	NEAR_CALL(party_nameExists, 4)
 	or	ax, ax
 	jl	short l_findEmptySlot
 	mov	cl, 4
@@ -52,18 +50,13 @@ l_loopComparison:
 	add	ax, 10h
 	push	dx
 	push	ax
-	call	printString
-	add	sp, 4
-	mov	ax, offset aIsAlreadyInThe
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	delayNoTable	2
+	PRINTSTRING
+	PUSH_OFFSET(s_alreadyInParty)
+	PRINTSTRING
+	DELAY(2)
 	jmp	short l_incrementCounter
 l_findEmptySlot:
-	push	cs
-	call	near ptr findEmptyRosterNum
+	NEAR_CALL(party_findEmptySlot)
 	mov	[bp+var_2], ax
 	cmp	ax, 7
 	jge	l_rosterFull
@@ -78,9 +71,7 @@ l_findEmptySlot:
 	add	ax, 10h
 	push	dx
 	push	ax
-	push	cs
-	call	near ptr roster_nameExists
-	add	sp, 4
+	NEAR_CALL(roster_nameExists, 4)
 	mov	[bp+var_4], ax
 	or	ax, ax
 	jge	short l_addCharacter
@@ -92,38 +83,30 @@ l_findEmptySlot:
 	add	ax, 10h
 	push	dx
 	push	ax
-	call	printString
-	add	sp, 4
-	mov	ax, offset aThereSNoOneHer
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	delayNoTable	2
+	PRINTSTRING
+	PUSH_OFFSET(s_noOneHereNamedThat)
+	PRINTSTRING
+	DELAY(2)
 	jmp	l_incrementCounter
 l_addCharacter:
-	getCharP [bp+var_2], bx
+	CHARINDEX(ax, STACKVAR(var_2), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	getCharP [bp+var_4], bx
+	CHARINDEX(ax, STACKVAR(var_4), bx)
 	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	near_call	copyCharacterBuf,8
-	push	cs
-	call	near ptr rost_insertMember
+	NEAR_CALL(copyCharacterBuf,8)
+	NEAR_CALL(party_addCharacter)
 	mov	byte ptr word_44166,	0
 	jmp	l_incrementCounter
 l_rosterFull:
-	mov	ax, offset aTheRosterIsFul
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	delayNoTable	2
+	PUSH_OFFSET(s_rosterIsFull)
+	PRINTSTRING
+	DELAY(2)
 	jmp	l_incrementCounter
 l_return:
 	pop	si

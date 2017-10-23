@@ -1,6 +1,8 @@
 ; Attributes: bp-based frame
 
 ; Create the party in the roster's party buffer
+;
+; DWORD - arg_2 & arg_4
 
 roster_makeParty proc far
 
@@ -10,10 +12,8 @@ roster_makeParty proc far
 	arg_2= word ptr	 8
 	arg_4= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 6
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(6)
 	mov	ax, [bp+partyIndexNumber]
 	mov	cl, 7
 	shl	ax, cl
@@ -29,8 +29,7 @@ roster_makeParty proc far
 	inc	ax
 	push	dx
 	push	ax
-	call	_strcpy
-	add	sp, 8
+	CALL(_strcpy, 8)
 	mov	[bp+var_6], 0
 	jmp	short loc_1333C
 loc_13339:
@@ -38,7 +37,7 @@ loc_13339:
 loc_1333C:
 	cmp	[bp+var_6], 7
 	jge	short loc_1336F
-	getCharP	[bp+var_6], bx
+	CHARINDEX(ax, STACKVAR(var_6), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
@@ -51,11 +50,9 @@ loc_1333C:
 	add	ax, 10h
 	push	dx
 	push	ax
-	call	_strcpy
-	add	sp, 8
+	CALL(_strcpy, 8)
 	jmp	short loc_13339
 loc_1336F:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 roster_makeParty endp

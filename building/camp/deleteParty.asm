@@ -8,10 +8,8 @@ camp_deleteParty proc far
 	outputStringBuf= word ptr -100h
 	partyIndexNumber= word ptr	 6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 10Ah
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(10Ah)
 	push	si
 	mov	ax, [bp+partyIndexNumber]
 	mov	cl, 7
@@ -19,32 +17,22 @@ camp_deleteParty proc far
 	add	ax, offset g_rosterPartyBuffer
 	mov	word ptr [bp+partyBuf], ax
 	mov	word ptr [bp+partyBuf+2], seg seg022
-	mov	ax, offset aAreYouSureYouW
-	push	ds
-	push	ax
-	lea	ax, [bp+outputStringBuf]
-	push	ss
-	push	ax
-	call	_strcat
-	add	sp, 8
-	mov	word ptr [bp+outputStringBufP], ax
-	mov	word ptr [bp+outputStringBufP+2], dx
+	PUSH_OFFSET(s_confirmDelete)
+	PUSH_STACK_ADDRESS(outputStringBuf)
+	STRCAT(outputStringBufP)
+
 	push	word ptr [bp+partyBuf+2]
 	push	word ptr [bp+partyBuf]
 	push	dx
 	push	ax
-	call	_strcat
-	add	sp, 8
-	mov	word ptr [bp+outputStringBufP], ax
-	mov	word ptr [bp+outputStringBufP+2], dx
-	dword_appendChar	outputStringBufP, '?'
-	null_terminate	[bp+outputStringBufP]
-	lea	ax, [bp+outputStringBuf]
-	push	ss
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	call	getYesNo
+	STRCAT(outputStringBufP)
+
+	APPEND_CHAR(STACKVAR(outputStringBufP), '?')
+	NULL_TERMINATE(STACKVAR(outputStringBufP))
+
+	PUSH_STACK_ADDRESS(outputStringBuf)
+	PRINTSTRING(true)
+	CALL(getYesNo)
 	or	ax, ax
 	jz	short l_return
 	mov	ax, [bp+partyIndexNumber]
@@ -63,8 +51,7 @@ l_packPartyBuf:
 	push	word ptr [bp+outputStringBufP]
 	push	dx
 	push	word ptr [bp+partyBuf]
-	call	_memcpy
-	add	sp, 0Ah
+	CALL(_memcpy, 0Ah)
 	mov	ax, word ptr [bp+outputStringBufP]
 	mov	dx, word ptr [bp+outputStringBufP+2]
 	mov	word ptr [bp+partyBuf], ax
@@ -85,7 +72,6 @@ l_zeroPartyBufLoopEntry:
 	jmp	short l_zeroPartyBufLoopEntry
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_deleteParty endp

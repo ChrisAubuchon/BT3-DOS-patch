@@ -4,12 +4,12 @@ getCharacterGender proc	far
 	func_enter
 
 loc_loop_start:
-	push_ds_string	aDoYouWishYourC
-	std_call	printStringWClear, 4
+	PUSH_OFFSET(s_genderOptions)
+	PRINTSTRING(true)
 
 	mov	ax, 0Ch
 	push	ax
-	std_call	getKey, 2
+	GETKEY
 
 	cmp	ax, 1Bh
 	jz	loc_return_ff
@@ -36,7 +36,6 @@ loc_return_ff:
 	mov	ax, 0FFh
 
 loc_exit:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 getCharacterGender endp

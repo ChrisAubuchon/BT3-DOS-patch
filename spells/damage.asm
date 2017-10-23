@@ -10,12 +10,11 @@ sp_damageSpell proc far
 	partySlotNumber=	word ptr  6
 	spellNumber= word ptr  8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 10h
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(10h)
 	push	di
 	push	si
+
 	mov	bx, [bp+spellNumber]
 	mov	al, spellEffectFlags[bx]
 	sub	ah, ah
@@ -51,9 +50,7 @@ loc_20118:
 	movsw
 	movsb
 	push	[bp+partySlotNumber]
-	push	cs
-	call	near ptr bat_doBreathAttack
-	add	sp, 0Ch
+	NEAR_CALL(bat_doBreathAttack, 0Ch)
 	pop	si
 	pop	di
 	mov	sp, bp

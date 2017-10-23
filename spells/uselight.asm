@@ -5,16 +5,15 @@ _sp_useLightObj	proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	push_ds_string	aMakesALight
-	func_printString
+	FUNC_ENTER
+	CHKSTK
+
+	PUSH_OFFSET(s_makesLight)
+	PRINTSTRING
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	near_call	sp_lightSpell,4
-	mov	sp, bp
-	pop	bp
+	NEAR_CALL(sp_lightSpell,4)
+
+	FUNC_EXIT
 	retf
 _sp_useLightObj	endp

@@ -7,10 +7,9 @@ sp_batchspell proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(4)
+
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
 	sub	ah, ah
@@ -25,7 +24,7 @@ l_loopEnter:
 	jz	short l_return
 	push	ax
 	push	[bp+spellCaster]
-	near_call	_batchSpellCast, 4
+	NEAR_CALL(_batchSpellCast, 4)
 	jmp	short l_loopEnter
 l_return:
 	mov	sp, bp

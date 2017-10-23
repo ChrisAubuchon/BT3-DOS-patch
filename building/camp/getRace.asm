@@ -4,20 +4,14 @@ getCharacterRace proc far
 
 	var_2= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2)
 l_ioLoopEntry:
-	mov	ax, offset aSelectARaceFor
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	PUSH_OFFSET(s_raceOptions)
+	PRINTSTRING(true)
 	mov	ax, 1FCh
 	push	ax
-	call	getKey
-	add	sp, 2
+	GETKEY
 	mov	[bp+var_2], ax
 	cmp	ax, 1Bh
 	jnz	short l_checkMouse

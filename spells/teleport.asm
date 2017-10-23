@@ -13,21 +13,18 @@ sp_teleport proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 116h
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(116h)
 	push	di
 	push	si
-	mov	word ptr [bp+var_16], offset characterIOBuf
+
+	mov	word ptr [bp+var_16], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+var_16+2],	seg seg022
 	cmp	inDungeonMaybe, 0
 	jnz	short loc_20FCB
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	push	cs
-	call	near ptr printSpellFizzled
-	add	sp, 4
+	NEAR_CALL(printSpellFizzled, 4)
 	jmp	l_return
 loc_20FCB:
 	mov	word_4EE66, 0
@@ -44,17 +41,10 @@ loc_20FE5:
 	mov	[bp+si+teleDeltaList], 0
 	jmp	short loc_20FE2
 loc_20FF7:
-	call	clearTextWindow
-	mov	ax, offset aTeleportUseArr
-	push	ds
-	push	ax
-	lea	ax, [bp+var_116]
-	push	ss
-	push	ax
-	call	_strcat
-	add	sp, 8
-	mov	word ptr [bp+var_10], ax
-	mov	word ptr [bp+var_10+2],	dx
+	CALL(clearTextWindow)
+	PUSH_OFFSET(s_teleportMenu)
+	PUSH_STACK_ADDRESS(var_116)
+	STRCAT(var_10)
 	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	[bp+var_C], ax
@@ -63,20 +53,12 @@ loc_20FF7:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_10]
-	mov	ax, offset aDownUp
-	push	ds
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
-	mov	word ptr [bp+var_10], ax
-	mov	word ptr [bp+var_10+2],	dx
+	PUSH_OFFSET(s_downUp)
+	PLURALIZE(var_10)
 	lfs	bx, [bp+var_10]
 	mov	byte ptr fs:[bx], 0
-	lea	ax, [bp+var_116]
-	push	ss
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_STACK_ADDRESS(var_116)
+	PRINTSTRING
 	mov	al, byte ptr [bp+var_C]
 	add	al, 3
 	mov	gs:txt_numLines, al
@@ -100,15 +82,13 @@ loc_21086:
 	shl	si, 1
 	push	[bp+si+teleDeltaList]
 	push	cs
-	call	near ptr _sp_teleportPrintNum
-	add	sp, 4
+	NEAR_CALL(_sp_teleportPrintNum, 4)
 	inc	gs:txt_numLines
 	jmp	short loc_2106E
 loc_210A1:
 	sub	ax, ax
 	push	ax
-	call	sub_14E41
-	add	sp, 2
+	GETKEY
 	mov	[bp+var_8], ax
 	jmp	short loc_210E5
 loc_210B1:
@@ -153,20 +133,14 @@ loc_210FB:
 	jge	short loc_21104
 	jmp	loc_20FF7
 loc_21104:
-	mov	ax, offset aTeleport?
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	call	getYesNo
+	PUSH_OFFSET(s_confirmTeleport)
+	PRINTSTRING
+	CALL(getYesNo)
 	or	ax, ax
 	jnz	short loc_21136
-	mov	ax, offset aTeleportCancel
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	wait4IO
+	PUSH_OFFSET(s_cancelTeleport)
+	PRINTSTRING
+	IOWAIT
 	jmp	l_return
 loc_21136:
 	mov	ax, dunLevelNum
@@ -178,18 +152,12 @@ loc_21136:
 	mov	ax, sq_north
 	add	ax, [bp+teleDeltaList]
 	push	ax
-	push	cs
-	call	near ptr _sp_doTeleport
-	add	sp, 6
+	NEAR_CALL(_sp_doTeleport, 6)
 	or	ax, ax
-	jnz	short loc_21168
-	jmp	loc_211F3
+	jz	loc_211F3
 loc_21168:
-	mov	ax, offset aTeleportSucces
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_OFFSET(s_successfulTeleport)
+	PRINTSTRING
 	mov	ax, [bp+teleDeltaList]
 	add	sq_north, ax
 	mov	ax, [bp+teleDeltaList+2]
@@ -215,16 +183,12 @@ loc_21168:
 loc_211F1:
 	jmp	short l_return
 loc_211F3:
-	mov	ax, offset aTeleportFailed
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_OFFSET(s_failedTeleport)
+	PRINTSTRING
 l_return:
 	pop	si
 	pop	di
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_teleport endp
 
@@ -245,11 +209,10 @@ _sp_doTeleport proc far
 	sqE= word ptr  8
 	level= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 1Ah
-	call	someStackOperation
+	FUNC_EXIT
+	CHKSTK(1Ah)
 	push	si
+
 	cmp	[bp+level], 0
 	jl	short loc_2121E
 	cmp	[bp+level], 7
@@ -258,7 +221,7 @@ loc_2121E:
 	sub	ax, ax
 	jmp	loc_2136C
 loc_21223:
-	mov	word ptr [bp+var_E], offset characterIOBuf
+	mov	word ptr [bp+var_E], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+var_E+2], seg seg022
 	lfs	bx, [bp+var_E]
 	mov	al, fs:[bx+dun_t.deltaSqN]
@@ -288,8 +251,7 @@ loc_21255:
 loc_21276:
 	mov	ax, 0FA0h
 	push	ax
-	call	_mallocMaybe
-	add	sp, 2
+	CALL(_mallocMaybe, 2)
 	mov	word ptr [bp+var_14], ax
 	mov	word ptr [bp+var_14+2],	dx
 	push	dx
@@ -300,8 +262,7 @@ loc_21276:
 	sub	ah, ah
 	add	ax, 0Ah
 	push	ax
-	call	readLevelData
-	add	sp, 6
+	CALL(readLevelData, 6)
 loc_212A2:
 	lfs	bx, [bp+var_14]
 	mov	al, fs:[bx+dun_t.deltaSqN]
@@ -331,8 +292,7 @@ loc_212D5:
 loc_212E4:
 	push	word ptr [bp+var_14+2]
 	push	word ptr [bp+var_14]
-	call	_freeMaybe
-	add	sp, 4
+	CALL(_freeMaybe, 4)
 loc_212F2:
 	sub	ax, ax
 	jmp	short loc_2136C
@@ -377,8 +337,7 @@ loc_212F6:
 loc_21359:
 	push	word ptr [bp+var_14+2]
 	push	word ptr [bp+var_14]
-	call	_freeMaybe
-	add	sp, 4
+	CALL(_freeMaybe, 4)
 loc_21367:
 	mov	ax, [bp+var_10]
 	jmp	short $+2
@@ -398,23 +357,17 @@ _sp_teleportPrintNum proc far
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 24h	
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(24h)
+
 	sub	ax, ax
 	push	ax
 	mov	ax, [bp+arg_0]
 	cwd
 	push	dx
 	push	ax
-	lea	ax, [bp+var_20]
-	push	ss
-	push	ax
-	call	_itoa
-	add	sp, 0Ah
-	mov	word ptr [bp+var_24], ax
-	mov	word ptr [bp+var_24+2],	dx
+	PUSH_STACK_ADDRESS(var_20)
+	ITOA(var_24)
 	cmp	[bp+arg_2], 0
 	jz	short loc_213A8
 	lfs	bx, [bp+var_24]
@@ -424,12 +377,9 @@ loc_213A8:
 	lfs	bx, [bp+var_24]
 	mov	byte ptr fs:[bx], 0
 	mov	gs:byte_42419, 30h 
-	lea	ax, [bp+var_20]
-	push	ss
-	push	ax
-	call	sub_16595
-	add	sp, 4
-	mov	sp, bp
-	pop	bp
+	PUSH_STACK_ADDRESS(var_20)
+	CALL(sub_16595, 4)
+
+	FUNC_EXIT
 	retf
 _sp_teleportPrintNum endp

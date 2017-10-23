@@ -5,10 +5,8 @@ spell_cast proc	far
 	spellNo= word ptr  8
 	itemUsedFlag= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 
 	cmp	[bp+itemUsedFlag], 0
 	jnz	short l_notMapSpell
@@ -21,7 +19,7 @@ spell_cast proc	far
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	std_call	map_execute, 6
+	CALL(map_execute, 6)
 	or	ax, ax
 	jnz	l_return
 

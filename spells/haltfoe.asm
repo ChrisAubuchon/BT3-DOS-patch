@@ -3,12 +3,11 @@ sp_haltFoe proc	far
 
 	spellCaster= word ptr	 6
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
+
 	push	[bp+spellCaster]
-	near_call spellSavingThrowHelper,2
+	NEAR_CALL(spellSavingThrowHelper,2)
 	or	ax, ax
 	jz	short l_return
 	cmp	[bp+spellCaster], 80h
@@ -17,10 +16,8 @@ sp_haltFoe proc	far
 	jmp	short l_return
 l_monCaster:
 	inc	gs:partyFrozenFlag
-	mov	ax, offset aAndThePartyFre
-	push	ds
-	push	ax
-	func_printString
+	PUSH_OFFSET(s_partyFreezes)
+	PRINTSTRING
 l_return:
 	mov	sp, bp
 	pop	bp

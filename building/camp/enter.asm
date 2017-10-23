@@ -2,20 +2,19 @@
 
 camp_enter proc	far
 
-	var_58=	word ptr -58h
+	lastActiveSlot=	word ptr -58h
 	loopCounter=	word ptr -56h
-	var_54=	word ptr -54h
-	var_52=	word ptr -52h
-	var_3E=	word ptr -3Eh
-	var_3C=	word ptr -3Ch
+	mouseBitmask=	word ptr -54h
+	optionKeys=	word ptr -52h
+	currentKey=	word ptr -3Eh
+	optionMouse=	word ptr -3Ch
 	campOptionList=	word ptr -14h
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 58h	
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(58h)
 	push	si
-	call	endNoncombatSong
+
+	CALL(endNonCombatSong)
 
 	; End all duration spells when entering camp
 	mov	[bp+loopCounter], 0
@@ -24,8 +23,7 @@ l_durationSpellLoopEntry:
 	cmp	lightDuration[bx], 0
 	jz	short l_notActive
 	push	bx
-	call	sub_17920
-	add	sp, 2
+	CALL(sub_17920, 2)
 l_notActive:
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 5
@@ -33,87 +31,65 @@ l_notActive:
 
 	mov	gs:gl_detectSecretDoorFlag, 0
 	mov	gs:songACBonus,	0
-	push	cs
-	call	near ptr readRosterFiles
-	push	cs
-	call	near ptr roster_writeParty
-	mov	ax, offset aTheRuin
-	push	ds
-	push	ax
-	call	setTitle
-	add	sp, 4
+	NEAR_CALL(readRosterFiles)
+	NEAR_CALL(roster_writeParty)
+	PUSH_OFFSET(s_ruinTitle)
+	CALL(setTitle, 4)
 	sub	ax, ax
 	push	ax
-	call	bigpic_drawPicNumber
-	add	sp, 2
+	CALL(bigpic_drawPicNumber, 2)
 l_mainIoLoopEntry:
-	call	clearTextWindow
-	lea	ax, [bp+campOptionList]
-	push	ss
-	push	ax
-	push	cs
-	call	near ptr camp_configOptionList
-	add	sp, 4
-	lea	ax, [bp+var_3C]
-	push	ss
-	push	ax
-	lea	ax, [bp+var_52]
-	push	ss
-	push	ax
-	lea	ax, [bp+campOptionList]
-	push	ss
-	push	ax
-	mov	ax, offset aThouArtInTheCa
-	push	ds
-	push	ax
-	call	printVarString
-	add	sp, 10h
-	mov	[bp+var_54], ax
-	push	cs
-	call	near ptr findEmptyRosterNum
-	mov	[bp+var_58], ax
-	mov	ax, [bp+var_54]
+	CALL(clearTextWindow)
+	PUSH_STACK_ADDRESS(campOptionList)
+	NEAR_CALL(camp_configOptionList, 4)
+	PUSH_STACK_ADDRESS(optionMouse)
+	PUSH_STACK_ADDRESS(optionKeys)
+	PUSH_STACK_ADDRESS(campOptionList)
+	PUSH_OFFSET(s_campMenuString)
+	CALL(printVarString, 10h)
+	mov	[bp+mouseBitmask], ax
+	NEAR_CALL(party_findEmptySlot)
+	mov	[bp+lastActiveSlot], ax
+	mov	ax, [bp+mouseBitmask]
 	or	ah, 20h
 	push	ax
-	call	getKey
-	add	sp, 2
-	mov	[bp+var_3E], ax
-	cmp	ax, 30h	
-	jle	short loc_13564
-	mov	ax, [bp+var_58]
-	add	ax, 31h	
-	cmp	ax, [bp+var_3E]
-	jle	short loc_13564
-	mov	ax, [bp+var_3E]
-	sub	ax, 31h	
+	GETKEY
+	mov	[bp+currentKey], ax
+
+	cmp	ax, '0'			; Print character if 1-7
+	jle	short l_checkKeyAgainstOptions
+	mov	ax, [bp+lastActiveSlot]
+	add	ax, '1'
+	cmp	ax, [bp+currentKey]
+	jle	short l_checkKeyAgainstOptions
+	mov	ax, [bp+currentKey]
+	sub	ax, '1'
 	push	ax
-	call	printCharacter
-	add	sp, 2
+	CALL(printCharacter, 2)
 	sub	ax, ax
 	push	ax
-	call	bigpic_drawPicNumber
-	add	sp, 2
-	mov	ax, offset aTheRuin
-	push	ds
-	push	ax
-	call	setTitle
-	add	sp, 4
+	CALL(bigpic_drawPicNumber, 2)
+	PUSH_OFFSET(s_ruinTitle)
+	CALL(setTitle, 4)
 	jmp	short loc_135A7
-loc_13564:
+
+l_checkKeyAgainstOptions:
 	mov	[bp+loopCounter], 0
 loc_13569:
 	mov	si, [bp+loopCounter]
-	cmp	byte ptr [bp+si+var_52], 0
+	cmp	byte ptr [bp+si+optionKeys], 0
 	jz	short loc_135A7
-	mov	al, byte ptr [bp+si+var_52]
+
+	mov	al, byte ptr [bp+si+optionKeys]
 	cbw
-	cmp	ax, [bp+var_3E]
-	jz	short loc_13585
+	cmp	ax, [bp+currentKey]
+	jz	short l_executeCampFunction
 	shl	si, 1
-	mov	ax, [bp+var_3E]
-	cmp	[bp+si+var_3C],	ax
+	mov	ax, [bp+currentKey]
+	cmp	[bp+si+optionMouse], ax
 	jnz	short loc_135A2
-loc_13585:
+
+l_executeCampFunction:
 	mov	bx, [bp+loopCounter]
 	shl	bx, 1
 	shl	bx, 1
@@ -129,8 +105,7 @@ loc_135A7:
 	jmp	l_mainIoLoopEntry
 loc_135AA:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_enter endp
 

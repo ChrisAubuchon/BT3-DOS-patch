@@ -10,10 +10,9 @@ getSpptRequired	proc far
 	partySlotNumber= word ptr  6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2)
+
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spptRequired[bx]
 	sub	ah, ah
@@ -21,7 +20,7 @@ getSpptRequired	proc far
 	mov	ax, itemEff_quaterSpptUse
 	push	ax
 	push	[bp+partySlotNumber]
-	std_call	hasEffectEquipped,4
+	CALL(hasEffectEquipped,4)
 	or	ax, ax
 	jnz	short l_checkHalf
 	mov	ax, [bp+sppt]
@@ -32,7 +31,7 @@ l_checkHalf:
 	mov	ax, itemEff_halfSpptUsage
 	push	ax
 	push	[bp+partySlotNumber]
-	std_call	hasEffectEquipped,4
+	CALL(hasEffectEquipped,4)
 	or	ax, ax
 	jnz	short l_returnSppt
 	mov	ax, [bp+sppt]

@@ -6,10 +6,8 @@ roster_partyExists proc far
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2)
 	mov	[bp+loopCounter], 0
 l_loopEntry:
 	mov	bx, [bp+loopCounter]
@@ -21,8 +19,7 @@ l_loopEntry:
 	push	ax
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	_strcmp
-	add	sp, 8
+	STRCMP
 	or	ax, ax
 	jz	l_returnPartyIndex
 	inc	[bp+loopCounter]
@@ -34,8 +31,7 @@ l_returnMinusOne:
 l_returnPartyIndex:
 	mov	ax, [bp+loopCounter]
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 roster_partyExists endp
 

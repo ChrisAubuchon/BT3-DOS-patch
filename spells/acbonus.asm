@@ -4,10 +4,9 @@ sp_acBonus proc	far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
+
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster
 	mov	bx, [bp+spellIndexNumber]

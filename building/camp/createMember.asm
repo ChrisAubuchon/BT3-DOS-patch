@@ -21,10 +21,8 @@ camp_createMember proc far
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 0ECh 
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(0ECh)
 	push	di
 	push	si
 	mov	word ptr [bp+var_20], offset newCharBuffer
@@ -42,16 +40,14 @@ loc_129BD:
 	mov	byte ptr fs:[bx+si], 0
 	jmp	short loc_129BA
 loc_129CF:
-	push	cs
-	call	near ptr getCharacterGender
+	NEAR_CALL(getCharacterGender)
 	mov	gs:newCharBuffer.gender, al
 	cmp	al, 0FFh
 	jnz	short loc_129E4
 	sub	ax, ax
 	jmp	loc_12DAE
 loc_129E4:
-	push	cs
-	call	near ptr getCharacterRace
+	NEAR_CALL(getCharacterRace)
 	mov	gs:newCharBuffer.race, al
 	cmp	al, 0FFh
 	jnz	short loc_129F9
@@ -76,7 +72,7 @@ loc_12A1C:
 loc_12A1F:
 	cmp	[bp+counter], 5
 	jge	short loc_12A5A
-	call	_random
+	CALL(_random)
 	and	ax, 7
 	mov	si, [bp+raceGenderValue]
 	mov	bx, [bp+counter]
@@ -97,29 +93,22 @@ loc_12A1F:
 loc_12A58:
 	jmp	short loc_12A1C
 loc_12A5A:
-	call	_random
+	CALL(_random)
 	and	ax, 0Fh
 	add	ax, 13
 	mov	[bp+var_30], ax
 	mov	gs:newCharBuffer.currentHP, ax
 	mov	gs:newCharBuffer.maxHP,	ax
 	mov	[bp+var_24], ax
-	call	clearTextWindow
+	CALL(clearTextWindow)
 	mov	ax, 5
 	push	ax
-	lea	ax, [bp+var_E8]
-	push	ss
-	push	ax
-	lea	ax, [bp+var_2E]
-	push	ss
-	push	ax
-	call	getAttributeString
-	add	sp, 0Ah
-	lea	ax, [bp+var_E8]
-	push	ss
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_STACK_ADDRESS(var_E8)
+	PUSH_STACK_ADDRESS(var_2E)
+	CALL(getAttributeString, 0Ah)
+
+	PUSH_STACK_ADDRESS(var_E8)
+	PRINTSTRING(false)
 	mov	al, gs:newCharBuffer.race
 	sub	ah, ah
 	mov	cx, ax
@@ -156,9 +145,7 @@ loc_12AD8:
 	push	word ptr (classString+2)[bx]
 	push	word ptr classString[bx]
 	push	[bp+var_EA]
-	push	cs
-	call	near ptr printListItem
-	add	sp, 6
+	NEAR_CALL(printListItem, 6)
 	mov	si, [bp+var_EA]
 	inc	[bp+var_EA]
 	shl	si, 1
@@ -171,8 +158,7 @@ loc_12B30:
 	mov	[bp+var_34], 1
 loc_12B3A:
 	push	[bp+var_2]
-	call	getKey
-	add	sp, 2
+	CALL(getKey,2)
 	mov	[bp+var_22], ax
 	mov	ax, [bp+var_8]
 	add	ax, 10Eh
@@ -299,7 +285,7 @@ loc_12CB7:
 	jz	short loc_12CEE
 	cmp	gs:newCharBuffer.class,	class_rogue
 	jnb	short loc_12CEE
-	call	_random
+	CALL(_random)
 	and	ax, 0Fh
 	add	ax, 8
 	mov	gs:newCharBuffer.currentSppt, ax
@@ -310,19 +296,15 @@ loc_12CF5:
 	mov	ax, gs:newCharBuffer.currentSppt
 	mov	gs:newCharBuffer.maxSppt, ax
 loc_12CFD:
-	mov	ax, offset aNameYourNewCha
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	PUSH_OFFSET(s_nameYourCharacter)
+	PRINTSTRING(true)
 	mov	ax, 0Eh
 	push	ax
 	mov	ax, offset newCharBuffer
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_readString
-	add	sp, 6
+	CALL(_readString, 6)
 	or	ax, ax
 	jnz	short loc_12D25
 	jmp	loc_12DAE
@@ -335,17 +317,12 @@ loc_12D37:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	cs
-	call	near ptr roster_nameExists
-	add	sp, 4
+	NEAR_CALL(roster_nameExists, 4)
 	or	ax, ax
 	jl	short loc_12D6A
-	mov	ax, offset aThereIsAlready
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	wait4IO
+	PUSH_OFFSET(s_nameAlreadyExists)
+	PRINTSTRING(true)
+	IOWAIT
 	mov	[bp+var_4], 1
 	jmp	short loc_12D6F
 loc_12D6A:
@@ -353,10 +330,9 @@ loc_12D6A:
 loc_12D6F:
 	cmp	[bp+var_4], 0
 	jnz	short loc_12CFD
-	push	cs
-	call	near ptr countSavedChars
+	NEAR_CALL(roster_countCharacters)
 	mov	[bp+var_30], ax
-	getCharP	[bp+var_30], bx
+	CHARINDEX(ax, STACKVAR(var_30), bx)
 	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
@@ -365,10 +341,8 @@ loc_12D6F:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	cs
-	call	near ptr copyCharacterBuf
-	add	sp, 8
-	getCharP	[bp+var_30], bx
+	NEAR_CALL(copyCharacterBuf, 8)
+	CHARINDEX(ax, STACKVAR(var_30), bx)
 	mov	fs, seg022_x
 	assume fs:seg022
 	mov	fs:(g_rosterCharacterBuffer+78h)[bx], 0

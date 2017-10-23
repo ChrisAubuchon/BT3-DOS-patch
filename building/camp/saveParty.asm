@@ -6,33 +6,20 @@ camp_saveParty proc far
 	partyName=	word ptr -16h
 	var_2= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 18h
-	call	someStackOperation
-	mov	ax, offset aNameToSavePart
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	FUNC_ENTER
+	CHKSTK(18h)
+	PUSH_OFFSET(s_askPartyName)
+	PRINTSTRING(true)
 	mov	ax, 0Eh
 	push	ax
-	lea	ax, [bp+partyName]
-	push	ss
-	push	ax
-	call	_readString
-	add	sp, 6
+	PUSH_STACK_ADDRESS(partyName)
+	CALL(_readString, 6)
 	or	ax, ax
 	jz	short l_return
-	push	cs
-	call	near ptr roster_countParties
+	NEAR_CALL(roster_countParties)
 	mov	[bp+savedPartyCount], ax
-	lea	ax, [bp+partyName]
-	push	ss
-	push	ax
-	push	cs
-	call	near ptr roster_partyExists
-	add	sp, 4
+	PUSH_STACK_ADDRESS(partyName)
+	NEAR_CALL(roster_partyExists, 4)
 	mov	[bp+var_2], ax
 	or	ax, ax
 	jge	short loc_13291
@@ -41,16 +28,11 @@ camp_saveParty proc far
 loc_13291:
 	cmp	[bp+var_2], 9
 	jg	short l_return
-	lea	ax, [bp+partyName]
-	push	ss
-	push	ax
+	PUSH_STACK_ADDRESS(partyName)
 	push	[bp+var_2]
-	push	cs
-	call	near ptr roster_makeParty
-	add	sp, 6
+	NEAR_CALL(roster_makeParty, 6)
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_saveParty endp
 

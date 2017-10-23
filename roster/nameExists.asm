@@ -9,21 +9,18 @@ roster_nameExists proc far
 	nameOffset= word ptr  6
 	nameString= word ptr  8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2)
 	mov	[bp+counter], 0
 l_loopEntry:
-	getCharP	[bp+counter], bx
+	CHARINDEX(ax, STACKVAR(counter), bx)
 	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	push	[bp+nameString]
 	push	[bp+nameOffset]
-	call	_strcmp
-	add	sp, 8
+	STRCMP
 	or	ax, ax
 	jz	short l_returnValue
 	inc	[bp+counter]
@@ -35,8 +32,7 @@ l_loopEntry:
 l_returnValue:
 	mov	ax, [bp+counter]
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 roster_nameExists endp
 

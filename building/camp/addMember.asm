@@ -6,14 +6,12 @@ camp_addMember proc far
 	var_156= word ptr -156h
 	savedList= dword	ptr -154h
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 15Ch
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(15Ch)
 	push	si
-	call	clearTextWindow
-	push	cs
-	call	near ptr countSavedChars
+
+	CALL(clearTextwindow)
+	NEAR_CALL(roster_countCharacters)
 	or	ax, ax
 	jz	l_noSavedCharacters
 	mov	[bp+var_15A], 0
@@ -68,14 +66,9 @@ l_savedListComplete:
 
 l_ioLoopEnter:
 	push	[bp+var_15C]
-	lea	ax, [bp+savedList]
-	push	ss
-	push	ax
-	mov	ax, offset aWhoShallJoin?
-	push	ds
-	push	ax
-	call	text_scrollingWindow
-	add	sp, 0Ah
+	PUSH_STACK_ADDRESS(savedList)
+	PUSH_OFFSET(s_whoJoins)
+	CALL(text_scrollingWindow, 0Ah)
 	mov	[bp+var_15A], ax
 	or	ax, ax
 	jl	l_return
@@ -83,9 +76,7 @@ l_ioLoopEnter:
 	cmp	[bp+var_15A], ax
 	jge	short l_addCharacter
 	push	[bp+var_15A]
-	push	cs
-	call	near ptr camp_insertParty
-	add	sp, 2
+	NEAR_CALL(camp_insertParty, 2)
 	jmp	l_return
 l_addCharacter:
 	mov	si, [bp+var_15A]
@@ -93,7 +84,7 @@ l_addCharacter:
 	shl	si, 1
 	push	word ptr [bp+si+savedList+2]
 	push	word ptr [bp+si+savedList]
-	near_call	party_nameExists, 4
+	NEAR_CALL(party_nameExists, 4)
 	or	ax, ax
 	jl	short l_loopContinue
 	mov	si, [bp+var_15A]
@@ -101,14 +92,10 @@ l_addCharacter:
 	shl	si, 1
 	push	word ptr [bp+si+savedList+2]
 	push	word ptr [bp+si+savedList]
-	call	printStringWClear
-	add	sp, 4
-	mov	ax, offset aIsAlreadyInThe
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	wait4IO
+	PRINTSTRING(true)
+	PUSH_OFFSET(s_alreadyInParty)
+	PRINTSTRING
+	IOWAIT
 	mov	[bp+var_158], 1
 	jmp	short l_loopComparison
 l_loopContinue:
@@ -116,42 +103,34 @@ l_loopContinue:
 l_loopComparison:
 	cmp	[bp+var_158], 0
 	jnz	l_ioLoopEnter
-	push	cs
-	call	near ptr findEmptyRosterNum
+	NEAR_CALL(party_findEmptySlot)
 	mov	[bp+var_158], ax
 	cmp	ax, 7
 	jge	short l_shortReturnLabel
-	getCharP [bp+var_158], bx
+	CHARINDEX(ax, STACKVAR(var_158), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	mov	ax, [bp+var_15A]
 	sub	ax, [bp+var_156]
-	getCharIndex	cx, cx
+	CHARINDEX(cx, cx)
 	mov	bx, ax
 	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	push	cs
-	call	near ptr copyCharacterBuf
-	add	sp, 8
-	push	cs
-	call	near ptr rost_insertMember
+	NEAR_CALL(copyCharacterBuf, 8)
+	NEAR_CALL(party_addCharacter)
 	mov	byte ptr word_44166,	0
 l_shortReturnLabel:
 	jmp	short l_return
 l_noSavedCharacters:
-	mov	ax, offset aThereAreNoChar
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
-	wait4IO
+	PUSH_OFFSET(s_noCharsOnDisk)
+	PRINTSTRING
+	IOWAIT
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_addMember endp

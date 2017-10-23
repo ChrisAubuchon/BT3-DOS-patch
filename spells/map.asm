@@ -6,10 +6,9 @@ spGeo_removeTrap proc far
 	row= word ptr  6
 	column=	word ptr  8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(4)
+
 	mov	bx, [bp+row]
 	shl	bx, 1
 	shl	bx, 1
@@ -26,8 +25,8 @@ spGeo_removeTrap proc far
 	mov	word ptr [bp+squareP+2], dx
 	lfs	bx, [bp+squareP]
 	and	byte ptr fs:[bx], 0EFh
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 spGeo_removeTrap endp
 
@@ -39,10 +38,9 @@ dun_maskSquare proc far
 	_byte=	word ptr 0Ah
 	_mask=  byte ptr 0Ch
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(4)
+
 	mov	bx, [bp+row]
 	shl	bx, 1
 	shl	bx, 1
@@ -60,8 +58,8 @@ dun_maskSquare proc far
 	mov	al, [bp+_mask]
 	lfs	bx, [bp+squareP]
 	and	byte ptr fs:[bx], al
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 dun_maskSquare endp
 
@@ -73,10 +71,9 @@ spGeo_revealSquare proc far
 	row= word ptr  6
 	column=	word ptr  8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(4)
+
 	mov	bx, [bp+row]
 	shl	bx, 1
 	shl	bx, 1
@@ -93,8 +90,8 @@ spGeo_revealSquare proc far
 	mov	word ptr [bp+squareP+2], dx
 	lfs	bx, [bp+squareP]
 	or	byte ptr fs:[bx], 1
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 spGeo_revealSquare endp
 
@@ -106,10 +103,9 @@ dun_revealSpSquare proc	far
 	column=	word ptr  8
 	geoSpMaskIndex= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(4)
+
 	push	si
 	mov	bx, [bp+row]
 	shl	bx, 1
@@ -143,8 +139,8 @@ l_nextSquare:
 	and	byte ptr fs:[bx+4], 0FBh
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 dun_revealSpSquare endp
 
@@ -158,10 +154,9 @@ sp_geomancerSpell proc far
 	column=	word ptr -2
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 8
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(8)
+
 	cmp	inDungeonMaybe, 0
 	jz	short l_return
 	mov	bx, [bp+spellIndexNumber]
@@ -199,9 +194,9 @@ loc_223F4:
 	jmp	short loc_223F1
 loc_2241C:
 	jmp	short loc_223D8
+
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_geomancerSpell endp
 

@@ -4,10 +4,8 @@ sp_antiMagic proc far
 
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
 	add	gs:antiMagicFlag, al

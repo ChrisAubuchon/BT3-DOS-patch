@@ -2,41 +2,25 @@
 
 camp_saveAndExit proc far
 
-	var_2= word ptr	-2
-
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	mov	ax, offset aPressReturnToS
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	push	cs
-	call	near ptr roster_writeParty
+	FUNC_ENTER
+	CHKSTK()
+	PUSH_OFFSET(s_saveAndExit)
+	PRINTSTRING(true)
+	NEAR_CALL(roster_writeParty)
 	sub	ax, ax
 	push	ax
-	call	getKey
-	add	sp, 2
-	mov	[bp+var_2], ax
+	GETKEY
 	cmp	ax, 0Dh
 	jnz	short loc_13412
 	mov	buildingRvalMaybe, 0FFh
-	push	cs
-	call	near ptr countSavedChars
+	NEAR_CALL(roster_countCharacters)
 	push	ax
-	push	cs
-	call	near ptr saveCharsInf
-	add	sp, 2
-	push	cs
-	call	near ptr roster_countParties
+	NEAR_CALL(writeCharacterFile, 2)
+	NEAR_CALL(roster_countParties)
 	push	ax
-	push	cs
-	call	near ptr savePartiesInf
-	add	sp, 2
+	NEAR_CALL(writePartyFile, 2)
 loc_13412:
-	call	clearTextWindow
+	CALL(clearTextWindow)
 	mov	sp, bp
 	pop	bp
 	retf

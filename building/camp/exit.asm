@@ -2,34 +2,23 @@
 
 camp_exit	proc far
 
-	var_2= word ptr	-2
+	FUNC_ENTER
+	CHKSTK
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	push	cs
-	call	near ptr roster_writeParty
-	push	cs
-	call	near ptr countSavedChars
-	mov	[bp+var_2], ax
+	NEAR_CALL(roster_writeParty)
+	NEAR_CALL(roster_countCharacters)
 	push	ax
-	push	cs
-	call	near ptr saveCharsInf
-	add	sp, 2
-	push	cs
-	call	near ptr roster_countParties
-	mov	[bp+var_2], ax
+	NEAR_CALL(writeCharacterFile, 2)
+	NEAR_CALL(roster_countParties)
 	push	ax
-	push	cs
-	call	near ptr savePartiesInf
-	add	sp, 2
-	mov	byte_4EEBA, 6
+	NEAR_CALL(writePartyFile, 2)
+
+	mov	g_currentHour, 6
 	sub	al, al
 	mov	levelNoMaybe, al
 	mov	gs:isNight, al
 	mov	buildingRvalMaybe, 2
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 camp_exit	endp

@@ -1,5 +1,7 @@
 ; Attributes: bp-based frame
 
+; DWORD var_104 & var_106
+
 sp_earthMaw proc far
 
 	loopCounter= word ptr -108h
@@ -8,35 +10,33 @@ sp_earthMaw proc far
 	var_102= word ptr -102h
 	var_100= word ptr -100h
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 108h
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(108h)
 	push	si
 
-	push_ds_String	aAndTheEarthSwa
-	push_ss_string	var_100
-	std_call	_strcat, 8
+	PUSH_OFFSET(s_earthSwallows)
+	PUSH_STACK_ADDRESS(var_100)
+	STRCAT
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
 
 	cmp	gs:bat_curTarget, 80h
 	jnb	short l_monTarget
 
-	; Kill all part members
+	; Kill all party members
 	mov	[bp+loopCounter], 0
 l_partyLoopEnter:
-	getCharP	[bp+loopCounter], si
-	or	gs:roster.status[si], stat_dead
-	mov	gs:roster.currentHP[si], 0
+	CHARINDEX(ax, STACKVAR(loopCounter), si)
+	or	gs:party.status[si], stat_dead
+	mov	gs:party.currentHP[si], 0
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 7
 	jl	short l_partyLoopEnter
 
-	call	endNoncombatSong
-	push_ds_string	aTheParty
-	push_ss_string	var_100
-	std_call	_strcat,8
+	CALL(endNoncombatSong)
+	PUSH_OFFSET(s_theParty)
+	PUSH_STACK_ADDRESS(var_100)
+	STRCAT
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
 	jmp	l_return
@@ -46,9 +46,7 @@ l_monTarget:
 	sub	ah, ah
 	mov	si, ax
 	and	ax, 3
-	mov	cx, monStruSize
-	mul	cx
-	mov	bx, ax
+	MONINDEX(cx, cx, bx)
 	mov	al, gs:monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Eh
@@ -57,14 +55,14 @@ l_monTarget:
 	push	si
 	push	[bp+var_104]
 	push	[bp+var_106]
-	near_call	strcatTargetName,8
+	NEAR_CALL(strcatTargetName,8)
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	and	ax, 3
 	mov	[bp+var_102], ax
-	getMonP	[bp+var_102], bx
+	MONINDEX(ax, STACKVAR(var_102), bx)
 	and	gs:monGroups.groupSize[bx], 0E0h
 	mov	[bp+loopCounter], 0
 l_monLoopEnter:
@@ -80,11 +78,8 @@ l_monLoopEnter:
 	cmp	[bp+loopCounter], 32
 	jl	short l_monLoopEnter
 l_return:
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_STACK_ADDRESS(var_100)
+	PRINTSTRING
 	pop	si
 	mov	sp, bp
 	pop	bp

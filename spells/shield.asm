@@ -5,10 +5,9 @@ sp_shieldSpell proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
+
 	cmp	[bp+spellCaster], 80h
 	jl	short l_partyCaster
 	mov	bx, [bp+spellIndexNumber]
@@ -25,11 +24,9 @@ l_partyCaster:
 	mov	shieldAcBonus, al
 	mov	ax, icon_shield
 	push	ax
-	call	icon_activate
-	add	sp, 2
+	CALL(icon_activate, 2)
 	mov	byte ptr word_44166,	0
 loc_215BE:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_shieldSpell endp

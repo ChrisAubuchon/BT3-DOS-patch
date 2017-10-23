@@ -6,10 +6,9 @@ sp_trapZap proc	far
 	_sq_north= word	ptr -6
 	dungeonSquareP= dword ptr -4
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 0Ah
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(0Ah)
+
 	mov	ax, sq_north
 	mov	[bp+_sq_north],	ax
 	mov	ax, sq_east
@@ -26,7 +25,7 @@ l_loop:
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
-	std_call	wrapNumber, 4
+	CALL(wrapNumber, 4)
 	mov	[bp+_sq_north],	ax
 	mov	al, g_dunWidth
 	sub	ah, ah
@@ -36,7 +35,7 @@ l_loop:
 	mov	ax, dirDeltaE[bx]
 	add	ax, [bp+_sq_east]
 	push	ax
-	std_call	wrapNumber, 4
+	CALL(wrapNumber, 4)
 	mov	[bp+_sq_east], ax
 	mov	bx, [bp+_sq_north]
 	shl	bx, 1
@@ -58,7 +57,6 @@ l_loop:
 	cmp	[bp+loopCounter], 0
 	jg	l_loop
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_trapZap endp

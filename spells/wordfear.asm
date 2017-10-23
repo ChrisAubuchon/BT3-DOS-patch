@@ -5,14 +5,12 @@ sp_wordOfFear proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 	push	si
 
 	push	[bp+spellCaster]
-	near_call	spellSavingThrowHelper,2
+	NEAR_CALL(spellSavingThrowHelper,2)
 	or	ax, ax
 	jz	short l_return
 	cmp	[bp+spellCaster], 80h
@@ -37,8 +35,7 @@ l_monCaster:
 	add	gs:byte_42567, al
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_wordOfFear endp
 

@@ -10,10 +10,9 @@ printListItem proc far
 	arg_2= word ptr	 8
 	arg_4= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2Ch	
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2Ch)
+
 	lea	ax, [bp+stringBuf]
 	mov	word ptr [bp+stringBufP], ax
 	mov	word ptr [bp+stringBufP+2], ss
@@ -29,13 +28,9 @@ printListItem proc far
 	push	[bp+arg_2]
 	push	word ptr [bp+stringBufP+2]
 	push	word ptr [bp+stringBufP]
-	call	_strcat
-	add	sp, 8
-	lea	ax, [bp+stringBuf]
-	push	ss
-	push	ax
-	call	printString
-	add	sp, 4
+	STRCAT
+	PUSH_STACK_ADDRESS(stringBuf)
+	PRINTSTRING
 	mov	sp, bp
 	pop	bp
 	retf

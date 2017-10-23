@@ -8,12 +8,11 @@ sp_farFoes proc	far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 5Ah	
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(5Ah)
+
 	push	[bp+spellCaster]
-	near_call	spellSavingThrowHelper,2
+	NEAR_CALL(spellSavingThrowHelper,2)
 	or	ax, ax
 	jz	l_return
 	test	byte ptr [bp+spellCaster], 80h
@@ -21,7 +20,7 @@ sp_farFoes proc	far
 
 	mov	[bp+loopCounter], 0
 l_loopEnter:
-	getMonP	[bp+loopCounter], bx
+	MONINDEX(ax, STACKVAR(loopCounter), bx)
 	mov	al, gs:monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
@@ -36,7 +35,7 @@ l_loopEnter:
 l_notTooFar:
 	push	[bp+newDistance]
 	push	[bp+loopCounter]
-	near_call	_sp_setMonDistance,4
+	NEAR_CALL(_sp_setMonDistance,4)
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 4
 	jl	short l_loopEnter
@@ -46,7 +45,7 @@ l_monCaster:
 	sub	ah, ah
 	and	ax, 3
 	mov	[bp+loopCounter], ax
-	getMonP	[bp+loopCounter], bx
+	MONINDEX(ax, STACKVAR(loopCounter), bx)
 	mov	al, gs:monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
@@ -61,28 +60,21 @@ l_monCaster:
 l_partyNotTooFar:
 	push	[bp+newDistance]
 	push	[bp+loopCounter]
-	near_call	_sp_setMonDistance,4
+	NEAR_CALL(_sp_setMonDistance,4)
 l_outputString:
-	strcat_offset aAndTheFoesAre, stringBufP
-	mov	ax, offset aAndTheFoesAre
-	push	ds
-	push	ax
-	lea	ax, [bp+stringBuf]
-	push	ss
-	push	ax
-	do_strcat stringBufP
-	mov	ax, offset aFartherAway
-	push	ds
-	push	ax
+	PUSH_OFFSET(s_andTheFoesAre)
+	PUSH_STACK_ADDRESS(stringBuf)
+	STRCAT(stringBufP)
+
+	PUSH_OFFSET(s_fartherAway)
 	push	dx
 	push	word ptr [bp+stringBufP]
-	do_strcat stringBufP
-	lea	ax, [bp+stringBuf]
-	push	ss
-	push	ax
-	func_printString
+	STRCAT(stringBufP)
+
+	PUSH_STACK_ADDRESS(stringBuf)
+	PRINTSTRING
 l_return:
-	delayWithTable
+	DELAY
 	mov	sp, bp
 	pop	bp
 	retf
@@ -94,12 +86,11 @@ _sp_setMonDistance proc	far
 	monsterGroupIndex= word ptr	 6
 	newDistance= byte ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 	push	si
-	getMonP	[bp+monsterGroupIndex], si
+
+	MONINDEX(ax, STACKVAR(monsterGroupIndex), si)
 	cmp	byte ptr gs:monGroups._name[si], 0
 	jz	short l_return
 	mov	al, gs:monGroups.distance[si]

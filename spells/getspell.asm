@@ -14,13 +14,12 @@ getSpellNumber proc far
 	var_100= word ptr -100h
 	partySlotNumber= word ptr	 6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 306h
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(306h)
 	push	si
-	getCharP	[bp+partySlotNumber], bx
-	test	gs:roster.status[bx], stat_dead	or stat_stoned or stat_paralyzed
+
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
+	test	gs:party.status[bx], stat_dead	or stat_stoned or stat_paralyzed
 	jnz	l_returnFailed
 
 	mov	al, spell_mouseClicked
@@ -29,7 +28,7 @@ getSpellNumber proc far
 	jnz	loc_mouse_spell_select
 
 	push	[bp+partySlotNumber]
-	std_call	txt_castSpell,2
+	CALL(text_castSpell,2)
 	cmp	ax, 0FFFFh
 	jz	l_return
 	jmp	l_spellFound
@@ -45,8 +44,8 @@ loc_1FDC6:
 	jge	short loc_1FE1A
 	push	[bp+var_104]
 	push	[bp+partySlotNumber]
-	call	mage_hasLearnedSpell
-	add	sp, 4
+	CALL(mage_hasLearnedSpell, 4)
+
 	or	ax, ax
 	jz	short loc_1FE18
 	mov	si, [bp+var_106]
@@ -73,21 +72,16 @@ loc_1FE1A:
 	lea	ax, [bp+var_306]
 	push	ss
 	push	ax
-	mov	ax, offset aSpellToCast
+	mov	ax, offset s_spellToCast
 	push	ds
 	push	ax
-	call	text_scrollingWindow
-	add	sp, 0Ah
+	CALL(text_scrollingWindow, 0Ah)
 	mov	[bp+var_102], ax
 	jmp	short loc_1FE5F
 loc_1FE3E:
-	mov	ax, offset aYouDonTKnowAny
-	mov	dx, seg	dseg
-	push	dx
-	push	ax
-	call	printString
-	add	sp, 4
-	wait4IO
+	PUSH_OFFSET(s_dontKnowAnySpells)
+	PRINTSTRING
+	IOWAIT
 	jmp	short l_returnFailed
 loc_1FE5F:
 	cmp	[bp+var_102], 0
@@ -100,15 +94,15 @@ l_spellFound:
 	mov	g_curSpellNumber, ax
 	push	ax
 	push	[bp+partySlotNumber]
-	near_call	getSpptRequired,4
+	NEAR_CALL(getSpptRequired,4)
 	mov	cx, ax
-	getCharP	[bp+partySlotNumber], bx
-	cmp	gs:roster.currentSppt[bx], cx
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
+	cmp	gs:party.currentSppt[bx], cx
 	jnb	short l_enoughSppt
 
-	push_ds_string	aNotEnoughSpellPoint
-	std_call	printStringWClear,4
-	wait4IO
+	PUSH_OFFSET(s_notEnoughSppt)
+	PRINTSTRING(true)
+	IOWAIT
 	jmp	short l_returnFailed
 
 l_enoughSppt:
