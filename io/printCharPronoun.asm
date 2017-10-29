@@ -37,7 +37,7 @@ printCharPronoun proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(decryptName, 8)
+	CALL(unmaskString, 8)
 	sub	ax, ax
 	push	ax
 	push	[bp+arg_2]

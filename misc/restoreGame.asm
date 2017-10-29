@@ -67,7 +67,7 @@ l_isDay:
 	sub	al, al
 l_setIsNight:
 	mov	gs:isNight, al
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 l_return:
 	mov	sp, bp
 	pop	bp

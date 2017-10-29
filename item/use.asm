@@ -4,7 +4,7 @@ useItem	proc far
 
 	var_FA=	word ptr -0F8h
 	targetSlotNumber=	word ptr -38h
-	var_34=	word ptr -34h
+	itemSlotNumber=	word ptr -34h
 	var_32=	word ptr -32h
 	userSlotNumber= word ptr	-2
 
@@ -39,11 +39,11 @@ loc_11D4B:
 	PUSH_OFFSET(s_whichItem)
 	CALL(text_scrollingWindow, 0Ah)
 
-	mov	[bp+var_34], ax
+	mov	[bp+itemSlotNumber], ax
 	or	ax, ax
 	jl	l_return
 
-	push	[bp+var_34]
+	push	[bp+itemSlotNumber]
 	push	[bp+userSlotNumber]
 	CALL(item_canBeUsed, 4)
 	or	ax, ax
@@ -54,7 +54,7 @@ loc_11D4B:
 	and	ax, 7
 	mov	[bp+targetSlotNumber], ax
 	cmp	ax, 4
-	jge	short l_getTarget
+	jge	short l_doUse
 	PUSH_OFFSET(s_UseOn)
 	push	[bp+targetSlotNumber]
 	CALL(getTarget, 6)
@@ -62,15 +62,15 @@ loc_11D4B:
 	or	ax, ax
 	jl	short l_return
 
-l_getTarget:
+l_doUse:
 	CALL(clearTextWindow)
 	sub	ax, ax
 	push	ax
 	push	g_curSpellNumber
 	push	[bp+targetSlotNumber]
-	push	[bp+var_34]
+	push	[bp+itemSlotNumber]
 	push	[bp+userSlotNumber]
-	NEAR_CALL(sub_11E07, 0Ah)
+	NEAR_CALL(item_doSpell, 0Ah)
 	jmp	short l_waitAndReturn
 
 l_powerless:

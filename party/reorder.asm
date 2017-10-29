@@ -46,7 +46,7 @@ l_newOrderIoEntry:
 	add	al, '1'
 	mov	byte_42AF5, al
 	PUSH_OFFSET(s_gtChar)
-	CALL(sub_16560, 4)
+	CALL(text_nlWriteString, 4)
 
 l_retryReadSlot:
 	CALL(readSlotNumber)
@@ -75,7 +75,7 @@ l_retryReadSlot:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(sub_16595, 4)
+	CALL(text_writeString, 4)
 	inc	[bp+loopCounter]
 	mov	ax, [bp+emptySlot]
 	dec	ax
@@ -100,13 +100,13 @@ loc_119C9:
 	add	al, '0'
 	mov	byte_42AF5, al
 	PUSH_OFFSET(s_gtChar)
-	CALL(sub_16560, 4)
+	CALL(text_nlWriteString, 4)
 	CHARINDEX(ax, STACKVAR(var_14), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(sub_16595, 4)
+	CALL(text_writeString, 4)
 	PUSH_OFFSET(s_useThisOrder)
 	PRINTSTRING
 	CALL(getYesNo)
@@ -158,7 +158,7 @@ loc_11A6D:
 loc_11A7D:
 	jmp	short loc_11A24
 l_updateAndReturn:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 l_return:
 	pop	si
 	pop	di

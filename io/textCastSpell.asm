@@ -17,7 +17,7 @@ text_castSpell proc far
 
 	PUSH_IMM(4)
 	PUSH_STACK_ADDRESS(_instr)
-	CALL(_readString, 6)
+	CALL(readString, 6)
 
 	PUSH_STACK_ADDRESS(_instr)
 	CALL(_strlen, 4)

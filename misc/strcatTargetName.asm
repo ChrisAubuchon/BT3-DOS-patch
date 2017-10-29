@@ -30,7 +30,7 @@ l_monTarget:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(decryptName, 8)
+	CALL(unmaskString, 8)
 
 	cmp	[bp+targetCount], 0
 	jz	short l_monSingular

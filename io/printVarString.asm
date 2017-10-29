@@ -73,7 +73,7 @@ l_notNull:
 	lfs	si, [bp+validOptionCharacters]
 	mov	fs:[bx+si], al
 
-	cmp	gs:byte_42419, 0
+	cmp	gs:g_currentCharPosition, 0
 	jz	short l_noNewline
 	CALL(txt_newLine)
 l_noNewline:
