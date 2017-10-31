@@ -20,7 +20,7 @@ camp_saveAndExit proc far
 	push	ax
 	NEAR_CALL(writePartyFile, 2)
 loc_13412:
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	mov	sp, bp
 	pop	bp
 	retf

@@ -63,7 +63,7 @@ temple_getHealee proc far
 	mov	[bp+healCost], ax
 	jmp	l_getPayer
 l_noStatusAilment:
-	getCharP	[bp+healeeSlotNumber], si
+	CHARINDEX(ax, STACKVAR(healeeSlotNumber), si)
 	mov	ax, gs:party.maxHP[si]
 	sub	ax, gs:party.currentHP[si]
 	mov	[bp+deltaHP], ax

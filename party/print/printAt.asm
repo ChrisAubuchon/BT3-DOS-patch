@@ -2,7 +2,7 @@
 
 party_printAt proc far
 
-	inString= word ptr	 6
+	inString= dword ptr	 6
 	column= word ptr	 0Ah
 	slotNumber= word ptr	 0Ch
 	colorFlag= word ptr	 0Eh
@@ -24,7 +24,7 @@ party_printAt proc far
 	add	ax, 0Ch
 	push	ax
 	push	[bp+inString]
-	NEAR_CALL(sub_16F67, 0Ah)
+	NEAR_CALL(printAt, 0Ah)
 
 	FUNC_EXIT
 	retf

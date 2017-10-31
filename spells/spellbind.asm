@@ -58,7 +58,7 @@ l_monTarget:
 	push	ax
 	push	[bp+partySlotNumber]
 	NEAR_CALL(_sp_convertMonToSummon,6)
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_return
 l_printNoEffect:
 	push	[bp+spellIndexNumber]
@@ -103,7 +103,7 @@ _sp_convertMonToSummon proc far
 	push	ax
 	push	word ptr [bp+monBufferP+2]
 	push	word ptr [bp+monBufferP]
-	CALL(decryptName,8)
+	CALL(unmaskString,8)
 	sub	ax, ax
 	push	ax
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)

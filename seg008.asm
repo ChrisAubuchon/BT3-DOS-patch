@@ -17,14 +17,14 @@ bat_init proc far
 	mov	bp, sp
 	mov	ax, 8
 	call	someStackOperation
-	mov	al, gs:byte_4266B
+	mov	al, gs:g_currentSongPlusOne
 	mov	gs:bat_curSong,	al
-	mov	al, gs:byte_42420
+	mov	al, gs:g_currentSong
 	sub	ah, ah
 	mov	[bp+var_2], ax
-	mov	al, gs:byte_41E62
+	mov	al, gs:g_currentSinger
 	mov	[bp+var_6], ax
-	call	sub_22DA1
+	call	endNoncombatSong
 	push	cs
 	call	near ptr bat_getOpponents
 	mov	[bp+var_8], 0
@@ -82,8 +82,8 @@ loc_1B1AF:
 	add	sp, 2
 	push	cs
 	call	near ptr bat_endCombatSong
-	mov	byte ptr word_44166,	0
-	call	rost_getLastActiveSlot
+	mov	byte ptr g_printPartyFlag,	0
+	call	party_getLastSlot
 	cmp	ax, 7
 	jle	short loc_1B215
 partyDied:
@@ -200,12 +200,12 @@ loc_1B2DE:
 	call	near ptr bat_doMonAttack
 	add	sp, 4
 loc_1B2EB:
-	cmp	gs:byte_42419, 0
+	cmp	gs:g_currentCharPosition, 0
 	jz	short loc_1B2FC
 	call	txt_newLine
 loc_1B2FC:
 	call	txt_newLine
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	loc_1B2A4
 
 loc_doCombatRoundExit:
@@ -227,17 +227,17 @@ bat_doCharAttack proc far
 	mov	bx, [bp+charNo]
 	mov	gs:bat_charPriority[bx], 0
 	getCharP	[bp+charNo], bx
-	cmp	byte ptr gs:roster._name[bx], 0
+	cmp	byte ptr gs:party._name[bx], 0
 	jnz	short loc_1B343
 	jmp	loc_1B3FA
 loc_1B343:
 	getCharP	[bp+charNo], bx
-	test	gs:roster.status[bx], stat_dead	or stat_stoned or stat_paralyzed
+	test	gs:party.status[bx], stat_dead	or stat_stoned or stat_paralyzed
 	jz	short loc_1B356
 	jmp	loc_1B3FA
 loc_1B356:
 	getCharP	[bp+charNo], bx
-	cmp	gs:roster.class[bx], class_monster
+	cmp	gs:party.class[bx], class_monster
 	jb	short loc_1B373
 	push	[bp+charNo]
 	push	cs
@@ -646,7 +646,7 @@ loc_1B6B5:
 	mov	[bp+var_104], ax
 	mov	[bp+var_102], dx
 
-	null_terminate [bp+var_104]
+	NULL_TERMINATE(STACKVAR(var_104))
 
 	mov	al, [bp+arg_4]
 	mov	[bp+var_10A], al
@@ -713,7 +713,7 @@ bat_doMonMelee proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	decryptName
+	call	unmaskString
 	add	sp, 8
 	lea	ax, [bp+var_100]
 	mov	word ptr [bp+var_106], ax
@@ -759,7 +759,7 @@ loc_1B7E7:
 	jmp	short loc_1B818
 loc_1B7F5:
 	mov	[bp+var_11A], 1
-	mov	ax, offset aThe
+	mov	ax, offset s_the
 	push	ds
 	push	ax
 	push	word ptr [bp+var_106+2]
@@ -946,7 +946,9 @@ loc_1B9C4:
 	mov	word ptr [bp+var_106+2], dx
 	jmp	loc_1BA3B
 loc_1BA2F:
-	strcat_offset	aPeriodBlankLine, var_106
+	PUSH_OFFSET(s_period)
+	PUSH_STACK_PTR(var_106)
+	STRCAT(var_106)
 loc_1BA3B:
 	lfs	bx, [bp+var_106]
 	inc	word ptr [bp+var_106]
@@ -956,7 +958,7 @@ loc_1BA3B:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	delayWithTable
 	pop	si
 	mov	sp, bp
@@ -984,7 +986,7 @@ bat_getMonAttackerName proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	decryptName
+	call	unmaskString
 	add	sp, 8
 	lfs	bx, [bp+arg_0]
 	inc	word ptr [bp+arg_0]
@@ -1092,10 +1094,10 @@ bat_monHitChar proc far
 	jmp	loc_1BC04
 loc_1BB70:
 	getCharP	bx, bx
-	mov	al, gs:roster.ac[bx]
+	mov	al, gs:party.ac[bx]
 	cbw
 	mov	bx, [bp+monNo]
-	mov	cl, gs:byte_4229C[bx]
+	mov	cl, gs:monSpellToHitPenalty[bx]
 	sub	ch, ch
 	add	ax, cx
 	mov	[bp+var_2], ax
@@ -1113,7 +1115,7 @@ loc_1BB9E:
 	call	near ptr randomBetweenXandY
 	add	sp, 4
 	mov	bx, [bp+monNo]
-	mov	cl, gs:byte_42422[bx]
+	mov	cl, gs:monAttackBonus[bx]
 	sub	ch, ch
 	add	cx, ax
 	mov	[bp+var_4], cx
@@ -1133,7 +1135,7 @@ loc_1BBDC:
 	call	near ptr dice_doYDX
 	add	sp, 2
 	mov	bx, [bp+monNo]
-	mov	cl, gs:byte_42422[bx]
+	mov	cl, gs:monAttackBonus[bx]
 	sub	ch, ch
 	add	cx, ax
 	mov	gs:damageAmount, cx
@@ -1162,13 +1164,13 @@ bat_charCanBeAttacked proc far
 	jmp	short loc_1BC85
 loc_1BC1D:
 	getCharP	[bp+arg_0], bx
-	cmp	byte ptr gs:roster._name[bx], 0
+	cmp	byte ptr gs:party._name[bx], 0
 	jnz	short loc_1BC35
 	sub	ax, ax
 	jmp	short loc_1BC85
 loc_1BC35:
 	getCharP	[bp+arg_0], bx
-	cmp	gs:roster.class[bx], class_illusion
+	cmp	gs:party.class[bx], class_illusion
 	jnz	short loc_1BC55
 	cmp	gs:monDisbelieveFlag, 0
 	jnz	short loc_1BC55
@@ -1182,7 +1184,7 @@ loc_1BC55:
 	jmp	short loc_1BC85
 loc_1BC68:
 	getCharP	bx, bx
-	mov	al, gs:roster.status[bx]
+	mov	al, gs:party.status[bx]
 	and	al, 0Ch
 	mov	cx, ax
 	cmp	cl, 1
@@ -1212,7 +1214,7 @@ bat_doSummonAttack proc	far
 	push	si
 
 	getCharIndex	ax, [bp+charNo]
-	add	ax, offset roster
+	add	ax, offset party
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], seg seg027
 	lfs	bx, [bp+var_4]
@@ -1301,11 +1303,11 @@ bat_summonCastSpell proc far
 	mov	ax, 6
 	call	someStackOperation
 	getCharIndex	ax, [bp+charNo]
-	add	ax, offset roster
+	add	ax, offset party
 	mov	word ptr [bp+charP], ax
 	mov	word ptr [bp+charP+2], seg seg027
 	mov	bx, [bp+spellNo]
-	test	byte_47F94[bx], 20h
+	test	spellCastFlags[bx], 20h
 	jz	short loc_1BD90
 	mov	ax, 7
 	push	ax
@@ -1368,7 +1370,7 @@ bat_summonMeleeAttack proc far
 	jmp	short loc_1BE3F
 loc_1BDEE:
 	getCharIndex	ax, [bp+arg_0]
-	add	ax, offset roster
+	add	ax, offset party
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], seg seg027
 	lfs	bx, [bp+var_4]
@@ -1434,7 +1436,7 @@ bat_summonBreathAttack proc far
 	mov	[bp+var_102], dx
 
 	getCharIndex	ax, [bp+charNo]
-	add	ax, offset roster
+	add	ax, offset party
 	mov	word ptr [bp+charP], ax
 	mov	word ptr [bp+charP+2], seg seg027
 	lfs	bx, [bp+charP]
@@ -1485,7 +1487,7 @@ loc_1BEAA:
 	mov	[bp+var_102], dx
 
 	; NULL terminate the string
-	null_terminate	[bp+var_104]
+	NULL_TERMINATE(STACKVAR(var_104))
 
 	lea	ax, [bp+var_100]
 	push	ss
@@ -1541,13 +1543,13 @@ bat_doCharMeleeAttack proc far
 	jge	short loc_1BF22
 
 	getCharP	[bp+arg_2], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jnz	short loc_1BF0D
-	mov	gs:roster.hostileFlag[si], 1
+	mov	gs:party.hostileFlag[si], 1
 
 loc_1BF0D:
 	getCharP	[bp+arg_2], bx
-	test	gs:roster.status[bx], stat_dead	or stat_stoned
+	test	gs:party.status[bx], stat_dead	or stat_stoned
 	jz	short loc_1BF20
 	jmp	loc_1C0F0
 
@@ -1565,15 +1567,15 @@ loc_1BF22:
 
 loc_1BF3E:
 	getCharP	[bp+arg_0], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	lea	ax, [bp+var_106]
 	push	ss
 	push	ax
-	do_strcat	var_10C
-	dword_appendChar	var_10C, ' '
+	STRCAT(var_10C)
+	APPEND_CHAR(STACKVAR(var_10C), ' ')
 
 	push_imm	1
 	push	[bp+arg_0]
@@ -1586,9 +1588,9 @@ loc_1BF3E:
 	jmp	short loc_1BFBF
 loc_1BF8B:
 	getCharP	[bp+arg_0], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jb	short loc_1BFBA
-	add	ax, offset roster
+	add	ax, offset party
 
 	save_ptr_stack	seg seg027, ax, var_4
 	lfs	bx, [bp+var_4]
@@ -1608,17 +1610,17 @@ loc_1BFBF:
 	shl	bx, 1
 	push_ptr_stringList	monMeleeAttString, bx
 	push_ptr_stack		var_10C
-	do_strcat	var_10C
-	dword_appendChar	var_10C, ' '
+	STRCAT(var_10C)
+	APPEND_CHAR(STACKVAR(var_10C), ' ')
 
 	push	[bp+arg_2]
 	push_ptr_stack	var_10C
-	far_call	bat_getAttackerName, 6
+	near_call	bat_getAttackerName, 6
 	save_ptr_stack	dx,ax,var_10C
 
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	far_call	bat_getCharDamage, 4
+	near_call	bat_getCharDamage, 4
 	mov	[bp+var_108], ax
 	or	ax, ax
 	jnz	short loc_1C04B
@@ -1632,16 +1634,16 @@ loc_1BFBF:
 loc_1C04B:
 	push	[bp+var_108]
 	push_ptr_stack	var_10C
-	far_call	bat_printHitDamage, 6
+	near_call	bat_printHitDamage, 6
 	save_ptr_stack	dx,ax,var_10C
 
 	push_var_stack	arg_2
-	far_call	bat_doHPDamage, 2
+	near_call	bat_doHPDamage, 2
 	or	ax, ax
 	jz	short loc_1C0A7
 
 	push_ptr_stack	var_10C
-	far_call	bat_getKillString,4
+	near_call	bat_getKillString,4
 	save_ptr_stack	dx,ax,var_10C
 
 	push_imm	1
@@ -1654,10 +1656,12 @@ loc_1C04B:
 	jmp	short loc_1C0B3
 
 loc_1C0A7:
-	strcat_offset	aPeriodBlankLine, var_10C
+	PUSH_OFFSET(s_period)
+	PUSH_STACK_PTR(var_10C)
+	STRCAT(var_10C)
 
 loc_1C0B3:
-	dword_appendChar	var_10C, 0
+	APPEND_CHAR(STACKVAR(var_10C), 0)
 	mov	byte ptr fs:[bx], 0
 	lea	ax, [bp+var_106]
 	push	ss
@@ -1666,7 +1670,7 @@ loc_1C0B3:
 
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42280[bx], 0
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 
 	delayWithTable
 loc_1C0F0:
@@ -1689,17 +1693,17 @@ bat_getAttackerName proc far
 	cmp	[bp+arg_4], 80h
 	jge	short loc_1C12E
 	getCharP	[bp+arg_4], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push_reg	dx
 	push_reg	ax
 	push_ptr_stack	arg_0
-	do_strcat	arg_0
+	STRCAT(arg_0)
 
 	jmp	short loc_1C19A
 loc_1C12E:
 	and	[bp+arg_4], 3
-	dword_appendChar	arg_0, 'a'
+	APPEND_CHAR(STACKVAR(arg_0), 'a')
 	lea	ax, [bp+var_10]
 	push_reg	ss
 	push_reg	ax
@@ -1708,16 +1712,16 @@ loc_1C12E:
 	mov	dx, seg	seg027
 	push_reg	dx
 	push_reg	ax
-	std_call	decryptName, 8
+	std_call	unmaskString, 8
 	mov	al, byte ptr [bp+var_10]
 	cbw
 	push_reg	ax
-	far_call	str_startsWithVowel, 2
+	near_call	str_startsWithVowel, 2
 	or	ax, ax
 	jz	short loc_1C174
-	dword_appendChar	arg_0, 'n'
+	APPEND_CHAR(STACKVAR(arg_0), 'n')
 loc_1C174:
-	dword_appendChar	arg_0, ' '
+	APPEND_CHAR(STACKVAR(arg_0), ' ')
 	sub	ax, ax
 	push	ax
 	push_ptr_stack	arg_0
@@ -1826,7 +1830,7 @@ bat_doCharUseItem proc far
 	mov	al, gs:byte_42334[bx]
 	push	ax
 	push	bx
-	call	sub_11E07
+	call	item_doSpell
 	add	sp, 0Ah
 	mov	sp, bp
 	pop	bp
@@ -1849,7 +1853,7 @@ bat_hideInShadows proc far
 	mov	ax, 108h
 	call	someStackOperation
 	getCharP	[bp+arg_0], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -1879,7 +1883,7 @@ bat_hideInShadows proc far
 	call	_random
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
-	cmp	gs:(roster.specAbil+2)[bx], cl
+	cmp	gs:(party.specAbil+2)[bx], cl
 	jbe	short loc_1C2F5
 loc_1C2DE:
 	mov	ax, offset aAndSucceeds
@@ -1927,7 +1931,7 @@ bat_doCharSong proc far
 	call	someStackOperation
 	mov	[bp+var_2], 0
 	getCharP	[bp+arg_0], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -1949,11 +1953,11 @@ bat_doCharSong proc far
 	jmp	short loc_1C3AA
 loc_1C384:
 	getCharP	[bp+arg_0], bx
-	cmp	gs:roster.specAbil[bx],	0
+	cmp	gs:party.specAbil[bx],	0
 	jz	short loc_1C3AA
 	mov	[bp+var_2], 1
 	getCharP	[bp+arg_0], bx
-	dec	gs:roster.specAbil[bx]
+	dec	gs:party.specAbil[bx]
 loc_1C3AA:
 	cmp	[bp+var_2], 0
 	jz	short loc_1C3F4
@@ -2032,7 +2036,7 @@ bat_charMeleeAttack proc far
 	xor	ax, ax
 	call	someStackOperation
 	getCharP	[bp+arg_0], bx
-	test	gs:roster.status[bx], stat_nuts
+	test	gs:party.status[bx], stat_nuts
 	jz	short loc_1C480
 	call	_random
 	test	al, 1
@@ -2040,7 +2044,7 @@ bat_charMeleeAttack proc far
 loc_1C480:
 	getCharIndex	ax, [bp+arg_0]
 	mov	bx, ax
-	cmp	gs:roster.hostileFlag[bx], 0
+	cmp	gs:party.hostileFlag[bx], 0
 	jz	short loc_1C4AD
 loc_1C494:
 	mov	ax, 7
@@ -2241,14 +2245,14 @@ loc_1C61B:
 	jmp	loc_1C707
 loc_1C624:
 	getCharP	[bp+var_C], bx
-	cmp	byte ptr gs:roster._name[bx], 0
+	cmp	byte ptr gs:party._name[bx], 0
 	jnz	short loc_1C63B
 	jmp	loc_1C707
 loc_1C63B:
 	getCharP	[bp+var_C], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jb	short loc_1C67B
-	add	ax, offset roster
+	add	ax, offset party
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], seg seg027
 	lfs	bx, [bp+var_4]
@@ -2271,15 +2275,15 @@ loc_1C67B:
 	jmp	short loc_1C704
 loc_1C696:
 	getCharP	[bp+var_C], si
-	mov	bl, gs:roster.class[si]
+	mov	bl, gs:party.class[si]
 	sub	bh, bh
 	mov	al, byte_475AE[bx]
 	mov	bx, [bp+var_C]
 	mov	gs:bat_charPriority[bx], al
 	call	rnd_2d16
-	mov	cx, gs:roster.level[si]
+	mov	cx, gs:party.level[si]
 	shr	cx, 1
-	mov	dl, gs:roster.dexterity[si]
+	mov	dl, gs:party.dexterity[si]
 	shl	dl, 1
 	add	cl, dl
 	add	cl, al
@@ -2368,13 +2372,13 @@ bat_getOpponents proc far
 	mov	gs:byte_422A4, 1
 	cmp	gs:bat_curSong,	0
 	jz	short loc_1C7D3
-	mov	al, gs:byte_42420
+	mov	al, gs:g_currentSong
 	sub	ah, ah
 	push	ax
 	mov	al, charSize
-	mul	gs:byte_41E62
+	mul	gs:g_currentSinger
 	mov	bx, ax
-	push	gs:roster.level[bx]
+	push	gs:party.level[bx]
 	push	cs
 	call	near ptr bat_convertSongToCombat
 	add	sp, 4
@@ -2908,7 +2912,7 @@ bat_printOpponentGroup proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	decryptName
+	call	unmaskString
 	add	sp, 8
 	mov	ax, [bp+var_16]
 	dec	ax
@@ -2988,7 +2992,7 @@ bat_setBigpic proc far
 	jnz	short loc_1CDC3
 	mov	ax, 21h	
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 	mov	ax, offset aParty
 	push	ds
@@ -3004,7 +3008,7 @@ loc_1CDC3:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	decryptName
+	call	unmaskString
 	add	sp, 8
 	mov	ax, [bp+var_26]
 	dec	ax
@@ -3029,7 +3033,7 @@ loc_1CDC3:
 	mov	al, gs:monGroups.picIndex
 	sub	ah, ah
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 loc_1CE1C:
 	mov	sp, bp
@@ -3131,8 +3135,8 @@ loc_1CEDA:
 	retf
 bat_convertSongToCombat	endp
 
-include battle\dosong.asm
-include battle\endsong.asm
+include(`battle/dosong.asm')
+include(`battle/endsong.asm')
 
 ; Attributes: bp-based frame
 
@@ -3179,13 +3183,13 @@ loc_1D0B8:
 	add	sp, 8
 	sub	al, al
 	mov	bx, [bp+counter]
-	mov	gs:byte_42270[bx], al
+	mov	gs:g_monFreezeAcPenalty[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:byte_41E50[bx], al
 	mov	bx, [bp+counter]
-	mov	gs:byte_4229C[bx], al
+	mov	gs:monSpellToHitPenalty[bx], al
 	mov	bx, [bp+counter]
-	mov	gs:byte_42422[bx], al
+	mov	gs:monAttackBonus[bx], al
 	jmp	short loc_1D0B5
 loc_1D130:
 	mov	[bp+counter], 0
@@ -3213,8 +3217,8 @@ loc_1D18D:
 	sub	al, al
 	mov	gs:byte_42440, al
 	mov	gs:byte_41E70, al
-	mov	gs:byte_42274, al
-	mov	gs:byte_4244E, al
+	mov	gs:g_charFreezeAcPenalty, al
+	mov	gs:partySpellAcBonus, al
 	mov	gs:byte_42567, al
 	mov	gs:monFrozenFlag, al
 	mov	gs:byte_422A4, al
@@ -3314,7 +3318,7 @@ loc_1D2F1:
 	mov	ax, offset aBadDiceMaskRange
 	push	ds
 	push	ax
-	call	sub_1763A
+	call	printMessageAndExit
 	add	sp, 4
 loc_1D2FE:
 	pop	si
@@ -3459,7 +3463,7 @@ loc_1D40E:
 	cmp	[bp+var_2], 7
 	jge	short loc_1D44C
 	getCharP	[bp+var_2], bx
-	cmp	byte ptr gs:roster._name[bx], 0
+	cmp	byte ptr gs:party._name[bx], 0
 	jz	short loc_1D44A
 	mov	ax, itemEff_alwaysRunAway
 	push	ax
@@ -3560,7 +3564,7 @@ bat_castOpt proc far
 	mov	ax, 1
 	push	ax
 	push	[bp+arg_0]
-	call	anotherCastSpell
+	call	getSpellNumber
 	add	sp, 4
 	mov	[bp+var_2], ax
 	or	ax, ax
@@ -3568,12 +3572,12 @@ bat_castOpt proc far
 	sub	ax, ax
 	jmp	short loc_1D541
 loc_1D4ED:
-	mov	al, byte ptr curSpellNo
+	mov	al, byte ptr g_curSpellNumber
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42244[bx], al
 	cmp	[bp+var_2], 4
 	jg	short loc_1D52D
-	mov	ax, offset aCastAt
+	mov	ax, offset s_castAt
 	push	ds
 	push	ax
 	push	[bp+var_2]
@@ -3637,7 +3641,7 @@ loc_1D570:
 	lea	ax, [bp+var_34]
 	push	ss
 	push	ax
-	mov	ax, offset aWhichItem?
+	mov	ax, offset s_whichItem
 	push	ds
 	push	ax
 	call	text_scrollingWindow
@@ -3654,20 +3658,20 @@ loc_1D58F:
 	add	sp, 4
 	or	ax, ax
 	jz	short loc_1D61F
-	mov	al, byte ptr curSpellNo
+	mov	al, byte ptr g_curSpellNumber
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42244[bx], al
 	mov	al, byte ptr [bp+var_4]
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42334[bx], al
-	mov	bx, curSpellNo
-	mov	al, byte_47F94[bx]
+	mov	bx, g_curSpellNumber
+	mov	al, spellCastFlags[bx]
 	sub	ah, ah
 	and	ax, 7
 	mov	[bp+var_2], ax
 	cmp	ax, 4
 	jge	short loc_1D609
-	mov	ax, offset aUseOn_0
+	mov	ax, offset s_nlUseOn
 	push	ds
 	push	ax
 	push	[bp+var_2]
@@ -3700,13 +3704,13 @@ loc_1D61F:
 	call	printStringWClear
 	add	sp, 4
 	wait4IO
-	call	clearTextWindow
+	call	text_clear
 	sub	ax, ax
 	jmp	short loc_1D663
 loc_1D641:
 	jmp	short loc_1D663
 loc_1D643:
-	mov	ax, offset aYourPocketsAreEm
+	mov	ax, offset s_pocketsAreEmpty
 	mov	dx, seg	dseg
 	push	dx
 	push	ax
@@ -3747,7 +3751,7 @@ bat_songOpt proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	call	clearTextWindow
+	call	text_clear
 	sub	ax, ax
 	push	ax
 	push	[bp+arg_0]
@@ -3870,7 +3874,7 @@ loc_1D738:
 loc_1D763:
 	mov	[bp+var_22], 1
 	push	[bp+var_14]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_6], ax
 	mov	[bp+var_16], 0
@@ -3915,29 +3919,29 @@ loc_1D7CA:
 	jmp	loc_1D97D
 loc_1D7D4:
 	getCharP	[bp+charNo], bx
-	cmp	byte ptr gs:roster._name[bx], 0
+	cmp	byte ptr gs:party._name[bx], 0
 	jnz	short loc_1D7EC
 	jmp	loc_1D97D
 loc_1D7EC:
-	call	clearTextWindow
+	call	text_clear
 	getCharP	[bp+charNo], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jb	short loc_1D809
 	jmp	loc_1D97A
 loc_1D809:
-	test	gs:roster.status[si], stat_dead	or stat_stoned or stat_paralyzed
+	test	gs:party.status[si], stat_dead	or stat_stoned or stat_paralyzed
 	jz	short loc_1D814
 	jmp	loc_1D97A
 loc_1D814:
-	test	gs:roster.status[si], stat_possessed or	stat_nuts
+	test	gs:party.status[si], stat_possessed or	stat_nuts
 	jz	short loc_1D827
-	cmp	gs:(roster.specAbil+3)[si], 0
+	cmp	gs:(party.specAbil+3)[si], 0
 	jz	short loc_1D827
 	jmp	loc_1D96C
 loc_1D827:
-	call	clearTextWindow
+	call	text_clear
 	getCharP	[bp+charNo], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -4014,7 +4018,7 @@ loc_1D89A:
 	add	sp, 4
 	mov	[bp+var_22], 1
 	push	[bp+var_14]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_6], ax
 	mov	[bp+var_16], 0
@@ -4060,7 +4064,7 @@ loc_1D96C:
 loc_1D97A:
 	jmp	loc_1D7C6
 loc_1D97D:
-	mov	ax, offset aUseTheseCommands?
+	mov	ax, offset s_useTheseCommands?
 	push	ds
 	push	ax
 	call	printStringWClear
@@ -4172,7 +4176,7 @@ loc_1DA4B:
 	mov	byte ptr fs:[bx+1], 1
 	mov	byte ptr fs:[bx+2], 1
 	getCharP	[bp+arg_4], bx
-	mov	ax, gs:roster.currentSppt[bx]
+	mov	ax, gs:party.currentSppt[bx]
 	lfs	bx, [bp+arg_0]
 	or	ax, ax
 	jz	l_bat_getCharOptions_sppts
@@ -4185,7 +4189,7 @@ l_bat_getCharOptions_sppts:
 	cmp	gs:byte_42280[bx], 9
 	jnb	short loc_1DAA7
 	getCharP	bx, bx
-	cmp	gs:roster.class[bx], class_rogue
+	cmp	gs:party.class[bx], class_rogue
 	jnz	short loc_1DAA7
 	mov	al, 1
 	jmp	short loc_1DAA9
@@ -4195,7 +4199,7 @@ loc_1DAA9:
 	lfs	bx, [bp+arg_0]
 	mov	fs:[bx+5], al
 	getCharP	[bp+arg_4], bx
-	cmp	gs:roster.class[bx], class_bard
+	cmp	gs:party.class[bx], class_bard
 	jnz	short loc_1DADB
 	mov	ax, itType_instrument
 	push	ax
@@ -4263,7 +4267,7 @@ loc_1DB20:
 	mov	ax, [bp+arg_0]
 	jmp	loc_1DD02
 loc_1DB34:
-	call	findEmptyRosterNum
+	call	party_findEmptySlot
 	mov	[bp+var_8], ax
 	cmp	ax, 1
 	jg	short loc_1DB46
@@ -4338,7 +4342,7 @@ loc_1DB86:
 loc_1DC09:
 	jmp	loc_1DD20
 loc_1DC0C:
-	call	findEmptyRosterNum
+	call	party_findEmptySlot
 	mov	[bp+var_8], ax
 	push	cs
 	call	near ptr bat_cntActiveMonGroups
@@ -4443,7 +4447,7 @@ loc_1DD1E:
 	jmp	short loc_1DCFA
 loc_1DD20:
 	push	[bp+var_4]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_E], ax
 	cmp	ax, 10Eh
@@ -4559,7 +4563,7 @@ bat_getCharDamage proc far
 	cmp	[bp+arg_2], 80h
 	jge	short loc_1DED6
 	getCharP	[bp+arg_2], bx
-	mov	al, gs:roster.ac[bx]
+	mov	al, gs:party.ac[bx]
 	cbw
 	mov	[bp+var_4], ax
 	jmp	loc_1DF74
@@ -4609,7 +4613,7 @@ loc_1DF17:
 	cbw
 	add	[bp+var_4], ax
 	mov	bx, [bp+var_E]
-	mov	al, gs:byte_42270[bx]
+	mov	al, gs:g_monFreezeAcPenalty[bx]
 	sub	ah, ah
 	sub	[bp+var_4], ax
 loc_1DF74:
@@ -4642,9 +4646,9 @@ loc_1DFC8:
 	add	ax, [bp+var_4]
 	mov	[bp+var_18], ax
 	getCharP	[bp+arg_0], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jb	short loc_1E01B
-	add	ax, offset roster
+	add	ax, offset party
 	mov	word ptr [bp+var_1E], ax
 	mov	word ptr [bp+var_1E+2],	seg seg027
 	lfs	bx, [bp+var_1E]
@@ -4663,7 +4667,7 @@ loc_1DFC8:
 	jmp	short loc_1E059
 loc_1E01B:
 	getCharP	[bp+arg_0], bx
-	mov	ax, gs:roster.level[bx]
+	mov	ax, gs:party.level[bx]
 	shr	ax, 1
 	shr	ax, 1
 	mov	[bp+var_12], ax
@@ -4672,7 +4676,7 @@ loc_1E01B:
 	mov	[bp+var_12], 0FFh
 loc_1E03D:
 	getCharP	[bp+arg_0], bx
-	mov	al, gs:roster.strength[bx]
+	mov	al, gs:party.strength[bx]
 	sub	ah, ah
 	shr	ax, 1
 	mov	cx, [bp+var_4]
@@ -4683,7 +4687,7 @@ loc_1E059:
 	call	rnd_2d8
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
-	mov	bl, gs:roster.class[bx]
+	mov	bl, gs:party.class[bx]
 	sub	bh, bh
 	mov	al, byte_475F8[bx]
 	cbw
@@ -4702,7 +4706,7 @@ loc_1E059:
 	jmp	loc_1E277
 loc_1E0A5:
 	getCharP	bx, bx
-	cmp	gs:roster.class[bx], class_monster
+	cmp	gs:party.class[bx], class_monster
 	jb	short loc_1E0D5
 	mov	ax, gs:summonMeleeType
 	mov	gs:specialAttackVal, ax
@@ -4719,9 +4723,9 @@ loc_1E0D5:
 	jmp	short loc_1E12B
 loc_1E0EE:
 	getCharP	[bp+arg_0], si
-	cmp	gs:roster.class[si], class_monk
+	cmp	gs:party.class[si], class_monk
 	jnz	short loc_1E126
-	mov	ax, gs:roster.level[si]
+	mov	ax, gs:party.level[si]
 	shr	ax, 1
 	shr	ax, 1
 	mov	[bp+var_20], ax
@@ -4738,7 +4742,7 @@ loc_1E126:
 	mov	[bp+var_16], 20h 
 loc_1E12B:
 	getCharP	[bp+arg_0], bx
-	cmp	gs:roster.class[bx], class_rogue
+	cmp	gs:party.class[bx], class_rogue
 	jnz	short loc_1E152
 	mov	bx, [bp+arg_0]
 	cmp	gs:byte_42280[bx], 0
@@ -4747,7 +4751,7 @@ loc_1E12B:
 	jmp	short loc_1E165
 loc_1E152:
 	getCharP	[bp+arg_0], bx
-	mov	al, gs:roster.numAttacks[bx]
+	mov	al, gs:party.numAttacks[bx]
 	sub	ah, ah
 loc_1E165:
 	mov	[bp+var_2], ax
@@ -4800,7 +4804,7 @@ loc_1E1F8:
 	call	_random
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
-	cmp	gs:(roster.specAbil+2)[bx], cl
+	cmp	gs:(party.specAbil+2)[bx], cl
 	jbe	short loc_1E226
 	mov	ax, speAtt_criticalHit
 	jmp	short loc_1E228
@@ -4811,11 +4815,11 @@ loc_1E228:
 	jmp	short loc_1E272
 loc_1E232:
 	getCharP	[bp+arg_0], si
-	cmp	gs:roster.class[si], class_hunter
+	cmp	gs:party.class[si], class_hunter
 	;;jnz	short loc_1E267
 	jnz	short loc_1E272
 	call	_random
-	cmp	gs:roster.specAbil[si],	al
+	cmp	gs:party.specAbil[si],	al
 	jbe	short loc_1E25B
 	mov	ax, speAtt_criticalHit
 	jmp	short loc_1E25D
@@ -5194,13 +5198,13 @@ bat_charAfterDmgCheck proc far
 	call	someStackOperation
 	push	si
 	getCharP	[bp+arg_0], bx
-	cmp	byte ptr gs:roster._name[bx], 0
+	cmp	byte ptr gs:party._name[bx], 0
 	jnz	short loc_1E5CC
 	sub	ax, ax
 	jmp	loc_1E66E
 loc_1E5CC:
 	getCharP	[bp+arg_0], bx
-	test	gs:roster.status[bx], stat_dead
+	test	gs:party.status[bx], stat_dead
 	jz	short loc_1E5FA
 	cmp	gs:specialAttackVal, speAtt_possess
 	jnz	short loc_1E5F6
@@ -5215,18 +5219,18 @@ loc_1E5F6:
 	jmp	short loc_1E66E
 loc_1E5FA:
 	getCharP	[bp+arg_0], bx
-	test	gs:roster.status[bx], stat_stoned
+	test	gs:party.status[bx], stat_stoned
 	jz	short loc_1E612
 	sub	ax, ax
 	jmp	short loc_1E66E
 loc_1E612:
 	getCharP	[bp+arg_0], si
 	mov	ax, gs:damageAmount
-	cmp	gs:roster.currentHP[si], ax
+	cmp	gs:party.currentHP[si], ax
 	jnb	short loc_1E647
-	or	gs:roster.status[si], stat_dead
-	mov	gs:roster.currentHP[si], 0
-	mov	gs:roster.hostileFlag[si], 0
+	or	gs:party.status[si], stat_dead
+	mov	gs:party.currentHP[si], 0
+	mov	gs:party.hostileFlag[si], 0
 	mov	ax, 1
 	jmp	short loc_1E66E
 	jmp	short loc_1E662
@@ -5234,7 +5238,7 @@ loc_1E647:
 	mov	ax, gs:damageAmount
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
-	sub	gs:roster.currentHP[bx], cx
+	sub	gs:party.currentHP[bx], cx
 loc_1E662:
 	push	[bp+arg_0]
 	push	cs
@@ -5268,33 +5272,33 @@ loc_1E68A:
 	jmp	loc_1E88A
 poisonChar:
 	getCharP	[bp+charNo], bx
-	or	gs:roster.status[bx], stat_poisoned
+	or	gs:party.status[bx], stat_poisoned
 	mov	ax, 1
 	jmp	loc_1E88A
 levelDrainChar:
 	getCharP	[bp+charNo], bx
-	cmp	gs:roster.class[bx], class_monster
+	cmp	gs:party.class[bx], class_monster
 	jb	short loc_1E6C2
 	sub	ax, ax
 	jmp	loc_1E88A
 	jmp	short loc_1E70E
 loc_1E6C2:
 	getCharP	[bp+charNo], bx
-	cmp	gs:roster.level[bx], 1
+	cmp	gs:party.level[bx], 1
 	jbe	short loc_1E6DF
 	getCharP	[bp+charNo], bx
-	dec	gs:roster.level[bx]
+	dec	gs:party.level[bx]
 loc_1E6DF:
 	getCharP	[bp+charNo], si
-	mov	ax, gs:roster.level[si]
+	mov	ax, gs:party.level[si]
 	dec	ax
 	push	ax
 	push	[bp+charNo]
-	call	getXPForLevel
+	call	getLevelXp
 	add	sp, 4
 	cwd
-	mov	word ptr gs:roster.experience[si], ax
-	mov	word ptr gs:(roster.experience+2)[si], dx
+	mov	word ptr gs:party.experience[si], ax
+	mov	word ptr gs:(party.experience+2)[si], dx
 	mov	ax, 1
 	jmp	loc_1E88A
 loc_1E70E:
@@ -5302,18 +5306,18 @@ loc_1E70E:
 	jmp	loc_1E88A
 nutsifyChar:
 	getCharP	[bp+charNo], bx
-	or	gs:roster.status[bx], stat_nuts
+	or	gs:party.status[bx], stat_nuts
 	mov	ax, 1
 	jmp	loc_1E88A
 oldifyChar:
 	getCharP	[bp+charNo], bx
-	cmp	gs:roster.class[bx], class_monster
+	cmp	gs:party.class[bx], class_monster
 	jb	short loc_1E744
 	sub	ax, ax
 	jmp	loc_1E88A
 loc_1E744:
 	getCharP	[bp+charNo], bx
-	test	gs:roster.status[bx], stat_old
+	test	gs:party.status[bx], stat_old
 	jz	short loc_1E759
 	sub	ax, ax
 	jmp	loc_1E88A
@@ -5321,39 +5325,39 @@ loc_1E759:
 	getCharP	[bp+charNo], si
 	mov	ax, 5
 	push	ax
-	lea	ax, roster.savedST[si]
+	lea	ax, party.savedST[si]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	lea	ax, roster.strength[si]
+	lea	ax, party.strength[si]
 	push	dx
 	push	ax
 	push	cs
 	call	near ptr _doAgeStatus
 	add	sp, 0Ah
 	getCharP	[bp+charNo], bx
-	or	gs:roster.status[bx], stat_old
+	or	gs:party.status[bx], stat_old
 	mov	ax, 1
 	jmp	loc_1E88A
 possessChar:
 	getCharP	[bp+charNo], si
-	mov	gs:roster.currentHP[si], 64h 
-	and	gs:roster.status[si], stat_poisoned or stat_old	or stat_stoned or stat_paralyzed or stat_possessed or stat_nuts	or stat_unknown
-	or	gs:roster.status[si], stat_possessed
+	mov	gs:party.currentHP[si], 64h 
+	and	gs:party.status[si], stat_poisoned or stat_old	or stat_stoned or stat_paralyzed or stat_possessed or stat_nuts	or stat_unknown
+	or	gs:party.status[si], stat_possessed
 	mov	ax, 1
 	jmp	loc_1E88A
 stoneChar:
 	getCharP	[bp+charNo], si
-	mov	gs:roster.currentHP[si], 0
-	mov	gs:roster.hostileFlag[si], 0
-	or	gs:roster.status[si], stat_stoned
+	mov	gs:party.currentHP[si], 0
+	mov	gs:party.hostileFlag[si], 0
+	or	gs:party.status[si], stat_stoned
 	mov	ax, 1
 	jmp	loc_1E88A
 killChar:
 	getCharP	[bp+charNo], si
-	or	gs:roster.status[si], stat_dead
-	mov	gs:roster.currentHP[si], 0
-	mov	gs:roster.hostileFlag[si], 0
+	or	gs:party.status[si], stat_dead
+	mov	gs:party.currentHP[si], 0
+	mov	gs:party.hostileFlag[si], 0
 	mov	ax, 1
 	jmp	loc_1E88A
 loc_1E802:
@@ -5366,13 +5370,13 @@ loc_1E80D:
 	jge	short loc_1E846
 	getCharP	[bp+charNo], si
 	add	si, [bp+var_4]
-	mov	al, gs:roster.inventory.itemNo[si]
+	mov	al, gs:party.inventory.itemNo[si]
 	sub	ah, ah
 	mov	[bp+var_2], ax
 	mov	bx, ax
 	cmp	itemTypeList[bx], 1
 	jnz	short loc_1E844
-	and	gs:roster.inventory.itemFlags[si], 0FCh
+	and	gs:party.inventory.itemFlags[si], 0FCh
 loc_1E844:
 	jmp	short loc_1E809
 loc_1E846:
@@ -5380,7 +5384,7 @@ loc_1E846:
 	jmp	short loc_1E88A
 consumeSppt:
 	getCharP	[bp+charNo], bx
-	mov	gs:roster.currentSppt[bx], 0
+	mov	gs:party.currentSppt[bx], 0
 	mov	ax, 1
 	jmp	short loc_1E88A
 loc_1E863:
@@ -5450,11 +5454,11 @@ partyDied proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	mov	gs:byte_42296, 0FFh
 	mov	ax, 57
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 	mov	ax, offset aSorryBud
 	push	ds

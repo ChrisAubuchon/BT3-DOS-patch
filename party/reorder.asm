@@ -20,7 +20,7 @@ party_reorder proc far
 	jle	l_return
 
 l_reorderEntry:
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	mov	[bp+loopCounter], 0
 
 ; Initialize arrays:

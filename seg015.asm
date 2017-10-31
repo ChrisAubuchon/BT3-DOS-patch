@@ -18,7 +18,7 @@ doSummon proc far
 	call	someStackOperation
 	test	gs:disbelieveFlags, disb_nosummon
 	jz	short loc_25E96
-	mov	ax, offset aButItFizzledNL
+	mov	ax, offset s_butItFizzledNl
 	mov	dx, seg	dseg
 	push	dx
 	push	ax
@@ -59,7 +59,7 @@ sum_partySummonSpell proc far
 	call	someStackOperation
 	mov	[bp+var_4], 0
 loc_25EC6:
-	call	findEmptyRosterNum
+	call	party_findEmptySlot
 	mov	[bp+var_2], ax
 	cmp	ax, 7
 	jge	short loc_25F1E
@@ -81,8 +81,8 @@ loc_25EF8:
 loc_25EFA:
 	mov	cx, ax
 	getCharP	[bp+var_2], bx
-	mov	gs:roster.class[bx], cl
-	mov	byte ptr word_44166,	0
+	mov	gs:party.class[bx], cl
+	mov	byte ptr g_printPartyFlag,	0
 	mov	[bp+var_4], 1
 	jmp	short loc_25F2A
 loc_25F1E:
@@ -92,7 +92,7 @@ loc_25F1E:
 	add	sp, 2
 	jmp	short loc_25F36
 loc_25F2A:
-	cmp	curSpellNo, 4Dh 
+	cmp	g_curSpellNumber, 4Dh 
 	jz	short loc_25EC6
 loc_25F36:
 	mov	sp, bp
@@ -143,7 +143,7 @@ loc_25F72:
 	or	[bp+var_4], ax
 	jmp	short loc_25FDA
 loc_25F97:
-	cmp	curSpellNo, 4Dh 
+	cmp	g_curSpellNumber, 4Dh 
 	jnz	short loc_25FAF
 	push	[bp+var_4]
 	push	cs
@@ -170,7 +170,7 @@ loc_25FAF:
 	add	sp, 2
 	jmp	short loc_25FF5
 loc_25FDA:
-	cmp	curSpellNo, 4Dh 
+	cmp	g_curSpellNumber, 4Dh 
 	jz	short loc_25FF2
 	push	[bp+var_4]
 	push	cs
@@ -301,7 +301,7 @@ loc_26101:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	decryptName
+	call	unmaskString
 	add	sp, 8
 	mov	ax, offset aAndA
 	push	ds

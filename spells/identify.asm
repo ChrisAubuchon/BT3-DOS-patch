@@ -11,7 +11,7 @@ sp_identifySpell proc far
 	FUNC_ENTER
 	CHKSTK(0F4h)
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	and	[bp+spellCaster], 7Fh
 	PUSH_STACK_ADDRESS(var_32)
 	PUSH_STACK_ADDRESS(var_F4)

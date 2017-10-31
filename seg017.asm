@@ -23,7 +23,7 @@ loc_263EF:
 	add	sp, 4
 	mov	ax, 3Ch	
 	push	ax
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_4], ax
 	cmp	ax, 110h
@@ -133,7 +133,7 @@ loc_2649C:
 	lea	ax, [bp+var_1E]
 	push	ss
 	push	ax
-	call	_readString
+	call	readString
 	add	sp, 6
 	or	ax, ax
 	jz	short loc_264E1
@@ -147,7 +147,7 @@ loc_2649C:
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
 loc_264E1:
-	mov	ax, offset aThieves_inf
+	mov	ax, offset s_thievesInf
 	push	ds
 	push	ax
 	push	[bp+var_24]
@@ -161,7 +161,7 @@ loc_264E1:
 	lea	ax, [bp+var_1B4]
 	push	ss
 	push	ax
-	call	openFile
+	call	_open
 	add	sp, 6
 	mov	[bp+var_182], ax
 	inc	ax
@@ -215,7 +215,7 @@ loc_26572:
 	add	sp, 8
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
-	mov	ax, offset aParties_inf
+	mov	ax, offset s_partiesInf
 	push	ds
 	push	ax
 	push	dx
@@ -247,7 +247,7 @@ loc_265FB:
 	lea	ax, [bp+var_1B4]
 	push	ss
 	push	ax
-	call	openFile
+	call	_open
 	add	sp, 6
 	mov	[bp+var_182], ax
 	inc	ax
@@ -483,15 +483,15 @@ sub_2681F proc far
 	call	someStackOperation
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	rost_charNameExists
+	call	roster_nameExists
 	add	sp, 4
 	mov	[bp+var_4], ax
 	or	ax, ax
 	jge	short loc_26868
-	call	countSavedChars
+	call	roster_countCharacters
 	mov	[bp+var_2], ax
 	getCharP	[bp+var_2], bx
-	lea	ax, characterIOBuf[bx]
+	lea	ax, g_rosterCharacterBuffer[bx]
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
@@ -561,7 +561,7 @@ loc_268AD:
 	lea	ax, [bp+var_1E]
 	push	ss
 	push	ax
-	call	_readString
+	call	readString
 	add	sp, 6
 	or	ax, ax
 	jz	short loc_268F2
@@ -611,7 +611,7 @@ loc_26931:
 	add	sp, 4
 	sub	ax, ax
 	push	ax
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_20], ax
 	cmp	ax, 1Bh
@@ -646,7 +646,7 @@ loc_2696B:
 	lea	ax, [bp+var_1AE]
 	push	ss
 	push	ax
-	call	openFile
+	call	_open
 	add	sp, 6
 	mov	[bp+var_17C], ax
 	inc	ax

@@ -6,60 +6,55 @@ song_singNonCombat	proc far
 	subtractor= word ptr	-4
 	songNumber= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 6
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(6)
 
-	call	clearTextWindow
-	push_ds_string aWhoWillPlay?
-	func_printString
+	CALL(text_clear)
+	PUSH_OFFSET(s_whoWillPlay)
+	PRINTSTRING
 
-	call	getCharNumber
+	CALL(readSlotNumber)
 	mov	[bp+partySlotNumber], ax
 	or	ax, ax
 	jl	short l_return
 
 	push	ax
-	near_call	sing_getSongSubtractor, 2
+	NEAR_CALL(sing_getSongSubtractor, 2)
 	mov	[bp+subtractor], ax
 
 	push	[bp+partySlotNumber]
-	near_call	_canSingSong,2
+	NEAR_CALL(_canSingSong,2)
 	or	ax, ax
 	jz	short l_waitAndReturn
 
 	cmp	[bp+subtractor], 0
 	jl	short l_waitAndReturn
 
-	call	clearTextWindow
+	CALL(text_clear)
 	sub	ax, ax
 	push	ax
 	push	[bp+partySlotNumber]
-	near_call	song_getSong, 4
+	NEAR_CALL(song_getSong, 4)
 	mov	[bp+songNumber], ax
 	or	ax, ax
 	jl	short l_waitAndReturn
 
 	; End currently playing song
-	push	cs
-	call	near ptr endNoncombatSong
+	NEAR_CALL(endNoncombatSong)
 
 	push	[bp+songNumber]
 	push	[bp+partySlotNumber]
-	near_call	song_playSong, 4
+	NEAR_CALL(song_playSong, 4)
 
-	push	cs
-	call	near ptr song_doNoncombatEffect
+	NEAR_CALL(song_doNoncombatEffect)
 	mov	al, byte ptr [bp+subtractor]
 	mov	cx, ax
-	getCharP	[bp+partySlotNumber], bx
-	sub	gs:roster.specAbil[bx],	cl
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
+	sub	gs:party.specAbil[bx],	cl
 l_waitAndReturn:
-	wait4IO
+	IOWAIT
 l_return:
-	call	clearTextWindow
-	mov	sp, bp
-	pop	bp
+	CALL(text_clear)
+	FUNC_EXIT
 	retf
 song_singNonCombat	endp

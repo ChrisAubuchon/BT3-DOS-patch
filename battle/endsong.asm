@@ -1,10 +1,8 @@
 ; Attributes: bp-based frame
 
 bat_endCombatSong proc far
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 	cmp	gs:g_currentSongPlusOne, 0
 	jz	short l_return
 	mov	gs:g_currentSongPlusOne, 0
@@ -38,7 +36,7 @@ l_songSwitch:
 	cmp	ax, song_shield
 	jz	short l_shield
 l_endAndReturn:
-	call	song_endMusic
+	CALL(song_endMusic)
 l_return:
 	mov	sp, bp
 	pop	bp

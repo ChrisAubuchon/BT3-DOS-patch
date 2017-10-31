@@ -67,7 +67,7 @@ loc_16445:
 	inc	[bp+linesPrinted]
 	cmp	ax, 50
 	jle	short loc_16457
-	NEAR_CALL(_return_three)
+	mov	ax, 3
 	jmp	l_return
 
 loc_16457:
@@ -89,7 +89,7 @@ l_otherCharacter:
 	mov	al, byte ptr [bp+currentCharacter]
 	mov	byte ptr [bp+si+lineBuffer], al
 	push	[bp+currentCharacter]
-	NEAR_CALL(txt_charSpacing, 2)
+	NEAR_CALL(text_characterWidth, 2)
 	add	[bp+pixelsUsed], ax
 	cmp	[bp+pixelsUsed], 138
 	jl	l_nextCharacter
@@ -98,7 +98,7 @@ l_otherCharacter:
 	inc	[bp+linesPrinted]
 	cmp	ax, 50
 	jle	short l_wrapText
-	NEAR_CALL(_return_three)
+	mov	ax, 3
 	jmp	l_return
 
 l_wrapText:

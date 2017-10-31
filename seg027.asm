@@ -11,7 +11,7 @@ vorpalPlateBonus	db 7 dup(0)
 align 2
 antiMagicFlag	db 0
 gl_detectSecretDoorFlag	db 0
-byte_41E62	db 0
+g_currentSinger	db 0
 byte_41E63	db 0
 charActionList db 7	dup(0)		   ; 0
 unk_41E6B	db	0
@@ -27,13 +27,13 @@ batRewardLo	dw 0
 batRewardHi	dw 0
 mapHeight	db 0
 byte_41E81	db 0
-roster		character_t <>
-stru_41EFA	character_t <>
+party		character_t <>
+partySecondSlot	character_t <>
 		character_t <>
 		character_t <>
 		character_t <>
 		character_t <>
-rosterTail	character_t <>
+partyTail	character_t <>
 newCharBuffer	character_t <>
 byte_42242	db 0
 		db 0
@@ -50,11 +50,11 @@ bat_curTarget	db 0
 musicBufs	memoryPointer	8 dup(<0>)
 monFrozenFlag	db 0
 		db 0
-byte_42270	db 0
+g_monFreezeAcPenalty	db 0
 		db 0
 		db 0
 		db 0
-byte_42274	db 0
+g_charFreezeAcPenalty	db 0
 		db 0
 byte_42276	db 0
 		db 0
@@ -64,7 +64,7 @@ byte_42276	db 0
 		db 0
 		db 0
 		db 0
-byte_4227E	db 0
+g_usedItemSlotNumber	db 0
 		db 0
 byte_42280	db 6	dup(0)		   ; 0
 byte_42286	db 0
@@ -84,7 +84,7 @@ align 2
 word_42298	dw 0
 byte_4229A	db 0
 sqRegenHPFlag	db 0
-byte_4229C	db 4	dup(0)		   ; 0
+monSpellToHitPenalty	db 4	dup(0)		   ; 0
 byte_422A0	db 0
 align 2
 specialAttackVal	dw 0
@@ -111,7 +111,7 @@ byte_42334	db 0
 songExtraAttack	db 0
 align 2
 word_4233E	dw 0
-bigpicImageNo	db 0
+bigpicCellNumber	db 0
 align 2
 monGroups	mon_t <>
 stru_42372	mon_t <>
@@ -122,8 +122,8 @@ summonMeleeDamage	dw 0
 regenSpptSq	db 0
 align 2
 summonMeleeType	dw 0
-word_4240A	dw 0
-word_4240C	dw 0
+bigpicCellData_off	dw 0
+bigpicCellData_seg	dw 0
 disbelieveFlags	db 0
 align 2
 word_42410	dw 0
@@ -132,15 +132,15 @@ stuckFlag	db 0
 align 2
 word_42416	dw 0
 db    0
-byte_42419	db 0
-byte_4241A	db 0
+g_currentCharPosition	db 0
+g_text_clearFlag	db 0
 txt_numLines	db 0
 songAntiMonster	db 0
 align 2
-word_4241E	dw 0
-byte_42420	db 0
+g_currentMouseIcon	dw 0
+g_currentSong	db 0
 db    0
-byte_42422	db 4	dup(0)		   ; 0
+monAttackBonus	db 4	dup(0)		   ; 0
 mfunc_ioBuf	db 10h dup(0)	    ; 0
 dword_42436	dd 0
 word_4243A	dw 0
@@ -153,7 +153,7 @@ db    0
 byte_42444	db 7	dup(0)
 align 2
 word_4244C	dw 0
-byte_4244E	db 0
+partySpellAcBonus	db 0
 align 2
 advanceTimeFlag	dw 0
 breakAfterFunc	dw 0
@@ -177,6 +177,6 @@ songACBonus	db 0
 songHalfDamage	db 0
 bat_monPriorityList dw 80h dup(0)	    ; 0
 		db    0
-byte_4266B	db 0
+g_currentSongPlusOne	db 0
 align 8
 seg027 ends

@@ -25,9 +25,9 @@ minimap_show proc far
 	mov	[bp+rightLeftValue], 8
 	mov	[bp+upDownValue], 6
 l_loopEntry:
-	mov	gs:g_clearTextWindowFlag, 1
-	NEAR_CALL(clearTextWindow)
-	mov	gs:g_clearTextWindowFlag, 1
+	mov	gs:g_text_clearFlag, 1
+	NEAR_CALL(text_clear)
+	mov	gs:g_text_clearFlag, 1
 
 	mov	[bp+ewCounter], 0
 	jmp	short loc_1555E
@@ -243,7 +243,7 @@ l_afterLeftLoop:
 	jmp	l_loopEntry
 
 l_clearAndReturn:
-	NEAR_CALL(clearTextWindow)
+	NEAR_CALL(text_clear)
 
 l_return:
 	pop	si

@@ -1,10 +1,8 @@
 ; Attributes: bp-based frame
 
 song_doNoncombatEffect proc far
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 	mov	al, gs:g_currentSong
 	sub	ah, ah
 	jmp	l_songSwitch
@@ -15,12 +13,12 @@ l_sanctuary:
 	mov	al, charSize
 	mul	gs:g_currentSinger
 	mov	bx, ax
-	cmp	gs:roster.level[bx], 60
+	cmp	gs:party.level[bx], 60
 	jnb	short l_maxFifteen
 	mov	al, charSize
 	mul	gs:g_currentSinger
 	mov	bx, ax
-	mov	ax, gs:roster.level[bx]
+	mov	ax, gs:party.level[bx]
 	shr	ax, 1
 	shr	ax, 1
 	jmp	short l_setBonus
@@ -32,7 +30,7 @@ l_setBonus:
 	jnz	short l_setBonusIfZero
 	inc	gs:songACBonus
 l_setBonusIfZero:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	l_return
 l_duotime:
 	mov	gs:songRegenSppt, 1
@@ -43,20 +41,20 @@ l_watchwood:
 	mov	gs:gl_detectSecretDoorFlag, 0FFh
 	sub	ax, ax
 	push	ax
-	std_call	icon_activate, 2
+	CALL(icon_activate, 2)
 	jmp	short l_return
 l_overture:
 	mov	compassDuration, 0FFh
 	mov	ax, 1
 	push	ax
-	std_call	icon_activate, 2
+	CALL(icon_activate, 2)
 	jmp	short l_return
 l_shield:
 	mov	gs:songHalfDamage, 1
 	mov	shieldDuration, 0FFh
 	mov	ax, 3
 	push	ax
-	std_call	icon_activate, 2
+	CALL(icon_activate, 2)
 	jmp	short l_return
 l_songSwitch:
 	cmp	ax, song_safety

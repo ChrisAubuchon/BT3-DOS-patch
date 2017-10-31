@@ -238,11 +238,11 @@ field_69 dw ?
 field_6B dw ?
 bi_char_t ends
 
-someFileStru struc ; (sizeof=0x2)
+levelFile_t struc ; (sizeof=0x2)
 fileType db ?		
 ; enum levelFile
 fileIndexMaybe db ?	; base 10
-someFileStru ends
+levelFile_t ends
 
 memoryPointer struc ; (sizeof=0x4)
 _offset	dw ?
@@ -280,10 +280,10 @@ deltaEast db ?		; base 10
 deltaNorth db ?		; base 10
 viewStruct ends
 
-unknown_t struc	; (sizeof=0x2)
-field_0	db ?		; base 10
-field_1	db ?		; base 10
-unknown_t ends
+coordinate_t struc	; (sizeof=0x2)
+column	db ?		; base 10
+row	db ?		; base 10
+coordinate_t ends
 
 campStru_t struc ; (sizeof=0x9)
 hasEmptySlot db	?

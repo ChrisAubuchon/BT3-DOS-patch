@@ -319,7 +319,7 @@ loc_27205:
 	lea	ax, [bp+var_14A]
 	push	ss
 	push	ax
-	call	_readString
+	call	readString
 	add	sp, 6
 	push	[bp+var_20]
 	lea	ax, [bp+var_1E]

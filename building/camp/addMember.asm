@@ -10,7 +10,7 @@ camp_addMember proc far
 	CHKSTK(15Ch)
 	push	si
 
-	CALL(clearTextwindow)
+	CALL(text_clear)
 	NEAR_CALL(roster_countCharacters)
 	or	ax, ax
 	jz	l_noSavedCharacters
@@ -46,7 +46,7 @@ l_nextCharacter:
 	jge	l_savedListComplete
 	mov	ax, [bp+var_15C]
 	sub	ax, [bp+var_156]
-	getCharIndex	cx, cx
+	CHARINDEX(cx, cx)
 	add	ax, 0
 	mov	si, [bp+var_15C]
 	shl	si, 1
@@ -122,7 +122,7 @@ l_loopComparison:
 	push	ax
 	NEAR_CALL(copyCharacterBuf, 8)
 	NEAR_CALL(party_addCharacter)
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 l_shortReturnLabel:
 	jmp	short l_return
 l_noSavedCharacters:

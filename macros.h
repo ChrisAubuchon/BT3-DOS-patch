@@ -8,22 +8,6 @@ func_exit	macro
 	pop	bp
 	endm
 
-func_return	macro	_rval
-	mov	ax, _rval
-	endm
-
-null_terminate	macro inString
-	lfs	bx, dword ptr inString
-	inc 	word ptr inString
-	mov	byte ptr fs:[bx], 0
-	endm
-
-dword_appendChar	macro _dword,_char
-	lfs	bx, [bp+_dword]
-	inc	word ptr [bp+_dword]
-	mov	byte ptr fs:[bx], _char
-	endm
-
 getCharIndex	macro srcreg, mult
 	mov	srcreg, charSize
 	imul	mult
@@ -47,41 +31,17 @@ getMonP		macro mult, dest
 wait4IO		macro
 	mov	ax, 4000h
 	push	ax
-	call	far ptr sub_14E41
+	call	far ptr getKey
 	add	sp, 2
 	endm
 
 delayWithTable	macro
-	call	txt_delayWithTable
+	call	text_delayWithTable
 	endm
 
 delayNoTable	macro _count
 	push_imm	_count
-	std_call	txt_delayNoTable, 2
-	endm
-
-do_strcat	macro _dest
-	std_call	_strcat, 8
-	save_ptr_stack	dx,ax,_dest
-	endm
-
-do_pluralize	macro _dest
-	std_call	str_pluralize, 0Ah
-	save_ptr_stack	dx,ax,_dest
-	endm
-
-do_itoa		macro _dest
-	std_call	_itoa, 0Ah
-	save_ptr_stack	dx,ax,_dest
-	endm
-
-strcat_offset	macro src,dest
-	mov	ax, offset src
-	push	ds
-	push	ax
-	push	word ptr [bp+dest+2]
-	push	word ptr [bp+dest]
-	do_strcat	dest
+	std_call	text_delayNoTable, 2
 	endm
 
 save_ptr_stack	macro _segment,_off,_dest
@@ -131,7 +91,7 @@ push_seg_ptr	macro _seg, _off
 	push	ax
 	endm
 
-far_call	macro _func,_sp_add
+near_call	macro _func,_sp_add
 	push	cs
 	call	near ptr _func
 	add	sp, _sp_add
@@ -147,13 +107,6 @@ _chkstk		macro _size
 	call	someStackOperation
 	endm
 
-rangeWithMax	macro _max, _srcReg, _tmpReg
-	sub	_srcReg, _max
-	sbb	_tmpReg, _tmpReg
-	and	_srcReg, _tmpReg
-	add	_srcReg, _max
-	endm
-
 ; Function calls
 func_printString	macro
 	std_call	printString, 4
@@ -161,10 +114,6 @@ func_printString	macro
 
 func_readString		macro
 	std_call	_readString, 6
-	endm
-
-func_strcat		macro
-	std_call	_strcat, 8
 	endm
 
 func_strncpy	macro
@@ -185,16 +134,4 @@ func_lseek		macro
 
 func_close		macro
 	std_call	_close, 2
-	endm
-
-func_readLevelData	macro
-	std_call	readLevelData, 6
-	endm
-
-func_readGraphicsMaybe	macro
-	std_call	readGraphicsMaybe, 2
-	endm
-
-func_readMonsterFile	macro
-	std_call	readMonsterFile, 2
 	endm

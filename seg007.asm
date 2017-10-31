@@ -98,7 +98,7 @@ dun_changeLevels proc far
 	mov	ax, 4
 	call	someStackOperation
 	push	si
-	mov	word ptr [bp+var_4], offset characterIOBuf
+	mov	word ptr [bp+var_4], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+var_4+2], seg seg022
 	mov	si, dunLevelNum
 	lfs	bx, [bp+var_4]
@@ -129,7 +129,7 @@ dun_setExitLocation proc far
 	mov	bp, sp
 	mov	ax, 4
 	call	someStackOperation
-	mov	word ptr [bp+var_4], offset characterIOBuf
+	mov	word ptr [bp+var_4], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+var_4+2], seg seg022
 	lfs	bx, [bp+var_4]
 	mov	al, fs:[bx+dun_t.exitSqN]
@@ -159,7 +159,7 @@ mfunc_downStairs proc far
 	cmp	word_4EE66, 0
 	jnz	short loc_193B0
 	mov	word_4EE66, 1
-	call	clearTextWindow
+	call	text_clear
 	mov	al, levFlags
 	sub	ah, ah
 	and	ax, 10h
@@ -167,7 +167,7 @@ mfunc_downStairs proc far
 	mov	ax, offset aThereAreStairs
 	push	ds
 	push	ax
-	call	sub_1636B
+	call	stairsPluralHelper
 	add	sp, 6
 	call	getYesNo
 	or	ax, ax
@@ -208,7 +208,7 @@ mfunc_upStairs proc far
 	cmp	word_4EE66, 0
 	jnz	short loc_1941F
 	mov	word_4EE66, 1
-	call	clearTextWindow
+	call	text_clear
 	mov	al, levFlags
 	and	al, 10h
 	cmp	al, 1
@@ -218,7 +218,7 @@ mfunc_upStairs proc far
 	mov	ax, offset aThereAreStairs
 	push	ds
 	push	ax
-	call	sub_1636B
+	call	stairsPluralHelper
 	add	sp, 6
 	call	getYesNo
 	or	ax, ax
@@ -270,7 +270,7 @@ loc_1945B:
 	call	sub_253D0
 	jmp	short loc_19473
 loc_1946E:
-	call	cmd_printLocation
+	call	printLocation
 loc_19473:
 	jmp	short loc_194B4
 doVictory:
@@ -465,7 +465,7 @@ mfunc_clearPrintString proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	call	clearTextWindow
+	call	text_clear
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	push	cs
@@ -529,7 +529,7 @@ mfunc_drawBigpic proc far
 	sub	ah, ah
 	mov	[bp+picNo], ax
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 	mov	ax, word ptr [bp+memBuf]
 	mov	dx, word ptr [bp+memBuf+2]
@@ -606,7 +606,7 @@ mfunc_getChMaybe endp
 
 ; Attributes: bp-based frame
 
-mfunc_clearTextWindow proc far
+mfunc_text_clear proc far
 
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
@@ -615,14 +615,14 @@ mfunc_clearTextWindow proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	call	clearTextWindow
+	call	text_clear
 	mov	ax, [bp+arg_0]
 	mov	dx, [bp+arg_2]
 	jmp	short $+2
 	mov	sp, bp
 	pop	bp
 	retf
-mfunc_clearTextWindow endp
+mfunc_text_clear endp
 
 ; Attributes: bp-based frame
 
@@ -642,7 +642,7 @@ mfunc_ifFlag proc far
 	mov	[bp+var_2], ax
 	push	ax
 	push	cs
-	call	near ptr sub_19813
+	call	near ptr checkProgressFlags
 	add	sp, 2
 	push	ax
 	push	word ptr [bp+arg_0+2]
@@ -674,7 +674,7 @@ mfunc_ifNotFlag	proc far
 	mov	[bp+var_2], ax
 	push	ax
 	push	cs
-	call	near ptr sub_19813
+	call	near ptr checkProgressFlags
 	add	sp, 2
 	cmp	ax, 1
 	sbb	cx, cx
@@ -693,7 +693,7 @@ mfunc_ifNotFlag	endp
 
 ; Attributes: bp-based frame
 
-sub_19813 proc far
+checkProgressFlags proc far
 
 	var_4= word ptr	-4
 	var_2= word ptr	-2
@@ -711,7 +711,7 @@ sub_19813 proc far
 	and	ax, 7
 	mov	[bp+var_2], ax
 	mov	bx, [bp+var_4]
-	mov	al, mfuncFlags[bx]
+	mov	al, g_gameProgressFlags[bx]
 	sub	ah, ah
 	mov	bx, [bp+var_2]
 	mov	cl, byteMaskList[bx]
@@ -721,7 +721,7 @@ sub_19813 proc far
 	mov	sp, bp
 	pop	bp
 	retf
-sub_19813 endp
+checkProgressFlags endp
 
 ; Attributes: bp-based frame
 
@@ -744,7 +744,7 @@ sub_19855 proc far
 	mov	bp, sp
 	mov	ax, 1Ch
 	call	someStackOperation
-	mov	[bp+charBufOff], offset	characterIOBuf
+	mov	[bp+charBufOff], offset	g_rosterCharacterBuffer
 	mov	[bp+charBufSeg], seg seg022
 	mov	ax, [bp+charBufOff]
 	mov	dx, [bp+charBufSeg]
@@ -781,7 +781,7 @@ sub_19855 proc far
 	shl	cx, 1
 	add	cx, dx
 	add	ax, cx
-	add	ax, offset characterIOBuf
+	add	ax, offset g_rosterCharacterBuffer
 	mov	word ptr [bp+var_12], ax
 	mov	word ptr [bp+var_12+2],	seg seg022
 	mov	ax, [bp+var_18]
@@ -908,7 +908,7 @@ _updateFlags proc far
 	and	ax, 7
 	mov	[bp+var_4], ax
 	mov	bx, [bp+var_6]
-	mov	al, mfuncFlags[bx]
+	mov	al, g_gameProgressFlags[bx]
 	sub	ah, ah
 	mov	bx, [bp+var_4]
 	mov	cl, flagMaskList[bx]
@@ -919,7 +919,7 @@ _updateFlags proc far
 	and	al, [bp+arg_2]
 	or	al, byte ptr [bp+var_2]
 	mov	bx, [bp+var_6]
-	mov	mfuncFlags[bx], al
+	mov	g_gameProgressFlags[bx], al
 	mov	sp, bp
 	pop	bp
 	retf
@@ -939,7 +939,7 @@ mfunc_ifCurSpellEQ proc	far
 	inc	word ptr [bp+arg_0]
 	mov	al, fs:[bx]
 	sub	ah, ah
-	cmp	ax, curSpellNo
+	cmp	ax, g_curSpellNumber
 	jnz	short loc_19A21
 	mov	ax, 1
 	jmp	short loc_19A23
@@ -1052,10 +1052,10 @@ mfunc_ifChHasItemF proc	far
 	mov	al, charSize
 	mul	gs:byte_42288
 	mov	bx, ax
-	mov	al, gs:byte_4227E
+	mov	al, gs:g_usedItemSlotNumber
 	sub	ah, ah
 	add	bx, ax
-	mov	al, gs:roster.inventory.itemFlags[bx]
+	mov	al, gs:party.inventory.itemFlags[bx]
 	mov	[bp+var_6], ax
 	sar	ax, 1
 	sar	ax, 1
@@ -1111,7 +1111,7 @@ mfunc_getItem proc far
 	mov	al, fs:[bx]
 	mov	[bp+var_6], ax
 loc_19B4A:
-	call	clearTextWindow
+	call	text_clear
 	mov	ax, offset aWhoWantsToGetT
 	push	ds
 	push	ax
@@ -1135,7 +1135,7 @@ loc_19B4A:
 	push	ax
 	call	printString
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+var_4], ax
 	or	ax, ax
 	jge	short loc_19BB0
@@ -1157,7 +1157,7 @@ loc_19BB0:
 	or	ax, ax
 	jz	short loc_19C46
 	getCharP	[bp+var_4], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -1200,7 +1200,7 @@ loc_19BB0:
 	jmp	short loc_19CB5
 	jmp	short loc_19CB2
 loc_19C46:
-	mov	ax, offset aSorryBut
+	mov	ax, offset s_sorryBut
 	push	ds
 	push	ax
 	lea	ax, [bp+var_106]
@@ -1211,7 +1211,7 @@ loc_19C46:
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
 	getCharP	[bp+var_4], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -1337,13 +1337,13 @@ loc_19D50:
 	jge	short loc_19D90
 	getCharP	[bp+charNo], bx
 	add	bx, [bp+var_2]
-	mov	al, gs:roster.inventory.itemFlags[bx]
+	mov	al, gs:party.inventory.itemFlags[bx]
 	sub	ah, ah
 	cmp	ax, [bp+arg_0]
 	jnz	short loc_19D8E
 	mov	al, byte ptr [bp+var_2]
 	dec	al
-	mov	gs:byte_4227E, al
+	mov	gs:g_usedItemSlotNumber, al
 	mov	al, byte ptr [bp+charNo]
 	mov	gs:byte_42288, al
 	mov	ax, 1
@@ -1554,7 +1554,7 @@ loc_19EC5:
 	jge	short loc_19F06
 	getCharP	[bp+charNo], bx
 	add	bx, [bp+var_2]
-	mov	al, gs:roster.inventory.itemFlags[bx]
+	mov	al, gs:party.inventory.itemFlags[bx]
 	sub	ah, ah
 	cmp	ax, [bp+arg_0]
 	jnz	short loc_19F04
@@ -1724,24 +1724,24 @@ loc_1A01A:
 	mov	ax, [bp+var_2]
 	mov	cx, ax
 	getCharP	[bp+var_4], bx
-	cmp	gs:roster.currentHP[bx], cx
+	cmp	gs:party.currentHP[bx], cx
 	jbe	short loc_1A047
 	getCharP	[bp+var_4], bx
-	sub	gs:roster.currentHP[bx], cx
+	sub	gs:party.currentHP[bx], cx
 	jmp	short loc_1A05C
 loc_1A047:
 	getCharP	[bp+var_4], si
-	mov	gs:roster.currentHP[si], 0
-	or	gs:roster.status[si], 4
+	mov	gs:party.currentHP[si], 0
+	or	gs:party.status[si], 4
 loc_1A05C:
 	jmp	short loc_1A017
 loc_1A05E:
-	call	rost_getLastActiveSlot
+	call	party_getLastSlot
 	cmp	ax, 7
 	jle	short loc_1A073
 	mov	buildingRvalMaybe, 5
 loc_1A073:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	mov	ax, word ptr [bp+arg_0]
 	mov	dx, word ptr [bp+arg_0+2]
 	jmp	short $+2
@@ -1851,10 +1851,10 @@ mfunc_invANDc3 proc far
 	mov	[bp+var_2], ax
 	mov	al, 78h	
 	mul	gs:byte_42288
-	mov	cl, gs:byte_4227E
+	mov	cl, gs:g_usedItemSlotNumber
 	sub	ch, ch
 	add	ax, cx
-	add	ax, offset roster.inventory
+	add	ax, offset party.inventory
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], seg seg027
 	lfs	bx, [bp+var_6]
@@ -1886,17 +1886,17 @@ mfunc_addToInv proc far
 	mov	al, 78h	
 	mul	gs:byte_42288
 	mov	si, ax
-	mov	al, gs:byte_4227E
+	mov	al, gs:g_usedItemSlotNumber
 	sub	ah, ah
 	add	si, ax
-	mov	al, gs:roster.inventory.itemCount[si]
+	mov	al, gs:party.inventory.itemCount[si]
 	lfs	bx, [bp+arg_0]
 	inc	word ptr [bp+arg_0]
 	mov	cl, fs:[bx]
 	sub	ch, ch
 	add	ax, cx
 	mov	[bp+var_2], ax
-	mov	al, gs:roster.inventory.itemNo[si]
+	mov	al, gs:party.inventory.itemNo[si]
 	sub	ah, ah
 	mov	[bp+var_4], ax
 	cmp	[bp+var_2], 0FEh 
@@ -1914,10 +1914,10 @@ loc_1A1FC:
 	mov	al, 78h	
 	mul	gs:byte_42288
 	mov	bx, ax
-	mov	al, gs:byte_4227E
+	mov	al, gs:g_usedItemSlotNumber
 	sub	ah, ah
 	add	bx, ax
-	mov	gs:roster.inventory.itemCount[bx], cl
+	mov	gs:party.inventory.itemCount[bx], cl
 	mov	ax, word ptr [bp+arg_0]
 	mov	dx, word ptr [bp+arg_0+2]
 	jmp	short $+2
@@ -1942,10 +1942,10 @@ mfunc_subFromInv proc far
 	call	someStackOperation
 	mov	al, 78h	
 	mul	gs:byte_42288
-	mov	cl, gs:byte_4227E
+	mov	cl, gs:g_usedItemSlotNumber
 	sub	ch, ch
 	add	ax, cx
-	add	ax, offset roster.inventory.itemCount
+	add	ax, offset party.inventory.itemCount
 	mov	word ptr [bp+var_A], ax
 	mov	word ptr [bp+var_A+2], seg seg027
 	lfs	bx, [bp+var_A]
@@ -2093,7 +2093,7 @@ mfunc_getStrFromUser proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_readString
+	call	readString
 	add	sp, 6
 	mov	[bp+var_2], 0
 	jmp	short loc_1A3A4
@@ -2247,7 +2247,7 @@ mfunc_getCharacter proc	far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+var_2], ax
 	or	ax, ax
 	jl	short loc_1A4CA
@@ -2296,8 +2296,8 @@ mfunc_ifGiveGold proc far
 	mov	al, 78h	
 	mul	gs:byte_42288
 	mov	bx, ax
-	mov	ax, word ptr gs:roster.gold[bx]
-	mov	dx, word ptr gs:(roster.gold+2)[bx]
+	mov	ax, word ptr gs:party.gold[bx]
+	mov	dx, word ptr gs:(party.gold+2)[bx]
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
 	mov	bx, [bp+var_6]
@@ -2320,8 +2320,8 @@ loc_1A54C:
 	mov	al, 78h	
 	mul	gs:byte_42288
 	mov	bx, ax
-	sub	word ptr gs:roster.gold[bx], cx
-	sbb	word ptr gs:(roster.gold+2)[bx], dx
+	sub	word ptr gs:party.gold[bx], cx
+	sbb	word ptr gs:(party.gold+2)[bx], dx
 	jmp	short loc_1A58A
 loc_1A571:
 	mov	ax, offset aYouDonTHaveEno
@@ -2382,8 +2382,8 @@ sub_1A5C0 proc far
 	mov	al, 78h	
 	mul	gs:byte_42288
 	mov	bx, ax
-	add	word ptr gs:roster.gold[bx], cx
-	adc	word ptr gs:(roster.gold+2)[bx], dx
+	add	word ptr gs:party.gold[bx], cx
+	adc	word ptr gs:(party.gold+2)[bx], dx
 	mov	ax, word ptr [bp+arg_0]
 	mov	dx, word ptr [bp+arg_0+2]
 	jmp	short $+2
@@ -2621,10 +2621,10 @@ mfunc_chHasItemNo proc far
 	mov	al, 78h	
 	mul	gs:byte_42288
 	mov	bx, ax
-	mov	al, gs:byte_4227E
+	mov	al, gs:g_usedItemSlotNumber
 	sub	ah, ah
 	add	bx, ax
-	mov	al, gs:roster.inventory.itemNo[bx]
+	mov	al, gs:party.inventory.itemNo[bx]
 	cmp	ax, [bp+var_2]
 	jnz	short loc_1A7FF
 	mov	ax, 1
@@ -2657,7 +2657,7 @@ mfunc_packInvMaybe proc	far
 	mov	al, gs:byte_42288
 	sub	ah, ah
 	mov	gs:word_4244C, ax
-	mov	al, gs:byte_4227E
+	mov	al, gs:g_usedItemSlotNumber
 	mov	gs:word_42416, ax
 	call	inven_pack
 	mov	ax, [bp+arg_0]
@@ -2685,7 +2685,7 @@ mfunc_addMonToParty proc far
 	mov	al, fs:[bx]
 	sub	ah, ah
 	mov	[bp+var_4], ax
-	call	findEmptyRosterNum
+	call	party_findEmptySlot
 	mov	[bp+var_2], ax
 	cmp	ax, 7
 	jge	short loc_1A89E
@@ -2697,7 +2697,7 @@ mfunc_addMonToParty proc far
 	push	[bp+var_2]
 	call	_sp_convertMonToSummon
 	add	sp, 6
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 loc_1A89E:
 	cmp	[bp+var_2], 7
 	jge	short loc_1A8A9
@@ -2739,9 +2739,9 @@ loc_1A8DA:
 	cmp	[bp+var_2], 7
 	jge	short loc_1A917
 	getCharP	[bp+var_2], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jnz	short loc_1A915
-	lea	ax, roster._name[si]
+	lea	ax, party._name[si]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -2789,7 +2789,7 @@ mfunc_clrPrtStrOffset proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	call	clearTextWindow
+	call	text_clear
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	push	cs
@@ -2841,9 +2841,9 @@ mfunc_rmMonFromParty proc far
 	mov	al, gs:byte_42288
 	sub	ah, ah
 	push	ax
-	call	rost_removeMember
+	call	party_pack
 	add	sp, 2
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	mov	ax, [bp+arg_0]
 	mov	dx, [bp+arg_2]
 	jmp	short $+2
@@ -2887,7 +2887,7 @@ loc_1A9FF:
 	jge	short loc_1AA36
 	getCharP	[bp+var_4], bx
 	add	bx, [bp+var_2]
-	mov	al, gs:roster.chronoQuest[bx]
+	mov	al, gs:party.chronoQuest[bx]
 	sub	ah, ah
 	mov	bx, [bp+var_8]
 	mov	cl, byteMaskList[bx]
@@ -2948,13 +2948,13 @@ loc_1AA82:
 	cmp	[bp+charNo], 7
 	jge	short loc_1AACB
 	getCharP	[bp+charNo], si
-	cmp	byte ptr gs:roster._name[si], 0
+	cmp	byte ptr gs:party._name[si], 0
 	jz	short loc_1AAC9
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jnb	short loc_1AAC9
 	mov	bx, [bp+qByte]
 	add	bx, si
-	mov	al, gs:roster.chronoQuest[bx]
+	mov	al, gs:party.chronoQuest[bx]
 	sub	ah, ah
 	mov	bx, [bp+qIndex]
 	mov	cl, byteMaskList[bx]
@@ -3040,13 +3040,13 @@ loc_1AB38:
 	cmp	[bp+charNo], 7
 	jge	short loc_1AB81
 	getCharP	[bp+charNo], si
-	cmp	byte ptr gs:roster._name[si], 0
+	cmp	byte ptr gs:party._name[si], 0
 	jz	short loc_1AB7F
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jnb	short loc_1AB7F
 	mov	bx, [bp+var_2]
 	add	bx, si
-	mov	al, gs:roster.chronoQuest[bx]
+	mov	al, gs:party.chronoQuest[bx]
 	sub	ah, ah
 	mov	bx, [bp+var_8]
 	mov	cl, byteMaskList[bx]
@@ -3118,15 +3118,15 @@ loc_1ABDD:
 	cmp	[bp+charNo], 7
 	jge	short loc_1AC1B
 	getCharP	[bp+charNo], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jnb	short loc_1AC19
-	cmp	byte ptr gs:roster._name[si], 0
+	cmp	byte ptr gs:party._name[si], 0
 	jz	short loc_1AC19
 	mov	bx, [bp+var_6]
 	mov	al, byteMaskList[bx]
 	mov	bx, [bp+var_2]
 	add	bx, si
-	or	gs:roster.chronoQuest[bx], al
+	or	gs:party.chronoQuest[bx], al
 loc_1AC19:
 	jmp	short loc_1ABDA
 loc_1AC1B:
@@ -3169,15 +3169,15 @@ loc_1AC53:
 	cmp	[bp+var_6], 7
 	jge	short loc_1AC91
 	getCharP	[bp+var_6], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jnb	short loc_1AC8F
-	cmp	byte ptr gs:roster._name[si], 0
+	cmp	byte ptr gs:party._name[si], 0
 	jz	short loc_1AC8F
 	mov	bx, [bp+var_8]
 	mov	al, flagMaskList[bx]
 	mov	bx, [bp+var_2]
 	add	bx, si
-	and	gs:roster.chronoQuest[bx], al
+	and	gs:party.chronoQuest[bx], al
 loc_1AC8F:
 	jmp	short loc_1AC50
 loc_1AC91:
@@ -3249,10 +3249,10 @@ loc_1ACF1:
 	cmp	[bp+counter], 7
 	jge	short loc_1AD1E
 	getCharP	[bp+counter], si
-	cmp	byte ptr gs:roster._name[si], 0
+	cmp	byte ptr gs:party._name[si], 0
 	jz	short loc_1AD1C
 	mov	ax, [bp+level]
-	cmp	gs:roster.level[si], ax
+	cmp	gs:party.level[si], ax
 	jnb	short loc_1AD1C
 	mov	[bp+rval], 0
 	jmp	short loc_1AD1E
@@ -3413,7 +3413,7 @@ mfunc_ifIsClass	proc far
 	mov	al, 78h	
 	mul	gs:byte_42288
 	mov	bx, ax
-	mov	al, gs:roster.class[bx]
+	mov	al, gs:party.class[bx]
 	sub	ah, ah
 	cmp	ax, [bp+var_2]
 	jnz	short loc_1AEC1
@@ -3488,7 +3488,7 @@ mfunc_clrAndTeleport proc far
 	call	someStackOperation
 	mov	ax, 0FEh
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 	push	[bp+arg_2]
 	push	[bp+arg_0]

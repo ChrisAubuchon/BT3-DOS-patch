@@ -1,7 +1,6 @@
 ; Segment type:	Pure data
 dseg segment para public 'DATA' use16
 	assume cs:dseg
-;byte_foobar	db 200h dup(0)
 word_42670	dw 0
 word_42672	dw 0
 byte_42674	db 0
@@ -14,10 +13,10 @@ aComp		db 'comp',0
 aRgb		db	'rgb',0
 aEga		db	'ega',0
 aTdy		db	'tdy',0
-aThief_cfg	db 'thief.cfg',0
-aTit0		db 'tit0',0
-aTitle		db 'title',0
-aMusic_all	db 'music.all',0
+s_thiefCfg	db 'thief.cfg',0
+s_firstTitle		db 'tit0',0
+s_titleScreen		db 'title',0
+s_musicAll	db 'music.all',0
 aStuckElipsis	db 'Stuck....',0
 graphicsDrivers	dd aComp, aRgb,	aEga, aTdy; 0
 aFacing		db 'facing ',0
@@ -35,24 +34,19 @@ aCityGates_	db ' city gates.',0
 aEntranceToTheC	db ' entrance to the city.',0
 aGreatIceKeep_	db ' great ice keep.',0
 aEntranceOfTheF	db ' entrance of the forest.',0
-aPausing	db 'pausing',0
+s_pausing	db 'pausing',0
 		db    0
-aWhoWillYouDrop? db 'Who will you drop?',0
+s_whoToDrop db 'Who will you drop?',0
 		db    0
-aYouCanTDropAPart db 'You can',27h,'t drop a party member.',0
+s_cantDropCharacter db 'You can',27h,'t drop a party member.',0
 		db    0
-aYouReIn db 'You',27h,'re in ',0
+s_youreIn db 'You',27h,'re in ',0
 		db    0
-aAnd_2		db ' and ',0
-aPaceS_1	db ' pace/\s',0
+s_spAndsp		db ' and ',0
 		db    0
-aNorthSouth_0	db ' /north\south\',0
-		db    0
-aEastWest_0 db ' /east\west\',0
-		db    0
-aItSNow		db 0Ah,0Ah, 'It',27h,'s now ',0
+s_itsNow		db 0Ah,0Ah, 'It',27h,'s now ',0
 timeOfDay	dd aEarlyMorning_, aMidMorning_, aNoon_, aAfternoon_,	aDusk_,	aEvening_, aMidnight_, aAfterMidnight_
-aOfAtThe	db ' /of\at\ the',0
+s_ofAtThe	db ' /of\at\ the',0
 		db    0
 locationString	dd aRefugeeCampOfS, aCityGates_,	aEntranceToTheC, aGreatIceKeep_, aEntranceOfTheF; 0
 byte_428A6	db 0Ch, 0Ah,	7, 0Fh,	6, 6, 7, 9; 0
@@ -64,19 +58,19 @@ byte_428BA	db 0, 1, 2, 1, 3, 2,	1, 2; 0
 byte_428C4	db 7, 7, 7, 7, 0, 0,	0, 1; 0
 		db 1, 1, 1, 2, 2, 2, 3,	3; 8
 		db 4, 4, 4, 5, 5, 5, 6,	6; 16
-aWhoWillUseAnItem db 'Who will use an item?',0
-aUseOn		db 'Use on ',0
-aPowerless_	db 'Powerless.',0
+s_whoUsesItem db 'Who will use an item?',0
+s_UseOn		db 'Use on ',0
+s_powerless	db 'Powerless.',0
 		db    0
-aDoYouWishToResto db 'Do you wish to restore your last saved game?',0
+s_confirmRestore db 'Do you wish to restore your last saved game?',0
 		db    0
-aDoYouWishToSaveY db 'Do you wish to save your game?',0
+s_confirmSave db 'Do you wish to save your game?',0
 		db    0
-aSavingTheGame_	db 'Saving the game.',0
+s_savingTheGame	db 'Saving the game.',0
 		db    0
-aYourGameHasBeenS	db 'Your game has been saved to disk.',0Ah, 0Ah
+s_gameHasBeenSaved	db 'Your game has been saved to disk.',0Ah, 0Ah
 			db 'Do you wish to exit to DOS?',0
-aHelpForThoseInNeed17	db 'HELP for those in need:',0Ah, 0Ah
+s_helpMessage1	db 'HELP for those in need:',0Ah, 0Ah
 			db '1-7 = Player info',0Ah
 			db 'Arrows = Move, turn',0Ah
 			db '? = Where are we',0Ah
@@ -84,7 +78,7 @@ aHelpForThoseInNeed17	db 'HELP for those in need:',0Ah, 0Ah
 			db 'S = Save the game',0Ah
 			db 'T = Time out',0Ah
 			db 'V = Sound on/off',0Ah,0
-aMoreHelpBPlayABardTu	db 'More HELP:',0Ah, 0Ah
+s_helpMessage2	db 'More HELP:',0Ah, 0Ah
 			db 'B = Play a Bard tune',0Ah
 			db 'C = Cast a spell',0Ah
 			db 'F1-F7 = Cast a spell',0Ah
@@ -93,19 +87,19 @@ aMoreHelpBPlayABardTu	db 'More HELP:',0Ah, 0Ah
 			db 'P = Party combat',0Ah
 			db 'D = Drop special party member',0Ah
 			db 'U = Use an item',0Ah,0
-aNewOrder	db 'New Order:',0Ah,0Ah,0
+s_newOrder	db 'New Order:',0Ah,0Ah,0
 		db    0
-gtChar		db '>'
+s_gtChar		db '>'
 byte_42AF5	db 78h				; XXX - Doesn't seem to be used
 		db 20h
 		db 0
-aUseThisOrder?	db 0Ah,'Use this order?',0
-aGame_sav	db 'game.sav',0
-aCanTOpenGameSave	db 'Can',27h,'t open game save file',0
+s_useThisOrder	db 0Ah,'Use this order?',0
+s_gameSav	db 'game.sav',0
+s_cantOpenGameSave	db 'Can',27h,'t open game save file',0
 			db    0
-word_42B36	dw 1
-aQuitTheGame?	db 'Quit the game?',0
-aYouWillLoseYou	db 'You will lose your game status.',0Ah
+g_soundActiveFlag	dw 1
+s_confirmQuit	db 'Quit the game?',0
+s_loseProgressConfirm	db 'You will lose your game status.',0Ah
 		db 0Ah, 0Ah, 0Ah
 		db '  Do you wish to quit?',0
 align 2
@@ -124,7 +118,7 @@ aChronomancer	db 'Chronomancer',0
 aGeomancer	db 'Geomancer',0
 aMonster	db 'Monster',0
 aIllusion	db 'Illusion',0
-aThouArtInTheCa	db 'Thou art in the Camp of Skara Brae.'
+s_campMenuString	db 'Thou art in the Camp of Skara Brae.'
 		db 0Ah
 		db 0Ah
 		db '@Add a member',0Ah
@@ -136,14 +130,14 @@ aThouArtInTheCa	db 'Thou art in the Camp of Skara Brae.'
 		db '@Save the party',0Ah
 		db '@Leave the game',0Ah
 		db '@Enter wilderness',0
-aPressReturnToS	db 'Press <RETURN> to save off all char'
+s_saveAndExit	db 'Press <RETURN> to save off all char'
 		db 'acters and end game play. Or press '
 		db 'ESC to go back.',0
-aDoYouWishYourC	db 'Do you wish your character to be',0Ah
+s_genderOptions	db 'Do you wish your character to be',0Ah
 		db 'Male or',0Ah
 		db 'Female?',0
 align 2
-aSelectARaceFor	db 'Select a race for your new character:',0Ah,0Ah
+s_raceOptions	db 'Select a race for your new character:',0Ah,0Ah
 		db '1) Human',0Ah
 		db '2) Elf',0Ah
 		db '3) Dwarf',0Ah
@@ -152,30 +146,30 @@ aSelectARaceFor	db 'Select a race for your new character:',0Ah,0Ah
 		db '6) Half-Orc',0Ah
 		db '7) Gnome',0
 align 2
-aNameYourNewCha	db 'Name your new character --',0
+s_nameYourCharacter	db 'Name your new character --',0
 align 2
-aSelectWhichPar	db 'Select which party member to remove or...',0
-aRemoveThemAll	db 'Remove them all!',0
+s_whichPartyMemberToRemove	db 'Select which party member to remove or...',0
+s_removeAll	db 'Remove them all!',0
 align 2
-aNameToSavePart	db 'Name to save party under?',0
-aDeleteWho?	db 'Delete Who?',0
-aIsCurrentlyInT	db ' is currently in the party. Remove from the party first.',0
+s_askPartyName	db 'Name to save party under?',0
+s_deleteWho	db 'Delete Who?',0
+s_currentlyInParty	db ' is currently in the party. Remove from the party first.',0
 align 2
-aAreYouSureYouW	db 'Are you sure you want to delete ',0
+s_confirmDelete	db 'Are you sure you want to delete ',0
 align 2
-aThereAreNoChar	db 'There are no characters on this disk.',0
-aWhoShallJoin?	db 'Who shall join?',0
-aIsAlreadyInThe	db ' is already in the party.',0
-aThereIsAlready	db 'There is already a character with that name in the roster.',0
+s_noCharsOnDisk	db 'There are no characters on this disk.',0
+s_whoJoins	db 'Who shall join?',0
+s_alreadyInParty	db ' is already in the party.',0
+s_nameAlreadyExists	db 'There is already a character with that name in the party.',0
 align 2
-aTheRosterIsFul	db 'The roster is full.',0
-aThereSNoOneHer	db 'There',27h,'s no one here named that!',0
-aRenameWho?	db 'Rename Who?',0
+s_rosterIsFull	db 'The roster is full.',0
+s_noOneHereNamedThat	db 'There',27h,'s no one here named that!',0
+s_renameWho	db 'Rename Who?',0
 aYouCanTRenameA	db 'You can',27h,'t rename a party list!',0
 align 2
-aWhatIs		db 'What is ',0
+s_whatIs		db 'What is ',0
 align 2
-aSNewName?	db 27h,'s new name?',0
+s_newName	db 27h,'s new name?',0
 align 2
 byte_42F8C	db 33, 48, 54, 79, 54, 79, 54, 79, 54, 79, 33; 0
 		db 48, 33, 48, 33, 48, 33, 48, 33, 48, 54, 79; 11
@@ -214,46 +208,46 @@ classString	dd aWarrior		    ; 0
 		dd aGeomancer		; 12
 		dd aMonster		; 13
 		dd aIllusion		; 14
-aTheRuin	db 'The Ruin',0
-off_430BC	dd camp_addMember
+s_ruinTitle	db 'The Ruin',0
+g_campActionFunctions	dd camp_addMember
 		dd camp_removeMember
 		dd camp_renameMember
 		dd camp_createMember
 		dd transferCharacter
-		dd camp_deleteCharacter
-		dd saveParty
-		dd saveAndExitMaybe
-		dd enterWilderness
-aThieves_inf	db	'thieves.inf',0
-aParties_inf	db	'parties.inf',0
-aHailTravelersS	db 'Hail, travelers! Step to the bar and I',27h,'ll draw you a tankard.',0Ah
+		dd camp_deleteMember
+		dd camp_saveParty
+		dd camp_saveAndExit
+		dd camp_exit
+s_thievesInf	db	'thieves.inf',0
+s_partiesInf	db	'parties.inf',0
+s_tavernGreeting	db 'Hail, travelers! Step to the bar and I',27h,'ll draw you a tankard.',0Ah
 		db 'You can:',0Ah
 		db 'Order a drink',0Ah
 		db 'Talk to barkeep',0Ah
 		db 'Exit the tavern',0
 align 2
-aWhoWillOrderAD	db 'Who will order a drink?',0
-aSeatThyself	db	'Seat thyself,',0Ah,0
+s_whoWillOrder	db 'Who will order a drink?',0
+s_seatThyself	db	'Seat thyself,',0Ah,0
 align 2
-aWhatLlItBe?Ale	db 'What',27h,'ll it be?',0Ah
+s_drinkOptions	db 'What',27h,'ll it be?',0Ah
 		db 'Ale',0Ah
 		db 'Beer',0Ah
 		db 'Mead',0Ah
 		db 'Foul spirits',0Ah
 		db 'Ginger Ale',0
 align 2
-aThouAreInNoCon	db 'Thou are in no condition to order anything.',0
-aInFactThyParty	db 'In fact, thy party is a disgrace..',0Ah
+s_cantOrder	db 'Thou are in no condition to order anything.',0
+s_partyIsDisgrace	db 'In fact, thy party is a disgrace..',0Ah
 		db 'Bouncers!!!',0
 align 2
-aWillYouHaveIt_	db 'Will you have it...',0Ah
+s_hereOrToGo	db 'Will you have it...',0Ah
 		db 'Here or',0Ah
 		db 'To go?',0
 align 2
-aBurpNotTooBad_	db '(Burp!) Not too bad.',0
+s_burpNotBad	db '(Burp!) Not too bad.',0
 align 2
-aMyGoodnessThat	db 'My goodness, that',27h,'s good stuff.',0
-aNowThatSARealT	db 'Now that',27h,'s a real thirst quencher!',0
+s_goodStuff	db 'My goodness, that',27h,'s good stuff.',0
+s_thirstQuencher	db 'Now that',27h,'s a real thirst quencher!',0
 align 2
 aButYouFeelALit	db 'But you feel a little light-headed.'
 		db 0
@@ -263,22 +257,22 @@ aYouSeemToHaveA	db 'You seem to have a hard time staying on the bar stool.',0
 align 2
 aYouCollapseOnT	db 'You collapse on the floor.',0
 align 2
-aSorryBut	db 'Sorry but ',0
+s_sorryBut	db 'Sorry but ',0
 align 2
-aCanTCarryAnyMo	db ' can',27h,'t carry any more items.',0
+s_cantCarryAnyMore	db ' can',27h,'t carry any more items.',0
 align 2
-aTheBartenderFi	db 'The bartender fills a wineskin with your order and hands it to you.',0
-aWhoWillTalkToT	db 'Who will talk to the barkeep?',0
-aYouAreInNoCond	db 'You are in no condition to talk.',0
+s_barkeepFillsWineskin	db 'The bartender fills a wineskin with your order and hands it to you.',0
+s_whoTalksToBarkeep	db 'Who will talk to the barkeep?',0
+s_noConditionToTalk	db 'You are in no condition to talk.',0
 align 2
-aTalkAinTCheap db '"Talk ain',27h,'t cheap,',0
+s_talkAintCheap db '"Talk ain',27h,'t cheap,',0
 align 2
-aBeerBreath	db ' Beer Breath',0
+s_beerBreath	db ' Beer Breath',0
 align 2
-aTheBarkeepSays	db '" the barkeep says.',0
-aHowMuchWillYou	db 'How much will you tip him?',0
+s_barkeepSays	db '" the barkeep says.',0
+s_howMuchWillTip	db 'How much will you tip him?',0
 align 2
-aMoneyTalksFrie	db '"Money talks, friend," he says.',0
+s_moneyTalks	db '"Money talks, friend," he says.',0
 aThereSABuildin	db '"There',27h,'s a building in Skara Brae where some of the survivors stashed their goods. It may be helpful," smiles the bartender',0
 aBeOnTheLookout	db '"Be on the lookout for the magic gems, your spellcasters will need them."',0
 aThereLiesAnoth	db '"There lies another bar in Celaria Bree, seek it. It exists only in the dimension called Lucencia."',0
@@ -291,7 +285,7 @@ aTheKeyToFindin	db '"The key to finding Sceadu is finding the lock."',0
 align 2
 aSceaduCanBeFou	db '"Sceadu can be found in the middle of Nowhere."',0
 aSeekWerraInTar	db '"Seek Werra in Tarmitia."',0
-aNotEnoughGold_	db 'Not enough gold.',0
+s_notEnoughGold	db 'Not enough gold.',0
 align 2
 barkeepSayings	dd aThereSABuildin      ; 0
 		dd aBeOnTheLookout	; 1
@@ -308,8 +302,8 @@ barkeepSayings	dd aThereSABuildin      ; 0
 		dd aSeekWerraInTar	; 12
 		dd aTheKeyToFindin	; 13
 		dd aSceaduCanBeFou	; 14
-aAbmfg		db 'ABMFG',0
-byte_437D8	db 3, 2, 4, 6, 1, 3	   ; 0
+s_drinkOptionKeys		db 'ABMFG',0
+g_drinkPriceList	db 3, 2, 4, 6, 1, 3	   ; 0
 nullDrunkValue	dw 0
 drunkString	dd nullDrunkValue	    ; 0
 		dd nullDrunkValue	; 1
@@ -324,52 +318,52 @@ drunkString	dd nullDrunkValue	    ; 0
 		dd aYouSeemToHaveA	; 10
 		dd aYouCollapseOnT	; 11
 		dd aYouCollapseOnT	; 12
-tav_drinkStrength db 1,	2, 3, 4, 0, 0	  ; 0
-aScrapwood	db 'Scrapwood',0
-aStaggerInn	db 'Stagger Inn',0
-aHicHaven	db 'Hic Haven',0
-aCheers		db 'Cheers',0
-aTavern		db 'Tavern',0
+tavern_drinkStrength db 1,	2, 3, 4, 0, 0	  ; 0
+s_scrapwood	db 'Scrapwood',0
+s_staggerInn	db 'Stagger Inn',0
+s_hicHaven	db 'Hic Haven',0
+s_cheers	db 'Cheers',0
+s_tavern	db 'Tavern',0
 tavCoords	tavernLoc_t <12, 17, 0, 0, 0>; 0
 		tavernLoc_t <7,	12, 3, 2, 5>; 1
 		tavernLoc_t <2,	3, 3, 4, 5>; 2
 		tavernLoc_t <13, 7, 6, 6, 5>; 3
 		tavernLoc_t <99, 99, 99, 8, 10>; 4
 		db    0
-tavernNames	dd aScrapwood	    ; 0
-		dd aStaggerInn		; 1
-		dd aHicHaven		; 2
-		dd aCheers		; 3
-		dd aTavern		; 4
+tavernNames	dd s_scrapwood	    ; 0
+		dd s_staggerInn		; 1
+		dd s_hicHaven		; 2
+		dd s_cheers		; 3
+		dd s_tavern		; 4
 byte_43876	db 0, 50, 250, 244, 232 ; 0
 		db    0
-aWelcomeOhWearyOne	db 'Welcome, oh weary ones, to our humble temple.',0Ah
+s_templeGreeting	db 'Welcome, oh weary ones, to our humble temple.',0Ah
 			db 'Dost thou wish to...',0Ah
 			db 'Heal a character',0Ah
 			db 'Pool thy gold',0Ah
 			db 'Exit temple',0
-aWhomShallGatherTh	db 'Whom shall gather thy gold?',0
-aNowHathAllTheGold	db ' now hath all the gold.',0
-aWhoNeedethHealing	db 'Who needeth healing?',0
+s_whomGathersGold	db 'Whom shall gather thy gold?',0
+s_hathAllTheGold	db ' now hath all the gold.',0
+s_whoNeedsHealing	db 'Who needeth healing?',0
 			db    0
-aIsInBadShapeIndeed_	db	' is in bad shape, indeed. ',0
+s_isInBadShape	db	' is in bad shape, indeed. ',0
 			db    0
-aInGold_WhoWillForfeit	db ' in gold. Who will forfeit the gold?',0
+s_templeGoldForfeit	db ' in gold. Who will forfeit the gold?',0
 			db    0
-aSorryButWithoutProper	db 'Sorry, but without proper sacrifice the prayer will fail.',0
-aThePriestsLayHandsOn	db 'The priests lay hands on ',0
-aElipsis		db '...',0
-aElipsisAnd		db '...and ',0
-aIsHealed		db ' is healed!',0
-aHathBeenDrainedOfLife	db ' hath been drained of life force. ',0
+s_sorryButWithoutProper	db 'Sorry, but without proper sacrifice the prayer will fail.',0
+s_layHands	db 'The priests lay hands on ',0
+s_elipsis		db '...',0
+s_elipsisAnd		db '...and ',0
+s_isHealed		db ' is healed!',0
+s_drainedOfLife	db ' hath been drained of life force. ',0
 			db    0
-aThouMustSacrifice	db	'Thou must sacrifice ',0
+s_thouMustSacrifice	db	'Thou must sacrifice ',0
 			db    0
-aDoesNotRequireAnyHeal	db ' does not require any healing.',0
+s_dontNeedHealing	db ' does not require any healing.',0
 			db    0
-aHasWoundsWhichNeedTen	db ' has wounds which need tending. ',0
+s_hasWounds	db ' has wounds which need tending. ',0
 			db    0
-aTheDonationWillBe	db 'The donation will be ',0
+s_donationWillBe	db 'The donation will be ',0
 temple_healPrice	dw 0, 400, 300, 900, 1120, 220, 500, 600, 900			; 8
 aHe		db 'he',0
 aShe		db 'she',0
@@ -379,17 +373,17 @@ aHer		db 'her',0
 aHis		db 'his',0
 aIts		db 'its',0
 pronounString	dd aHe, aShe, aIt, aHim, aHer, aIt, aHis, aHer, aIts		; 7
-aShrine		db 'Shrine',0
-aForestLawn	db 'Forest Lawn',0
-aAlliria	db 'Alliria',0
-aTwilightTmp	db 'Twilight Tmp',0
+s_shrine		db 'Shrine',0
+s_forestLawn	db 'Forest Lawn',0
+s_alliria	db 'Alliria',0
+s_twilightTemple	db 'Twilight Tmp',0
 templeLoc	templeLoc_t <8, 1, 0,	0>; 0
 		templeLoc_t <10, 4, 3, 2>; 1
 		templeLoc_t <2,	7, 6, 4>; 2
 		templeLoc_t <255, 255, 255, 6>;	3
-templeTitles	dd aShrine, aForestLawn, aAlliria,	aTwilightTmp; 0
-byte_43B50	db 2, 1, 10h, 40h, 20h, 8, 4, 0; 0
-byte_43B58	db 2, 1, 5, 7, 6, 4,	3, 0; 0
+templeTitles	dd s_shrine, s_forestLawn, s_alliria,	s_twilightTemple; 0
+templeStatusBitmasks	db 2, 1, 10h, 40h, 20h, 8, 4, 0; 0
+templeHealPriceIndex	db 2, 1, 5, 7, 6, 4,	3, 0; 0
 statusHealMask	db 0FFh,	0FEh, 0FDh, 3, 3, 0EFh,	0DFh, 0BFh, 0FFh, 0		; 8
 fgtrXPReq	dd 2000, 4000, 7000, 10000, 15000, 20000; 0
 		dd 30000, 50000, 80000,	110000,	150000,	200000;	6
@@ -411,32 +405,32 @@ classXPReqs	dd fgtrXPReq, wizdXPReq, sorcXPReq,	magiXPReq; 0
 		dd magiXPReq, fgtrXPReq, fgtrXPReq, fgtrXPReq; 4
 		dd fgtrXPReq, magiXPReq, archXPReq, archXPReq; 8
 		dd geomXPReq		; 12
-aYouAreInAnEmpt	db 'You are in an empty building.',0
-aBuilding	db 'Building',0
+s_emptyBuilding	db 'You are in an empty building.',0
+s_building	db 'Building',0
 align 2
-aThePartyIsInsi	db 'The party is inside a storage building.',0Ah
+s_storageMenu	db 'The party is inside a storage building.',0Ah
 		db 'Who wishes to inspect?',0Ah
 		db 0Ah, 0Ah, 0Ah
 		db 'ESC to exit building',0
 align 2
-aWould		db 'Would ',0
+s_would		db 'Would ',0
 align 2
-aLikeToPickup__	db ' like to pickup...',0
+s_likeToPickup	db ' like to pickup...',0
 align 2
-aTheBuildingIsE	db 'The building is empty.',0
+s_buildingIsEmpty	db 'The building is empty.',0
 align 2
 aPickUp___	db 'Pick up...',0
 align 2
-aAllFull	db 'All full!',0
-aYouPickUpTheIt	db 'You pick up the item.',0
+s_allFull	db 'All full!',0
+s_youPickUpItem	db 'You pick up the item.',0
 
-aInventor_stf	db 'inventor.stf',0
+a_inventoryStf	db 'inventor.stf',0
 align 2
 aWildwal_grp	db	'wildwal.grp',0
 aSkara_grp	db 'skara.grp',0
 aGdung_grp	db 'gdung.grp',0
 aDisk1		db 'Disk 1',0
-aDisk2		db 'Disk 2',0
+s_diskTwo		db 'Disk 2',0
 aDisk3		db 'Disk 3',0
 aMaps_lo	db 'maps.lo',0
 aMaps_hi	db 'maps.hi',0
@@ -445,14 +439,14 @@ aMonsterh	db 'monsterh',0
 aLow_pic	db 'low.pic',0
 aHi_pic		db 'hi.pic',0
 align 2
-aPleaseInsertDi	db 'Please insert disk ',0
-byte_43EBC	db 0FFh, 0, 4, 8, 4,	0, 0, 4; 0
+s_insertDisk	db 'Please insert disk ',0
+minimap_bitmaskOffsetList	db 0FFh, 0, 4, 8, 4, 0, 0, 4; 0
 		db 0, 0, 4, 8, 4, 0, 0,	4; 8
-aOldPsndnutspossparade	db 'Old PsndNutsPossParaDeadSton',0
+s_statusAbbreviations	db 'Old PsndNutsPossParaDeadSton',0
 			db    0
-byte_43EEA	db stat_old, stat_poisoned, stat_nuts, stat_possessed; 0
+statusBitmaskList	db stat_old, stat_poisoned, stat_nuts, stat_possessed; 0
 		db stat_paralyzed, stat_dead, stat_stoned, 0; 4
-aWawisocomarobapahumoa	db 'WaWiSoCoMaRoBaPaHuMoArChGeMnIl',0
+classAbbreviations	db 'WaWiSoCoMaRoBaPaHuMoArChGeMnIl',0
 			db    0
 word_43F12	dw 0
 mouseBoxes	mouseBox_t < 0Fh,  0Ah,  6Ah,  7Ah>	; Bigpic Window
@@ -460,87 +454,87 @@ mouseBoxes	mouseBox_t < 0Fh,  0Ah,  6Ah,  7Ah>	; Bigpic Window
 		mouseBox_t < 90h,  0Ch, 0C7h, 132h>	; Roster Area
 		db    0
 		db    0
-off_43F2E	dd aWildwal_grp, aSkara_grp; 0
+map_graphicsTable	dd aWildwal_grp, aSkara_grp; 0
 		dd aSkara_grp, aGdung_grp; 2
 		dd aGdung_grp, aGdung_grp; 4
 byte_43F4A	db 8 dup(0)
 disk1		dw offset aDisk1
 dseg_0		dw seg dseg
-disk2		dd aDisk2
+disk2		dd s_diskTwo
 disk3		dd aDisk3
 mapFiles	dd aMaps_lo, aMaps_hi
 monsterFiles	dd	aMonsterl, aMonsterh
-stru_43F6E	someFileStru	<lev_monsterl, 0>; 0
-		someFileStru <lev_monsterl, 1>;	1
-		someFileStru <lev_monsterl, 2>;	2
-		someFileStru <lev_monsterl, 3>;	3
-		someFileStru <lev_monsterl, 4>;	4
-		someFileStru <lev_monsterh, 0>;	5
-		someFileStru <lev_monsterh, 1>;	6
-		someFileStru <lev_monsterh, 2>;	7
-		someFileStru <lev_monsterh, 3>;	8
-		someFileStru <lev_monsterh, 4>;	9
-		someFileStru <lev_monsterl, 5>;	10
-		someFileStru <lev_monsterl, 6>;	11
-		someFileStru <lev_monsterl, 7>;	12
-		someFileStru <lev_monsterl, 8>;	13
-		someFileStru <lev_monsterl, 9>;	14
-		someFileStru <lev_monsterl, 10>; 15
-		someFileStru <lev_monsterl, 11>; 16
-		someFileStru <lev_monsterl, 12>; 17
-		someFileStru <lev_monsterl, 13>; 18
-		someFileStru <lev_monsterl, 14>; 19
-		someFileStru <lev_monsterl, 15>; 20
-		someFileStru <lev_monsterl, 16>; 21
-		someFileStru <lev_monsterl, 17>; 22
-		someFileStru <lev_monsterl, 18>; 23
-		someFileStru <lev_monsterl, 19>; 24
-		someFileStru <lev_monsterl, 20>; 25
-		someFileStru <lev_monsterl, 21>; 26
-		someFileStru <lev_monsterl, 22>; 27
-		someFileStru <lev_monsterl, 23>; 28
-		someFileStru <lev_monsterl, 24>; 29
-		someFileStru <lev_monsterl, 25>; 30
-		someFileStru <lev_monsterl, 26>; 31
-		someFileStru <lev_monsterl, 27>; 32
-		someFileStru <lev_monsterl, 28>; 33
-		someFileStru <lev_monsterh, 5>;	34
-		someFileStru <lev_monsterh, 6>;	35
-		someFileStru <lev_monsterh, 7>;	36
-		someFileStru <lev_monsterh, 8>;	37
-		someFileStru <lev_monsterh, 9>;	38
-		someFileStru <lev_monsterh, 10>; 39
-		someFileStru <lev_monsterh, 11>; 40
-		someFileStru <lev_monsterh, 12>; 41
-		someFileStru <lev_monsterh, 13>; 42
-		someFileStru <lev_monsterh, 14>; 43
-		someFileStru <lev_monsterh, 15>; 44
-		someFileStru <lev_monsterh, 16>; 45
-		someFileStru <lev_monsterh, 17>; 46
-		someFileStru <lev_monsterh, 18>; 47
-		someFileStru <lev_monsterh, 19>; 48
-		someFileStru <lev_monsterh, 20>; 49
-		someFileStru <lev_monsterl, 29>; 50
-		someFileStru <lev_monsterl, 30>; 51
-		someFileStru <lev_monsterh, 21>; 52
-		someFileStru <lev_monsterh, 22>; 53
-		someFileStru <lev_monsterh, 23>; 54
-		someFileStru <lev_monsterh, 24>; 55
-		someFileStru <lev_monsterh, 25>; 56
-		someFileStru <lev_monsterh, 26>; 57
-		someFileStru <lev_monsterh, 27>; 58
-		someFileStru <lev_monsterh, 28>; 59
-		someFileStru <lev_monsterh, 29>; 60
-		someFileStru <lev_monsterh, 30>; 61
-		someFileStru <lev_monsterl, 31>; 62
-		someFileStru <lev_monsterl, 32>; 63
-		someFileStru <lev_monsterl, 33>; 64
-		someFileStru <lev_monsterl, 34>; 65
-		someFileStru <lev_monsterh, 31>; 66
-		someFileStru <lev_monsterh, 32>; 67
-		someFileStru <lev_monsterh, 33>; 68
-		someFileStru <lev_monsterh, 34>; 69
-		someFileStru <lev_monsterh, 35>; 70
+levelPathTable	levelFile_t	<lev_monsterl, 0>; 0
+		levelFile_t <lev_monsterl, 1>;	1
+		levelFile_t <lev_monsterl, 2>;	2
+		levelFile_t <lev_monsterl, 3>;	3
+		levelFile_t <lev_monsterl, 4>;	4
+		levelFile_t <lev_monsterh, 0>;	5
+		levelFile_t <lev_monsterh, 1>;	6
+		levelFile_t <lev_monsterh, 2>;	7
+		levelFile_t <lev_monsterh, 3>;	8
+		levelFile_t <lev_monsterh, 4>;	9
+		levelFile_t <lev_monsterl, 5>;	10
+		levelFile_t <lev_monsterl, 6>;	11
+		levelFile_t <lev_monsterl, 7>;	12
+		levelFile_t <lev_monsterl, 8>;	13
+		levelFile_t <lev_monsterl, 9>;	14
+		levelFile_t <lev_monsterl, 10>; 15
+		levelFile_t <lev_monsterl, 11>; 16
+		levelFile_t <lev_monsterl, 12>; 17
+		levelFile_t <lev_monsterl, 13>; 18
+		levelFile_t <lev_monsterl, 14>; 19
+		levelFile_t <lev_monsterl, 15>; 20
+		levelFile_t <lev_monsterl, 16>; 21
+		levelFile_t <lev_monsterl, 17>; 22
+		levelFile_t <lev_monsterl, 18>; 23
+		levelFile_t <lev_monsterl, 19>; 24
+		levelFile_t <lev_monsterl, 20>; 25
+		levelFile_t <lev_monsterl, 21>; 26
+		levelFile_t <lev_monsterl, 22>; 27
+		levelFile_t <lev_monsterl, 23>; 28
+		levelFile_t <lev_monsterl, 24>; 29
+		levelFile_t <lev_monsterl, 25>; 30
+		levelFile_t <lev_monsterl, 26>; 31
+		levelFile_t <lev_monsterl, 27>; 32
+		levelFile_t <lev_monsterl, 28>; 33
+		levelFile_t <lev_monsterh, 5>;	34
+		levelFile_t <lev_monsterh, 6>;	35
+		levelFile_t <lev_monsterh, 7>;	36
+		levelFile_t <lev_monsterh, 8>;	37
+		levelFile_t <lev_monsterh, 9>;	38
+		levelFile_t <lev_monsterh, 10>; 39
+		levelFile_t <lev_monsterh, 11>; 40
+		levelFile_t <lev_monsterh, 12>; 41
+		levelFile_t <lev_monsterh, 13>; 42
+		levelFile_t <lev_monsterh, 14>; 43
+		levelFile_t <lev_monsterh, 15>; 44
+		levelFile_t <lev_monsterh, 16>; 45
+		levelFile_t <lev_monsterh, 17>; 46
+		levelFile_t <lev_monsterh, 18>; 47
+		levelFile_t <lev_monsterh, 19>; 48
+		levelFile_t <lev_monsterh, 20>; 49
+		levelFile_t <lev_monsterl, 29>; 50
+		levelFile_t <lev_monsterl, 30>; 51
+		levelFile_t <lev_monsterh, 21>; 52
+		levelFile_t <lev_monsterh, 22>; 53
+		levelFile_t <lev_monsterh, 23>; 54
+		levelFile_t <lev_monsterh, 24>; 55
+		levelFile_t <lev_monsterh, 25>; 56
+		levelFile_t <lev_monsterh, 26>; 57
+		levelFile_t <lev_monsterh, 27>; 58
+		levelFile_t <lev_monsterh, 28>; 59
+		levelFile_t <lev_monsterh, 29>; 60
+		levelFile_t <lev_monsterh, 30>; 61
+		levelFile_t <lev_monsterl, 31>; 62
+		levelFile_t <lev_monsterl, 32>; 63
+		levelFile_t <lev_monsterl, 33>; 64
+		levelFile_t <lev_monsterl, 34>; 65
+		levelFile_t <lev_monsterh, 31>; 66
+		levelFile_t <lev_monsterh, 32>; 67
+		levelFile_t <lev_monsterh, 33>; 68
+		levelFile_t <lev_monsterh, 34>; 69
+		levelFile_t <lev_monsterh, 35>; 70
 lowPic		dd aLow_pic
 		dd aHi_pic
 bigpicIndex	db 0, 1, 2, 3	    ; 0
@@ -587,7 +581,7 @@ bigpicIndex	db 0, 1, 2, 3	    ; 0
 		db 41, 42, 43, 44	; 164
 		db 45, 255, 46,	255	; 168
 		db 47, 48, 255,	49	; 172
-aYesNo		db 'Yes',0Ah,'No',0
+s_yesNo		db 'Yes',0Ah,'No',0
 		db    0
 word_440BC	dw 0
 _str_Loalphabet	db ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g'; 0
@@ -602,23 +596,35 @@ _str_Hialphabet	db 'j', 'q', 'x', 'z', '0', '1', '2', '3'; 0
 		db 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'; 40
 		db 'Y', 'Z', '(', ')', '/', '\', '#', '*'; 48
 		db '?', '<', '>', ':', ';', '-', '%', 0; 56
-aEsc		db 'ESC',0
-aU		db '%U',0
-aVict		db 'vict',0
-aBardscr	db 'bardscr',0
-aIcons_bin	db 'icons.bin',0
-aPictureGetErro	db 'picture get error',0
-word_4414C	dw 2
+s_esc		db 'ESC',0
+s_u		db '%U',0
+s_victory		db 'vict',0
+s_bardscr	db 'bardscr',0
+s_iconFilePath	db 'icons.bin',0
+s_getPictureError	db 'picture get error',0
+bigpicIndexMultiplier	dw 2
 word_4414E	dw 0FFh
 aNorth		db 'north',0
 aEast		db 'east',0
 aSouth		db 'south',0
 aWest		db 'west',0
-word_44166	dw 1
-bitMask16bit	dw	1, 2, 4, 8	     ; 0
-		dw 10h,	20h, 40h, 80h	; 4
-		dw 100h, 200h, 400h, 800h; 8
-		dw 1000h, 2000h, 4000h,	8000h; 12
+g_printPartyFlag	dw 1
+bitMask16bit	dw 1		; 0
+		dw 2		; 1
+		dw 4		; 2
+		dw 8		; 3
+		dw 10h		; 4
+		dw 20h		; 5
+		dw 40h		; 6
+		dw 80h		; 7
+		dw 100h		; 8
+		dw 200h		; 9
+		dw 400h		; 10
+		dw 800h		; 11
+		dw 1000h	; 12
+		dw 2000h	; 13
+		dw 4000h	; 14
+		dw 8000h	; 15
 byteMaskList	db 80h, 40h, 20h, 10h   ; 0
 		db 8, 4, 2, 1		; 4
 flagMaskList	db 7Fh, 0BFh, 0DFh, 0EFh; 0
@@ -921,72 +927,72 @@ byte_44516	db 0, 1, 2, 3, 4, 5,	6, 1, 2, 3, 3, 4, 5; 0
 		db 1Ch,	1Dh, 1Eh, 0Fh, 10h, 10h, 11h, 13h; 38
 		db 14h,	15h, 1Fh, 20h, 21h, 1Fh, 20h, 21h; 46
 		db 14h,	14h, 16h, 17h, 18h, 17h, 17h, 0; 54
-byte_44554	db 4, 4, 4, 4, 4, 4,	4, 8, 8, 8, 0, 0, 0; 0
+byte_44554	db 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 0, 0, 0; 0
 		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 0, 0, 0; 13
 		db 8, 8, 0, 0, 4, 4, 4,	4, 4, 4, 4, 4, 0; 26
 		db 0, 0, 8, 8, 0, 0, 4,	4, 4, 4, 4, 4, 0; 39
 		db 0, 0, 8, 0, 4, 4, 4,	8, 0, 0; 52
-stru_44592	unknown_t <12, 42>	   ; 0
-		unknown_t <15, 42>	; 1
-		unknown_t <18, 42>	; 2
-		unknown_t <21, 42>	; 3
-		unknown_t <24, 42>	; 4
-		unknown_t <27, 42>	; 5
-		unknown_t <30, 42>	; 6
-		unknown_t <5, 38>	; 7
-		unknown_t <12, 38>	; 8
-		unknown_t <26, 38>	; 9
-		unknown_t <29, 38>	; 10
-		unknown_t <31, 38>	; 11
-		unknown_t <39, 38>	; 12
-		unknown_t <254,	38>	; 13
-		unknown_t <5, 38>	; 14
-		unknown_t <17, 44>	; 15
-		unknown_t <24, 44>	; 16
-		unknown_t <31, 44>	; 17
-		unknown_t <33, 38>	; 18
-		unknown_t <40, 38>	; 19
-		unknown_t <13, 33>	; 20
-		unknown_t <21, 33>	; 21
-		unknown_t <31, 33>	; 22
-		unknown_t <13, 55>	; 23
-		unknown_t <21, 55>	; 24
-		unknown_t <31, 55>	; 25
-		unknown_t <255,	38>	; 26
-		unknown_t <23, 38>	; 27
-		unknown_t <31, 38>	; 28
-		unknown_t <42, 38>	; 29
-		unknown_t <2, 42>	; 30
-		unknown_t <12, 42>	; 31
-		unknown_t <23, 42>	; 32
-		unknown_t <34, 42>	; 33
-		unknown_t <45, 42>	; 34
-		unknown_t <4, 21>	; 35
-		unknown_t <20, 21>	; 36
-		unknown_t <34, 21>	; 37
-		unknown_t <4, 63>	; 38
-		unknown_t <20, 63>	; 39
-		unknown_t <34, 63>	; 40
-		unknown_t <3, 35>	; 41
-		unknown_t <19, 35>	; 42
-		unknown_t <33, 35>	; 43
-		unknown_t <48, 35>	; 44
-		unknown_t <0, 35>	; 45
-		unknown_t <18, 35>	; 46
-		unknown_t <37, 35>	; 47
-		unknown_t <0, 8>	; 48
-		unknown_t <17, 4>	; 49
-		unknown_t <44, 8>	; 50
-		unknown_t <0, 77>	; 51
-		unknown_t <17, 77>	; 52
-		unknown_t <44, 77>	; 53
-		unknown_t <12, 22>	; 54
-		unknown_t <37, 22>	; 55
-		unknown_t <235,	22>	; 56
-		unknown_t <11, 22>	; 57
-		unknown_t <43, 22>	; 58
-		unknown_t <0, 0>	; 59
-		unknown_t <44, 0>	; 60
+bigpicQuadrantCoords	coordinate_t <12, 42>	   ; 0
+		coordinate_t <15, 42>	; 1
+		coordinate_t <18, 42>	; 2
+		coordinate_t <21, 42>	; 3
+		coordinate_t <24, 42>	; 4
+		coordinate_t <27, 42>	; 5
+		coordinate_t <30, 42>	; 6
+		coordinate_t <5, 38>	; 7
+		coordinate_t <12, 38>	; 8
+		coordinate_t <26, 38>	; 9
+		coordinate_t <29, 38>	; 10
+		coordinate_t <31, 38>	; 11
+		coordinate_t <39, 38>	; 12
+		coordinate_t <254,	38>	; 13
+		coordinate_t <5, 38>	; 14
+		coordinate_t <17, 44>	; 15
+		coordinate_t <24, 44>	; 16
+		coordinate_t <31, 44>	; 17
+		coordinate_t <33, 38>	; 18
+		coordinate_t <40, 38>	; 19
+		coordinate_t <13, 33>	; 20
+		coordinate_t <21, 33>	; 21
+		coordinate_t <31, 33>	; 22
+		coordinate_t <13, 55>	; 23
+		coordinate_t <21, 55>	; 24
+		coordinate_t <31, 55>	; 25
+		coordinate_t <255,	38>	; 26
+		coordinate_t <23, 38>	; 27
+		coordinate_t <31, 38>	; 28
+		coordinate_t <42, 38>	; 29
+		coordinate_t <2, 42>	; 30
+		coordinate_t <12, 42>	; 31
+		coordinate_t <23, 42>	; 32
+		coordinate_t <34, 42>	; 33
+		coordinate_t <45, 42>	; 34
+		coordinate_t <4, 21>	; 35
+		coordinate_t <20, 21>	; 36
+		coordinate_t <34, 21>	; 37
+		coordinate_t <4, 63>	; 38
+		coordinate_t <20, 63>	; 39
+		coordinate_t <34, 63>	; 40
+		coordinate_t <3, 35>	; 41
+		coordinate_t <19, 35>	; 42
+		coordinate_t <33, 35>	; 43
+		coordinate_t <48, 35>	; 44
+		coordinate_t <0, 35>	; 45
+		coordinate_t <18, 35>	; 46
+		coordinate_t <37, 35>	; 47
+		coordinate_t <0, 8>	; 48
+		coordinate_t <17, 4>	; 49
+		coordinate_t <44, 8>	; 50
+		coordinate_t <0, 77>	; 51
+		coordinate_t <17, 77>	; 52
+		coordinate_t <44, 77>	; 53
+		coordinate_t <12, 22>	; 54
+		coordinate_t <37, 22>	; 55
+		coordinate_t <235, 22>	; 56
+		coordinate_t <11, 22>	; 57
+		coordinate_t <43, 22>	; 58
+		coordinate_t <0, 0>	; 59
+		coordinate_t <44, 0>	; 60
 byte_4460C	db 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0; 0
 		db 0, 0, 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0; 13
 		db 0, 0, 0, 0, 0FFh, 0FFh, 0, 0, 0FFh, 0FFh; 23
@@ -1016,15 +1022,10 @@ iconWidth	db 12, 16, 16, 12, 20, 0; 0
 iconDataList	dd	iconLight, iconCompass,	iconAreaEnchant, iconShield, iconLevitation; 0
 word_4470E	dw 0E4h, 1A0h, 110h,	0F0h, 140h; 0
 byte_44718	db 0, 0, 0, 0, 0, 0	   ; 0
-byte_4471E	db 2, 0, 4, 0, 3, 0	   ; 0
-iconActiveFlagMaybe db 0, 0, 0,	0, 0, 0	    ; 0
-byte_4472A	db 4, 4, 4, 1, 4, 0	   ; 0
-byte_44730	db 0
-byte_44731	db 0
-		db    0
-		db    0
-		db    0
-		db    0
+iconAnimationDelay	db 2, 0, 4, 0, 3, 0	   ; 0
+iconCurrentDelay db 0, 0, 0,	0, 0, 0	    ; 0
+iconClearIndex	db 4, 4, 4, 1, 4, 0	   ; 0
+iconCurrentCell	db 0, 0, 0, 0, 0, 0
 aMafl		db 'MAFL',0
 aMageFlame	db 'Mage Flame',0
 aArfi		db 'ARFI',0
@@ -1682,7 +1683,7 @@ align 2
 aWhoDoes	db 'Who does ',0
 aWantToGiveItTo	db ' want to give it to?',0
 align 2
-aYouDonTKnowAny	db 'You don',27h,'t know any spells.',0
+s_dontKnowAnySpells	db 'You don',27h,'t know any spells.',0
 align 2
 aKnownSpells	db 'Known spells',0
 align 2
@@ -1700,7 +1701,7 @@ aNumberOfTunesL	db 'Number of tunes left: ',0
 align 2
 aHunterAbilitie	db 'Hunter abilities',0
 align 2
-aYourPocketsAreEm db 'Your pockets are empty.',0
+s_pocketsAreEmpty db 'Your pockets are empty.',0
 aStiqdxcnlkhp	db 'StIQDxCnLkHP',0
 align 2
 genericItemStr	dd aItem, aWeapon, aShield, aArmor, aHelm, aGloves, aInstrument, aFigurine; 0
@@ -2200,7 +2201,7 @@ itemCharFlags	db ' ', '|', '^', '?', 0, 0; 0 ; This is a list of characters used
 			
 			
 off_46C1A	dd item_trade, item_discard, item_equip, item_unequip, item_identify;	0
-aEscToContinue	db 'ESC to continue',0
+s_escToContinue	db 'ESC to continue',0
 aThereAreStairs	db 'There are stairs here, going /up\down\. ',0Ah
 		db 'Do you wish to take them?',0
 align 2
@@ -2223,7 +2224,7 @@ off_46CFC	dd mfunc_downStairs ;	0
 		dd mfunc_drawBigpic	; 7
 		dd mfunc_setTitle	; 8
 		dd mfunc_getChMaybe	; 9
-		dd mfunc_clearTextWindow ; a
+		dd mfunc_text_clear ; a
 		dd mfunc_ifFlag		; b
 		dd mfunc_ifNotFlag	; c
 		dd sub_19855		; d
@@ -2328,8 +2329,8 @@ breathAttack	breathAtt_t <0, 0, 0, 0, 0, 41h, 1>; 0
 aYouStillFace	db 'You still face ',0
 aDoYouWishToCon	db 'Do you wish to continue?',0Ah,0
 aButMisses	db ', but misses!',0Ah,0Ah,0
-aPeriodBlankLine	db '.', 0Ah, 0Ah,0
-aExclBlankLine		db '!',0Ah, 0Ah,0
+s_period	db '.', 0Ah, 0Ah,0
+s_exclBlankLine		db '!',0Ah, 0Ah,0
 aJumpsIntoTheShadows	db ' jumps into the shadows, ',0
 aAndSucceeds	db 'and succeeds!',0Ah,0Ah,0
 aButIsDiscovered db 'but is discovered!',0Ah,0Ah,0
@@ -2338,7 +2339,7 @@ aSummonsHelpAnd	db ' summons help and ',0
 		db    0
 aNoneAppears___	db 'none appears...',0Ah,0Ah,0
 aAnotherJoinsTheFray db	'another joins the fray!',0Ah,0Ah,0
-aThe		db	'The ',0
+s_the		db	'The ',0
 		db    0
 aAdvanceS	db ' advance/s\!',0Ah,0Ah,0
 		db    0
@@ -2366,13 +2367,13 @@ a@defend@partyAttack@c db 0Ah
 		db '@Bard Song',0Ah,0
 		db    0
 aSelectAnOption_ db 0Ah,0Ah,'Select an option.',0
-aUseOn_0	db 0Ah,'Use on ',0
+s_nlUseOn	db 0Ah,'Use on ',0
 		db    0
 aYouCanTUseThatItem_ db	'You can',27h,'t use that item.',0
 		db    0
 aAttack		db 0Ah,'Attack ',0
 		db    0
-aUseTheseCommands? db 'Use these commands?',0Ah,0Ah,0
+s_useTheseCommands? db 'Use these commands?',0Ah,0Ah,0
 aAndHits	db ', and hits ',0
 aTimesFor	db ' times for ',0
 aAndHitsFor	db ', and hits for ',0
@@ -2510,7 +2511,7 @@ aThereIsAChestHere_Wil db 'There is a chest here. Will you:',0Ah,0Ah
 		db '@Trap Zap',0Ah
 		db '@Leave chest',0
 aWhoWillCastATrzp?	db 'Who will cast a TRZP?',0
-aYouDonTKnowThatSpell_	db 'You don',27h,'t know that spell.',0
+s_dontKnowThatSpell_	db 'You don',27h,'t know that spell.',0
 		db    0
 aYouNeedAtLeast2SpellP	db 'You need at least 2 spell points.',0
 aWhoWillExamineIt?	db 'Who will examine it?',0
@@ -2599,77 +2600,77 @@ aTheExit_	db 'the exit.',0
 align 2
 aYouCanOnlyCast	db 'You can only cast that in combat',0Ah,0Ah,0
 align 2
-aAtTheParty___	db 'at the party...',0Ah,0Ah,0
-aButThePartyWas	db 'But the party was too far away!',0Ah,0Ah,0
-aAt		db 'at ',0
-aSome		db 'some ',0
-aElipsisNLNL	db '...',0Ah,0Ah,0
-aOne		db 'One ',0
+s_atTheParty	db 'at the party...',0Ah,0Ah,0
+s_partyTooFarAway	db 'But the party was too far away!',0Ah,0Ah,0
+s_at		db 'at ',0
+s_some		db 'some ',0
+s_elipsisNl	db '...',0Ah,0Ah,0
+s_one		db 'One ',0
 align 2
-aRepelledTheAtt	db 'repelled the attack!',0Ah,0Ah,0
+s_repelledAttack	db 'repelled the attack!',0Ah,0Ah,0
 align 2
-aWasTooFarAway db 'was too far away!',0Ah,0Ah,0
-aIs		db 'is ',0
-aFor		db	' for ',0
+s_wasTooFarAway db 'was too far away!',0Ah,0Ah,0
+s_is		db 'is ',0
+a_for		db	' for ',0
 aPointSOfDamage	db ' point/\s\ of damage',0
 align 2
 aAnd		db	'And ',0
 align 2
-aAndThePartyFre	db 'and the party freezes',0
-aButItHadNoEffe	db 'but it had no effect!',0Ah,0Ah,0
-aCloser		db 'closer',0
+s_partyFreezes	db 'and the party freezes',0
+s_butItHadNoEffect	db 'but it had no effect!',0Ah,0Ah,0
+s_closer		db 'closer',0
 align 2
-aFartherAway	db 'farther away',0
+s_fartherAway	db 'farther away',0
 align 2
-aAndTheFoesAre	db 'and the foes are ',0
+s_andTheFoesAre	db 'and the foes are ',0
 align 2
-aTheParty	db 'the party!',0
+s_theParty	db 'the party!',0
 align 2
-aAndTheEarthSwa	db 'and the earth swallows up ',0
+s_earthSwallows	db 'and the earth swallows up ',0
 align 2
-aWhichItem?	db 'Which item?',0
-aSpellAborted_	db 'Spell aborted.',0
+s_whichItem	db 'Which item?',0
+s_spellAborted	db 'Spell aborted.',0
 align 2
-aItemHasBeenIde	db 'Item has been identified!',0
-aDopplganger	db 'Dopplganger',0
-aAteIt_		db 'ate it.',0Ah,0Ah,0
-aDrinksAndFeels	db 'drinks and feels ',0
-off_47D32	dd aLessThirsty_, aHicHappier_, aRefreshed, aTerrible_, aTerrible_;	0
-aCanTSeemToFind	db 'can',27h,'t seem to find a use for the item.',0Ah,0Ah,0
+s_itemIdentified	db 'Item has been identified!',0
+s_dopplganger	db 'Dopplganger',0
+s_ateIt		db 'ate it.',0Ah,0Ah,0
+s_drinksAndFeels	db 'drinks and feels ',0
+drinkStringList	dd aLessThirsty_, aHicHappier_, aRefreshed, aTerrible_, aTerrible_;	0
+s_cantFindUse	db 'can',27h,'t seem to find a use for the item.',0Ah,0Ah,0
 align 2
-aInvokesAFiguri	db 'invokes a figurine ',0
-aIsReEnergized	db 'is re-energized!',0Ah,0Ah,0
+s_invokesFigurine	db 'invokes a figurine ',0
+s_isReenergized	db 'is re-energized!',0Ah,0Ah,0
 align 2
-aCastsAWeapon	db 'casts a weapon ',0
-aBreathes	db 'breathes ',0
-aTeleportUseArr	db 'Teleport',0Ah
+s_castsWeapon	db 'casts a weapon ',0
+s_breathes	db 'breathes ',0
+s_teleportMenu	db 'Teleport',0Ah
 		db '<Use arrow keys and SPC to select>',0Ah
 		db 'North:',0Ah
 		db 'East :',0Ah,0
-aDownUp		db '/Down\Up  \ :',0Ah,0
+s_downUp		db '/Down\Up  \ :',0Ah,0
 align 2
-aTeleport?	db 0Ah,'Teleport?',0Ah,0Ah,0
+s_confirmTeleport	db 0Ah,'Teleport?',0Ah,0Ah,0
 align 2
-aTeleportCancel	db 'Teleport cancelled!',0
-aTeleportFailed	db 'Teleport failed!',0
+s_cancelTeleport	db 'Teleport cancelled!',0
+s_failedTeleport	db 'Teleport failed!',0
 align 2
-aTeleportSucces	db 'Teleport successful!',0
+s_successfulTeleport	db 'Teleport successful!',0
 align 2
-aYouFace	db 'You face ',0
-aLevelS		db ' level/\s',0
-aAboveBelow	db ' /above\below\',0
+s_youFace	db 'You face ',0
+s_levels		db ' level/\s',0
+s_aboveBelow	db ' /above\below\',0
 align 2
-aPaceS		db ' pace/\s',0
+s_paces		db ' pace/\s',0
 align 2
-aNorthSouth	db ' /north\south\',0
+s_northSouth	db ' /north\south\',0
 align 2
-aEastWest	db ' /east\west\',0
+s_eastWest	db ' /east\west\',0
 align 2
-aAndAreAt	db ' and are at ',0
+s_andAreAt	db ' and are at ',0
 align 2
-aOf		db ' of ',0
+s_of		db ' of ',0
 align 2
-aAndAre		db ' and /\are \',0
+s_andAre		db ' and /\are \',0
 align 2
 scryBaseStringList dd aTheEntryStairs, aTheEntryPortal,	aTheEntryway_
 		dd aTheBaseOfTheMo, aAVantagePoint_, aTheWayIn_
@@ -2721,23 +2722,142 @@ byte_47F58	db 0, 0, 2, 0	   ; 0
 		db 6, 6, 6, 1		; 48
 		db 0, 0, 0, 0		; 52
 		db 2, 2, 1, 2		; 56
-byte_47F94	db 1Ch, 0Bh,	14h, 0Ah, 1Ch, 38h, 1Ch, 1Ch; 0
-		db 0Ah,	1Ch, 38h, 1Ch, 0Ah, 3Ch, 1Ch, 38h; 8
-		db 14h,	0Ah, 1Ch, 28h, 38h, 14h, 0Bh, 28h; 16
-		db 1Ch,	1Ch, 28h, 0Ah, 0Bh, 0Ah, 0Ch, 2Ch; 24
-		db 14h,	1Ch, 3Ch, 0Bh, 0Ah, 38h, 0Bh, 0Ch; 32
-		db 1Ch,	0Ch, 1Ch, 0Ah, 1Ch, 0Ch, 1Ch, 1Ch; 40
-		db 1Ch,	0Ch, 0Ch, 1Ch, 1Ch, 0Ch, 1Ch, 0Ah; 48
-		db 0FCh, 1Ch, 0Ah, 1Ch,	0Bh, 0Ah, 38h, 1Ch; 56
-		db 8, 0Ah, 0Bh,	1Ch, 38h, 0Ah, 0Ah, 0Ch; 64
-		db 0Ah,	1Ch, 0Ch, 0Ah, 1Ch, 1Ch, 0Ch, 38h; 72
-		db 1Ch,	1Ch, 0Ah, 0Ah, 1Ch, 1Ch, 0Ah, 0Ch; 80
-		db 1Ch,	1Ch, 0Ch, 0Bh, 1Ch, 1Ch, 14h, 38h; 88
-		db 1Ch,	1Ch, 38h, 0Ah, 1Ch, 1Ch, 1Ch, 0Ch; 96
-		db 1Ch,	1Ch, 0Ah, 14h, 14h, 0Ch, 1Ch, 14h; 104
-		db 0Bh,	14h, 14h, 0Ah, 14h, 0Bh, 14h, 0Ah; 112
-		db 0Ch,	0Ah, 14h, 0FCh,	0Ch, 1Ch, 1Ch, 1Ch; 120
-		db 1Ch,	1Ch, 1Ch, 0Bh, 1Ch, 0Ah, 1Ch, 0Ch; 128
+spellCastFlags	db 1Ch		; 0
+		db 0Bh		; 1
+		db 14h		; 2
+		db 0Ah		; 3
+		db 1Ch		; 4
+		db 38h		; 5
+		db 1Ch		; 6
+		db 1Ch		; 7
+		db 0Ah		; 8
+		db 1Ch		; 9
+		db 38h		; 10
+		db 1Ch		; 11
+		db 0Ah		; 12
+		db 3Ch		; 13
+		db 1Ch		; 14
+		db 38h		; 15
+		db 14h		; 16
+		db 0Ah		; 17
+		db 1Ch		; 18
+		db 28h		; 19
+		db 38h		; 20
+		db 14h		; 21
+		db 0Bh		; 22
+		db 28h		; 23
+		db 1Ch		; 24
+		db 1Ch		; 25
+		db 28h		; 26
+		db 0Ah		; 27
+		db 0Bh		; 28
+		db 0Ah		; 29
+		db 0Ch		; 30
+		db 2Ch		; 31
+		db 14h		; 32
+		db 1Ch		; 33
+		db 3Ch		; 34
+		db 0Bh		; 35
+		db 0Ah		; 36
+		db 38h		; 37
+		db 0Bh		; 38
+		db 0Ch		; 39
+		db 1Ch		; 40
+		db 0Ch		; 41
+		db 1Ch		; 42
+		db 0Ah		; 43
+		db 1Ch		; 44
+		db 0Ch		; 45
+		db 1Ch		; 46
+		db 1Ch		; 47
+		db 1Ch		; 48
+		db 0Ch		; 49
+		db 0Ch		; 50
+		db 1Ch		; 51
+		db 1Ch		; 52
+		db 0Ch		; 53
+		db 1Ch		; 54
+		db 0Ah		; 55
+		db 0FCh		; 56
+		db 1Ch		; 57
+		db 0Ah		; 58
+		db 1Ch		; 59
+		db 0Bh		; 60
+		db 0Ah		; 61
+		db 38h		; 62
+		db 1Ch		; 63
+		db 8		; 64
+		db 0Ah		; 65
+		db 0Bh		; 66
+		db 1Ch		; 67
+		db 38h		; 68
+		db 0Ah		; 69
+		db 0Ah		; 70
+		db 0Ch		; 71
+		db 0Ah		; 72
+		db 1Ch		; 73
+		db 0Ch		; 74
+		db 0Ah		; 75
+		db 1Ch		; 76
+		db 1Ch		; 77
+		db 0Ch		; 78
+		db 38h		; 79
+		db 1Ch		; 80
+		db 1Ch		; 81
+		db 0Ah		; 82
+		db 0Ah		; 83
+		db 1Ch		; 84
+		db 1Ch		; 85
+		db 0Ah		; 86
+		db 0Ch		; 87
+		db 1Ch		; 88
+		db 1Ch		; 89
+		db 0Ch		; 90
+		db 0Bh		; 91
+		db 1Ch		; 92
+		db 1Ch		; 93
+		db 14h		; 94
+		db 38h		; 95
+		db 1Ch		; 96
+		db 1Ch		; 97
+		db 38h		; 98
+		db 0Ah		; 99
+		db 1Ch		; 100
+		db 1Ch		; 101
+		db 1Ch		; 102
+		db 0Ch		; 103
+		db 1Ch		; 104
+		db 1Ch		; 105
+		db 0Ah		; 106
+		db 14h		; 107
+		db 14h		; 108
+		db 0Ch		; 109
+		db 1Ch		; 110
+		db 14h		; 111
+		db 0Bh		; 112
+		db 14h		; 113
+		db 14h		; 114
+		db 0Ah		; 115
+		db 14h		; 116
+		db 0Bh		; 117
+		db 14h		; 118
+		db 0Ah		; 119
+		db 0Ch		; 120
+		db 0Ah		; 121
+		db 14h		; 122
+		db 0FCh		; 123
+		db 0Ch		; 124
+		db 1Ch		; 125
+		db 1Ch		; 126
+		db 1Ch		; 127
+		db 1Ch		; 128
+		db 1Ch		; 129
+		db 1Ch		; 130
+		db 0Bh		; 131
+		db 1Ch		; 132
+		db 0Ah		; 133
+		db 1Ch		; 134
+		db 0Ch		; 135
 spellEffectFlags db splf_mageflame	; 0 Mage Flame
 		db 0B6h			; 1
 		db 0			; 2
@@ -2941,29 +3061,29 @@ byte_483AC	db 0Dh, 0Eh		   ; 0
 		db 10h,	11h		; 4
 		db 12h,	13h		; 6
 		db 14h,	0		; 8
-aCastAt		db 'Cast at ',0
+s_castAt		db 'Cast at ',0
 		db    0
-aWhoWillCastASp	db 'Who will cast a spell?',0
+s_whoWillCast	db 'Who will cast a spell?',0
 		db    0
-aYouDonTKnowThatSpell db 'You don',27h,'t know that spell!',0
+s_dontKnowThatSpell db 'You don',27h,'t know that spell!',0
 		db    0
-aNoSpellByThatName	db 'No spell by that name.', 0
-aNotEnoughSpellPoint	db 'Not enough spell points!',0
+s_noSpellByThatName	db 'No spell by that name.', 0
+s_notEnoughSppt	db 'Not enough spell points!',0
 		db    0
-aSpellToCast db	'Spell to cast:',0
+s_spellToCast db	'Spell to cast:',0
 		db    0
 aWhichMagicArtShallYou db 'Which magic art shall you invoke?',0
 		db ') ',0
 		db    0
-aCastsASpell	db 'casts a spell',0
-aButItFizzled	db 'but it fizzled!',0
-aButItFizzledNL	db 'but it fizzled!',0Ah,0Ah,0
-aMakesALight	db 'makes a light',0
+s_castsASpell	db 'casts a spell',0
+s_butItFizzled	db 'but it fizzled!',0
+s_butItFizzledNl	db 'but it fizzled!',0Ah,0Ah,0
+s_makesLight	db 'makes a light',0
 mageSpellIndex	db 255, 42, 28, 0       ; 0 ; This array	is an index into another array for
 		db 14, 255, 255, 255	; 4 ; determining the spells that a magic user has.
 		db 255,	255, 56, 70	; 8
 		db 84, 255, 255, 0	; 12
-aThouArtNotAS_0	db 'Thou art not a spellcaster',0
+s_notSpellcaster	db 'Thou art not a spellcaster',0
 		db    0
 lightDistList	db 3			;0 splf_mageflame
 		db 4			;1 splf_lesserrev
@@ -2987,7 +3107,7 @@ lightDurList	db 4			;0 splf_mageflame
 		db 0FFh			;3 splf_cateyes
 		db 4
 		db 8			;0
-byte_484BE	db 0, 0Ah, 0Ah, 5	   ; 0
+classSavingBonus	db 0, 0Ah, 0Ah, 5	   ; 0
 		db 5, 0, 0, 5		; 4
 		db 0, 0, 11h, 11h	; 8
 		db 16h,	0		; 12
@@ -2996,7 +3116,7 @@ word_484CC	dw 1Eh
 		db    0
 		db    7
 		db    0
-byte_484D2	db 0Bh
+batchSpellList	db 0Bh
 		db  21h	; !
 		db  34h	; 4
 		db  0Eh
@@ -3012,12 +3132,12 @@ geoSpMasks	geomanSp_t <3, 20h>	   ; 0
 		geomanSp_t <4, 40h>	; 1
 		geomanSp_t <3, 4>	; 2
 		geomanSp_t <3, 2>	; 3
-geoSpList	dd dun_removeTrap	  ; 0 ;	0: Earth Ward. Remove all traps	from level
+geoSpList	dd spGeo_removeTrap	; 0 ;	0: Earth Ward. Remove all traps	from level
 		dd dun_revealSpSquare	; 1 ; 1: Sanctuary. Reveal all mage regeneration squares
 		dd dun_revealSpSquare	; 2 ; 2: Succor	Song. Reveal party heal	squares
 		dd dun_revealSpSquare	; 3 ; 3: Roscoe's Alert. Reveal all anti-magic squares
 		dd dun_revealSpSquare	; 4 ; 4: Earth song. Reveal all	drain HP squares
-		dd sub_22300		; 5 ; 5:
+		dd spGeo_revealSquare	; 5 ; 5:
 spellFuncList	dd sp_lightSpell	      ;	0
 		dd sp_damageSpell	; 1
 		dd sp_trapZap		; 2
@@ -3161,15 +3281,15 @@ aRhymeOfDuotime	db 'Rhyme of Duotime',0
 aWatchwoodMelod	db 'Watchwood Melody',0
 aKielSOverture	db 'Kiel',27h,'s Overture',0
 aMinstrelShield	db 'Minstrel Shield',0
-aWhoWillPlay?	db 'Who will play?',0
+s_whoWillPlay	db 'Who will play?',0
 align 2
-aNotABard	db 'Not a bard!',0
-aYouArenTUsingA	db 'You aren',27h,'t using an instrument!',0
-aYourThroatIsDr	db 'Your throat is dry!',0
+s_notBard	db 'Not a bard!',0
+s_notUsingInstrument	db 'You aren',27h,'t using an instrument!',0
+s_dryThroat	db 'Your throat is dry!',0
 songNames	dd aSirRobinSTune, aSafetySong, aSanctuaryScore, aBringaroundBal; 0
 		dd aRhymeOfDuotime, aWatchwoodMelod, aKielSOverture, aMinstrelShield; 4
-aStopPlayingASo	db 'Stop playing a song',0
-byte_48820	db 14h dup(0), 1, 14h dup(0), 2, 0Ch dup(0), 2, 16h dup(0), 1
+s_stopPlayingSong	db 'Stop playing a song',0
+g_instrumentType	db 14h dup(0), 1, 14h dup(0), 2, 0Ch dup(0), 2, 16h dup(0), 1
 		db 34h dup(0), 2, 4Eh dup(0), 2, 3, 6 dup(0), 1, 4 dup(0)
 		db 3, 21h dup(0)
 aGillesGillsFor	db 'Gilles Gills for ',0
@@ -3405,19 +3525,19 @@ questFuncs	dd chron_questBrilhasti, chron_questValarian; 0
 byte_4A6FA	db 0, 1, 40h, 10h, 4, 1, 40h, 10h; 0
 byte_4A702	db 1, 1, 0, 0, 0, 0,	1, 1; 0
 aGuild		db 'Guild',0
-aWelcomeBraveHe	db '"Welcome, brave heroes. You have succeeded in destroying the threat to all reality. As you know, to do this, you slipped the bonds of time, and traveled forbidden routes'
+s_victoryMessage_1	db '"Welcome, brave heroes. You have succeeded in destroying the threat to all reality. As you know, to do this, you slipped the bonds of time, and traveled forbidden routes'
 		db 'through that which has forever been. You pressed your struggle forward despite danger and death, and you accomplished that which the gods themselves were unable to do."'
 		db 0Ah,0Ah
 		db 'His praise washes over you like a warm ocean wave, and you feel strength infuse your body.',0
-aInDoingWhatYou	db '"In doing what you have done, you have proved youself worthy of nothing less than the ultimate reward." He closes his eyes and raises his hands. '
+s_victoryMessage_2	db '"In doing what you have done, you have proved youself worthy of nothing less than the ultimate reward." He closes his eyes and raises his hands. '
 		db '"The death of the gods tore reality asunder, but you bound it up again. The gods of old are dead, therefore I accept you as my new children. You shall be gods yourselves!"'
 		db 0Ah,0Ah,0
-aHisEyesOpenAga	db 'His eyes open again and you look up on infinity. At once you see Skara Brae restored to its former beauty. You see beyond it and the Six cities of the Plains. '
+s_victoryMessage_3	db 'His eyes open again and you look up on infinity. At once you see Skara Brae restored to its former beauty. You see beyond it and the Six cities of the Plains. '
 		db 'You see the whole world and each of its cultures, and you realize all of it is now your domain.',0Ah,0Ah,0
-aAndSoItCameToP	db '"And so it came to pass that eight new stars burned in the night sky. The least of these, the Companion star, was named Hawkslayer after a hero of legend. '
+s_victoryMessage_4	db '"And so it came to pass that eight new stars burned in the night sky. The least of these, the Companion star, was named Hawkslayer after a hero of legend. '
 		db 'The other seven, together known as the Company of Heroes, are each named for one of the New Gods. Each night they can be seen is betokened a good night, and '
 		db 'adventurers know these gods smile especially upon them..."',0Ah,'-- excerpt from The Gospel of the New Gods (Chap I, Verses 5-9)',0Ah,0Ah,0Ah,0
-aYourPartyWillN	db 'Your party will now alter time back to the refugee camp.',0Ah
+s_victoryMessage_5	db 'Your party will now alter time back to the refugee camp.',0Ah
 		db 'Who knows what new challenges await you in the future!',0
 aATrapIsNear	db 'A trap is near!',0
 aThereAreStai_0	db 'There are stairs near...',0
@@ -3456,15 +3576,15 @@ aAWanderingCreatureOff	db 'A wandering creature offers to join your party. You c
 		db '@Allow it to join',0Ah
 		db '@Fight it',0Ah
 		db '@Leave in peace',0
-aComeHearTheTaleOfSkar db 'Come hear the tale of Skara Brae - A god returned to have his way. Creatures of darkness, spawn of night, The Mad One',27h,'s kin destroyed the'
+s_titleText db 'Come hear the tale of Skara Brae - A god returned to have his way. Creatures of darkness, spawn of night, The Mad One',27h,'s kin destroyed the'
 		db ' site. Defenders fell, their bane come true, Garth, Roscoe, Kylearan too! As doom approached, the helpless fled. It did no good, the streets'
 		db ' ran red. Survivors few, they sit and mope, with but one final ray of hope: ',27h,'Cross time and space, the legends say, Heroes, at last! To steal the day! ',0
 		db    0
-someMessageList	dd aWelcomeBraveHe	; 0
-		dd aInDoingWhatYou	; 1
-		dd aHisEyesOpenAga	; 2
-		dd aAndSoItCameToP	; 3
-		dd aYourPartyWillN	; 4
+victoryMessageList	dd s_victoryMessage_1	; 0
+		dd s_victoryMessage_2	; 1
+		dd s_victoryMessage_3	; 2
+		dd s_victoryMessage_4	; 3
+		dd s_victoryMessage_5	; 4
 align 2
 aAnExplosion	db 0Ah,'An explosion!',0
 align 2
@@ -4427,7 +4547,7 @@ aSceadu		db 'Sceadu',0
 aWerra		db 'Werra',0
 aTarjan		db 'Tarjan',0
 aSkaraBrae	db 'Skara Brae',0
-aUnterbrae	db 'UnterBrae',0
+s_unterbrae	db 'UnterBrae',0
 aArboria	db 'Arboria',0
 aGelidia	db 'Gelidia',0
 aLucencia	db 'Lucencia',0
@@ -4451,7 +4571,7 @@ aShadowRock	db 'Shadow Rock',0
 aSulphurSprings	db 'Sulphur Springs',0
 aWarriorsVale	db 'Warriors Vale',0
 aBrilhasti	db 'Brilhasti',0
-aUrmech		db 'Urmech',0
+s_urmech		db 'Urmech',0
 aTslotha	db 'Tslotha',0
 aCyanis		db 'Cyanis',0
 aTheOldMan	db 'The Old Man',0
@@ -4479,10 +4599,10 @@ off_4C918	dd aArefolia, aAcorns ; 0
 		dd aWineskin,	aNightspear; 12
 		dd aHammerOfWrath, aWandOfPower; 14
 off_4C958	dd aMalefia, aValarian  ; 0
-		dd aLanatir, aAlliria	; 2
+		dd aLanatir, s_alliria	; 2
 		dd aFerofist, aSceadu	; 4
 		dd aWerra, aTarjan	; 6
-		dd aSkaraBrae, aUnterbrae; 8
+		dd aSkaraBrae, s_unterbrae; 8
 		dd aArboria, aGelidia	; 10
 		dd aLucencia, aKinestia	; 12
 		dd aTenebrosia,	aTarmitia; 14
@@ -4494,11 +4614,11 @@ off_4C998	dd aCieraBrannia, aCelariaBree; 0
 		dd aColdPeak, aCrystalSpring; 10
 		dd aOldDwarfMine, aShadowRock; 12
 		dd aSulphurSprings, aWarriorsVale; 14
-off_4C9D8	dd aBrilhasti, aUrmech  ; 0
+off_4C9D8	dd aBrilhasti, s_urmech  ; 0
 		dd aTslotha, aCyanis	; 2
 		dd aTheOldMan, aHawkslayer; 4
-		dd aScrapwood, aBardSHall; 6
-		dd aStaggerInn, aHicHaven; 8
+		dd s_scrapwood, aBardSHall; 6
+		dd s_staggerInn, s_hicHaven; 8
 		dd aVioletMountain, aCrystalPalace; 10
 		dd aCatacombs, aTunnels	; 12
 		dd aWorkshop, aWizardSGuild; 14
@@ -4606,8 +4726,8 @@ dirFacing	dw 0
 inDungeonMaybe	dw 0
 buildingRvalMaybe dw 0
 word_4EE66	dw 0
-curSpellNo	dw 0
-mfuncFlags	db 7 dup(0)     ; 0
+g_curSpellNumber	dw 0
+g_gameProgressFlags	db 7 dup(0)     ; 0
 byte_4EE71	db 0
 		db    0
 		db    0
@@ -4618,38 +4738,159 @@ byte_4EE71	db 0
 		db    0
 		db    0
 _mfunc_regs	dw 20h dup(0)	    ; 0
-byte_4EEBA	db 0
+g_currentHour	db 0
 lightDistance	db 0
-byte_4EEBC	db 0
+g_songDuration	db 0
 lightDuration		db 0
 compassDuration		db 0
 detectDuration		db 0
 shieldDuration		db 0
 levitationDuration	db 0
 detectType		db 0
-byte_4EEC3	db 0
-byte_4EEC4	db 0
 levelNoMaybe	db 0
 levFlags	db 0
-dunWidth	db 0
-dunHeight	db 0
+g_dunWidth	db 0
+g_dunHeight	db 0
 byte_4EEC9	db 0
 partyAttackFlag	db 0
-byte_4EECB	db 0
+shieldAcBonus	db 0
 byte_4EECC	db 0
-byte_4EECD	db 0FFh, 7 dup(0), 8 dup(1), 7 dup(0)
-		db 0FFh, 8 dup(80h), 6Bh, 8; 23
-		db 6 dup(0), 2 dup(1), 0, 2 dup(6); 34
-		db 0, 2 dup(1), 6 dup(0), 8; 45
-		db 6Bh, 2 dup(80h), 0, 2 dup(30h); 55
-		db 0, 2 dup(80h), 55h, 7 dup(0); 61
-		db 2 dup(1), 0, 2 dup(1), 0; 72
-		db 2 dup(1), 7 dup(0), 55h, 2 dup(80h); 78
-		db 0, 2 dup(80h), 0, 2 dup(80h); 90
-		db 2 dup(0), 8, 2 dup(1Ch), 8; 96
-		db 3 dup(0), 66h, 3Ch, 2 dup(18h); 102
-		db 3Ch, 66h, 0, 8 dup(0FFh); 109
-		db 2 dup(0)           
+minimapWallBitmasks db	0FFh,	0,	0,	0,	0,	0,	0,	0	; 0
+		; 11111111
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		db	1,	1,	1,	1,	1,	1,	1,	1	; 1
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		db	0,	0,	0,	0,	0,	0,	0,	0FFh	; 2
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 11111111
+		db	80h,	80h,	80h,	80h,	80h,	80h,	80h,	80h	; 3
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		db	6Bh,	8,	0,	0,	0,	0,	0,	0	; 4
+		; 01101011
+		; 00001000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		db	1,	1,	0,	6,	6,	0,	1,	1	; 5
+		; 00000001
+		; 00000001
+		; 00000000
+		; 00000110
+		; 00000110
+		; 00000000
+		; 00000001
+		; 00000001
+		db	0,	0,	0,	0,	0,	0,	8,	6Bh	; 6
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00001000
+		; 01101011
+		db	80h,	80h,	0, 	30h,	30h,	0,	80h,	80h	; 7
+		; 10000000
+		; 10000000
+		; 00000000
+		; 00110000
+		; 00110000
+		; 00000000
+		; 10000000
+		; 10000000
+		db	55h,	0,	0,	0,	0,	0,	0,	0	; 8
+		; 01010101
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		db	1,	1,	0,	1,	1,	0,	1,	1	; 9
+		; 00000001
+		; 00000001
+		; 00000000
+		; 00000001
+		; 00000001
+		; 00000000
+		; 00000001
+		; 00000001
+		db	0,	0,	0,	0,	0,	0,	0,	55h	; 10
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 01010101
+		db	80h,	80h,	0,	80h,	80h,	0,	80h,	80h	; 11
+		; 10000000
+		; 10000000
+		; 00000000
+		; 10000000
+		; 10000000
+		; 00000000
+		; 10000000
+		; 10000000
+		db	0,	0,	8,	1Ch,	1Ch,	8,	0,	0	; 12
+		; 00000000
+		; 00000000
+		; 00001000
+		; 00011100
+		; 00011100
+		; 00001000
+		; 00000000
+		; 00000000
+		db 0, 66h, 3Ch, 18h, 18h, 3Ch, 66h, 0; 13 - minimap_X
+		; 00000000
+		; 01100110
+		; 00111100
+		; 00011000
+		; 00011000
+		; 00111100
+		; 01100110
+		; 00000000
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh ; 14
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		db 0, 0
 aFaster		db 0Ah,'<Faster...>',0Ah,0
 aSlower		db 0Ah,'<Slower...>',0Ah,0
 txtDelayTable	db 1, 4, 7, 0Bh, 0Eh, 11h, 14h, 17h, 1Ah, 1Dh
@@ -5021,7 +5262,7 @@ aR6000StackOver	db 'R6000',0Dh,0Ah
 		db 0FFh
 		db 0FFh
 		db    0
-word_4FD56	dw 0
+tavern_sayingBase	dw 0
 tav_drunkLevel	db 8 dup(0)	       ; 0
 curStrByte	db ?
 align 2

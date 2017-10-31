@@ -130,13 +130,13 @@ loc_24E9B:
 	add	sp, 4
 	jmp	short loc_24E97
 loc_24EB3:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	;delayNoTable	2
 	sub	ax, ax
 	push	ax
 	push	sq_east
 	push	sq_north
-	call	dun_removeTrap
+	call	spGeo_removeTrap
 	add	sp, 6
 	mov	ax, [bp+var_102]
 	jmp	short $+2
@@ -160,9 +160,9 @@ trap_doDamage proc far
 	call	someStackOperation
 	push	si
 	getCharP	[bp+arg_0], si
-	cmp	byte ptr gs:roster._name[si], 0
+	cmp	byte ptr gs:party._name[si], 0
 	jz	short loc_24F77
-	test	gs:roster.status[si], stat_dead
+	test	gs:party.status[si], stat_dead
 	jnz	short loc_24F77
 	mov	al, byte ptr [bp+arg_0]
 	mov	gs:bat_curTarget, al
@@ -230,15 +230,15 @@ dunsq_doDarkness proc far
 	jz	short loc_24FCE
 	sub	ax, ax
 	push	ax
-	call	sub_17920
+	call	icon_deactivate
 	add	sp, 2
 loc_24FCE:
 	mov	lightDistance, 0
-	cmp	gs:byte_4266B, 0
+	cmp	gs:g_currentSongPlusOne, 0
 	jz	short loc_24FF5
-	cmp	gs:byte_42420, 5
+	cmp	gs:g_currentSong, 5
 	jnz	short loc_24FF5
-	call	sub_22DA1
+	call	endNoncombatSong
 loc_24FF5:
 	mov	ax, offset aDarkness
 	push	ds
@@ -317,12 +317,12 @@ loc_25075:
 	cmp	lightDuration[bx], 0
 	jz	short loc_25093
 	push	[bp+var_2]
-	call	sub_17920
+	call	icon_deactivate
 	add	sp, 2
 loc_25093:
 	jmp	short loc_25072
 loc_25095:
-	mov	byte ptr word_44166, 0
+	mov	byte ptr g_printPartyFlag, 0
 	sub	ax, ax
 	jmp	short $+2
 	mov	sp, bp
@@ -350,28 +350,28 @@ loc_250B4:
 	cmp	[bp+var_2], 7
 	jge	short loc_25103
 	getCharP	[bp+var_2], si
-	test	gs:roster.status[si], stat_dead	or stat_stoned
+	test	gs:party.status[si], stat_dead	or stat_stoned
 	jnz	short loc_25101
 	mov	al, levelNoMaybe
 	sub	ah, ah
 	mov	di, ax
-	cmp	gs:roster.currentHP[si], di
+	cmp	gs:party.currentHP[si], di
 	jbe	short loc_250EC
-	sub	gs:roster.currentHP[si], di
+	sub	gs:party.currentHP[si], di
 	jmp	short loc_25101
 loc_250EC:
 	getCharP	[bp+var_2], si
-	mov	gs:roster.currentHP[si], 0
-	or	gs:roster.status[si], stat_dead
+	mov	gs:party.currentHP[si], 0
+	or	gs:party.status[si], stat_dead
 loc_25101:
 	jmp	short loc_250B1
 loc_25103:
-	call	rost_getLastActiveSlot
+	call	party_getLastSlot
 	cmp	ax, 7
 	jle	short loc_25118
 	mov	buildingRvalMaybe, 5
 loc_25118:
-	mov	byte ptr word_44166, 0
+	mov	byte ptr g_printPartyFlag, 0
 	sub	ax, ax
 	jmp	short $+2
 	pop	si
@@ -389,15 +389,15 @@ loc_do_partyHPRegen_loopStart:
 	cmp		cx, 7
 	jge		loc_do_partyHPRegen_exit
 	getCharP	cx, bx
-	test		gs:roster.status[si], stat_dead or stat_stoned
+	test		gs:party.status[si], stat_dead or stat_stoned
 	jnz		loc_do_partyHPRegen_incCounter
 	mov		al, levelNoMaybe
 	sub		ah, ah
-	add		gs:roster.currentHP[bx], ax
-	mov		ax, gs:roster.maxHP[bx]
-	cmp		roster.currentHP[bx], ax
+	add		gs:party.currentHP[bx], ax
+	mov		ax, gs:party.maxHP[bx]
+	cmp		party.currentHP[bx], ax
 	jbe		loc_do_partyHPRegen_incCounter
-	mov		gs:roster.currentHP[bx], ax
+	mov		gs:party.currentHP[bx], ax
 
 loc_do_partyHPRegen_incCounter:
 	inc		cx
@@ -431,14 +431,14 @@ dunsq_doSilence	proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	cmp	gs:byte_4266B, 0
+	cmp	gs:g_currentSongPlusOne, 0
 	jz	short loc_2516E
 	mov	ax, offset aTheSoundOfSile
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	sub_22DA1
+	call	endNoncombatSong
 loc_2516E:
 	sub	ax, ax
 	jmp	short $+2
@@ -488,18 +488,18 @@ loc_251A6:
 	mov	[bp+var_2], ax
 	mov	cx, ax
 	getCharP	[bp+var_4], bx
-	cmp	gs:roster.currentSppt[bx], cx
+	cmp	gs:party.currentSppt[bx], cx
 	jbe	short loc_251E8
 	getCharP	[bp+var_4], bx
-	sub	gs:roster.currentSppt[bx], cx
+	sub	gs:party.currentSppt[bx], cx
 	jmp	short loc_251F7
 loc_251E8:
 	getCharP	[bp+var_4], bx
-	mov	gs:roster.currentSppt[bx], 0
+	mov	gs:party.currentSppt[bx], 0
 loc_251F7:
 	jmp	short loc_251A3
 loc_251F9:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	sub	ax, ax
 	jmp	short $+2
 	mov	sp, bp
@@ -544,7 +544,7 @@ loc_2524A:
 	cmp	[bp+var_2], 7
 	jge	short loc_2528B
 	getCharP	[bp+var_2], bx
-	cmp	gs:roster.class[bx], class_monster
+	cmp	gs:party.class[bx], class_monster
 
 	; FIXED - Was jz. This activated the square when there were no monsters
 	; in the party.
@@ -553,7 +553,7 @@ loc_2524A:
 	test	al, 3
 	jnz	short loc_25289
 	getCharP	[bp+var_2], bx
-	mov	gs:roster.hostileFlag[bx], 1
+	mov	gs:party.hostileFlag[bx], 1
 	mov	byte_4EECC, 1
 loc_25289:
 	jmp	short loc_25247
@@ -754,7 +754,7 @@ loc_253E6:
 	or	ax, ax
 	jz	short loc_2544B
 	getCharP	[bp+var_2], bx
-	mov	al, gs:roster.class[bx]
+	mov	al, gs:party.class[bx]
 	mov	[bp+var_4], al
 	or	al, al
 	jz	short loc_25422
@@ -769,13 +769,13 @@ loc_25422:
 	mov	ax, 34
 	push	ax
 	push	[bp+var_2]
-	call	getXPForLevel
+	call	getLevelXp
 	add	sp, 4
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+var_2], si
-	mov	word ptr gs:roster.experience[si], cx
-	mov	word ptr gs:(roster.experience+2)[si], bx
+	mov	word ptr gs:party.experience[si], cx
+	mov	word ptr gs:(party.experience+2)[si], bx
 loc_2544B:
 	jmp	short loc_253E3
 loc_2544D:
@@ -796,13 +796,13 @@ sub_25452 proc far
 	xor	ax, ax
 	call	someStackOperation
 	getCharP	[bp+arg_0], bx
-	test	gs:(roster.chronoQuest+1)[bx], 1
+	test	gs:(party.chronoQuest+1)[bx], 1
 	jnz	short loc_25495
 	getCharP	[bp+arg_0], bx
-	cmp	gs:roster.class[bx], class_monster
+	cmp	gs:party.class[bx], class_monster
 	jnb	short loc_25495
 	getCharP	[bp+arg_0], bx
-	cmp	gs:roster.level[bx], 35
+	cmp	gs:party.level[bx], 35
 	jnb	short loc_25495
 	mov	ax, 1
 	jmp	short loc_25497
@@ -841,13 +841,13 @@ loc_254B3:
 	jmp	short loc_254B0
 loc_254C9:
 	getCharP	[bp+arg_0], si
-	mov	gs:roster.class[si], class_archmage
+	mov	gs:party.class[si], class_archmage
 	sub	ax, ax
-	mov	word ptr gs:(roster.experience+2)[si], ax
-	mov	word ptr gs:roster.experience[si], ax
+	mov	word ptr gs:(party.experience+2)[si], ax
+	mov	word ptr gs:party.experience[si], ax
 	mov	ax, 14h
 	push	ax
-	lea	ax, roster.strength[si]
+	lea	ax, party.strength[si]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -855,16 +855,16 @@ loc_254C9:
 	call	near ptr sub_25544
 	add	sp, 6
 	getCharP	[bp+arg_0], bx
-	cmp	gs:roster.maxHP[bx], 375
+	cmp	gs:party.maxHP[bx], 375
 	jnb	short loc_2551F
 	getCharP	[bp+arg_0], bx
-	mov	gs:roster.maxHP[bx], 375
+	mov	gs:party.maxHP[bx], 375
 loc_2551F:
 	getCharP	[bp+arg_0], bx
-	cmp	gs:roster.maxSppt[bx], 350
+	cmp	gs:party.maxSppt[bx], 350
 	jnb	short loc_2553F
 	getCharP	[bp+arg_0], bx
-	mov	gs:roster.maxSppt[bx], 350
+	mov	gs:party.maxSppt[bx], 350
 loc_2553F:
 	pop	si
 	mov	sp, bp
@@ -920,14 +920,14 @@ convertToGeomancer proc	far
 	call	someStackOperation
 	push	si
 	getCharP	[bp+charNo], si
-	mov	gs:roster.class[si], class_geomancer
+	mov	gs:party.class[si], class_geomancer
 	sub	ax, ax
-	mov	word ptr gs:(roster.experience+2)[si], ax
-	mov	word ptr gs:roster.experience[si], ax
-	mov	gs:roster.level[si], 1
-	mov	gs:roster.maxLevel[si],	1
-	mov	gs:roster.currentSppt[si], 25
-	mov	gs:roster.maxSppt[si], 25
+	mov	word ptr gs:(party.experience+2)[si], ax
+	mov	word ptr gs:party.experience[si], ax
+	mov	gs:party.level[si], 1
+	mov	gs:party.maxLevel[si],	1
+	mov	gs:party.currentSppt[si], 25
+	mov	gs:party.maxSppt[si], 25
 	mov	ax, 0Ch
 	push	ax
 	push	[bp+charNo]
@@ -935,7 +935,7 @@ convertToGeomancer proc	far
 	call	near ptr sub_2561D
 	add	sp, 4
 	getCharP	[bp+charNo], bx
-	mov	gs:roster.numAttacks[bx], 0
+	mov	gs:party.numAttacks[bx], 0
 	mov	ax, 106
 	push	ax
 	push	[bp+charNo]
@@ -951,7 +951,7 @@ convertToGeomancer proc	far
 	push	[bp+charNo]
 	call	mage_learnSpell
 	add	sp, 4
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -982,7 +982,7 @@ loc_25634:
 	jge	short loc_2568F
 	getCharP	[bp+arg_0], si
 	add	si, [bp+var_4]
-	mov	al, gs:roster.inventory.itemNo[si]
+	mov	al, gs:party.inventory.itemNo[si]
 	sub	ah, ah
 	mov	[bp+var_6], ax
 	mov	bx, ax
@@ -998,10 +998,10 @@ loc_25674:
 	mov	ax, 2
 loc_25677:
 	mov	[bp+var_2], ax
-	mov	al, gs:roster.inventory.itemFlags[si]
+	mov	al, gs:party.inventory.itemFlags[si]
 	and	al, 0FCh
 	or	al, byte ptr [bp+var_2]
-	mov	gs:roster.inventory.itemFlags[si], al
+	mov	gs:party.inventory.itemFlags[si], al
 	jmp	short loc_25630
 loc_2568F:
 	pop	si
@@ -1139,7 +1139,7 @@ loc_2579F:
 	shl	si, 1
 	mov	ax, dirDeltaE[si]
 	add	[bp+sqE], ax
-	mov	al, dunWidth
+	mov	al, g_dunWidth
 	sub	ah, ah
 	push_reg	ax
 	push_var_stack	sqE
@@ -1147,7 +1147,7 @@ loc_2579F:
 	mov	[bp+sqE], ax
 	mov	ax, dirDeltaN[si]
 	sub	[bp+sqN], ax
-	mov	al, dunHeight
+	mov	al, g_dunHeight
 	sub	ah, ah
 	push_reg	ax
 	push_var_stack	sqN
@@ -1325,7 +1325,7 @@ dun_randomMonJoin proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	call	findEmptyRosterNum
+	call	party_findEmptySlot
 	mov	[bp+var_2], ax
 	cmp	ax, 7
 	jl	short loc_25963
@@ -1336,16 +1336,16 @@ dun_randomMonJoin proc far
 	jmp	short loc_25983
 	jmp	short loc_25963
 loc_25951:
-	call	findEmptyRosterNum
+	call	party_findEmptySlot
 	mov	[bp+var_2], ax
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 loc_25963:
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	push	[bp+var_2]
 	call	_sp_convertMonToSummon
 	add	sp, 6
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	mov	ax, 1
 	jmp	short $+2
 loc_25983:
@@ -1424,14 +1424,14 @@ loc_259D7:
 	mov	al, fs:[bx+mon_t.picIndex]
 	sub	ah, ah
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 	lea	ax, [bp+var_2C]
 	push	ss
 	push	ax
 	push	word ptr [bp+var_30+2]
 	push	word ptr [bp+var_30]
-	call	decryptName
+	call	unmaskString
 	add	sp, 8
 	sub	ax, ax
 	push	ax
@@ -1466,7 +1466,7 @@ loc_25A76:
 	mov	byte ptr [bp+si+var_8],	1
 	jmp	short loc_25A73
 loc_25A85:
-	call	clearTextWindow
+	call	text_clear
 	lea	ax, [bp+var_14]
 	push	ss
 	push	ax
@@ -1484,7 +1484,7 @@ loc_25A85:
 	mov	[bp+var_42], ax
 	mov	[bp+var_44], 0
 	push	ax
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_16], ax
 	cmp	ax, 1Bh
@@ -1512,7 +1512,7 @@ loc_25ADD:
 	add	sp, 4
 	or	ax, ax
 	jz	short loc_25AFA
-	call	clearTextWindow
+	call	text_clear
 loc_25AFA:
 	jmp	short loc_25B03
 loc_25AFC:

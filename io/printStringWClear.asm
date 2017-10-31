@@ -6,7 +6,7 @@ printStringWClear proc far
 
 	FUNC_ENTER
 	CHKSTK
-	NEAR_CALL(clearTextWindow)
+	NEAR_CALL(text_clear)
 	push	[bp+arg_0]
 	PRINTSTRING
 

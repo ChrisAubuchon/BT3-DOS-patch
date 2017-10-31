@@ -6,7 +6,7 @@ seg019 segment word public 'CODE' use16
 byte_27433 db 90h, 10h dup(0)
 ; Attributes: bp-based frame
 
-dcmp_init proc far
+huf_init proc far
 
 	arg_0= word ptr	 6
 
@@ -52,10 +52,10 @@ dcmp_init proc far
 	assume ds:dseg
 	pop	bp
 	retf
-dcmp_init endp ; sp = -2
+huf_init endp ; sp = -2
 ; Attributes: bp-based frame
 
-dcmp_decompress	proc far
+huf_flate	proc far
 
 	arg_0= dword ptr  6
 	arg_4= word ptr	 0Ah
@@ -147,7 +147,7 @@ loc_27531:
 	mov	byte ptr ds:_decompByteMask+1, al
 	xchg	al, ah
 	jmp	short loc_274E2
-dcmp_decompress	endp
+huf_flate	endp
 
 ; Attributes: bp-based frame
 dcmp_expandTree	proc near
@@ -922,7 +922,7 @@ sub_27B4C endp
 
 ; Attributes: bp-based frame
 
-openFile proc far
+_open proc far
 
 	arg_0= dword ptr  6
 	arg_4= byte ptr	 0Ah
@@ -943,7 +943,7 @@ loc_27B74:
 	pop	ds
 	pop	bp
 	retf
-openFile endp
+_open endp
 
 ; Attributes: bp-based frame
 
@@ -1416,7 +1416,7 @@ sub_27E05 endp
 
 ; Attributes: bp-based frame
 
-sub_27E13 proc far
+dungeon_getWallInDirection proc far
 
 	walls= word ptr	 6
 	_dirFacing= word ptr  8
@@ -1433,11 +1433,11 @@ sub_27E13 proc far
 	xor	dx, dx
 	pop	bp
 	retf
-sub_27E13 endp
+dungeon_getWallInDirection endp
 
 ; Attributes: bp-based frame
 
-sub_27E2A proc far
+minimap_clearSquare proc far
 
 	arg_0= dword ptr  6
 
@@ -1453,11 +1453,11 @@ sub_27E2A proc far
 	pop	es
 	pop	bp
 	retf
-sub_27E2A endp
+minimap_clearSquare endp
 
 ; Attributes: bp-based frame
 
-sub_27E3D proc far
+minimap_setSquare proc far
 
 	arg_0= dword ptr  6
 	arg_4= word ptr	 0Ah
@@ -1468,7 +1468,7 @@ sub_27E3D proc far
 	push	si
 	push	ds
 	push	es
-	mov	si, offset byte_4EECD
+	mov	si, offset minimapWallBitmasks
 	les	di, [bp+arg_0]
 	mov	ax, [bp+arg_4]
 	shl	ax, 1
@@ -1489,11 +1489,11 @@ loc_27E58:
 	pop	di
 	pop	bp
 	retf
-sub_27E3D endp
+minimap_setSquare endp
 
 ; Attributes: bp-based frame
 
-bigpic_setBG proc far
+bigpic_memcpy proc far
 
 	arg_0= dword ptr  6
 	skyColor= word ptr  0Ah
@@ -1516,7 +1516,7 @@ bigpic_setBG proc far
 	pop	di
 	pop	bp
 	retf
-bigpic_setBG endp
+bigpic_memcpy endp
 
 byte_27E86 db 0, 1, 2, 3, 4, 5,	6, 7; 0
 db 8, 9, 0Ah, 0, 0Ch, 0Dh, 0Eh,	0Fh; 8
@@ -1656,9 +1656,6 @@ errorHandler	proc far
                 push    di
                 push    bp
                 mov     ds, cs:word_27F05
-                push    ax
-                call    sub_17729
-                add     sp, 2
                 pop     bp
                 pop     di
                 pop     si
@@ -1733,7 +1730,6 @@ loc_27FEF:
 	sub	bh, bh
 	inc	bx
 	mov	word_4EF5B, bx
-	call	_doNothing
 loc_28008:
 	pop	es
 	assume es:nothing
@@ -1915,15 +1911,6 @@ loc_28183:
 	retf
 sub_28115 endp
 
-	cmp	byte_4EF5E, 0
-	jz	short locret_281A1
-	cmp	byte_4EF79, 0
-	jnz	short locret_281A1
-	call	_doNothing_0
-	call	_doNothing
-locret_281A1:
-	retf
-
 checkGamePort proc far
 	xor	ax, ax
 	cmp	byte_4EF52, al
@@ -2030,36 +2017,7 @@ loc_2824E:
 	retf
 sub_2821E endp
 
-	cmp	byte_4EF7A, 1
-	jz	short locret_28272
-	cmp	byte_4EF79, 0
-	jnz	short locret_28272
-	call	_doNothing_2
-	call	_doNothing_1
-	call	_doNothing
-	jmp	short locret_28272
-align 2
-locret_28272:
-	retf
-	push	bp
-	mov	bp, sp
-	sub	dx, dx
-	cmp	word_4EF6F, 3F8h
-	jz	short loc_28282
-	mov	dl, 1
-loc_28282:
-	mov	al, [bp+4]
-	sub	ah, ah
-	int	14h		; SERIAL I/O - INITIALIZE USART
-			; AL = initializing parameters,	DX = port number (0-3)
-			; Return: AH = RS-232 status code bits,	AL = modem status bits
-	mov	dx, word_4EF6F
-	mov	dl, 0F8h 
-	in	al, dx		; COM: receiver	buffer register.
-			; 8 bits of character received.
-	pop	bp
-	retn
-	assume ss:seg029, ds:nothing
+assume ss:seg029, ds:nothing
 public start
 
 start proc far
@@ -2118,7 +2076,7 @@ loc_282CC:
 	pop	es
 	assume es:dseg
 	cld
-	mov	di, offset word_4FD56
+	mov	di, offset tavern_sayingBase
 	mov	cx, offset dseg_end+2
 	sub	cx, di
 	xor	ax, ax
@@ -6978,26 +6936,27 @@ sub_2A8BC endp
 
 ; Attributes: bp-based frame
 
-sub_2A912 proc far
+_strcpy proc far
 
-	arg_0= dword ptr  6
-	arg_4= dword ptr  0Ah
+	destString= dword ptr  6
+	srcString= dword ptr  0Ah
 
 	push	bp
 	mov	bp, sp
 	mov	dx, di
 	mov	bx, si
 	push	ds
-	lds	si, [bp+arg_4]
+	lds	si, [bp+srcString]
 	mov	di, si
 	mov	ax, ds
 	mov	es, ax
 	assume es:dseg
+
 	xor	ax, ax
 	mov	cx, 0FFFFh
-	repne scasb
-	not	cx
-	les	di, [bp+arg_0]
+	repne scasb			; scan srcString for '\0' 
+	not	cx			; cx has the index of '\0'
+	les	di, [bp+destString]
 	assume es:nothing
 	mov	ax, di
 	test	al, 1
@@ -7015,7 +6974,7 @@ loc_2A937:
 	mov	dx, es
 	pop	bp
 	retf
-sub_2A912 endp
+_strcpy endp
 
 ; Attributes: bp-based frame
 

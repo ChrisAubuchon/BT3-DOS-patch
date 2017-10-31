@@ -9,7 +9,7 @@ printStringWithWait proc	far
 	FUNC_ENTER
 	CHKSTK
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	PRINTSTRING

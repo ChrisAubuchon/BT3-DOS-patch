@@ -3,15 +3,15 @@ seg024 segment para public 'DATA' use16
 	assume cs:seg024
 	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
 
-_vid_mouseMoved	dw offset mouse_moved
-vid_mouseXp	dw offset mouse_x
-vid_mouseYp	dw offset mouse_y
-off_3E956	dw offset byte_4EF5E
-off_3E958	dw offset byte_4EF79
-off_3E95A	dw offset byte_4EF7A
+mouseMovedP	dw offset mouse_moved
+mouseXP	dw offset mouse_x
+mouseYP	dw offset mouse_y
+byte_4EF5E_P	dw offset byte_4EF5E
+byte_4EF79_P	dw offset byte_4EF79
+byte_4EF7A_P	dw offset byte_4EF7A
 off_3E95C	dd monsterBuf
 off_3E960	dd monsterBuf
-off_3E964	dd byte_3E630
+characterBitmasksP	dd characterBitmasks
 
 vid_setMode proc near
 	jmp	near ptr _vid_setMode
@@ -43,9 +43,9 @@ sub_3E977 proc near
 sub_3E977 endp
 
 ; Attributes: thunk
-sub_3E97A proc near
+gfx_writeCharacter proc near
 	jmp	near ptr sub_3F0D2
-sub_3E97A endp
+gfx_writeCharacter endp
 
 ; Attributes: thunk
 sub_3E97D proc near
@@ -444,7 +444,7 @@ arg_6= byte ptr	 0Ch
 	mov	ax, cs
 	mov	es, ax
 	assume es:seg024
-	lds	si, cs:off_3E964
+	lds	si, cs:characterBitmasksP
 	mov	ax, [bp+arg_4]
 	sub	ah, ah
 	shl	ax, 1
@@ -1246,32 +1246,32 @@ sub_3F603 proc far
 ; FUNCTION CHUNK AT 0C73 SIZE 00000002 BYTES
 	cli
 	nop
-	mov	bx, cs:off_3E958
+	mov	bx, cs:byte_4EF79_P
 	cmp	byte ptr [bx], 0
 	jz	short loc_3F5C3
 	mov	byte ptr [bx], 0
-	mov	bx, cs:off_3E956
+	mov	bx, cs:byte_4EF5E_P
 	cmp	byte ptr [bx], 0
 	jz	short loc_3F5C3
 	push	bp
 	push	si
 	push	di
 	mov	bp, sp
-	mov	bx, cs:off_3E95A
+	mov	bx, cs:byte_4EF7A_P
 	mov	byte ptr [bx], 1
 	sti
-	mov	bx, cs:_vid_mouseMoved
+	mov	bx, cs:mouseMovedP
 	mov	byte ptr [bx], 0
 	push	ds
 	push	es
-	mov	bx, cs:vid_mouseXp
+	mov	bx, cs:mouseXP
 	mov	ax, [bx]
 	mov	cs:vid_mouseX, ax
 	shr	ax, 1
 	shr	ax, 1
 	shr	ax, 1
 	mov	si, ax
-	mov	bx, cs:vid_mouseYp
+	mov	bx, cs:mouseYP
 	mov	ax, [bx]
 	mov	cs:vid_mouseY, ax
 	shl	ax, 1
@@ -1317,7 +1317,7 @@ loc_3F687:
 	assume ds:dseg
 	push	cs
 	call	sub_3E977
-	mov	bx, cs:off_3E95A
+	mov	bx, cs:byte_4EF7A_P
 	mov	byte ptr [bx], 0
 	pop	di
 	pop	si
@@ -1330,14 +1330,14 @@ sub_3F603 endp
 sub_3F6A9 proc far
 	cli
 	nop
-	mov	bx, cs:off_3E958
+	mov	bx, cs:byte_4EF79_P
 	cmp	byte ptr [bx], 0
 	jnz	short loc_3F712
 	inc	byte ptr [bx]
-	mov	bx, cs:off_3E956
+	mov	bx, cs:byte_4EF5E_P
 	cmp	byte ptr [bx], 0
 	jz	short loc_3F712
-	mov	bx, cs:off_3E95A
+	mov	bx, cs:byte_4EF7A_P
 	mov	byte ptr [bx], 1
 	sti
 	push	bp
@@ -1376,7 +1376,7 @@ loc_3F6F6:
 	jz	short loc_3F6F1
 	pop	ds
 	assume ds:dseg
-	mov	bx, cs:off_3E95A
+	mov	bx, cs:byte_4EF7A_P
 	mov	byte ptr [bx], 0
 	pop	di
 	pop	si

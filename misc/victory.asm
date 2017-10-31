@@ -21,7 +21,7 @@ doVictoryMaybe proc far
 	mov	[bp+var_262], 0
 loc_16745:
 	push	[bp+var_262]
-	CALL(sub_17920, 2)
+	CALL(icon_deactivate, 2)
 	inc	[bp+var_262]
 	cmp	[bp+var_262], 5
 	jl	short loc_16745
@@ -154,7 +154,7 @@ loc_168AD:
 	shl	si, 1
 	push	[bp+si+var_256]
 	push	[bp+si+var_258]
-	NEAR_CALL(sub_16F1E, 0Ah)
+	NEAR_CALL(writeStringAt, 0Ah)
 loc_168FC:
 	inc	[bp+var_264]
 	cmp	[bp+var_264], 8

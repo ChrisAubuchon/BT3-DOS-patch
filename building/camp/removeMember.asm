@@ -61,7 +61,7 @@ l_saveAndReturn:
 	CALL(roster_countCharacters)
 	push	ax
 	CALL(writeCharacterFile,2)
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 l_return:
 	pop	si
 	FUNC_EXIT

@@ -59,7 +59,7 @@ l_isSpellCaster:
 	mov	al, byte ptr [bp+var_2]
 	mov	gs:bat_curTarget, al
 l_doCast:
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	mov	ax, 1
 	push	ax
 	sub	ax, ax

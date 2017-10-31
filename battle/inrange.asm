@@ -8,17 +8,14 @@ bat_isPartyInRange proc	far
 	source=	word ptr  6
 	range= word ptr  8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 8
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(8)
 
 	; Return success if party attack
 	cmp	gs:bat_curTarget, 80h
 	jnb	short l_notPartyAttack
 	cmp	[bp+source], 80h
-	jge	short l_notPartyAttack
-	jmp	l_returnOne
+	jl	l_returnOne
 
 l_notPartyAttack:
 	test	byte ptr [bp+range], 80h
@@ -45,7 +42,7 @@ l_monSource:
 l_checkDistance:
 	mov	[bp+var_6], ax
 	and	ax, 3
-	getMonIndex	cx, cx
+	MONINDEX(cx, cx)
 	mov	bx, ax
 	mov	al, gs:monGroups.distance[bx]
 	sub	ah, ah

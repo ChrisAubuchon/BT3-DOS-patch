@@ -106,7 +106,7 @@ loc_2304C:
 	jmp	short loc_23049
 loc_23070:
 	push	[bp+var_2]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_4], ax
 	cmp	ax, 10Eh
@@ -133,7 +133,7 @@ loc_230A9:
 	push	cs
 	call	near ptr rev_learnSpells
 	add	sp, 2
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	short loc_23105
 loc_230BF:
 	push	cs
@@ -142,7 +142,7 @@ loc_230BF:
 loc_230C5:
 	push	cs
 	call	near ptr rev_speakToElder
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 loc_230D3:
 	jmp	short loc_23105
 	jmp	short loc_23105
@@ -203,14 +203,14 @@ loc_23128:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+var_6], ax
 	or	ax, ax
 	jge	short loc_23144
 	jmp	loc_2329B
 loc_23144:
 	getCharP	[bp+var_6], bx
-	test	gs:roster.status[bx], 0Ch
+	test	gs:party.status[bx], 0Ch
 	jz	short loc_23174
 	mov	ax, offset aHmmm___ShouldI
 	push	ds
@@ -235,7 +235,7 @@ loc_23174:
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
 	getCharP	[bp+var_6], bx
-	lea	ax, roster._name[bx]
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -246,7 +246,7 @@ loc_23174:
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
 	getCharP	[bp+var_6], bx
-	cmp	gs:roster.class[bx], class_monster
+	cmp	gs:party.class[bx], class_monster
 	jnz	short loc_231E2
 	mov	ax, offset aCannotBeRaised
 	push	ds
@@ -324,7 +324,7 @@ loc_23274:
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	wait4IO
 	jmp	loc_23128
 loc_2329B:
@@ -352,9 +352,9 @@ rev_doAdvance proc far
 	call	someStackOperation
 	push	si
 	getCharP	[bp+charNo], si
-	inc	gs:roster.maxLevel[si]
-	mov	ax, gs:roster.maxLevel[si]
-	mov	gs:roster.level[si], ax
+	inc	gs:party.maxLevel[si]
+	mov	ax, gs:party.maxLevel[si]
+	mov	gs:party.level[si], ax
 	push	[bp+charNo]
 	push	cs
 	call	near ptr _rev_removeAgeStatus
@@ -364,18 +364,18 @@ rev_doAdvance proc far
 	call	_random
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	bl, gs:roster.class[bx]
+	mov	bl, gs:party.class[bx]
 	sub	bh, bh
 	mov	al, hpLevelBonusMask[bx]
 	sub	ah, ah
 	and	ax, cx
-	mov	cl, gs:roster.constitution[si]
+	mov	cl, gs:party.constitution[si]
 	sub	ch, ch
 	shr	cx, 1
 	shr	cx, 1
 	add	ax, cx
 	mov	[bp+var_4], ax
-	mov	ax, gs:roster.currentHP[si]
+	mov	ax, gs:party.currentHP[si]
 	add	ax, [bp+var_4]
 	sub	cx, cx
 	push	cx
@@ -383,9 +383,9 @@ rev_doAdvance proc far
 	push	cs
 	call	near ptr _returnValueOrFFFF
 	add	sp, 4
-	mov	gs:roster.currentHP[si], ax
+	mov	gs:party.currentHP[si], ax
 	getCharP	[bp+charNo], bx
-	mov	ax, gs:roster.maxHP[bx]
+	mov	ax, gs:party.maxHP[bx]
 	add	ax, [bp+var_4]
 	sub	cx, cx
 	push	cx
@@ -395,14 +395,14 @@ rev_doAdvance proc far
 	add	sp, 4
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	gs:roster.maxHP[bx], cx
+	mov	gs:party.maxHP[bx], cx
 	getCharP	[bp+charNo], bx
-	mov	al, gs:roster.class[bx]
+	mov	al, gs:party.class[bx]
 	sub	ah, ah
 	jmp	loc_23562
 fighterLevelUp:
 	getCharP	[bp+charNo], si
-	mov	ax, gs:roster.level[si]
+	mov	ax, gs:party.level[si]
 	dec	ax
 	shr	ax, 1
 	shr	ax, 1
@@ -414,13 +414,13 @@ fighterLevelUp:
 loc_2338C:
 	mov	al, 7
 loc_2338E:
-	mov	gs:roster.numAttacks[si], al
+	mov	gs:party.numAttacks[si], al
 	jmp	loc_23594
 rogueLevelUp:
 	call	rnd_1d8
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	al, gs:roster.dexterity[bx]
+	mov	al, gs:party.dexterity[bx]
 	sub	ah, ah
 	mov	dx, cx
 	mov	cl, 3
@@ -428,7 +428,7 @@ rogueLevelUp:
 	add	ax, dx
 	mov	[bp+var_2], ax
 	getCharP	[bp+charNo], bx
-	mov	al, gs:roster.specAbil[bx]
+	mov	al, gs:party.specAbil[bx]
 	sub	ah, ah
 	add	ax, [bp+var_2]
 	push	ax
@@ -436,11 +436,11 @@ rogueLevelUp:
 	add	sp, 2
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	gs:roster.specAbil[bx],	cl
+	mov	gs:party.specAbil[bx],	cl
 	call	rnd_1d8
 	add	[bp+var_2], ax
 	getCharP	[bp+charNo], bx
-	mov	al, gs:(roster.specAbil+1)[bx]
+	mov	al, gs:(party.specAbil+1)[bx]
 	sub	ah, ah
 	add	ax, [bp+var_2]
 	push	ax
@@ -448,11 +448,11 @@ rogueLevelUp:
 	add	sp, 2
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	gs:(roster.specAbil+1)[bx], cl
+	mov	gs:(party.specAbil+1)[bx], cl
 	call	rnd_1d8
 	add	[bp+var_2], ax
 	getCharP	[bp+charNo], bx
-	mov	al, gs:(roster.specAbil+2)[bx]
+	mov	al, gs:(party.specAbil+2)[bx]
 	sub	ah, ah
 	add	ax, [bp+var_2]
 	push	ax
@@ -460,20 +460,20 @@ rogueLevelUp:
 	add	sp, 2
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	gs:(roster.specAbil+2)[bx], cl
+	mov	gs:(party.specAbil+2)[bx], cl
 	jmp	loc_23594
 bardLevelUp:
 	getCharP	[bp+charNo], si
-	push	gs:roster.level[si]
+	push	gs:party.level[si]
 	call	_returnXor255
 	add	sp, 2
-	mov	gs:roster.specAbil[si],	al
+	mov	gs:party.specAbil[si],	al
 	jmp	loc_23594
 hunterLevelUp:
 	call	rnd_1d8
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	al, gs:roster.dexterity[bx]
+	mov	al, gs:party.dexterity[bx]
 	sub	ah, ah
 	mov	dx, cx
 	mov	cl, 3
@@ -481,7 +481,7 @@ hunterLevelUp:
 	add	ax, dx
 	mov	[bp+var_2], ax
 	getCharP	[bp+charNo], bx
-	mov	al, gs:roster.specAbil[bx]
+	mov	al, gs:party.specAbil[bx]
 	sub	ah, ah
 	add	ax, [bp+var_2]
 	push	ax
@@ -489,14 +489,14 @@ hunterLevelUp:
 	add	sp, 2
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	gs:roster.specAbil[bx],	cl
+	mov	gs:party.specAbil[bx],	cl
 	jmp	loc_23594
 mageLevelUp:
 	call	_random
 	and	ax, 3
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	al, gs:roster.intelligence[bx]
+	mov	al, gs:party.intelligence[bx]
 	sub	ah, ah
 	shr	ax, 1
 	shr	ax, 1
@@ -504,7 +504,7 @@ mageLevelUp:
 	inc	ax
 	mov	[bp+var_2], ax
 	getCharP	[bp+charNo], bx
-	mov	ax, gs:roster.currentSppt[bx]
+	mov	ax, gs:party.currentSppt[bx]
 	add	ax, [bp+var_2]
 	sub	cx, cx
 	push	cx
@@ -514,9 +514,9 @@ mageLevelUp:
 	add	sp, 4
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	gs:roster.currentSppt[bx], cx
+	mov	gs:party.currentSppt[bx], cx
 	getCharP	[bp+charNo], bx
-	mov	ax, gs:roster.maxSppt[bx]
+	mov	ax, gs:party.maxSppt[bx]
 	add	ax, [bp+var_2]
 	sub	cx, cx
 	push	cx
@@ -526,7 +526,7 @@ mageLevelUp:
 	add	sp, 4
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
-	mov	gs:roster.maxSppt[bx], cx
+	mov	gs:party.maxSppt[bx], cx
 	jmp	short loc_23594
 	jmp	short loc_23594
 loc_23562:
@@ -564,7 +564,7 @@ loc_23594:
 	add	sp, 4
 	mov	[bp+var_6], ax
 	getCharIndex	ax, [bp+charNo]
-	add	ax, offset roster.strength
+	add	ax, offset party.strength
 	mov	word ptr [bp+var_C], ax
 	mov	word ptr [bp+var_C+2], seg seg027
 	jmp	short loc_235BC
@@ -624,7 +624,7 @@ loc_23629:
 rev_doAdvance endp
 
 ; This function	returns	the difference between the
-; player's experience points and the requirements
+; players experience points and the requirements
 ; for the next level.
 ; Attributes: bp-based frame
 
@@ -639,28 +639,28 @@ rev_getXPDelta proc far
 	call	someStackOperation
 	push	si
 	getCharP	[bp+playerNo], bx
-	mov	ax, gs:roster.maxLevel[bx]
+	mov	ax, gs:party.maxLevel[bx]
 	mov	[bp+var_2], ax
 	or	ax, ax
 	jz	short loc_23689
 	dec	ax
 	push	ax
 	push	[bp+playerNo]
-	call	getXPForLevel
+	call	getLevelXp
 	add	sp, 4
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+playerNo], si
 	mov	ax, cx
 	mov	dx, bx
-	sub	ax, word ptr gs:roster.experience[si]
-	sbb	dx, word ptr gs:(roster.experience+2)[si]
+	sub	ax, word ptr gs:party.experience[si]
+	sbb	dx, word ptr gs:(party.experience+2)[si]
 	jmp	short loc_236A4
 	jmp	short loc_236A4
 loc_23689:
 	getCharP	[bp+playerNo], bx
-	mov	ax, word ptr gs:roster.experience[bx]
-	mov	dx, word ptr gs:(roster.experience+2)[bx]
+	mov	ax, word ptr gs:party.experience[bx]
+	mov	dx, word ptr gs:(party.experience+2)[bx]
 	neg	ax
 	adc	dx, 0
 	neg	dx
@@ -694,14 +694,14 @@ rev_learnSpells	proc far
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+charNo], ax
 	or	ax, ax
 	jge	short loc_236D1
 	jmp	loc_238B7
 loc_236D1:
 	getCharP	[bp+charNo], bx
-	mov	bl, gs:roster.class[bx]
+	mov	bl, gs:party.class[bx]
 	sub	bh, bh
 	mov	al, mageSpellIndex[bx]
 	sub	ah, ah
@@ -711,7 +711,7 @@ loc_236D1:
 	mov	ax, offset aThouArtNotASpe
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_238B7
 loc_23707:
@@ -739,12 +739,12 @@ loc_2372F:
 	mov	ax, offset aThouHathLearne
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_238B7
 loc_23745:
 	getCharP	[bp+charNo], bx
-	mov	ax, gs:roster.level[bx]
+	mov	ax, gs:party.level[bx]
 	inc	ax
 	shr	ax, 1
 	mov	cx, [bp+counter]
@@ -754,12 +754,12 @@ loc_23745:
 	mov	ax, offset aThouCannotAcqu
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_238B7
 loc_23771:
 	getCharP	[bp+charNo], bx
-	mov	bl, gs:roster.class[bx]
+	mov	bl, gs:party.class[bx]
 	sub	bh, bh
 	shl	bx, 1
 	shl	bx, 1
@@ -825,7 +825,7 @@ loc_23771:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+var_E], ax
 	or	ax, ax
 	jge	short loc_23844
@@ -836,16 +836,16 @@ loc_23844:
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+var_E], si
-	cmp	word ptr gs:(roster.gold+2)[si], bx
+	cmp	word ptr gs:(party.gold+2)[si], bx
 	ja	short loc_23877
 	jb	short loc_23868
-	cmp	word ptr gs:roster.gold[si], cx
+	cmp	word ptr gs:party.gold[si], cx
 	jnb	short loc_23877
 loc_23868:
 	mov	ax, offset aNotEnoughGoldNL
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	short loc_238B4
 loc_23877:
@@ -854,12 +854,12 @@ loc_23877:
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+var_E], si
-	sub	word ptr gs:roster.gold[si], cx
-	sbb	word ptr gs:(roster.gold+2)[si], bx
+	sub	word ptr gs:party.gold[si], cx
+	sbb	word ptr gs:(party.gold+2)[si], bx
 	mov	ax, offset aTheElderTeache
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	push	[bp+spellBase]
 	push	[bp+counter]
@@ -1110,14 +1110,14 @@ rev_changeMageClass proc far
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+charNo], ax
 	or	ax, ax
 	jge	short loc_23A21
 	jmp	loc_23C5A
 loc_23A21:
 	getCharP	[bp+charNo], bx
-	mov	al, gs:roster.class[bx]
+	mov	al, gs:party.class[bx]
 	mov	[bp+var_24], al
 	cmp	al, class_chronomancer
 	jz	short loc_23A3D
@@ -1127,12 +1127,12 @@ loc_23A3D:
 	mov	ax, offset aThouCannotChan
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_23C5A
 loc_23A4D:
 	getCharP	[bp+charNo], bx
-	mov	bl, gs:roster.class[bx]
+	mov	bl, gs:party.class[bx]
 	sub	bh, bh
 	mov	al, mageSpellIndex[bx]
 	sub	ah, ah
@@ -1142,7 +1142,7 @@ loc_23A4D:
 	mov	ax, offset aThouArtNotASpe
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_23C5A
 loc_23A83:
@@ -1164,7 +1164,7 @@ loc_23A8D:
 	mov	ax, offset aYouMustKnowAtL
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_23C5A
 loc_23AB7:
@@ -1193,7 +1193,7 @@ loc_23ACD:
 	push	word ptr (magicUserString+2)[bx]
 	push	word ptr magicUserString[bx]
 	push	[bp+var_22]
-	call	printOrderedList
+	call	printListItem
 	add	sp, 6
 	mov	si, [bp+var_22]
 	inc	[bp+var_22]
@@ -1213,7 +1213,7 @@ loc_23B2B:
 	mov	ax, offset aTheeDoesnTQual
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_23C5A
 loc_23B41:
@@ -1224,7 +1224,7 @@ loc_23B41:
 	add	sp, 4
 loc_23B4E:
 	push	[bp+var_2]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_1A], ax
 	cmp	ax, 1Bh
@@ -1252,7 +1252,7 @@ loc_23B77:
 	mov	ax, offset aTheeUnderstand
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aDostThouAccept
 	push	ds
@@ -1267,12 +1267,12 @@ loc_23BBE:
 	mov	ax, offset aKnowThisTheSpe
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aThereIsALargeG
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	push	[bp+charNo]
 	push	cs
@@ -1284,17 +1284,17 @@ loc_23BE2:
 	mov	al, byte_4A6BC[bx]
 	sub	ah, ah
 	mov	[bp+var_18], ax
-	mov	cl, gs:roster.class[si]
+	mov	cl, gs:party.class[si]
 	sub	ch, ch
 	cmp	ax, cx
 	jz	short loc_23C5A
 	sub	ax, ax
-	mov	word ptr gs:(roster.experience+2)[si], ax
-	mov	word ptr gs:roster.experience[si], ax
-	mov	gs:roster.maxLevel[si],	1
-	mov	gs:roster.level[si], 1
+	mov	word ptr gs:(party.experience+2)[si], ax
+	mov	word ptr gs:party.experience[si], ax
+	mov	gs:party.maxLevel[si],	1
+	mov	gs:party.level[si], 1
 	mov	al, byte ptr [bp+var_18]
-	mov	gs:roster.class[si], al
+	mov	gs:party.class[si], al
 	mov	bx, [bp+var_18]
 	mov	al, mageSpellIndex[bx]
 	sub	ah, ah
@@ -1305,11 +1305,11 @@ loc_23BE2:
 	push	cs
 	call	near ptr mage_learnSpellLevel
 	add	sp, 6
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	mov	ax, offset aNowThouBeginsT
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 loc_23C5A:
 	pop	si
@@ -1521,7 +1521,7 @@ loc_23D9D:
 	jge	short loc_23DBA
 	getCharP	[bp+arg_0], bx
 	add	bx, [bp+var_2]
-	mov	gs:roster.spells[bx], 0
+	mov	gs:party.spells[bx], 0
 	jmp	short loc_23D9A
 loc_23DBA:
 	mov	sp, bp
@@ -1545,7 +1545,7 @@ loc_23DC9:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+charNo], ax
 	or	ax, ax
 	jge	short loc_23DE5
@@ -1562,17 +1562,17 @@ loc_23DE5:
 	mov	ax, offset aSeekOutBrilhas
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	loc_23E88
 loc_23E06:
 	getCharP	[bp+charNo], bx
-	cmp	gs:roster.class[bx], class_chronomancer
+	cmp	gs:party.class[bx], class_chronomancer
 	jz	short loc_23E29
 	mov	ax, offset aILlTeachOnlyAC
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	jmp	short loc_23E88
 loc_23E29:
@@ -1655,12 +1655,12 @@ loc_23EC6:
 	mov	ax, offset aGelidiaTheLand
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aToTheNorthIsCo
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 54h	
 	push	ax
@@ -1714,12 +1714,12 @@ loc_23F3E:
 	mov	ax, offset aLucenciaIsEnte
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aToTheEastIsACr
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 58h	
 	push	ax
@@ -1773,12 +1773,12 @@ loc_23FB6:
 	mov	ax, offset aKinestiaTheDim
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aToTheSouthWest
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 5Ch	
 	push	ax
@@ -1832,12 +1832,12 @@ loc_2402E:
 	mov	ax, offset aTenebrosiaCanB
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aToTheSoutheast
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 60h	
 	push	ax
@@ -1891,12 +1891,12 @@ loc_240A6:
 	mov	ax, offset aTarmitiaIsEnte
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aToTheSouthIsAV
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 64h	
 	push	ax
@@ -1934,7 +1934,7 @@ chrono_isQuestComplete proc far
 	mov	cl, 3
 	sar	ax, cl
 	add	bx, ax
-	mov	al, gs:roster.chronoQuest[bx]
+	mov	al, gs:party.chronoQuest[bx]
 	sub	ah, ah
 	mov	bx, [bp+arg_2]
 	and	bx, 7
@@ -1978,7 +1978,7 @@ loc_24153:
 	mov	[bp+var_8], ax
 	cmp	[bp+var_6], 0
 	jz	short loc_24161
-	mov	ax, offset aBuilding
+	mov	ax, offset s_building
 	jmp	short loc_24164
 loc_24161:
 	mov	ax, offset aReviewBoard
@@ -1986,7 +1986,7 @@ loc_24164:
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], ds
 	push	[bp+var_8]
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 	push	[bp+var_2]
 	push	[bp+var_4]
@@ -1994,7 +1994,7 @@ loc_24164:
 	add	sp, 4
 	cmp	[bp+var_6], 0
 	jz	short loc_241B7
-	call	clearTextWindow
+	call	text_clear
 	mov	ax, offset aTheOldReviewBo
 	push	ds
 	push	ax
@@ -2044,22 +2044,22 @@ loc_241F9:
 	mov	ax, offset aTheOldManInThe
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aBeneathSkaraBr
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aYouMayEnterThe
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aDestroyBrilhas
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 0FFh
 	push	ax
@@ -2125,37 +2125,37 @@ loc_242B2:
 	mov	ax, offset aWelcomeYeChild
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aThatWhichHasLa
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aIfYouCannotSto
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aPrepareThyselv
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aAboriaTheHomeO
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aBringToMeValar
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aYesAndBeOnTheL
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 0FFh
 	push	ax
@@ -2234,22 +2234,22 @@ loc_24392:
 	mov	ax, offset aTheOldManTakes
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aYouHaveDoneWel
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aItIsTheDimensi
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aBringLanatirWi
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 0FFh
 	push	ax
@@ -2322,17 +2322,17 @@ loc_24454:
 	mov	ax, offset aTheOldManAppea
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aHisEyesFocusUp
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aIDareNotHopeAl
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 0FFh
 	push	ax
@@ -2408,22 +2408,22 @@ loc_2452D:
 	mov	ax, offset aTheOldManSLook
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aQuicklyThenMyC
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aYouMustReturnH
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aHurryThePaceQu
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 0FFh
 	push	ax
@@ -2499,22 +2499,22 @@ loc_24603:
 	mov	ax, offset aTheOldManSEyes
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aHePausesASecon
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aRememberInTheL
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aFromThereIRequ
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 0FFh
 	push	ax
@@ -2590,22 +2590,22 @@ loc_246D9:
 	mov	ax, offset aNoTheOldManCri
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aOffWithYouToTa
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aBringMeWerraSS
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aHisEyesLoseThe
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 0FFh
 	push	ax
@@ -2690,31 +2690,31 @@ loc_247D1:
 	mov	ax, offset aIKnowTheOldMan
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aGatherUpThePri
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aIHavePlacedThe
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aGetYourselvesH
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, 4Ah	
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 	mov	ax, offset aWithThoseFinal
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, quest_werraActive
 	push	ax
@@ -2738,9 +2738,9 @@ loc_24860:
 	cmp	[bp+var_2], 7
 	jge	short loc_248A2
 	getCharP	[bp+var_2], si
-	cmp	byte ptr gs:roster._name[si], 0
+	cmp	byte ptr gs:party._name[si], 0
 	jz	short loc_248A0
-	cmp	gs:roster.class[si], class_chronomancer
+	cmp	gs:party.class[si], class_chronomancer
 	jnz	short loc_248A0
 	mov	ax, 68h	
 	push	ax
@@ -2827,13 +2827,13 @@ loc_2490D:
 	cmp	[bp+var_2], 7
 	jge	short loc_2495B
 	getCharP	[bp+var_2], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jz	short loc_24959
 	mov	bx, [bp+arg_0]
 	mov	al, byte_4A702[bx]
 	sub	ah, ah
 	add	ax, si
-	add	ax, offset roster.chronoQuest
+	add	ax, offset party.chronoQuest
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], seg seg027
 	mov	al, byte_4A6FA[bx]
@@ -2870,12 +2870,12 @@ sub_24961 proc far
 	mov	ax, offset aTheOldManAward
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	ax, offset aWithAWaveOfHis
 	push	ds
 	push	ax
-	call	anotherPrintString
+	call	printStringWithWait
 	add	sp, 4
 	mov	[bp+var_2], 0
 	jmp	short loc_24991
@@ -2885,12 +2885,12 @@ loc_24991:
 	cmp	[bp+var_2], 7
 	jge	short loc_249EE
 	getCharP	[bp+var_2], si
-	cmp	gs:roster.class[si], class_monster
+	cmp	gs:party.class[si], class_monster
 	jnb	short loc_249EC
-	test	gs:roster.status[si], 4
+	test	gs:party.status[si], 4
 	jnz	short loc_249EC
-	mov	ax, word ptr gs:roster.experience[si]
-	mov	dx, word ptr gs:(roster.experience+2)[si]
+	mov	ax, word ptr gs:party.experience[si]
+	mov	dx, word ptr gs:(party.experience+2)[si]
 	add	ax, 27C0h
 	adc	dx, 9
 ;	push	dx
@@ -2898,15 +2898,15 @@ loc_24991:
 ;	push	cs
 ;	call	near ptr sub_22FC7
 ;	add	sp, 4
-	mov	word ptr gs:roster.experience[si], ax
-	mov	word ptr gs:(roster.experience+2)[si], dx
+	mov	word ptr gs:party.experience[si], ax
+	mov	word ptr gs:(party.experience+2)[si], dx
 	getCharP	[bp+var_2], si
-	mov	ax, gs:roster.maxSppt[si]
-	mov	gs:roster.currentSppt[si], ax
+	mov	ax, gs:party.maxSppt[si]
+	mov	gs:party.currentSppt[si], ax
 loc_249EC:
 	jmp	short loc_2498E
 loc_249EE:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -2926,7 +2926,7 @@ _rev_removeAgeStatus proc far
 	call	someStackOperation
 	push	si
 	getCharP	[bp+arg_0], si
-	mov	al, gs:roster.status[si]
+	mov	al, gs:party.status[si]
 	sub	ah, ah
 	and	ax, 2
 	mov	[bp+var_2], ax
@@ -2934,17 +2934,17 @@ _rev_removeAgeStatus proc far
 	jz	short loc_24A53
 	mov	ax, 5
 	push	ax
-	lea	ax, roster.strength[si]
+	lea	ax, party.strength[si]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	lea	ax, roster.savedST[si]
+	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
 	call	_doAgeStatus
 	add	sp, 0Ah
 	getCharP	[bp+arg_0], bx
-	and	gs:roster.status[bx], 0FDh
+	and	gs:party.status[bx], 0FDh
 loc_24A53:
 	mov	ax, [bp+var_2]
 	jmp	short $+2
@@ -2968,17 +2968,17 @@ _rev_resetAgeStatus proc far
 	getCharP	[bp+charNo], si
 	mov	ax, 5
 	push	ax
-	lea	ax, roster.savedST[si]
+	lea	ax, party.savedST[si]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	lea	ax, roster.strength[si]
+	lea	ax, party.strength[si]
 	push	dx
 	push	ax
 	call	_doAgeStatus
 	add	sp, 0Ah
 	getCharP	[bp+charNo], bx
-	or	gs:roster.status[bx], stat_old
+	or	gs:party.status[bx], stat_old
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -3003,7 +3003,7 @@ enterHallOfWizards proc	far
 	add	sp, 4
 	mov	ax, 36h	
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 loc_24AC6:
 	mov	ax, offset aThouArtInTheHallOfW
@@ -3028,7 +3028,7 @@ loc_24AE2:
 	jmp	short loc_24ADF
 loc_24B06:
 	push	[bp+var_2]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_4], ax
 	cmp	ax, 10Eh
@@ -3048,7 +3048,7 @@ loc_24B33:
 	push	cs
 	call	near ptr rev_checkXP
 	add	sp, 2
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	short loc_24B93
 loc_24B4A:
 	mov	ax, 1
@@ -3056,12 +3056,12 @@ loc_24B4A:
 	push	cs
 	call	near ptr rev_learnSpells
 	add	sp, 2
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	short loc_24B93
 loc_24B61:
 	push	cs
 	call	near ptr nonClassSpellGain
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 loc_24B6F:
 	jmp	short loc_24B93
 	jmp	short loc_24B93
@@ -3114,14 +3114,14 @@ nonClassSpellGain proc far
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+var_102], ax
 	or	ax, ax
 	jge	short loc_24BD4
 	jmp	loc_24D7F
 loc_24BD4:
 	getCharP	[bp+var_102], bx
-	mov	bl, gs:roster.class[bx]
+	mov	bl, gs:party.class[bx]
 	sub	bh, bh
 	cmp	mageSpellIndex[bx], 0FFh
 	jnz	short loc_24C10
@@ -3199,7 +3199,7 @@ loc_24C3E:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+var_108], ax
 	or	ax, ax
 	jge	short loc_24CDB
@@ -3213,10 +3213,10 @@ loc_24CDB:
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+var_108], si
-	cmp	word ptr gs:(roster.gold+2)[si], bx
+	cmp	word ptr gs:(party.gold+2)[si], bx
 	ja	short loc_24D27
 	jb	short loc_24D0C
-	cmp	word ptr gs:roster.gold[si], cx
+	cmp	word ptr gs:party.gold[si], cx
 	jnb	short loc_24D27
 loc_24D0C:
 	mov	ax, offset aNotEnoughGoldNL
@@ -3235,8 +3235,8 @@ loc_24D27:
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+var_108], si
-	sub	word ptr gs:roster.gold[si], cx
-	sbb	word ptr gs:(roster.gold+2)[si], bx
+	sub	word ptr gs:party.gold[si], cx
+	sbb	word ptr gs:(party.gold+2)[si], bx
 	mov	ax, [bp+var_10A]
 	add	ax, 7Ah	
 	push	ax

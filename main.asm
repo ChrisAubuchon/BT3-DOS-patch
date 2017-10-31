@@ -196,7 +196,7 @@ loc_101E6:
 	push	gs:word_42564
 	push	gs:word_42562
 	CALL(_freeMaybe, 4)
-	NEAR_CALL(sub_104F3)
+	NEAR_CALL(cleanupAndExit)
 loc_10266:
 	mov	ax, 33000
 	sub	dx, dx
@@ -238,7 +238,7 @@ loc_10266:
 	push	gs:word_42564
 	push	gs:word_42562
 	CALL(_freeMaybe, 4)
-	NEAR_CALL(sub_104F3)
+	NEAR_CALL(cleanupAndExit)
 loc_102FB:
 	mov	ax, 0FFFFh
 	push	ax
@@ -325,7 +325,7 @@ loc_103D4:
 	mov	ax, 0FFh
 	push	ax
 	CALL(song_playSong, 4)
-	CALL(configIconsBin)
+	CALL(icons_read)
 	call	far ptr j_nullsub_3
 	PUSH_OFFSET(s_titleText)
 	CALL(intro_scrollText, 4)
@@ -339,7 +339,7 @@ loc_103D4:
 	push	gs:word_42564
 	push	gs:word_42562
 	CALL(_freeMaybe, 4)
-	NEAR_CALL(sub_104F3)
+	NEAR_CALL(cleanupAndExit)
 loc_1043E:
 	mov	ax, 80E8h
 	sub	dx, dx
@@ -377,13 +377,13 @@ loc_1043E:
 	mov	ax, 4D0Ah
 	push	ax
 	CALL(_mallocMaybe, 2)
-	mov	gs:word_4240A, ax
-	mov	gs:word_4240C, dx
+	mov	gs:bigpicCellData_off, ax
+	mov	gs:bigpicCellData_seg, dx
 	NEAR_CALL(sub_116CC)
 	CALL(restoreGame)
 	push	buildingRvalMaybe
 	NEAR_CALL(sub_10560, 2)
-	NEAR_CALL(sub_104F3)
+	NEAR_CALL(cleanupAndExit)
 	mov	sp, bp
 	pop	bp
 	retf

@@ -72,6 +72,7 @@ itType_container  = 13
 itType_armor0  = 14
 
 ; enum dosKeys
+dosKeys_Enter	= 0Dh
 dosKeys_ESC  = 1Bh
 dosKeys_F1  = 3B00h
 dosKeys_F2  = 3C00h
@@ -80,10 +81,14 @@ dosKeys_F4  = 3E00h
 dosKeys_F5  = 3F00h
 dosKeys_F6  = 4000h
 dosKeys_F7  = 4100h
+dosKeys_home		= 4700h
 dosKeys_upArrow	 = 4800h
+dosKeys_pageUp		= 4900h
 dosKeys_leftArrow  = 4B00h
 dosKeys_rightArrow  = 4D00h
+dosKeys_end		= 4F00h
 dosKeys_downArrow  = 5000h
+dosKeys_pageDown	= 5100h
 
 ; enum directionEnum
 dir_north  = 0
@@ -167,3 +172,32 @@ song_shield  = 7
 ; enum levelFile
 lev_monsterl  =	1
 lev_monsterh  =	2
+
+; enum healFlags
+heal_fleshrestore = 1
+heal_stoned = 2
+heal_possession = 3
+heal_resurrect = 4
+heal_old = 5
+heal_healall = 6
+heal_allFlag = 80h
+heal_fullHeal = 0FDh
+heal_quickfix = 0FEh
+heal_levelMul = 0FFh
+
+; enum spellCastFlags
+spellcast_spellOnly = 8
+spellcast_combatOnly = 10h
+
+; enum miniMapBitmasks
+minimap_topWall		= 0
+minimap_rightWall	= 1
+minimap_bottomWall	= 2
+minimap_leftWall	= 3
+minimap_dot		= 0Ch
+minimap_X		= 0Dh
+minimap_undiscovered	= 0Eh
+
+; enum specialCharacters
+ch_InsertCursor		= 60h
+ch_OverwriteCursor	= 5Fh

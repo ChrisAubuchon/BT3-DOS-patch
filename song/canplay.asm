@@ -7,31 +7,27 @@ _charCanPlaySong proc far
 
 	partySlotNumber=	word ptr  6
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 	push	si
-	getCharP	[bp+partySlotNumber], si
+	CHARINDEX(ax, STACKVAR(partySlotNumber), si)
 
-	test	gs:roster.status[si], stat_dead	or stat_stoned or stat_paralyzed
+	test	gs:party.status[si], stat_dead	or stat_stoned or stat_paralyzed
 	jnz	short l_returnZero
 
-	cmp	gs:roster.class[si], class_bard
+	cmp	gs:party.class[si], class_bard
 	jnz	short l_returnZero
 
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	call	inven_hasTypeEquipped
-	add	sp, 4
+	CALL(inven_hasTypeEquipped, 4)
 	jmp	short l_return
 l_returnZero:
 	sub	ax, ax
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _charCanPlaySong endp
 

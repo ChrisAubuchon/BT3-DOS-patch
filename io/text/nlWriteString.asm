@@ -7,7 +7,7 @@ text_nlWriteString proc far
 	FUNC_ENTER
 	CHKSTK
 
-	mov	gs:g_clearTextWindowFlag, 1		; Mark text window as clearable
+	mov	gs:g_text_clearFlag, 1		; Mark text window as clearable
 	cmp	gs:g_currentCharPosition, 0		; If not at the beginning of the line
 	jz	short l_writeString
 	NEAR_CALL(txt_newLine)				;   Newline

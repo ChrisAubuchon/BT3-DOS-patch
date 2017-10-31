@@ -17,7 +17,7 @@ camp_insertParty proc far
 	add	ax, offset g_rosterPartyBuffer
 	mov	word ptr [bp+savedPartiesP], ax
 	mov	word ptr [bp+savedPartiesP+2], seg seg022
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	mov	[bp+loopCounter], 0
 	jmp	short l_loopComparison
 l_incrementCounter:
@@ -101,7 +101,7 @@ l_addCharacter:
 	push	ax
 	NEAR_CALL(copyCharacterBuf,8)
 	NEAR_CALL(party_addCharacter)
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	l_incrementCounter
 l_rosterFull:
 	PUSH_OFFSET(s_rosterIsFull)

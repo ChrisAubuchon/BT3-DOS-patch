@@ -1,465 +1,6 @@
-; Segment type:	Pure code
-seg000 segment byte public 'CODE' use16
-	assume cs:seg000
-	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
-	; Attributes: bp-based frame
-
-_main proc far
-	var_6= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
-	arg_4= word ptr	 0Ah
-	arg_27=	word ptr  2Dh
-
-	push	bp
-	mov	bp, sp
-	mov	ax, 6
-	call	someStackOperation
-	mov	ax, 55h
-	push	ax
-	call	bigpic_initBuffers
-	add	sp, 2
-	sub	ax, ax
-	push	ax
-	mov	ax, offset aThief_cfg
-	push	ds
-	push	ax
-	call	openFile
-	add	sp, 6
-	mov	[bp+var_4], ax
-	inc	ax
-	jnz	short loc_10039
-	mov	ax, 4
-	push	ax
-	call	far ptr	sub_28424
-	add	sp, 2
-loc_10039:
-	mov	ax, 6
-	push	ax
-	mov	ax, offset word_4243A
-	mov	dx, seg	seg027
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 8
-	push	[bp+var_4]
-	call	_close
-	add	sp, 2
-	mov	gs, seg027_x
-	push	gs:word_4243E
-	call	sub_14D90
-	add	sp, 2
-	cmp	[bp+arg_0], 1
-	jg	short loc_1007E
-	cmp	gs:word_4243A, 0
-	jnz	short loc_100E7
-loc_1007E:
-	mov	gs:word_4243A, 1
-	push	[bp+arg_4]
-	push	[bp+arg_2]
-	push	[bp+arg_0]
-	call	sub_2625E
-	add	sp, 6
-	mov	gs:word_4243C, ax
-	mov	ax, 2
-	push	ax
-	mov	ax, offset aThief_cfg
-	push	ds
-	push	ax
-	call	openFile
-	add	sp, 6
-	mov	[bp+var_4], ax
-	inc	ax
-	jnz	short loc_100C5
-	mov	ax, 4
-	push	ax
-	call	far ptr	sub_28424
-	add	sp, 2
-loc_100C5:
-	mov	ax, 4
-	push	ax
-	mov	ax, offset word_4243A
-	mov	dx, seg	seg027
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_write
-	add	sp, 8
-	push	[bp+var_4]
-	call	_close
-	add	sp, 2
-loc_100E7:
-	sub	ax, ax
-	push	ax
-	mov	bx, gs:word_4243C
-	and	bx, 0Fh
-	shl	bx, 1
-	shl	bx, 1
-	push	word ptr (graphicsDrivers+2)[bx]
-	push	word ptr graphicsDrivers[bx]
-	call	openFile
-	add	sp, 6
-	mov	[bp+var_4], ax
-	inc	ax
-	jnz	short loc_1011C
-	mov	ax, 4
-	push	ax
-	call	far ptr	sub_28424
-	add	sp, 2
-loc_1011C:
-	mov	ax, 18h
-	push	ax
-	mov	ax, offset monsterBuf
-	mov	dx, seg	seg023
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 8
-	mov	ax, 1068h
-	push	ax
-	mov	ax, offset vid_setMode
-	mov	dx, seg	seg024
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 8
-	push	[bp+var_4]
-	call	_close
-	add	sp, 2
-	mov	ax, 1
-	push	ax
-	call	far ptr	vid_setMode
-	add	sp, 2
-	sub	ax, ax
-	push	ax
-	call	far ptr j_nullsub_2
-	add	sp, 2
-	sub	ax, ax
-	push	ax
-	mov	ax, offset aTit0
-	push	ds
-	push	ax
-	call	openFile
-	add	sp, 6
-	mov	[bp+var_4], ax
-	inc	ax
-	jnz	short loc_1018E
-	mov	ax, 4
-	push	ax
-	call	far ptr	sub_28424
-	add	sp, 2
-loc_1018E:
-	mov	ax, 33000
-	sub	dx, dx
-	push	dx
-	push	ax
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 0Ah
-	push	[bp+var_4]
-	call	_close
-	add	sp, 2
-	mov	[bp+var_6], 0
-	jmp	short loc_101BD
-loc_101BA:
-	inc	[bp+var_6]
-loc_101BD:
-	cmp	[bp+var_6], 8
-	jge	short loc_101E6
-	mov	ax, 3200
-	push	ax
-	call	_mallocMaybe
-	add	sp, 2
-	mov	bx, [bp+var_6]
-	shl	bx, 1
-	shl	bx, 1
-	mov	word ptr gs:musicBufs._offset[bx], ax
-	mov	gs:musicBufs._segment[bx], dx
-	jmp	short loc_101BA
-loc_101E6:
-	mov	ax, 33000
-	sub	dx, dx
-	push	dx
-	push	ax
-	call	_mallocMaybe
-	add	sp, 4
-	mov	gs:word_42562, ax
-	mov	gs:word_42564, dx
-	push	dx
-	push	ax
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	call	d3comp
-	add	sp, 8
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	mov	ax, gs:word_42562
-	mov	dx, gs:word_42564
-	add	ax, 0Dh
-	push	dx
-	push	ax
-	call	far ptr	sub_3E97D
-	add	sp, 8
-	sub	ax, ax
-	push	ax
-	mov	ax, offset aTitle
-	push	ds
-	push	ax
-	call	openFile
-	add	sp, 6
-	mov	[bp+var_4], ax
-	inc	ax
-	jnz	short loc_10266
-	push	gs:word_42564
-	push	gs:word_42562
-	call	_freeMaybe
-	add	sp, 4
-	push	cs
-	call	near ptr sub_104F3
-loc_10266:
-	mov	ax, 33000
-	sub	dx, dx
-	push	dx
-	push	ax
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 0Ah
-	push	[bp+var_4]
-	call	_close
-	add	sp, 2
-	push	gs:word_42564
-	push	gs:word_42562
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	call	d3comp
-	add	sp, 8
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	mov	ax, gs:word_42562
-	mov	dx, gs:word_42564
-	add	ax, 0Dh
-	push	dx
-	push	ax
-	call	far ptr	sub_3E97D
-	add	sp, 8
-	sub	ax, ax
-	push	ax
-	mov	ax, offset aMusic_all
-	push	ds
-	push	ax
-	call	openFile
-	add	sp, 6
-	mov	[bp+var_4], ax
-	inc	ax
-	jnz	short loc_102FB
-	push	gs:word_42564
-	push	gs:word_42562
-	call	_freeMaybe
-	add	sp, 4
-	push	cs
-	call	near ptr sub_104F3
-loc_102FB:
-	mov	ax, 0FFFFh
-	push	ax
-	mov	ax, gs:word_4243C
-	mov	cl, 7
-	sar	ax, cl
-	add	ax, 10h
-	cwd
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_lseek
-	add	sp, 8
-	mov	ax, 2
-	push	ax
-	lea	ax, [bp+var_2]
-	push	ss
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 8
-	mov	ax, 0FFFFh
-	push	ax
-	mov	ax, [bp+var_2]
-	cwd
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_lseek
-	add	sp, 8
-	mov	ax, 9C4h
-	push	ax
-	mov	ax, 0
-	mov	dx, seg	seg025
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 8
-	mov	[bp+var_6], 0
-	jmp	short loc_10366
-loc_10363:
-	inc	[bp+var_6]
-loc_10366:
-	cmp	[bp+var_6], 8
-	jge	short loc_103D4
-	mov	ax, 0FFFFh
-	push	ax
-	mov	ax, [bp+var_6]
-	cwd
-	shl	ax, 1
-	rcl	dx, 1
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_lseek
-	add	sp, 8
-	mov	ax, 2
-	push	ax
-	lea	ax, [bp+var_2]
-	push	ss
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 8
-	mov	ax, 0FFFFh
-	push	ax
-	mov	ax, [bp+var_2]
-	cwd
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_lseek
-	add	sp, 8
-	mov	ax, 3200
-	push	ax
-	mov	bx, [bp+var_6]
-	shl	bx, 1
-	shl	bx, 1
-	push	gs:musicBufs._segment[bx]
-	push	word ptr gs:musicBufs._offset[bx]
-	push	[bp+var_4]
-	call	_read
-	add	sp, 8
-	jmp	short loc_10363
-loc_103D4:
-	push	[bp+var_4]
-	call	_close
-	add	sp, 2
-	call	sub_27F63
-	mov	ax, 7
-	push	ax
-	mov	ax, 0FFh
-	push	ax
-	call	sub_22CD5
-	add	sp, 4
-	call	configIconsBin
-	call	far ptr j_nullsub_3
-	mov	ax, offset aComeHearTheTaleOfSkar
-	mov	dx, seg	dseg
-	push	dx
-	push	ax
-	call	sub_1665F
-	add	sp, 4
-	sub	ax, ax
-	push	ax
-	mov	ax, offset aBardscr
-	push	ds
-	push	ax
-	call	openFile
-	add	sp, 6
-	mov	[bp+var_4], ax
-	inc	ax
-	jnz	short loc_1043E
-	push	gs:word_42564
-	push	gs:word_42562
-	call	_freeMaybe
-	add	sp, 4
-	push	cs
-	call	near ptr sub_104F3
-loc_1043E:
-	mov	ax, 80E8h
-	sub	dx, dx
-	push	dx
-	push	ax
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	push	[bp+var_4]
-	call	_read
-	add	sp, 0Ah
-	push	[bp+var_4]
-	call	_close
-	add	sp, 2
-	push	gs:word_42564
-	push	gs:word_42562
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	call	d3comp
-	add	sp, 8
-	mov	ax, offset characterIOBuf
-	mov	dx, seg	seg022
-	push	dx
-	push	ax
-	mov	ax, gs:word_42562
-	mov	dx, gs:word_42564
-	add	ax, 0Dh
-	push	dx
-	push	ax
-	call	far ptr	sub_3E97D
-	add	sp, 8
-	push	gs:word_42564
-	push	gs:word_42562
-	call	_freeMaybe
-	add	sp, 4
-	mov	ax, 4D0Ah
-	push	ax
-	call	_mallocMaybe
-	add	sp, 2
-	mov	gs:word_4240A, ax
-	mov	gs:word_4240C, dx
-	push	cs
-	call	near ptr sub_116CC
-	call	restoreGame
-	push	buildingRvalMaybe
-	push	cs
-	call	near ptr sub_10560
-	add	sp, 2
-	push	cs
-	call	near ptr sub_104F3
-	mov	sp, bp
-	pop	bp
-	retf
-_main endp
-
 ; Attributes: bp-based frame
 
-sub_104F3 proc far
+cleanupAndExit proc far
 	var_6= word ptr	-6
 	var_4= word ptr	-4
 	var_2= word ptr	-2
@@ -504,7 +45,7 @@ loc_10550:
 	mov	sp, bp
 	pop	bp
 	retf
-sub_104F3 endp
+cleanupAndExit endp
 
 ; Attributes: bp-based frame
 
@@ -582,17 +123,17 @@ dunMainLoop proc far
 	_chkstk		26h
 	push	si
 
-	mov	word ptr [bp+levP], offset characterIOBuf
+	mov	word ptr [bp+levP], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+levP+2], seg seg022
 
-	mov	ax, offset characterIOBuf
+	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	mov	ax, dunLevelIndex
 	add	ax, 10
 	push	ax
-	func_readLevelData
+	CALL(map_read, 6)
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.levFlags]
 	sub	ah, ah
@@ -602,22 +143,22 @@ dunMainLoop proc far
 	add	ax, 3
 	mov	[bp+var_22], ax
 	push	ax
-	func_readGraphicsMaybe
+	CALL(map_readGraphics, 2)
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.monIndex]
 	sub	ah, ah
 	push	ax
-	func_readMonsterFile
+	CALL(map_readMonsters, 2)
 
 	push_ss_string	var_1E
 	push_ptr_stack	levP
-	std_call	decryptName, 8
+	std_call	unmaskString, 8
 
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t._width]
-	mov	dunWidth, al
+	mov	g_dunWidth, al
 	mov	al, fs:[bx+dun_t._height]
-	mov	dunHeight, al
+	mov	g_dunHeight, al
 	mov	al, fs:[bx+dun_t.levelNum]
 	sub	ah, ah
 	mov	dunLevelNum,	ax
@@ -644,7 +185,7 @@ loc_dunMainLoop_skipDeltaSQEN:
 	mov	gs:mapDataOff, ax
 	mov	gs:mapDataSeg, dx
 	mov	[bp+var_C], 0
-	mov	dl, dunHeight
+	mov	dl, g_dunHeight
 	sub	dh, dh
 
 loc_dunMainLoop_popRowLoop_enter:
@@ -705,7 +246,7 @@ loc_dunMainLoop_doBattle:
 	jmp	loc_dunMainLoop_exit
 
 loc_107B9:
-	call	clearTextWindow
+	call	text_clear
 
 loc_107BE:
 	push	sq_north
@@ -722,10 +263,10 @@ loc_107BE:
 	mov	[bp+var_E], ax
 
 	push	dirFacing
-	mov	al, dunHeight
+	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
-	mov	al, dunWidth
+	mov	al, g_dunWidth
 	push	ax
 	push	sq_north
 	push	sq_east
@@ -754,15 +295,15 @@ loc_10886:
 loc_10899:
 	mov	ax, 0A000h
 	push	ax
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_6], ax
 	push	ax
-	std_call	getKeyboardCmd, 2
+	std_call	executeKeyboardCommand, 2
 	mov	[bp+var_20], ax
 	or	ax, ax
 	jz	short loc_1090B
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	cmp	buildingRvalMaybe, 0
 	jnz	loc_dunMainLoop_return_bldg_rval
 loc_108D5:
@@ -775,7 +316,7 @@ loc_108D5:
 	mov	[bp+var_E], ax
 	push_ss_string	var_1E
 	std_call	setTitle, 4
-	call	clearTextWindow
+	call	text_clear
 loc_1090B:
 	cmp	[bp+var_20], 0
 	jnz	short loc_10886
@@ -799,16 +340,16 @@ loc_dunMainLoop_key_qmark:
 	cmp	ax, '?'
 	jnz	loc_dunMainLoop_key_E
 
-	mov	al, dunHeight
+	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
-	mov	al, dunWidth
+	mov	al, g_dunWidth
 	push	ax
 	push	sq_north
 	push	sq_east
 	push	seg027_x
 	push	offset rowOffset
-	std_call	dun_doMiniMap, 0Ch
+	std_call	minimap_show, 0Ch
 	jmp	loc_dunMainLoop_buildingRvalMaybe_check
 
 loc_dunMainLoop_key_E:
@@ -844,7 +385,7 @@ loc_dunMainLoop_go_forward:
 	std_call	dun_goForwardCheck, 4
 	or	ax, ax
 	jz	loc_dunMainLoop_buildingRvalMaybe_check
-	call	clearTextWindow
+	call	text_clear
 	mov	si, dirFacing
 	shl	si, 1
 	mov	ax, sq_north
@@ -854,14 +395,14 @@ loc_dunMainLoop_go_forward:
 	add	ax, sq_east
 	mov	[bp+var_A], ax
 
-	mov	al, dunHeight
+	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+var_8]
 	std_call	wrapNumber, 4
 
 	mov	sq_north, ax
-	mov	al, dunWidth
+	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_A]
@@ -893,7 +434,7 @@ loc_dunMainLoop_incDirFacing:
 	and	ax, 3
 	mov	dirFacing, ax
 	mov	gs:wallIsPhased, 0
-	call	clearTextWindow
+	call	text_clear
 
 loc_dunMainLoop_buildingRvalMaybe_check:
 	cmp	buildingRvalMaybe, 0
@@ -962,7 +503,7 @@ loc_10B86:
 	dec	ax
 	push	ax
 	push	[bp+var_2]
-	call	sub_27E13
+	call	dungeon_getWallInDirection
 	add	sp, 4
 	mov	[bp+var_4], ax
 	mov	bx, ax
@@ -1023,7 +564,7 @@ dun_goForwardCheck proc far
 
 	cmp	gs:stuckFlag, 0
 	jz	short loc_dun_goForwardCheck_not_stuck
-	call	clearTextWindow
+	call	text_clear
 
 	push_ds_string	aStuckElipsis
 	func_printString
@@ -1053,7 +594,7 @@ loc_dun_goForwardCheck_not_zero:
 
 loc_dun_goForwardCheck_success:
 	mov	word_4EE66, 0
-	call	clearTextWindow
+	call	text_clear
 	mov	ax, 1
 	jmp	loc_dun_goForwardCheck_exit
 	
@@ -1088,15 +629,15 @@ wildMainLoop proc far
 	mov	ax, 4Ah	
 	call	someStackOperation
 	push	si
-	mov	word ptr [bp+var_30], offset characterIOBuf
+	mov	word ptr [bp+var_30], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+var_30+2],	seg seg022
 	call	far ptr j_nullsub_3
-	mov	ax, offset characterIOBuf
+	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	push	currentLocationMaybe
-	call	readLevelData
+	call	map_read
 	add	sp, 6
 	lfs	bx, [bp+var_30]
 	mov	al, fs:[bx+map_t.levFlags]
@@ -1106,20 +647,20 @@ wildMainLoop proc far
 	and	ax, 3
 	mov	[bp+var_46], ax
 	push	ax
-	call	readGraphicsMaybe
+	call	map_readGraphics
 	add	sp, 2
 	lfs	bx, [bp+var_30]
 	mov	al, fs:[bx+map_t.monsterIndex]
 	sub	ah, ah
 	push	ax
-	call	readMonsterFile
+	call	map_readMonsters
 	add	sp, 2
 	lea	ax, [bp+levelName]
 	push	ss
 	push	ax
 	push	word ptr [bp+var_30+2]
 	push	word ptr [bp+var_30]
-	call	decryptName
+	call	unmaskString
 	add	sp, 8
 	lfs	bx, [bp+var_30]
 	mov	al, fs:[bx+map_t.levFlags]
@@ -1186,7 +727,7 @@ loc_wildMainLoop_battleCheck:
 	jmp	loc_wildMainLoop_exit
 
 loc_10E17:
-	call	clearTextWindow
+	call	text_clear
 
 loc_wildMainLoop_mapExecute:
 	sub	ax, ax
@@ -1210,15 +751,15 @@ loc_10E5B:
 
 	mov	ax, 0A000h
 	push	ax
-	std_call	sub_14E41, 2
+	std_call	getKey, 2
 	mov	[bp+var_2], ax
 
 	push	ax
-	std_call	getKeyboardCmd, 2
+	std_call	executeKeyboardCommand, 2
 	mov	[bp+var_44], ax
 	or	ax, ax
 	jz	short loc_10EEE
-	mov	byte ptr word_44166, 0
+	mov	byte ptr g_printPartyFlag, 0
 	cmp	buildingRvalMaybe, 0
 	jnz	loc_wildMainLoop_return_bldg_rval
 
@@ -1230,7 +771,7 @@ loc_10EC0:
 
 	push_ss_string levelName
 	std_call	setTitle, 4
-	call	clearTextWindow
+	call	text_clear
 
 loc_10EEE:
 	cmp	[bp+var_44], 0
@@ -1256,7 +797,7 @@ loc_wildMainLoop_exitBuilding:
 	or	ax, ax
 	jz	loc_wildMainLoop_loopStart
 
-	call	clearTextWindow
+	call	text_clear
 	mov	si, dirFacing
 	shl	si, 1
 	mov	ax, sq_north
@@ -1313,7 +854,7 @@ loc_wildMainLoop_key_qmark:
 	cmp	ax, '?'
 	jnz	loc_wildMainLoop_key_K
 
-	call	cmd_printLocation
+	call	printLocation
 	jmp	loc_wildMainLoop_loopStart
 
 loc_wildMainLoop_key_K:
@@ -1359,7 +900,7 @@ loc_wildMainLoop_incDirFacing:
 
 	push_ds_string aFacing
 	push_ss_string var_28
-	func_strcat
+	STRCAT
 
 	mov	bx, dirFacing
 	shl	bx, 1
@@ -1367,7 +908,7 @@ loc_wildMainLoop_incDirFacing:
 	push_ptr_stringList	dirStringList, bx
 	push	dx
 	push	ax
-	func_strcat
+	STRCAT
 
 	push_ss_string	var_28
 	std_call	printStringWClear, 4
@@ -1461,10 +1002,10 @@ l_temple:
 	call	temple_enter
 	jmp	loc_map_enterBuilding_turn_around
 l_normalBuilding:
-	call	enterBuildingMaybe
+	call	empty_enter
 	jmp	loc_map_enterBuilding_turn_around
 l_storageBuilding:
-	call	strg_enter
+	call	storage_enter
 	jmp	loc_map_enterBuilding_turn_around
 l_reviewBoard:
 	call	rev_enter
@@ -1559,7 +1100,7 @@ loc_11288:
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	call	bigpic_setBG
+	call	bigpic_memcpy
 	add	sp, 8
 	mov	[bp+counter], 0
 	jmp	short loc_112AA
@@ -1600,8 +1141,8 @@ loc_112EB:
 	call	bigpic_makeNight
 	add	sp, 4
 loc_11311:
-	push	gs:word_4240C
-	push	gs:word_4240A
+	push	gs:bigpicCellData_seg
+	push	gs:bigpicCellData_off
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021
 	push	dx
@@ -1678,7 +1219,7 @@ loc_11372:
 	mov	[bp+var_50], ax
 	push	dirFacing
 	push	ax
-	call	sub_27E13
+	call	dungeon_getWallInDirection
 	add	sp, 4
 	mov	si, [bp+counter]
 	shl	si, 1
@@ -1703,10 +1244,10 @@ loc_113D5:
 	cbw
 	add	ax, [bp+sqN]
 	mov	[bp+deltaSqN], ax
-	mov	al, dunHeight
+	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
-	mov	al, dunWidth
+	mov	al, g_dunWidth
 	push	ax
 	push	[bp+deltaSqN]
 	push	[bp+deltaSqE]
@@ -1722,7 +1263,7 @@ loc_113D5:
 loc_11426:
 	push	[bp+gbufSeg]
 	push	[bp+gbufOff]
-	call	dun_setBigpicBG
+	call	bigpic_setBackground
 	add	sp, 4
 	cmp	gs:wallIsPhased, 0
 	jz	short loc_11444
@@ -1778,8 +1319,8 @@ loc_114C2:
 	jmp	short loc_1145F
 loc_114C4:
 	mov	gs:byte_422A0, 0
-	push	gs:word_4240C
-	push	gs:word_4240A
+	push	gs:bigpicCellData_seg
+	push	gs:bigpicCellData_off
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021
 	push	dx
@@ -1806,7 +1347,7 @@ dun_getWalls proc far
 	mov	bp, sp
 	mov	ax, 4
 	call	someStackOperation
-	mov	al, dunWidth
+	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+sqE]
@@ -1814,7 +1355,7 @@ dun_getWalls proc far
 	call	near ptr wrapNumber
 	add	sp, 4
 	mov	[bp+sqE], ax
-	mov	al, dunHeight
+	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+sqN]
@@ -1969,7 +1510,7 @@ loc_11663:
 	retf
 wild_getSquare endp
 
-; This function	returns	arg_0 mod'd to be between
+; This function	returns	arg_0 modd to be between
 ; 0 and	arg_2. This handles negative numbers
 ; intuitively.
 ; Attributes: bp-based frame
@@ -2027,7 +1568,7 @@ map_getDataOffsetP proc	far
 	and	si, 0FFh
 	mov	cl, 8
 	shl	si, cl
-	lea	ax, characterIOBuf[bx+si]
+	lea	ax, g_rosterCharacterBuffer[bx+si]
 	mov	dx, seg	seg022
 	jmp	short $+2
 	pop	si
@@ -2071,6 +1612,3 @@ sub_11706 proc far
 	pop	bp
 	retf
 sub_11706 endp
-
-seg000 ends
-

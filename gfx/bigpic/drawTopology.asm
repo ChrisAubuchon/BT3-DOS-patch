@@ -1,10 +1,4 @@
-; Segment type:	Pure code
-seg004 segment word public 'CODE' use16
-	assume cs:seg004
-;org 7
-	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
-algn_17737:
-align 2
+; XXX - Revisit after bigpic_copyTopoElem
 ; Attributes: bp-based frame
 
 bigpic_drawTopology proc far
@@ -24,12 +18,11 @@ bigpic_drawTopology proc far
 	sq= word ptr  8
 	gbuf= dword ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 1Eh
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(1Eh)
 	push	di
 	push	si
+
 	cmp	inDungeonMaybe, 0
 	jz	short loc_17756
 	mov	ax, 10h
@@ -38,18 +31,22 @@ loc_17756:
 	mov	ax, 14h
 loc_17759:
 	mov	[bp+headerSize], ax
+
 	mov	si, [bp+quadrant]
 	shl	si, 1
-	mov	al, byte ptr stru_44592.field_0[si]
+	mov	al, byte ptr bigpicQuadrantCoords.column[si]
 	cbw
 	mov	[bp+column], ax
-	mov	al, stru_44592.field_1[si]
+
+	mov	al, bigpicQuadrantCoords.row[si]
 	cbw
 	mov	[bp+row], ax
+
 	mov	bx, [bp+quadrant]
 	mov	al, byte_44278[bx]
 	cbw
 	mov	[bp+var_6], ax
+
 	mov	al, byte_442F4[bx]
 	cbw
 	mov	cx, [bp+sq]
@@ -57,10 +54,10 @@ loc_17759:
 	shl	cx, 1
 	add	ax, cx
 	mov	[bp+var_8], ax
+
 	mov	ax, [bp+headerSize]
 	cmp	[bp+var_8], ax
-	jl	short loc_177A8
-	jmp	loc_1786B
+	jge	loc_1786B
 loc_177A8:
 	mov	di, [bp+var_8]
 	lfs	bx, [bp+gbuf]
@@ -140,95 +137,3 @@ loc_1786B:
 	pop	bp
 	retf
 bigpic_drawTopology endp
-
-; Attributes: bp-based frame
-
-dun_setBigpicBG	proc far
-
-	var_4= word ptr	-4
-	var_2= word ptr	-2
-	arg_0= dword ptr  6
-
-	func_enter
-	_chkstk		4
-
-	test	levFlags, 20h
-	jz	loc_dun_setBigpicBG_inDungeon
-
-	push_imm	44h
-	push_imm	0BBBBh
-	mov		ax, offset bigpicBuf
-	mov		dx, seg seg021
-	push		dx
-	push		ax
-	std_call	bigpic_setBG, 8
-	jmp	loc_dun_setBigpicBG_exit
-	
-
-loc_dun_setBigpicBG_inDungeon:
-	push	si
-	lfs	bx, [bp+arg_0]
-	mov	ah, fs:(graphicsBuf+11h)[bx]
-	sub	al, al
-	mov	cl, fs:(graphicsBuf+10h)[bx]
-	sub	ch, ch
-	add	ax, cx
-	add	ax, bx
-	mov	dx, fs
-	add	ax, 0Dh
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
-	mov	ax, 9A0h
-	push	ax
-	push	dx
-	push	[bp+var_4]
-	mov	ax, offset bigpicBuf
-	mov	dx, seg	seg021
-	push	dx
-	push	ax
-	call	_memcpy
-	add	sp, 0Ah
-	lfs	bx, [bp+arg_0]
-	mov	ah, fs:(graphicsBuf+13h)[bx]
-	sub	al, al
-	mov	cl, fs:(graphicsBuf+12h)[bx]
-	sub	ch, ch
-	add	ax, cx
-	add	ax, bx
-	mov	dx, fs
-	add	ax, 0Dh
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
-	mov	ax, 9A0h
-	push	ax
-	push	dx
-	push	[bp+var_4]
-	mov	ax, (offset bigpicBuf+9A0h)
-	mov	dx, seg	seg021
-	push	dx
-	push	ax
-	call	_memcpy
-	add	sp, 0Ah
-	cmp	lightDistance, 4
-	jnb	short loc_dun_setBigpicBG_exit
-	mov	al, lightDistance
-	sub	ah, ah
-	mov	si, ax
-	shl	si, 1
-	push	bigpicLightSize[si]
-	sub	ax, ax
-	push	ax
-	mov	bx, bigpicLightOffset[si]
-	lea	ax, bigpicBuf[bx]
-	mov	dx, seg	seg021
-	push	dx
-	push	ax
-	call	_memset
-	add	sp, 8
-	pop	si
-loc_dun_setBigpicBG_exit:
-	func_exit
-	retf
-dun_setBigpicBG	endp
-
-seg004 ends

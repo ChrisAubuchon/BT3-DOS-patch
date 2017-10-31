@@ -63,7 +63,7 @@ loc_11D4B:
 	jl	short l_return
 
 l_doUse:
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	sub	ax, ax
 	push	ax
 	push	g_curSpellNumber

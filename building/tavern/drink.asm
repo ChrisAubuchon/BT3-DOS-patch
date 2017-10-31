@@ -9,7 +9,7 @@ tavern_drink proc far
 	FUNC_ENTER
 	CHKSTK(2)
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 
 	cmp	[bp+drinkIndexNumber], 4
 	jnz	short loc_13D39

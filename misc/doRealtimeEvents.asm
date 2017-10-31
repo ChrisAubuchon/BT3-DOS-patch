@@ -14,7 +14,7 @@ doRealtimeEvents proc far
 	jz	short loc_15256
 	mov	ax, _clockTicks
 	mov	gs:word_42294, ax
-	CALL(sub_179C4)
+	CALL(gfx_animate)
 loc_15256:
 	mov	ax, _clockTicks
 	mov	cl, 5
@@ -72,7 +72,7 @@ l_iconLoopEntry:
 	cmp	al, 1
 	jnz	short l_iconLoopIncrement
 	push	[bp+var_2]
-	CALL(sub_17920, 2)
+	CALL(icon_deactivate, 2)
 l_iconLoopIncrement:
 	inc	[bp+var_2]
 	cmp	[bp+var_2], 5

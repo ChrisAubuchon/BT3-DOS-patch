@@ -22,7 +22,7 @@ l_resetDrunkLoop:
 
 	mov	ax, 83
 	push	ax
-	CALL(bigpic_drawPicNumber, 2)
+	CALL(bigpic_drawPictureNumber, 2)
 	NEAR_CALL(tav_setTitle)
 	mov	tavern_sayingBase, ax
 l_tavernMainLoop:
@@ -42,17 +42,17 @@ l_orderDrink:
 	sub	ax, ax
 	jmp	short l_return
 l_refreshParty:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_waitAndLoop
 
 l_talkToBarkeep:
 	push	[bp+lastCharNo]
 	NEAR_CALL(tavern_talkToBarkeep, 2)
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_waitAndLoop
 
 l_exitTavern:
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	sub	ax, ax
 	jmp	short l_return
 

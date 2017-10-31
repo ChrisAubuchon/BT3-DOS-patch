@@ -25,7 +25,7 @@ l_partyCaster:
 	mov	ax, icon_shield
 	push	ax
 	CALL(icon_activate, 2)
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 loc_215BE:
 	FUNC_EXIT
 	retf

@@ -6,7 +6,7 @@ storage_enter proc	far
 
 	mov	ax, 50
 	push	ax
-	CALL(bigpic_drawPicNumber, 2)
+	CALL(bigpic_drawPictureNumber, 2)
 	PUSH_OFFSET(s_building)
 	CALL(setTitle, 4)
 	NEAR_CALL(readInventoryStf)
@@ -22,7 +22,7 @@ l_ioLoopEntry:
 	jmp	short l_ioLoopEntry
 l_return:
 	NEAR_CALL(writeInventoryStf)
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	mov	buildingRvalMaybe, 2
 	sub	ax, ax
 

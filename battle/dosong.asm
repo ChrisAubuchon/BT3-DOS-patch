@@ -6,25 +6,22 @@ bat_doCombatSong proc far
 	partySlotNumber= word ptr	 6
 	songNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(2)
 	push	[bp+songNumber]
 	push	[bp+partySlotNumber]
-	call	song_playSong
-	add	sp, 4
+	CALL(song_playSong, 4)
 
-	getCharP	[bp+partySlotNumber], bx
-	cmp	gs:roster.class[bx], class_monster
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
+	cmp	gs:party.class[bx], class_monster
 	jb	short l_getCharSongLevel		; If singer is not a character
 	mov	[bp+l_songLevel], 1			; set song level to 1
 	jmp	short loc_1CF2C
 
 l_getCharSongLevel:
-	getCharP	[bp+partySlotNumber], bx	; Song level is
-	mov	ax, gs:roster.level[bx]			; character level
-	rangeWithMax 15, ax, cx				; with a max value of 15
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)	; Song level is
+	mov	ax, gs:party.level[bx]			; character level
+	RANGE_WITH_MAX(15, ax, cx)			; with a max value of 15
 	mov	[bp+l_songLevel], ax
 loc_1CF2C:
 	mov	ax, [bp+songNumber]
@@ -39,12 +36,12 @@ l_sanctuary:
 	mov	al, charSize
 	mul	gs:g_currentSinger
 	mov	bx, ax
-	cmp	gs:roster.level[bx], 60
+	cmp	gs:party.level[bx], 60
 	jnb	short loc_1CF7E
 	mov	al, charSize
 	mul	gs:g_currentSinger
 	mov	bx, ax
-	mov	ax, gs:roster.level[bx]
+	mov	ax, gs:party.level[bx]
 	shr	ax, 1
 	shr	ax, 1
 	jmp	short loc_1CF80
@@ -76,8 +73,7 @@ l_overture:
 	mov	ax, 237
 	push	ax
 	push	[bp+partySlotNumber]
-	call	_batchSpellCast
-	add	sp, 4
+	CALL(_batchSpellCast, 4)
 	jmp	short l_return
 
 l_shield:

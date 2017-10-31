@@ -15,7 +15,7 @@ _sp_useWineskin	proc far
 	push	si
 
 	CHARINDEX(ax, STACKVAR(spellCaster), bx)
-	mov	al, gs:byte_4227E
+	mov	al, gs:g_usedItemSlotNumber
 	sub	ah, ah
 	add	bx, ax
 	mov	al, gs:party.inventory.itemFlags[bx]

@@ -20,7 +20,7 @@ var_2= word ptr	-2
 	add	sp, 4
 	mov	ax, 53h	
 	push	ax
-	call	bigpic_drawPicNumber
+	call	bigpic_drawPictureNumber
 	add	sp, 2
 loc_25B2D:
 	mov	ax, offset aWelcomeAndBeHa
@@ -32,11 +32,11 @@ loc_25B2D:
 	sub	ah, ah
 	mov	si, ax
 	shl	si, 1
-	mov	ax, word_44166[si]
+	mov	ax, g_printPartyFlag[si]
 	or	ax, bitMask16bit[si]
 	mov	[bp+var_2], ax
 	push	ax
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_4], ax
 	cmp	ax, 10Eh
@@ -101,7 +101,7 @@ loc_25BCE:
 	push	cs
 	call	near ptr sub_25E1B
 	add	sp, 6
-	call	clearTextWindow
+	call	text_clear
 	lea	ax, [bp+var_2E]
 	push	ss
 	push	ax
@@ -119,7 +119,7 @@ loc_25BCE:
 	mov	[bp+var_E], ax
 loc_25BFA:
 	push	[bp+var_E]
-	call	sub_14E41
+	call	getKey
 	add	sp, 2
 	mov	[bp+var_2], ax
 	cmp	ax, 1Bh
@@ -191,7 +191,7 @@ sub_25C72 proc far
 	mov	ax, 2
 	call	someStackOperation
 	push	si
-	call	clearTextWindow
+	call	text_clear
 	mov	[bp+var_2], 0
 	jmp	short loc_25C8D
 loc_25C8A:
@@ -281,7 +281,7 @@ bards_learnSong	proc far
 	push	ax
 	call	printString
 	add	sp, 4
-	call	getCharNumber
+	call	readSlotNumber
 	mov	[bp+var_8], ax
 	or	ax, ax
 	jge	short loc_25D64
@@ -295,10 +295,10 @@ loc_25D64:
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+var_8], si
-	cmp	word ptr gs:(roster.gold+2)[si], bx
+	cmp	word ptr gs:(party.gold+2)[si], bx
 	ja	short loc_25DA2
 	jb	short loc_25D93
-	cmp	word ptr gs:roster.gold[si], cx
+	cmp	word ptr gs:party.gold[si], cx
 	jnb	short loc_25DA2
 loc_25D93:
 	mov	ax, offset aNotEnoughGoldNL
@@ -316,8 +316,8 @@ loc_25DA2:
 	mov	cx, ax
 	mov	bx, dx
 	getCharP	[bp+var_8], si
-	sub	word ptr gs:roster.gold[si], cx
-	sbb	word ptr gs:(roster.gold+2)[si], bx
+	sub	word ptr gs:party.gold[si], cx
+	sbb	word ptr gs:(party.gold+2)[si], bx
 	mov	[bp+var_6], 0
 	jmp	short loc_25DD5
 loc_25DD2:
@@ -326,11 +326,11 @@ loc_25DD5:
 	cmp	[bp+var_6], 7
 	jge	short loc_25DFD
 	getCharP	[bp+var_6], si
-	cmp	gs:roster.class[si], class_bard
+	cmp	gs:party.class[si], class_bard
 	jnz	short loc_25DFB
 	mov	bx, [bp+arg_0]
 	mov	al, byte_4BDF0[bx]
-	or	gs:(roster.specAbil+1)[si], al
+	or	gs:(party.specAbil+1)[si], al
 loc_25DFB:
 	jmp	short loc_25DD2
 loc_25DFD:

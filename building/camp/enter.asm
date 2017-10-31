@@ -23,7 +23,7 @@ l_durationSpellLoopEntry:
 	cmp	lightDuration[bx], 0
 	jz	short l_notActive
 	push	bx
-	CALL(sub_17920, 2)
+	CALL(icon_deactivate, 2)
 l_notActive:
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 5
@@ -37,9 +37,9 @@ l_notActive:
 	CALL(setTitle, 4)
 	sub	ax, ax
 	push	ax
-	CALL(bigpic_drawPicNumber, 2)
+	CALL(bigpic_drawPictureNumber, 2)
 l_mainIoLoopEntry:
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	PUSH_STACK_ADDRESS(campOptionList)
 	NEAR_CALL(camp_configOptionList, 4)
 	PUSH_STACK_ADDRESS(optionMouse)
@@ -68,7 +68,7 @@ l_mainIoLoopEntry:
 	CALL(printCharacter, 2)
 	sub	ax, ax
 	push	ax
-	CALL(bigpic_drawPicNumber, 2)
+	CALL(bigpic_drawPictureNumber, 2)
 	PUSH_OFFSET(s_ruinTitle)
 	CALL(setTitle, 4)
 	jmp	short loc_135A7

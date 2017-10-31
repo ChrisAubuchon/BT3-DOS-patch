@@ -19,7 +19,7 @@ tavern_talkToBarkeep proc far
 	or	ax, ax
 	jl	l_returnZero
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 
 	; Check talker drunk level
 	mov	bx, [bp+talkerSlotNumber]

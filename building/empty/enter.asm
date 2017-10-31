@@ -21,7 +21,7 @@ loc_14956:
 
 loc_14959:
 	push	ax
-	CALL(bigpic_drawPicNumber, 2)
+	CALL(bigpic_drawPictureNumber, 2)
 	PUSH_OFFSET(s_building)
 	CALL(setTitle, 4)
 	PUSH_OFFSET(s_emptyBuilding)

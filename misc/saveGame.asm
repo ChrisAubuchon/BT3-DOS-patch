@@ -28,7 +28,7 @@ loc_11B3E:
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short l_doSave
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	PUSH_OFFSET(s_cantOpenGameSave)
 	PRINTSTRING
 	IOWAIT

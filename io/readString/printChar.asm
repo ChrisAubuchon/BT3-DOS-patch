@@ -14,7 +14,7 @@ readString_printChar proc far
 	push	ax
 	NEAR_CALL(readString_echoChar, 4)
 	push	[bp+inCharacter]
-	NEAR_CALL(txt_charSpacing, 2)
+	NEAR_CALL(text_characterWidth, 2)
 	add	gs:g_currentCharPosition, al
 
 	FUNC_EXIT

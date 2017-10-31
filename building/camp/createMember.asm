@@ -100,7 +100,7 @@ loc_12A5A:
 	mov	gs:newCharBuffer.currentHP, ax
 	mov	gs:newCharBuffer.maxHP,	ax
 	mov	[bp+var_24], ax
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	mov	ax, 5
 	push	ax
 	PUSH_STACK_ADDRESS(var_E8)
@@ -304,7 +304,7 @@ loc_12CFD:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(_readString, 6)
+	CALL(readString, 6)
 	or	ax, ax
 	jnz	short loc_12D25
 	jmp	loc_12DAE

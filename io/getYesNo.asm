@@ -47,12 +47,12 @@ loc_14E0B:
 	jmp	short l_loopEntry
 
 l_clearAndReturnOne:
-	NEAR_CALL(clearTextWindow)
+	NEAR_CALL(text_clear)
 	mov	ax, 1
 	jmp	short l_return
 
 l_clearAndReturnZero:
-	NEAR_CALL(clearTextWindow)
+	NEAR_CALL(text_clear)
 	sub	ax, ax
 	jmp	short l_return
 

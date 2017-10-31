@@ -8,10 +8,10 @@ temple_enter proc far
 	FUNC_ENTER
 	CHKSTK(4)
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	mov	ax, 49
 	push	ax
-	CALL(bigpic_drawPicNumber, 2)
+	CALL(bigpic_drawPictureNumber, 2)
 	NEAR_CALL(temple_setTitle)
 	NEAR_CALL(party_findEmptySlot)
 	mov	[bp+lastSlot], ax
@@ -42,7 +42,7 @@ l_poolGold:
 	push	[bp+lastSlot]
 	NEAR_CALL(temple_getGoldPoolee, 2)
 l_ioWaitAndLoop:
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	IOWAIT
 	jmp	l_templeIoLoopEntry
 l_keySwitch:

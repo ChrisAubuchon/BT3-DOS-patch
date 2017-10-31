@@ -14,7 +14,7 @@ camp_deleteMember proc far
 	CHKSTK(15Ch)
 	push	si
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	NEAR_CALL(roster_countCharacters)
 	or	ax, ax
 	jz	l_noSavedCharacters

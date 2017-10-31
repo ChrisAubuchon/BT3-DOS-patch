@@ -176,7 +176,7 @@ l_healall:
 	jmp	short l_return
 
 	; Following two lines were unreachable. 
-	;mov	byte ptr word_44166,	0
+	;mov	byte ptr g_printPartyFlag,	0
 	;jmp	short l_return
 l_switchStatus:
 	cmp	ax, 6

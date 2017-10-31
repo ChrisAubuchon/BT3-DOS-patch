@@ -1,10 +1,8 @@
 ; Attributes: bp-based frame
 
 song_endNoncombatEffect	proc far
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK
 
 	cmp	gs:g_currentSongPlusOne, 0
 	jz	l_return
@@ -21,7 +19,7 @@ l_safety:
 	jmp	short l_return
 l_sanctuary:
 	mov	gs:songACBonus,	0
-	mov	byte ptr word_44166,	0
+	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_return
 l_duotime:
 	mov	gs:songRegenSppt, 0
@@ -30,15 +28,13 @@ l_watchwood:
 	mov	lightDistance, 0
 	sub	ax, ax
 	push	ax
-	call	sub_17920
-	add	sp, 2
+	CALL(icon_deactivate, 2)
 	mov	gs:gl_detectSecretDoorFlag, 0
 	jmp	short l_return
 l_overture:
 	mov	ax, 1
 	push	ax
-	call	sub_17920
-	add	sp, 2
+	CALL(icon_deactivate, 2)
 	jmp	short l_return
 l_shield:
 	mov	gs:songHalfDamage, 0

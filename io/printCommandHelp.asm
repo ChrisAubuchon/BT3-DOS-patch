@@ -4,11 +4,11 @@ printCommandHelp proc far
 	FUNC_ENTER
 	CHKSTK
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	PUSH_OFFSET(s_helpMessage1)
 	PRINTSTRING
 	IOWAIT
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	PUSH_OFFSET(s_helpMessage2)
 	PRINTSTRING
 	IOWAIT

@@ -10,7 +10,7 @@ text_castSpell proc far
 	CHKSTK(7)
 	push	si
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 
 	PUSH_OFFSET(s_spellToCast)
 	PRINTSTRING

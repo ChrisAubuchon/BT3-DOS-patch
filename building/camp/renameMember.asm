@@ -15,7 +15,7 @@ camp_renameMember proc far
 	CHKSTK(25Eh)
 	push	si
 
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	NEAR_CALL(roster_countCharacters)
 	or	ax, ax
 	jz	l_noSavedCharacters
@@ -86,7 +86,7 @@ l_clearNameLoopEntry:
 	lea	ax, [bp+nameBuf]
 	push	ss
 	push	ax
-	CALL(_readString, 6)
+	CALL(readString, 6)
 	or	ax, ax
 	jz	short l_return
 	PUSH_STACK_ADDRESS(nameBuf)

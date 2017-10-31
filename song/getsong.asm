@@ -14,18 +14,16 @@ song_getSong proc far
 	partySlotNumber=	word ptr  6
 	songPlayingFlag= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 34h	
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(34h)
 	push	si
 	sub	ax, ax
 	mov	[bp+var_12], ax
 	mov	[bp+var_16], ax
 	mov	[bp+counter], ax
 l_loopEnter:
-	getCharP	[bp+partySlotNumber], bx
-	mov	al, gs:(roster.specAbil+1)[bx]
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
+	mov	al, gs:(party.specAbil+1)[bx]
 	sub	ah, ah
 	mov	bx, [bp+counter]
 	mov	cl, byteMaskList[bx]
@@ -57,8 +55,8 @@ l_loopEnter:
 	push	word ptr songNames[bx]
 	push	word ptr [bp+songListStringP+2]
 	push	word ptr [bp+songListStringP]
-	do_strcat	songListStringP
-	push_ss_string	songListString
+	STRCAT(songListStringP)
+	PUSH_STACK_ADDRESS(songListString)
 	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
@@ -73,15 +71,11 @@ l_next:
 	or	[bp+var_12], ax
 	cmp	[bp+songPlayingFlag], 0
 	jz	short l_getUserInput
-	mov	ax, offset aStopPlayingASo
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_OFFSET(s_stopPlayingSong)
+	PRINTSTRING
 l_getUserInput:
 	push	[bp+var_12]
-	call	sub_14E41
-	add	sp, 2
+	GETKEY
 	mov	[bp+var_14], ax
 	cmp	ax, 1Bh
 	jz	short loc_22C76
@@ -96,9 +90,7 @@ loc_22C7B:
 	cmp	[bp+var_14], 'S'
 	jnz	short loc_22C96
 	push	[bp+partySlotNumber]
-	push	cs
-	call	near ptr song_stopPlaying
-	add	sp, 2
+	NEAR_CALL(song_stopPlaying, 2)
 	mov	ax, 0FFFFh
 	jmp	short l_return
 loc_22C96:

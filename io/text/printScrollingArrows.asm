@@ -32,7 +32,7 @@ scroll_printArrows proc far
 	mov	ax, 0E0h 
 	push	ax
 	PUSH_OFFSET(s_esc)
-	NEAR_CALL(sub_16F1E, 0Ah)
+	NEAR_CALL(writeStringAt, 0Ah)
 	mov	sp, bp
 	pop	bp
 	retf

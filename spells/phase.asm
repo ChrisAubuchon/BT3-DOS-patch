@@ -22,7 +22,7 @@ sp_phaseDoor proc far
 	dec	ax
 	push	ax
 	push	[bp+var_2]
-	CALL(sub_27E13, 4)
+	CALL(dungeon_getWallInDirection, 4)
 	mov	[bp+var_8], ax
 	mov	al, byte ptr [bp+var_8]
 	and	al, 0Fh

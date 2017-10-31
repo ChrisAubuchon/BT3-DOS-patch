@@ -13,7 +13,7 @@ camp_saveParty proc far
 	mov	ax, 0Eh
 	push	ax
 	PUSH_STACK_ADDRESS(partyName)
-	CALL(_readString, 6)
+	CALL(readString, 6)
 	or	ax, ax
 	jz	short l_return
 	NEAR_CALL(roster_countParties)

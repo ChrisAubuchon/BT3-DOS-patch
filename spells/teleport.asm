@@ -41,7 +41,7 @@ loc_20FE5:
 	mov	[bp+si+teleDeltaList], 0
 	jmp	short loc_20FE2
 loc_20FF7:
-	CALL(clearTextWindow)
+	CALL(text_clear)
 	PUSH_OFFSET(s_teleportMenu)
 	PUSH_STACK_ADDRESS(var_116)
 	STRCAT(var_10)
@@ -262,7 +262,7 @@ loc_21276:
 	sub	ah, ah
 	add	ax, 0Ah
 	push	ax
-	CALL(readLevelData, 6)
+	CALL(map_read, 6)
 loc_212A2:
 	lfs	bx, [bp+var_14]
 	mov	al, fs:[bx+dun_t.deltaSqN]
@@ -376,9 +376,9 @@ _sp_teleportPrintNum proc far
 loc_213A8:
 	lfs	bx, [bp+var_24]
 	mov	byte ptr fs:[bx], 0
-	mov	gs:byte_42419, 30h 
+	mov	gs:g_currentCharPosition, 30h 
 	PUSH_STACK_ADDRESS(var_20)
-	CALL(sub_16595, 4)
+	CALL(text_writeString, 4)
 
 	FUNC_EXIT
 	retf

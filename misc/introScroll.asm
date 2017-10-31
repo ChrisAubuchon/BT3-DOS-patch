@@ -70,7 +70,7 @@ loc_166C6:
 	shl	si, 1
 	push	[bp+si+var_256]
 	push	[bp+si+var_258]
-	NEAR_CALL(sub_16F1E, 0Ah)
+	NEAR_CALL(writeStringAt, 0Ah)
 
 loc_16715:
 	inc	[bp+var_25C]

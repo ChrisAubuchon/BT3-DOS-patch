@@ -90,6 +90,11 @@ define(`IOWAIT', `mov	ax, 4000h
 #
 define(`GETKEY', `CALL(getKey, 2)')
 
+# OPEN([destination])
+#
+define(`OPEN', `CALL(_open, 6)
+ifelse(`$1', `', `dnl', `	mov	$1, ax')')
+
 # WRITE
 #
 define(`WRITE', `CALL(_write, 8)')
@@ -108,8 +113,8 @@ define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear, 4)', `CALL(
 
 # DELAY([count]
 #
-define(`DELAY', `ifelse(`$1', `', `CALL(txt_delayWithTable)', `PUSH_IMM($1)
-	CALL(txt_delayNoTable, 2)')')
+define(`DELAY', `ifelse(`$1', `', `CALL(text_delayWithTable)', `PUSH_IMM($1)
+	CALL(text_delayNoTable, 2)')')
 
 # STRCAT([destination])
 #

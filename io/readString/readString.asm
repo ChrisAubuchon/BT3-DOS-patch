@@ -72,7 +72,7 @@ loc_15EAC:
 	mov	al, fs:[bx+si]
 	cbw
 	push	ax
-	NEAR_CALL(txt_charSpacing), 2)
+	NEAR_CALL(text_characterWidth), 2)
 	push	ax
 	NEAR_CALL(readString_overwriteCursor, 2)
 	NEAR_CALL(readString_insertCursor)
@@ -89,7 +89,7 @@ loc_15EE1:
 	mov	al, fs:[bx+si]
 	cbw
 	push	ax
-	NEAR_CALL(txt_charSpacing, 2)
+	NEAR_CALL(text_characterWidth, 2)
 	push	ax
 	NEAR_CALL(readString_overwriteCursor, 2)
 	jmp	short loc_15EE1

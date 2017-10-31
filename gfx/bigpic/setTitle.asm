@@ -34,7 +34,7 @@ setTitle proc far
 	add	ax, 12h
 	push	ax
 	push	[bp+inString]
-	NEAR_CALL(sub_16F1E, 0Ah)
+	NEAR_CALL(writeStringAt, 0Ah)
 
 	mov	sp, bp
 	pop	bp

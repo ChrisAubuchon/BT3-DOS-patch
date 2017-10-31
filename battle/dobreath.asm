@@ -25,10 +25,8 @@ bat_doBreathAttack proc	far
 	levelMultiplier= byte ptr	 0Eh
 	spellRange= word ptr	 10h
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 11Ah
-	call	someStackOperation
+	FUNC_ENTER
+	CHKSTK(11Ah)
 
 	cmp	[bp+levelMultiplier], 0
 	jnz	short l_allFoesCheck
@@ -40,9 +38,9 @@ bat_doBreathAttack proc	far
 	jmp	short l_allFoesCheck
 
 l_partyMultiplier:
-	getCharP	[bp+partySlotNumber], bx
-	push	gs:roster.level[bx]
-	near_call _returnXor255,2
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
+	push	gs:party.level[bx]
+	NEAR_CALL(_returnXor255,2)
 	mov	[bp+levelMultiplier], al
 
 l_allFoesCheck:
@@ -84,26 +82,24 @@ loc_201E0:
 	sub	ah, ah
 loc_201E6:
 	mov	[bp+target], ax
-	mov	ax, offset aAtTheParty___
-	push	ds
-	push	ax
-	lea	ax, [bp+stringBuf]
-	push	ss
-	push	ax
-	do_strcat outputStringP
+	PUSH_OFFSET(s_atTheParty)
+	PUSH_STACK_ADDRESS(stringBuf)
+	STRCAT(outputStringP)
 	inc	[bp+partyAttackRval]
 	push	[bp+spellRange]
 	push	[bp+partySlotNumber]
-	near_call bat_isPartyInRange, 4
+	NEAR_CALL(bat_isPartyInRange, 4)
 	or	ax, ax
 	jnz	loc_20324
-	strcat_offset aButThePartyWas, outputStringP
+	PUSH_OFFSET(s_partyTooFarAway)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 	lea	ax, [bp+stringBuf]
 	push	ss
 	push	ax
-	func_printString
-	mov	byte ptr word_44166,	0
-	delayWithTable
+	PRINTSTRING
+	mov	byte ptr g_printPartyFlag,	0
+	DELAY
 	mov	ax, [bp+partyAttackRval]
 	dec	ax
 	jmp	bat_doBreathAttack_exit
@@ -136,13 +132,9 @@ loc_202B3:
 	mov	[bp+target], ax
 
 	; strcat(stringBuf, "at")
-	mov	ax, offset aAt
-	push	ds
-	push	ax
-	lea	ax, [bp+stringBuf]
-	push	ss
-	push	ax
-	do_strcat outputStringP
+	PUSH_OFFSET(s_at)
+	PUSH_STACK_ADDRESS(stringBuf)
+	STRCAT(outputStringP)
 
 	push	[bp+target]
 	mov	al, gs:bat_curTarget
@@ -150,17 +142,15 @@ loc_202B3:
 	push	ax
 	push	dx
 	push	word ptr [bp+outputStringP]
-	near_call strcatTargetName,8
+	NEAR_CALL(strcatTargetName,8)
 	mov	word ptr [bp+outputStringP], ax
 	mov	word ptr [bp+outputStringP+2], dx
-	mov	ax, offset aElipsisNLNL
+	mov	ax, offset s_elipsisNl
 	push	ds
 	push	ax
 	push	dx
 	push	word ptr [bp+outputStringP]
-	func_strcat
-	mov	word ptr [bp+outputStringP], ax
-	mov	word ptr [bp+outputStringP+2], dx
+	STRCAT(outputStringP)
 	jmp	short loc_20324
 l_enemyGroupGone:
 	mov	[bp+target], 0FFFFh
@@ -185,7 +175,7 @@ loc_20345:
 	jbe	short loc_20379
 	mov	al, [bp+arg_6]
 	push	ax
-	std_call dice_doYDX, 2
+	CALL(dice_doYDX, 2)
 	add	gs:damageAmount, ax
 	cmp	gs:damageAmount, 20000
 	jle	short loc_20377
@@ -196,7 +186,10 @@ loc_20377:
 loc_20379:
 	cmp	gs:bat_curTarget, 80h
 	jb	short loc_203AA
-	strcat_offset aOne, outputStringP
+
+	PUSH_OFFSET(s_one)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 	mov	[bp+var_2], 1
 	jmp	loc_2047F
 loc_203AA:
@@ -210,29 +203,30 @@ loc_203AA:
 	sub	ah, ah
 	push	ax
 	push	bx
-	near_call _canAttackChar, 4
+	NEAR_CALL(_canAttackChar, 4)
 	or	ax, ax
 	jz	loc_2047A
-	getCharP	[bp+target], bx
-	lea	ax, roster._name[bx]
+	CHARINDEX(ax, STACKVAR(target), bx)
+	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
-	do_strcat outputStringP
-	dword_appendChar outputStringP, ' '
+	STRCAT(outputStringP)
+	APPEND_CHAR(STACKVAR(outputStringP), ' ')
 	mov	ax, itemEff_breathDefense
 	push	ax
 	push	[bp+target]
-	call	hasEffectEquipped
-	add	sp, 4
+	CALL(hasEffectEquipped, 4)
 	or	ax, ax
 	jl	short loc_20467
 	test	[bp+breathFlags], breath_isBreath
 	jz	short loc_20467
-	strcat_offset aRepelledTheAtt, outputStringP
-	mov	byte ptr word_44166,	0
+	PUSH_OFFSET(s_repelledAttack)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
+	mov	byte ptr g_printPartyFlag,	0
 	mov	[bp+var_2], 0
 	jmp	short loc_20478
 loc_20467:
@@ -255,7 +249,7 @@ loc_20488:
 	mov	al, charSize
 	mul	gs:bat_curTarget
 	mov	bx, ax
-	mov	al, gs:roster.repelFlags[bx]
+	mov	al, gs:party.repelFlags[bx]
 	sub	ah, ah
 	jmp	short loc_204CF
 loc_204B0:
@@ -273,7 +267,9 @@ loc_204CF:
 	sub	ah, ah
 	test	[bp+var_10C], ax
 	jnz	short loc_2050C
-	strcat_offset aRepelledTheAtt, outputStringP
+	PUSH_OFFSET(s_repelledAttack)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 	mov	[bp+var_2], 0
 loc_2050C:
 	cmp	[bp+var_2], 0
@@ -282,14 +278,10 @@ loc_2050C:
 loc_20515:
 	push	[bp+spellRange]
 	push	[bp+partySlotNumber]
-	push	cs
-	call	near ptr bat_isPartyInRange
-	add	sp, 4
+	NEAR_CALL(bat_isPartyInRange, 4)
 	mov	[bp+var_4], ax
 	or	ax, ax
-	jnz	short loc_2052C
-	jmp	loc_207F3
-loc_2052C:
+	jz	loc_207F3
 	cmp	ax, 2
 	jnz	short loc_2053B
 	mov	gs:byte_41E63, 4
@@ -299,7 +291,7 @@ loc_2053B:
 	and	ax, 2
 	push	ax
 	push	[bp+partySlotNumber]
-	near_call savingThrowCheck, 4
+	NEAR_CALL(savingThrowCheck, 4)
 	mov	[bp+var_118], ax
 	or	ax, ax
 	jnz	short loc_20559
@@ -322,7 +314,7 @@ loc_2058E:
 	mov	al, charSize
 	mul	gs:bat_curTarget
 	mov	bx, ax
-	mov	al, gs:roster.strongElement[bx]
+	mov	al, gs:party.strongElement[bx]
 	sub	ah, ah
 	jmp	short loc_205CF
 loc_205B0:
@@ -360,7 +352,7 @@ loc_2060F:
 	mov	al, charSize
 	mul	gs:bat_curTarget
 	mov	bx, ax
-	mov	al, gs:roster.weakElement[bx]
+	mov	al, gs:party.weakElement[bx]
 	sub	ah, ah
 	jmp	short loc_20650
 loc_20631:
@@ -400,7 +392,9 @@ loc_2068D:
 	jnz	short loc_206A1
 	jmp	loc_207B5
 loc_206A1:
-	strcat_offset aIs, outputStringP
+	PUSH_OFFSET(s_is)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 	mov	bl, [bp+arg_4]
 	sub	bh, bh
 	and	bl, 0FEh
@@ -409,8 +403,10 @@ loc_206A1:
 	push	word ptr breathEffectStr[bx]
 	push	dx
 	push	ax
-	do_strcat outputStringP
-	strcat_offset aFor, outputStringP
+	STRCAT(outputStringP)
+	PUSH_OFFSET(a_for)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 	xor	ax, ax
 	push	ax
 	mov	ax, gs:damageAmount
@@ -419,7 +415,7 @@ loc_206A1:
 	push	ax
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
-	do_itoa	outputStringP
+	ITOA(outputStringP)
 	mov	ax, gs:damageAmount
 	dec	ax
 	push	ax
@@ -428,19 +424,19 @@ loc_206A1:
 	mov	ax, offset aPointSOfDamage
 	push	ds
 	push	ax
-	do_pluralize outputStringP
+	PLURALIZE(outputStringP)
 	mov	al, [bp+specialAttackIndex]
 	sub	ah, ah
 	mov	gs:specialAttackVal, ax
 	mov	al, gs:bat_curTarget
 	push	ax
-	std_call	bat_doHPDamage, 2
+	CALL(bat_doHPDamage, 2)
 	or	ax, ax
 	jz	short loc_207A7
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
-	std_call	bat_getKillString, 4
-	save_ptr_stack	dx,ax,outputStringP
+	CALL(bat_getKillString, 4)
+	SAVE_PTR_STACK(dx,ax,outputStringP)
 	mov	ax, 1
 	push	ax
 	mov	ax, 3
@@ -450,31 +446,36 @@ loc_206A1:
 	push	ax
 	push	dx
 	push	word ptr [bp+outputStringP]
-	std_call	printCharPronoun, 0Ah
-	save_ptr_stack	dx,ax,outputStringP
+	CALL(printCharPronoun, 0Ah)
+	SAVE_PTR_STACK(dx,ax,outputStringP)
 	jmp	short loc_207D2
 loc_207A7:
-	strcat_offset	aPeriodBlankLine, outputStringP
+	PUSH_OFFSET(s_period)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 	jmp	short loc_207D2
 loc_207B5:
-	strcat_offset aRepelledTheAtt, outputStringP
+	PUSH_OFFSET(s_repelledAttack)
+	STRCAT(outputStringP)
 loc_207D2:
 	jmp	short loc_207F1
 loc_207D4:
-	strcat_offset aRepelledTheAtt, outputStringP
+	PUSH_OFFSET(s_repelledAttack)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 loc_207F1:
 	jmp	short loc_20810
 loc_207F3:
-	strcat_offset aWasTooFarAway, outputStringP
+	PUSH_OFFSET(s_wasTooFarAway)
+	PUSH_STACK_PTR(outputStringP)
+	STRCAT(outputStringP)
 loc_20810:
 	lfs	bx, [bp+outputStringP]
 	mov	byte ptr fs:[bx], 0
-	lea	ax, [bp+stringBuf]
-	push	ss
-	push	ax
-	func_printString
-	mov	byte ptr word_44166,	0
-	delayWithTable
+	PUSH_STACK_ADDRESS(stringBuf)
+	PRINTSTRING
+	mov	byte ptr g_printPartyFlag,	0
+	DELAY
 	lea	ax, [bp+stringBuf]
 	mov	word ptr [bp+outputStringP], ax
 	mov	word ptr [bp+outputStringP+2], ss
@@ -504,8 +505,7 @@ loc_2089C:
 	cmp	[bp+var_110], 0
 	jnz	loc_201C6
 bat_doBreathAttack_exit:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bat_doBreathAttack endp
 
@@ -515,20 +515,18 @@ _canAttackChar proc far
         partySlotNumber=        word ptr  6
         specialAttackIndex= word ptr  8
 
-        push    bp
-        mov     bp, sp
-        xor     ax, ax
-        call    someStackOperation
-        getCharP        [bp+partySlotNumber], bx
+	FUNC_ENTER
+	CHKSTK
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 
-        cmp     byte ptr gs:roster._name[bx], 0			; if partySlot.isEmpty
+        cmp     byte ptr gs:party._name[bx], 0			; if partySlot.isEmpty
 	jz	l_return_zero					;   return 0
-        getCharP        [bp+partySlotNumber], bx
-        test    gs:roster.status[bx], stat_dead or stat_stoned	; if !partySlot.isDead and !partySlot.isStoned
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
+        test    gs:party.status[bx], stat_dead or stat_stoned	; if !partySlot.isDead and !partySlot.isStoned
 	jz	l_return_one					;   return 1
 
-        getCharP        [bp+partySlotNumber], bx		; Character is either dead or stoned
-        test    gs:roster.status[bx], stat_stoned		; if partySlot.isStoned
+	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)		; Character is either dead or stoned
+        test    gs:party.status[bx], stat_stoned		; if partySlot.isStoned
 	jnz	l_return_zero					;   return 0
 
 								; Character is dead
@@ -540,7 +538,6 @@ l_return_one:
 l_return_zero:
         sub     ax, ax
 l_return:
-        mov     sp, bp
-        pop     bp
+	FUNC_EXIT
         retf
 _canAttackChar endp
