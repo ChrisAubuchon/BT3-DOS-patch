@@ -796,7 +796,7 @@ sub_18306 proc far
 	push	ax
 	push	word ptr [bp+arg_0+2]
 	push	word ptr [bp+arg_0]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	jmp	short $+2
 	mov	sp, bp
@@ -828,7 +828,7 @@ item_trade proc	far
 	lea	ax, [bp+var_40]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_44], ax
 	mov	[bp+var_42], dx
@@ -839,7 +839,7 @@ item_trade proc	far
 	push	ax
 	push	[bp+var_42]
 	push	[bp+var_44]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_44], ax
 	mov	[bp+var_42], dx
@@ -848,7 +848,7 @@ item_trade proc	far
 	push	ax
 	push	dx
 	push	[bp+var_44]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_44], ax
 	mov	[bp+var_42], dx
@@ -1090,7 +1090,7 @@ loc_185D7:
 	lea	ax, [bp+var_44]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
@@ -1099,7 +1099,7 @@ loc_185D7:
 	shl	ax, 1
 	add	ax, cx
 	mov	[bp+var_46], ax
-	call	_random
+	call	random
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
 	cmp	gs:(party.specAbil+1)[bx], cl
@@ -1554,7 +1554,7 @@ item_getName proc far
 	push	word ptr genericItemStr[bx]
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	jmp	short loc_18A93
 	jmp	short loc_18A93
@@ -1566,7 +1566,7 @@ loc_18A74:
 	push	word ptr itemStr[bx]
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	jmp	short $+2
 loc_18A93:
@@ -1601,7 +1601,7 @@ printCharStats proc far
 	lea	ax, [bp+var_DC]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_1A], ax
 	mov	word ptr [bp+var_1A+2],	dx
@@ -1635,7 +1635,7 @@ loc_18B20:
 	push	ax
 	push	word ptr [bp+var_1A+2]
 	push	word ptr [bp+var_1A]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_1A], ax
 	mov	word ptr [bp+var_1A+2],	dx
@@ -1647,7 +1647,7 @@ loc_18B20:
 	push	gs:party.level[bx]
 	push	word ptr [bp+var_1A+2]
 	push	word ptr [bp+var_1A]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+var_1A], ax
 	mov	word ptr [bp+var_1A+2],	dx
@@ -1663,7 +1663,7 @@ loc_18B20:
 	push	word ptr genderString[bx]
 	push	word ptr [bp+var_1A+2]
 	push	word ptr [bp+var_1A]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_1A], ax
 	mov	word ptr [bp+var_1A+2],	dx
@@ -1679,7 +1679,7 @@ loc_18B20:
 	push	word ptr raceString[bx]
 	push	word ptr [bp+var_1A+2]
 	push	word ptr [bp+var_1A]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_1A], ax
 	mov	word ptr [bp+var_1A+2],	dx
@@ -1696,7 +1696,7 @@ loc_18BE9:
 	push	word ptr classString[bx]
 	push	word ptr [bp+var_1A+2]
 	push	word ptr [bp+var_1A]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_1A], ax
 	mov	word ptr [bp+var_1A+2],	dx
@@ -1822,7 +1822,7 @@ printNumberAndString proc far
 	push	[bp+arg_0]
 	push	[bp+arg_A]
 	push	[bp+arg_8]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
@@ -1832,7 +1832,7 @@ printNumberAndString proc far
 	push	[bp+arg_4]
 	push	dx
 	push	word ptr [bp+var_4]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
@@ -1911,7 +1911,7 @@ loc_18E29:
 	push	ax
 	push	word ptr [bp+arg_4+2]
 	push	word ptr [bp+arg_4]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+arg_4], ax
 	mov	word ptr [bp+arg_4+2], dx

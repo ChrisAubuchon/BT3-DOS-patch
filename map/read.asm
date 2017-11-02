@@ -57,21 +57,21 @@ loc_173FA:
 	push	dx
 	push	ax
 	push	[bp+fd]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 	mov	ax, 2
 	push	ax
 	lea	ax, [bp+var_6]
 	push	ss
 	push	ax
 	push	[bp+fd]
-	READ
+	CALL(read)
 	mov	ax, 0FFFFh
 	push	ax
 	sub	ax, ax
 	push	ax
 	push	[bp+var_6]
 	push	[bp+fd]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 	mov	ax, 4000
 	push	ax
 	CALL(_mallocMaybe, 2)
@@ -82,7 +82,7 @@ loc_173FA:
 	push	dx
 	push	[bp+memOffset]
 	push	[bp+fd]
-	READ
+	CALL(read)
 
 	push	[bp+arg_4]
 	push	[bp+arg_2]
@@ -94,7 +94,7 @@ loc_173FA:
 	push	[bp+memOffset]
 	CALL(_freeMaybe, 4)
 	push	[bp+fd]
-	CLOSE
+	CALL(close)
 
 	FUNC_EXIT
 	retf

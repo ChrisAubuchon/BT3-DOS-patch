@@ -1,6 +1,6 @@
 ; Attributes: bp-based frame
 
-_strcat	proc far
+strcat	proc far
 
 	toStr= dword ptr  6
 	fromStr= dword ptr  0Ah
@@ -25,4 +25,4 @@ l_loopEntry:
 
 	FUNC_EXIT
 	retf
-_strcat	endp
+strcat	endp

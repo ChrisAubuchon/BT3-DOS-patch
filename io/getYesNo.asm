@@ -25,7 +25,7 @@ getYesNo proc far
 	PRINTSTRING
 l_loopEntry:
 	push	[bp+var_2]
-	GETKEY
+	CALL(getKey)
 	mov	[bp+inputKey], ax
 	cmp	ax, 10Eh
 	jl	short loc_14E0B

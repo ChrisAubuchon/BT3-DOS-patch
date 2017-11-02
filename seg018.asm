@@ -36,16 +36,16 @@ geomancerSomething proc	far
 	mov	ax, 14Ch
 	call	someStackOperation
 	push	si
-	call	_random
+	call	random
 	and	ax, 0Fh
 	mov	[bp+random16_1], ax
-	call	_random
+	call	random
 	and	ax, 0Fh
 	mov	[bp+random16_2], ax
-	call	_random
+	call	random
 	and	ax, 0Fh
 	mov	[bp+random16_3], ax
-	call	_random
+	call	random
 	and	ax, 0Fh
 	mov	[bp+random16_4], ax
 	mov	bx, ax
@@ -225,7 +225,7 @@ loc_27205:
 	lea	ax, [bp+var_12A]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -236,7 +236,7 @@ loc_27205:
 	push	word ptr off_4C958[bx]
 	push	dx
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -245,7 +245,7 @@ loc_27205:
 	push	ax
 	push	dx
 	push	[bp+var_132]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -256,7 +256,7 @@ loc_27205:
 	push	word ptr off_4C998[bx]
 	push	dx
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -265,7 +265,7 @@ loc_27205:
 	push	ax
 	push	dx
 	push	[bp+var_132]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -276,7 +276,7 @@ loc_27205:
 	push	word ptr off_4C9D8[bx]
 	push	dx
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -285,7 +285,7 @@ loc_27205:
 	push	ax
 	push	dx
 	push	[bp+var_132]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -296,7 +296,7 @@ loc_27205:
 	push	word ptr off_4C918[bx]
 	push	dx
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
@@ -305,7 +305,7 @@ loc_27205:
 	push	ax
 	push	dx
 	push	[bp+var_132]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx

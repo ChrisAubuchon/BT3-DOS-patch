@@ -334,7 +334,7 @@ bat_doMonAttack	proc far
 	shl	ax, 1
 	add	bx, ax
 	mov	gs:bat_monPriorityList[bx], 0
-	call	_random
+	call	random
 	and	ax, 6
 	mov	[bp+var_6], ax
 	getMonP	[bp+monNo], si
@@ -502,11 +502,11 @@ bat_monSummonMon proc far
 	push	ax
 	push	dx
 	push	[bp+var_104]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_104], ax
 	mov	[bp+var_102], dx
-	call	_random
+	call	random
 	sub	ah, ah
 	cmp	ax, [bp+arg_4]
 	jnb	short loc_1B590
@@ -523,7 +523,7 @@ loc_1B590:
 	push	ax
 	push	[bp+var_102]
 	push	[bp+var_104]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_104], ax
 	mov	[bp+var_102], dx
@@ -534,7 +534,7 @@ loc_1B5B0:
 	push	ax
 	push	[bp+var_102]
 	push	[bp+var_104]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_104], ax
 	mov	[bp+var_102], dx
@@ -764,7 +764,7 @@ loc_1B7F5:
 	push	ax
 	push	word ptr [bp+var_106+2]
 	push	word ptr [bp+var_106]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_106], ax
 	mov	word ptr [bp+var_106+2], dx
@@ -843,7 +843,7 @@ loc_1B8E8:
 	add	sp, 6
 	mov	word ptr [bp+var_106], ax
 	mov	word ptr [bp+var_106+2], dx
-	call	_random
+	call	random
 	and	ax, 1
 	mov	cx, ax
 	getMonP	[bp+monNo], bx
@@ -860,7 +860,7 @@ loc_1B8E8:
 	push	word ptr monMeleeAttString[bx]
 	push	word ptr [bp+var_106+2]
 	push	word ptr [bp+var_106]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_106], ax
 	mov	word ptr [bp+var_106+2], dx
@@ -901,7 +901,7 @@ loc_1B8E8:
 	push	ax
 	push	word ptr [bp+var_106+2]
 	push	word ptr [bp+var_106]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_106], ax
 	mov	word ptr [bp+var_106+2], dx
@@ -1047,7 +1047,7 @@ loc_1BB0B:
 loc_1BB0E:
 	cmp	[bp+counter], 7
 	jge	short loc_1BB32
-	call	_random
+	call	random
 	and	ax, [bp+_mask]
 	mov	[bp+var_4], ax
 	push	ax
@@ -1224,7 +1224,7 @@ bat_doSummonAttack proc	far
 	jz	short loc_1BCBF
 	jmp	loc_1BD50
 loc_1BCBF:
-	call	_random
+	call	random
 	and	ax, 6
 	mov	[bp+var_8], ax
 	mov	si, ax
@@ -1602,7 +1602,7 @@ loc_1BF8B:
 loc_1BFBA:
 	mov	[bp+var_6], 2
 loc_1BFBF:
-	call	_random
+	call	random
 	and	ax, 1
 	add	[bp+var_6], ax
 	mov	bx, [bp+var_6]
@@ -1627,7 +1627,7 @@ loc_1BFBF:
 
 	push_ds_string	aButMisses
 	push_ptr_stack	var_10C
-	std_call	_strcat, 8
+	std_call	strcat, 8
 	save_ptr_stack	dx,ax,var_10C
 
 	jmp	short loc_1C0B3
@@ -1860,7 +1860,7 @@ bat_hideInShadows proc far
 	lea	ax, [bp+var_104]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_108], ax
 	mov	[bp+var_106], dx
@@ -1869,7 +1869,7 @@ bat_hideInShadows proc far
 	push	ax
 	push	dx
 	push	[bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_108], ax
 	mov	[bp+var_106], dx
@@ -1880,7 +1880,7 @@ bat_hideInShadows proc far
 	add	sp, 4
 	or	ax, ax
 	jz	short loc_1C2DE
-	call	_random
+	call	random
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
 	cmp	gs:(party.specAbil+2)[bx], cl
@@ -1903,7 +1903,7 @@ loc_1C30B:
 	push	[bp+var_4]
 	push	[bp+var_106]
 	push	[bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	lea	ax, [bp+var_104]
 	push	ss
@@ -1938,7 +1938,7 @@ bat_doCharSong proc far
 	lea	ax, [bp+var_102]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_108], ax
 	mov	[bp+var_106], dx
@@ -1966,7 +1966,7 @@ loc_1C3AA:
 	push	ax
 	push	[bp+var_106]
 	push	[bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_108], ax
 	mov	[bp+var_106], dx
@@ -1990,7 +1990,7 @@ loc_1C3F4:
 	push	ax
 	push	[bp+var_106]
 	push	[bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_108], ax
 	mov	[bp+var_106], dx
@@ -2010,7 +2010,7 @@ loc_1C3F4:
 	push	ax
 	push	dx
 	push	[bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_108], ax
 	mov	[bp+var_106], dx
@@ -2038,7 +2038,7 @@ bat_charMeleeAttack proc far
 	getCharP	[bp+arg_0], bx
 	test	gs:party.status[bx], stat_nuts
 	jz	short loc_1C480
-	call	_random
+	call	random
 	test	al, 1
 	jnz	short loc_1C494
 loc_1C480:
@@ -2395,7 +2395,7 @@ loc_1C7EC:
 	cmp	gs:byte_42458, 0
 	jnz	short loc_1C81D
 loc_1C7F8:
-	call	_random
+	call	random
 	and	al, 3
 	mov	byte_4EEC9, al
 	cmp	al, levelNoMaybe
@@ -2561,7 +2561,7 @@ loc_1C9AD:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memset
+	call	memset
 	add	sp, 8
 	jmp	short loc_1C9AA
 loc_1C9D5:
@@ -2643,7 +2643,7 @@ bat_swapMonGroups proc far
 	lea	ax, [bp+var_40]
 	push	ss
 	push	ax
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	ax, 64
 	push	ax
@@ -2659,7 +2659,7 @@ bat_swapMonGroups proc far
 	lea	ax, monHpList[bx]
 	push	dx
 	push	ax
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	ax, 64
 	push	ax
@@ -2673,7 +2673,7 @@ bat_swapMonGroups proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	ax, monStruSize
 	push	ax
@@ -2685,7 +2685,7 @@ bat_swapMonGroups proc far
 	lea	ax, [bp+var_40]
 	push	ss
 	push	ax
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	ax, monStruSize
 	push	ax
@@ -2699,7 +2699,7 @@ bat_swapMonGroups proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	ax, monStruSize
 	push	ax
@@ -2711,7 +2711,7 @@ bat_swapMonGroups proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	sp, bp
 	pop	bp
@@ -2820,7 +2820,7 @@ loc_1CC0D:
 	push	ax
 	push	[bp+var_6]
 	push	[bp+var_8]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	lea	ax, [bp+var_10C]
 	push	ss
@@ -2846,7 +2846,7 @@ loc_1CC52:
 	push	ax
 	push	[bp+var_6]
 	push	[bp+var_8]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_8], ax
 	mov	[bp+var_6], dx
@@ -2897,7 +2897,7 @@ bat_printOpponentGroup proc far
 	push	ax
 	push	word ptr [bp+arg_0+2]
 	push	word ptr [bp+arg_0]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+arg_0], ax
 	mov	word ptr [bp+arg_0+2], dx
@@ -2953,7 +2953,7 @@ bat_printOpponentGroup proc far
 	push	ax
 	push	word ptr [bp+arg_0+2]
 	push	word ptr [bp+arg_0]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+arg_0], ax
 	mov	word ptr [bp+arg_0+2], dx
@@ -3060,7 +3060,7 @@ mon_copyBuffer proc far
 	push	[bp+arg_0]
 	push	[bp+arg_6]
 	push	[bp+arg_4]
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	sp, bp
 	pop	bp
@@ -3166,7 +3166,7 @@ loc_1D0B8:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memset
+	call	memset
 	add	sp, 8
 	mov	ax, 40h	
 	push	ax
@@ -3179,7 +3179,7 @@ loc_1D0B8:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memset
+	call	memset
 	add	sp, 8
 	sub	al, al
 	mov	bx, [bp+counter]
@@ -3270,7 +3270,7 @@ loc_1D246:
 	add	sp, 2
 	mov	[bp+_mask], ax
 loc_1D253:
-	call	_random
+	call	random
 	and	ax, [bp+_mask]
 	mov	[bp+var_6], ax
 	mov	ax, [bp+var_4]
@@ -3360,7 +3360,7 @@ loc_1D333:
 	mov	ax, [bp+ndice]
 	cmp	[bp+counter], ax
 	jg	short loc_1D356
-	call	_random
+	call	random
 	mov	bx, [bp+dieval]
 	mov	cl, diceMaskList[bx]
 	sub	ch, ch
@@ -3478,7 +3478,7 @@ loc_1D40E:
 loc_1D44A:
 	jmp	short loc_1D40B
 loc_1D44C:
-	call	_random
+	call	random
 	sub	ah, ah
 	mov	[bp+var_2], ax
 	cmp	ax, 0C0h 
@@ -3948,7 +3948,7 @@ loc_1D827:
 	lea	ax, [bp+var_136]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
@@ -3957,7 +3957,7 @@ loc_1D827:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
@@ -3972,7 +3972,7 @@ loc_1D827:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
@@ -3982,7 +3982,7 @@ loc_1D89A:
 	push	ax
 	push	word ptr [bp+var_4+2]
 	push	word ptr [bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
@@ -4401,7 +4401,7 @@ loc_1DCAF:
 	push	ax
 	push	word ptr [bp+var_C+2]
 	push	word ptr [bp+var_C]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_C], ax
 	mov	word ptr [bp+var_C+2], dx
@@ -4791,7 +4791,7 @@ loc_1E1D0:
 	sub	ah, ah
 	cmp	ax, [bp+var_14]
 	jbe	short loc_1E1F6
-	call	_random
+	call	random
 	and	ax, 4
 	add	gs:damageAmount, ax
 	jmp	short loc_1E1CD
@@ -4801,7 +4801,7 @@ loc_1E1F8:
 	mov	bx, [bp+arg_0]
 	cmp	gs:byte_42280[bx], 0
 	jz	short loc_1E232
-	call	_random
+	call	random
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
 	cmp	gs:(party.specAbil+2)[bx], cl
@@ -4818,7 +4818,7 @@ loc_1E232:
 	cmp	gs:party.class[si], class_hunter
 	;;jnz	short loc_1E267
 	jnz	short loc_1E272
-	call	_random
+	call	random
 	cmp	gs:party.specAbil[si],	al
 	jbe	short loc_1E25B
 	mov	ax, speAtt_criticalHit
@@ -4858,7 +4858,7 @@ bat_printHitDamage proc	far
 	push	ax
 	push	[bp+dmgHi]
 	push	[bp+dmgLo]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+dmgLo], ax
 	mov	[bp+dmgHi], dx
@@ -4869,7 +4869,7 @@ loc_1E2A7:
 	push	ax
 	push	[bp+dmgHi]
 	push	[bp+dmgLo]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+dmgLo], ax
 	mov	[bp+dmgHi], dx
@@ -4881,7 +4881,7 @@ loc_1E2A7:
 	push	ax
 	push	[bp+dmgHi]
 	push	[bp+dmgLo]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	[bp+dmgLo], ax
 	mov	[bp+dmgHi], dx
@@ -4890,7 +4890,7 @@ loc_1E2A7:
 	push	ax
 	push	dx
 	push	[bp+dmgLo]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+dmgLo], ax
 	mov	[bp+dmgHi], dx
@@ -4903,7 +4903,7 @@ loc_1E2F4:
 	push	ax
 	push	[bp+dmgHi]
 	push	[bp+dmgLo]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	[bp+dmgLo], ax
 	mov	[bp+dmgHi], dx
@@ -4943,7 +4943,7 @@ bat_getKillString proc far
 	push	word ptr specialAttString[bx]
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	jmp	short $+2
 	mov	sp, bp

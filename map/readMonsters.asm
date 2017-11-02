@@ -20,7 +20,7 @@ map_readMonsters	proc far
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
-	CALL(_memset, 8)
+	CALL(memset)
 	mov	[bp+_size], 0
 
 	; If the index is the last index in the file, read the full 0x480 bytes.
@@ -80,13 +80,13 @@ loc_175D4:
 	push	dx
 	push	ax
 	PUSH	[bp+_fd]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 
 	mov	ax, 2
 	push	ax
 	PUSH_STACK_ADDRESS(var_4)
 	push	[bp+_fd]
-	READ
+	CALL(read)
 
 	cmp	[bp+_size], 0
 	jnz	l_read_data
@@ -95,7 +95,7 @@ loc_175D4:
 	push	ax
 	PUSH_STACK_ADDRESS(var_6)
 	push	[bp+_fd]
-	READ
+	CALL(read)
 
 	mov	ax, [bp+var_6]
 	sub	ax, [bp+var_4]
@@ -109,7 +109,7 @@ l_read_data:
 	push	dx
 	push	ax
 	push	[bp+_fd]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 
 	push	[bp+_size]
 	mov	ax, offset monsterBuf
@@ -117,10 +117,10 @@ l_read_data:
 	push	dx
 	push	ax
 	push	[bp+_fd]
-	READ
+	CALL(read)
 
 	push	[bp+_fd]
-	CLOSE
+	CALL(close)
 
 	FUNC_EXIT
 	retf

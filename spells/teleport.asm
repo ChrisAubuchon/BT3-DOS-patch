@@ -88,7 +88,7 @@ loc_21086:
 loc_210A1:
 	sub	ax, ax
 	push	ax
-	GETKEY
+	CALL(getKey)
 	mov	[bp+var_8], ax
 	jmp	short loc_210E5
 loc_210B1:

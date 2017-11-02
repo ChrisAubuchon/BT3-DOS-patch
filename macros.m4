@@ -1,5 +1,6 @@
 include(`foreachq4.m4')dnl
 divert(`-1')
+include(`functionTable.m4')
 
 # Function entry code
 #
@@ -19,11 +20,6 @@ define(`CHKSTK', `ifelse(`$1', `', `xor	ax, ax', `mov	ax, $1')
 # PUSH(value)
 #
 define(`PUSH', `push	$1')
-
-# CALL(function_name, [stack fixup value])
-#
-define(`CALL', `call	$1
-ifelse(`$2', `', `dnl', `	add	sp, $2')')
 
 # NEAR_CALL(function_name, [stack fixup value])
 #
@@ -84,32 +80,11 @@ define(`SAVE_PTR_STACK', `mov	word ptr [bp+$3], $2
 #
 define(`IOWAIT', `mov	ax, 4000h
 	push	ax
-	CALL(getKey, 2)')
-
-# GETKEY
-#
-define(`GETKEY', `CALL(getKey, 2)')
-
-# OPEN([destination])
-#
-define(`OPEN', `CALL(_open, 6)
-ifelse(`$1', `', `dnl', `	mov	$1, ax')')
-
-# WRITE
-#
-define(`WRITE', `CALL(_write, 8)')
-
-# READ
-#
-define(`READ', `CALL(_read, 8)')
-
-# CLOSE
-#
-define(`CLOSE', `CALL(_close, 2)')
+	CALL(getKey)')
 
 # PRINTSTRING([clear])
 #
-define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear, 4)', `CALL(printString,4)')')
+define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear)', `CALL(printString)')')
 
 # DELAY([count]
 #
@@ -118,12 +93,12 @@ define(`DELAY', `ifelse(`$1', `', `CALL(text_delayWithTable)', `PUSH_IMM($1)
 
 # STRCAT([destination])
 #
-define(`STRCAT', `CALL(_strcat, 8)
+define(`STRCAT', `CALL(strcat)
 ifelse(`$1', `', `dnl', `	SAVE_PTR_STACK(dx,ax,$1)')')
 
 # STRCMP
 #
-define(`STRCMP', `CALL(_strcmp, 8)')
+define(`STRCMP', `CALL(strcmp)')
 
 # APPEND_CHAR(address, char)
 #
@@ -140,12 +115,12 @@ define(`NULL_TERMINATE', `ifelse(`$1', `', `errprint(`No argument passed to NULL
 
 # ITOA([destination])
 #
-define(`ITOA', `CALL(_itoa, 0Ah)
+define(`ITOA', `CALL(itoa)
 ifelse(`$1', `', `dnl', `	SAVE_PTR_STACK(dx,ax,$1)')')
 
 # PLURALIZE([destination])
 #
-define(`PLURALIZE', `CALL(str_pluralize, 0Ah)
+define(`PLURALIZE', `CALL(str_pluralize)
 ifelse(`$1', `', `dnl',	`	SAVE_PTR_STACK(dx,ax,$1)')')
 
 # RANGE_WITH_MAX(maximum, srcreg, tmpreg)

@@ -83,7 +83,7 @@ loc_12170:
 	push	ax
 	push	[bp+var_108]
 	push	[bp+var_10A]
-	ITOA
+	CALL(itoa)
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 

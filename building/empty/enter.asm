@@ -4,7 +4,7 @@ empty_enter proc	far
 	FUNC_ENTER
 	CHKSTK
 
-	CALL(_random)
+	CALL(random)
 	test	al, 3
 	jnz	short l_noBattle
 

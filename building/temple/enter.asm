@@ -22,7 +22,7 @@ l_templeIoLoopEntry:
 l_badKey:
 	mov	ax, 70h	
 	push	ax
-	GETKEY
+	CALL(getKey)
 	mov	[bp+inputKey], ax
 
 	; Subtract 4 if selected with mouse

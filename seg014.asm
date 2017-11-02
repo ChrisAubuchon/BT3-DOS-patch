@@ -1,227 +1,3 @@
-; Segment type:	Pure code
-seg014 segment byte public 'CODE' use16
-	assume cs:seg014
-;org 8
-	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
-; Attributes: bp-based frame
-
-bards_enter proc far
-var_4= word ptr	-4
-var_2= word ptr	-2
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
-	push	si
-	mov	ax, offset aBardSHall
-	push	ds
-	push	ax
-	call	setTitle
-	add	sp, 4
-	mov	ax, 53h	
-	push	ax
-	call	bigpic_drawPictureNumber
-	add	sp, 2
-loc_25B2D:
-	mov	ax, offset aWelcomeAndBeHa
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	mov	al, gs:txt_numLines
-	sub	ah, ah
-	mov	si, ax
-	shl	si, 1
-	mov	ax, g_printPartyFlag[si]
-	or	ax, bitMask16bit[si]
-	mov	[bp+var_2], ax
-	push	ax
-	call	getKey
-	add	sp, 2
-	mov	[bp+var_4], ax
-	cmp	ax, 10Eh
-	jl	short loc_25B7D
-	cmp	ax, 119h
-	jg	short loc_25B7D
-	mov	al, gs:txt_numLines
-	sub	ah, ah
-	dec	ax
-	sub	[bp+var_4], ax
-loc_25B7D:
-	cmp	[bp+var_4], 'L'
-	jz	short loc_25B8A
-	cmp	[bp+var_4], 10Eh
-	jnz	short loc_25B8E
-loc_25B8A:
-	push	cs
-	call	near ptr bards_listen
-loc_25B8E:
-	cmp	[bp+var_4], 1Bh
-	jz	short loc_25BA1
-	cmp	[bp+var_4], 'E'
-	jz	short loc_25BA1
-	cmp	[bp+var_4], 10Fh
-	jnz	short loc_25B2D
-loc_25BA1:
-	sub	ax, ax
-	jmp	short $+2
-	pop	si
-	mov	sp, bp
-	pop	bp
-	retf
-bards_enter endp
-
-; Attributes: bp-based frame
-
-bards_listen proc far
-
-	var_2E=	word ptr -2Eh
-	var_1A=	word ptr -1Ah
-	var_10=	word ptr -10h
-	var_E= word ptr	-0Eh
-	var_C= word ptr	-0Ch
-	var_2= word ptr	-2
-
-	push	bp
-	mov	bp, sp
-	mov	ax, 2Eh	
-	call	someStackOperation
-	push	si
-	lea	ax, [bp+var_C]
-	push	ss
-	push	ax
-	cmp	currentLocationMaybe, 9
-	jnz	short loc_25BCC
-	mov	ax, 1
-	jmp	short loc_25BCE
-loc_25BCC:
-	sub	ax, ax
-loc_25BCE:
-	push	ax
-	push	cs
-	call	near ptr sub_25E1B
-	add	sp, 6
-	call	text_clear
-	lea	ax, [bp+var_2E]
-	push	ss
-	push	ax
-	lea	ax, [bp+var_1A]
-	push	ss
-	push	ax
-	lea	ax, [bp+var_C]
-	push	ss
-	push	ax
-	mov	ax, offset aTheseAreTheSon
-	push	ds
-	push	ax
-	call	printVarString
-	add	sp, 10h
-	mov	[bp+var_E], ax
-loc_25BFA:
-	push	[bp+var_E]
-	call	getKey
-	add	sp, 2
-	mov	[bp+var_2], ax
-	cmp	ax, 1Bh
-	jnz	short loc_25C0F
-	jmp	short loc_25C6D
-loc_25C0F:
-	mov	[bp+var_10], 0
-	jmp	short loc_25C19
-loc_25C16:
-	inc	[bp+var_10]
-loc_25C19:
-	cmp	[bp+var_10], 6
-	jge	short loc_25C6B
-	mov	si, [bp+var_10]
-	mov	al, byte ptr [bp+si+var_1A]
-	cbw
-	cmp	ax, [bp+var_2]
-	jz	short loc_25C35
-	shl	si, 1
-	mov	ax, [bp+var_2]
-	cmp	[bp+si+var_2E],	ax
-	jnz	short loc_25C69
-loc_25C35:
-	mov	bx, [bp+var_10]
-	shl	bx, 1
-	shl	bx, 1
-	mov	ax, word ptr bardSongLyrics[bx]
-	or	ax, word ptr (bardSongLyrics+2)[bx]
-	jnz	short loc_25C5D
-	cmp	[bp+var_10], 2
-	jnz	short loc_25C51
-	mov	ax, 1
-	jmp	short loc_25C53
-loc_25C51:
-	sub	ax, ax
-loc_25C53:
-	push	ax
-	push	cs
-	call	near ptr bards_learnSong
-	add	sp, 2
-	jmp	short loc_25C67
-loc_25C5D:
-	push	[bp+var_10]
-	push	cs
-	call	near ptr sub_25C72
-	add	sp, 2
-loc_25C67:
-	jmp	short loc_25C6D
-loc_25C69:
-	jmp	short loc_25C16
-loc_25C6B:
-	jmp	short loc_25BFA
-loc_25C6D:
-	pop	si
-	mov	sp, bp
-	pop	bp
-	retf
-bards_listen endp
-
-; Attributes: bp-based frame
-
-sub_25C72 proc far
-
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
-
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	push	si
-	call	text_clear
-	mov	[bp+var_2], 0
-	jmp	short loc_25C8D
-loc_25C8A:
-	inc	[bp+var_2]
-loc_25C8D:
-	mov	bx, [bp+arg_0]
-	shl	bx, 1
-	mov	ax, [bp+var_2]
-	cmp	word_4BDC4[bx],	ax
-	jle	short loc_25CC9
-	mov	si, ax
-	shl	si, 1
-	shl	si, 1
-	mov	bx, [bp+arg_0]
-	shl	bx, 1
-	shl	bx, 1
-	lfs	bx, bardSongLyrics[bx]
-	push	word ptr fs:[bx+si+2]
-	push	word ptr fs:[bx+si]
-	call	printString
-	add	sp, 4
-	wait4IO
-	jmp	short loc_25C8A
-loc_25CC9:
-	pop	si
-	mov	sp, bp
-	pop	bp
-	retf
-sub_25C72 endp
-
 ; Attributes: bp-based frame
 
 bards_learnSong	proc far
@@ -250,7 +26,7 @@ bards_learnSong	proc far
 	lea	ax, [bp+var_108]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -263,7 +39,7 @@ bards_learnSong	proc far
 	push	word ptr bardSongPrice[bx]
 	push	dx
 	push	[bp+var_4]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -272,7 +48,7 @@ bards_learnSong	proc far
 	push	ax
 	push	dx
 	push	[bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -395,5 +171,3 @@ loc_25E68:
 locret_25E6C:
 	retf
 sub_25E1B endp
-
-seg014 ends

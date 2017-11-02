@@ -50,9 +50,9 @@ loc_17513:
 	push	dx
 	push	ax
 	push	[bp+fd]
-	READ
+	CALL(read)
 	push	[bp+fd]
-	CLOSE
+	CALL(close)
 l_return:
 	mov	sp, bp
 	pop	bp

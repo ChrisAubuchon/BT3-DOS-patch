@@ -72,7 +72,7 @@ loc_12A1C:
 loc_12A1F:
 	cmp	[bp+counter], 5
 	jge	short loc_12A5A
-	CALL(_random)
+	CALL(random)
 	and	ax, 7
 	mov	si, [bp+raceGenderValue]
 	mov	bx, [bp+counter]
@@ -93,7 +93,7 @@ loc_12A1F:
 loc_12A58:
 	jmp	short loc_12A1C
 loc_12A5A:
-	CALL(_random)
+	CALL(random)
 	and	ax, 0Fh
 	add	ax, 13
 	mov	[bp+var_30], ax
@@ -285,7 +285,7 @@ loc_12CB7:
 	jz	short loc_12CEE
 	cmp	gs:newCharBuffer.class,	class_rogue
 	jnb	short loc_12CEE
-	CALL(_random)
+	CALL(random)
 	and	ax, 0Fh
 	add	ax, 8
 	mov	gs:newCharBuffer.currentSppt, ax

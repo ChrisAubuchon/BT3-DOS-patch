@@ -51,7 +51,7 @@ l_packPartyBuf:
 	push	word ptr [bp+outputStringBufP]
 	push	dx
 	push	word ptr [bp+partyBuf]
-	CALL(_memcpy, 0Ah)
+	CALL(memcpy, 0Ah)
 	mov	ax, word ptr [bp+outputStringBufP]
 	mov	dx, word ptr [bp+outputStringBufP+2]
 	mov	word ptr [bp+partyBuf], ax

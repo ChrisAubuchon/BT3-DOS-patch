@@ -11,7 +11,7 @@ l_ioLoopEntry:
 	PRINTSTRING(true)
 	mov	ax, 1FCh
 	push	ax
-	GETKEY
+	CALL(getKey)
 	mov	[bp+var_2], ax
 	cmp	ax, 1Bh
 	jnz	short l_checkMouse

@@ -137,7 +137,7 @@ loc_27531:
 	mov	bx, ds:word_2AD1E
 	mov	cx, 200h
 	mov	dx, offset byte_2AD20
-	int	21h		; DOS -	2+ - READ FROM FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
 			; BX = file handle, CX = number	of bytes to read
 			; DS:DX	-> buffer
 	mov	si, dx
@@ -208,7 +208,7 @@ loc_275AD:
 	mov	bx, ds:word_2AD1E
 	mov	cx, 200h
 	mov	dx, offset byte_2AD20
-	int	21h		; DOS -	2+ - READ FROM FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
 			; BX = file handle, CX = number	of bytes to read
 			; DS:DX	-> buffer
 	mov	si, dx
@@ -878,13 +878,13 @@ d3comp endp
 
 _readChFromKeyboard proc far
 	sub	ax, ax
-	int	16h		; KEYBOARD - READ CHAR FROM BUFFER, WAIT IF EMPTY
+	int	16h		; KEYBOARD - CALL(read) CHAR FROM BUFFER, WAIT IF EMPTY
 			; Return: AH = scan code, AL = character
 	retf
 _readChFromKeyboard endp
 
 
-_random	proc far
+random	proc far
 	cli
 	in	al, 40h		; Timer	8253-5 (AT: 8254.2).
 	mov	ah, al
@@ -894,7 +894,7 @@ _random	proc far
 	add	ax, randomSeed
 	mov	randomSeed, ax
 	retf
-_random	endp
+random	endp
 
 ; Attributes: bp-based frame
 
@@ -922,7 +922,7 @@ sub_27B4C endp
 
 ; Attributes: bp-based frame
 
-_open proc far
+open proc far
 
 	arg_0= dword ptr  6
 	arg_4= byte ptr	 0Ah
@@ -943,11 +943,11 @@ loc_27B74:
 	pop	ds
 	pop	bp
 	retf
-_open endp
+open endp
 
 ; Attributes: bp-based frame
 
-_close proc far
+close proc far
 
 	arg_0= word ptr	 6
 
@@ -955,7 +955,7 @@ _close proc far
 	mov	bp, sp
 	mov	bx, [bp+arg_0]
 	mov	ah, 3Eh
-	int	21h		; DOS -	2+ - CLOSE A FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(close) A FILE WITH HANDLE
 			; BX = file handle
 	jnb	short loc_27B86
 	sub	ax, ax
@@ -963,11 +963,11 @@ _close proc far
 loc_27B86:
 	pop	bp
 	retf
-_close endp
+close endp
 
 ; Attributes: bp-based frame
 
-_read proc far
+read proc far
 
 	fd= word ptr  6
 	memBuf=	dword ptr  8
@@ -980,7 +980,7 @@ _read proc far
 	lds	dx, [bp+memBuf]
 	mov	cx, [bp+numBytes]
 	mov	ah, 3Fh
-	int	21h		; DOS -	2+ - READ FROM FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
 			; BX = file handle, CX = number	of bytes to read
 			; DS:DX	-> buffer
 	jnb	short loc_27B9E
@@ -990,7 +990,7 @@ loc_27B9E:
 	pop	ds
 	pop	bp
 	retf
-_read endp
+read endp
 
 	push	bp
 	mov	bp, sp
@@ -999,7 +999,7 @@ _read endp
 	lds	dx, [bp+8]
 	mov	cx, 4
 	mov	ah, 3Fh
-	int	21h		; DOS -	2+ - READ FROM FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
 			; BX = file handle, CX = number	of bytes to read
 			; DS:DX	-> buffer
 	jnb	short loc_27BBA
@@ -1022,7 +1022,7 @@ loc_27BBA:
 	retf
 ; Attributes: bp-based frame
 
-_write proc far
+write proc far
 
 	arg_0= word ptr	 6
 	arg_2= dword ptr  8
@@ -1035,7 +1035,7 @@ _write proc far
 	lds	dx, [bp+arg_2]
 	mov	cx, [bp+arg_6]
 	mov	ah, 40h
-	int	21h		; DOS -	2+ - WRITE TO FILE WITH	HANDLE
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
 			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
 	jnb	short loc_27BE6
 	sub	ax, ax
@@ -1044,7 +1044,7 @@ loc_27BE6::
 	pop	ds
 	pop	bp
 	retf
-_write endp
+write endp
 
 	push	bp
 	mov	bp, sp
@@ -1053,14 +1053,14 @@ _write endp
 	lds	dx, [bp+8]
 	mov	cx, [bp+0Ch]
 	mov	ah, 40h
-	int	21h		; DOS -	2+ - WRITE TO FILE WITH	HANDLE
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
 			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
 	jnb	short loc_27BE6
 	sub	ax, ax
 	dec	ax
 ; Attributes: bp-based frame
 
-_lseek proc far
+lseek proc far
 
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
@@ -1073,7 +1073,7 @@ _lseek proc far
 	mov	cx, [bp+arg_4]
 	mov	dx, [bp+arg_2]
 	mov	ax, 4200h
-	int	21h		; DOS -	2+ - MOVE FILE READ/WRITE POINTER (LSEEK)
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
 			; AL = method: offset from beginning of	file
 	jnb	short loc_27C16
 	sub	ax, ax
@@ -1082,7 +1082,7 @@ loc_27C16:
 	pop	ds
 	pop	bp
 	retf
-_lseek endp
+lseek endp
 
 	push	bp
 	mov	bp, sp
@@ -1493,7 +1493,7 @@ minimap_setSquare endp
 
 ; Attributes: bp-based frame
 
-bigpic_memcpy proc far
+bigpicmemcpy proc far
 
 	arg_0= dword ptr  6
 	skyColor= word ptr  0Ah
@@ -1516,7 +1516,7 @@ bigpic_memcpy proc far
 	pop	di
 	pop	bp
 	retf
-bigpic_memcpy endp
+bigpicmemcpy endp
 
 byte_27E86 db 0, 1, 2, 3, 4, 5,	6, 7; 0
 db 8, 9, 0Ah, 0, 0Ch, 0Dh, 0Eh,	0Fh; 8
@@ -1704,7 +1704,7 @@ sub_27F63 proc far
 	mov	es, ax
 	cmp	word ptr es:0CCh, 0
 	jz	short loc_27FD6
-	int	33h		; - MS MOUSE - RESET DRIVER AND	READ STATUS
+	int	33h		; - MS MOUSE - RESET DRIVER AND	CALL(read) STATUS
 			; Return: AX = status
 			; BX = number of buttons
 	or	ax, ax
@@ -1794,7 +1794,7 @@ loc_28077:
 	mov	byte_4EF4D, 0
 loc_2807C:
 	mov	ax, 0Bh
-	int	33h		; - MS MOUSE - READ MOTION COUNTERS
+	int	33h		; - MS MOUSE - CALL(read) MOTION COUNTERS
 			; Return: CX = number of mickeys mouse moved horizontally since	last call
 			; DX = number of mickeys mouse moved vertically
 	or	cx, cx
@@ -2255,7 +2255,7 @@ loc_2846A:
 	test	byte_4EFFC[bx],	1
 	jz	short loc_28475
 	mov	ah, 3Eh
-	int	21h		; DOS -	2+ - CLOSE A FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(close) A FILE WITH HANDLE
 			; BX = file handle
 loc_28475:
 	inc	bx
@@ -2755,7 +2755,7 @@ sub_28785 proc far
 	dec	cx
 	mov	bx, 2
 	mov	ah, 40h
-	int	21h		; DOS -	2+ - WRITE TO FILE WITH	HANDLE
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
 			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
 loc_287A9:
 	pop	di
@@ -3728,7 +3728,7 @@ loc_28FF3:
 	push	ax
 	push	word ptr sscanf_bufp+2
 	push	word ptr sscanf_bufp
-	call	_memset
+	call	memset
 	add	sp, 8
 	jmp	short loc_29028
 loc_2900E:
@@ -6014,7 +6014,7 @@ loc_2A30A:
 	xor	cx, cx
 	mov	dx, cx
 	mov	ax, 4201h
-	int	21h		; DOS -	2+ - MOVE FILE READ/WRITE POINTER (LSEEK)
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
 			; AL = method: offset from present location
 	jb	short loc_2A36D
 	test	[bp+arg_8], 2
@@ -6032,7 +6032,7 @@ loc_2A337:
 	mov	[bp+var_4], ax
 	mov	dx, cx
 	mov	ax, 4202h
-	int	21h		; DOS -	2+ - MOVE FILE READ/WRITE POINTER (LSEEK)
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
 			; AL = method: offset from end of file
 	add	ax, [bp+arg_4]
 	adc	dx, [bp+arg_6]
@@ -6040,7 +6040,7 @@ loc_2A337:
 	mov	cx, [bp+var_2]
 	mov	dx, [bp+var_4]
 	mov	ax, 4200h
-	int	21h		; DOS -	2+ - MOVE FILE READ/WRITE POINTER (LSEEK)
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
 			; AL = method: offset from beginning of	file
 	jmp	short loc_2A331
 loc_2A359:
@@ -6048,7 +6048,7 @@ loc_2A359:
 	mov	cx, [bp+arg_6]
 	mov	al, byte ptr [bp+arg_8]
 	mov	ah, 42h
-	int	21h		; DOS -	2+ - MOVE FILE READ/WRITE POINTER (LSEEK)
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
 			; AL = method:
 			; 0-from beginnig,1-from current,2-from	end
 	jb	short loc_2A36D
@@ -6085,7 +6085,7 @@ loc_2A385:
 	push	ds
 	lds	dx, [bp+arg_4]
 	mov	ah, 3Fh
-	int	21h		; DOS -	2+ - READ FROM FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
 			; BX = file handle, CX = number	of bytes to read
 			; DS:DX	-> buffer
 	pop	ds
@@ -6153,7 +6153,7 @@ loc_2A3FB:
 	jnz	short loc_2A418
 	lea	dx, [bp-1]
 	mov	ah, 3Fh
-	int	21h		; DOS -	2+ - READ FROM FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
 			; BX = file handle, CX = number	of bytes to read
 			; DS:DX	-> buffer
 	jb	short loc_2A3EA
@@ -6164,7 +6164,7 @@ loc_2A41C:
 	mov	byte ptr [bp+var_1], 0
 	lea	dx, [bp+var_1]
 	mov	ah, 3Fh
-	int	21h		; DOS -	2+ - READ FROM FILE WITH HANDLE
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
 			; BX = file handle, CX = number	of bytes to read
 			; DS:DX	-> buffer
 	jb	short loc_2A3EA
@@ -6176,7 +6176,7 @@ loc_2A433:
 	mov	cx, 0FFFFh
 	mov	dx, cx
 	mov	ax, 4201h
-	int	21h		; DOS -	2+ - MOVE FILE READ/WRITE POINTER (LSEEK)
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
 			; AL = method: offset from present location
 	mov	cx, 1
 	cmp	byte ptr [bp+var_1], 0Ah
@@ -6224,7 +6224,7 @@ loc_2A470:
 	mov	ax, 4202h
 	xor	cx, cx
 	mov	dx, cx
-	int	21h		; DOS -	2+ - MOVE FILE READ/WRITE POINTER (LSEEK)
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
 			; AL = method: offset from end of file
 	jb	short loc_2A46D
 loc_2A482:
@@ -6319,7 +6319,7 @@ sub_2A50E proc far
 	jcxz	short loc_2A52A
 	mov	bx, [bp+6]
 	mov	ah, 40h
-	int	21h		; DOS -	2+ - WRITE TO FILE WITH	HANDLE
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
 			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
 	jb	short loc_2A531
 	add	[bp-2],	ax
@@ -6375,7 +6375,7 @@ loc_2A576:
 	push	ds
 	lds	dx, [bp+8]
 	mov	ah, 40h
-	int	21h		; DOS -	2+ - WRITE TO FILE WITH	HANDLE
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
 			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
 	push	ds
 	pop	es
@@ -6978,7 +6978,7 @@ _strcpy endp
 
 ; Attributes: bp-based frame
 
-_strcmp	proc far
+strcmp	proc far
 
 	arg_0= dword ptr  6
 	arg_4= dword ptr  0Ah
@@ -7005,7 +7005,7 @@ loc_2A96A:
 	mov	di, dx
 	pop	bp
 	retf
-_strcmp	endp
+strcmp	endp
 
 align 2
 ; Attributes: bp-based frame
@@ -7144,7 +7144,7 @@ sscanf endp
 align 2
 ; Attributes: bp-based frame
 
-_memcpy	proc far
+memcpy	proc far
 arg_0= dword ptr  6
 arg_4= dword ptr  0Ah
 arg_8= word ptr	 0Eh
@@ -7205,11 +7205,11 @@ loc_2AAA0:
 	mov	dx, word ptr [bp+arg_0+2]
 	pop	bp
 	retf
-_memcpy	endp
+memcpy	endp
 
 ; Attributes: bp-based frame
 
-_memset	proc far
+memset	proc far
 _ptr= dword ptr	 6
 _c= word ptr  0Ah
 _size= word ptr	 0Ch
@@ -7253,7 +7253,7 @@ loc_2AAE8:
 	mov	dx, word ptr [bp+_ptr+2]
 	pop	bp
 	retf
-_memset	endp
+memset	endp
 
 ; START	OF FUNCTION CHUNK FOR sub_2A98A
 

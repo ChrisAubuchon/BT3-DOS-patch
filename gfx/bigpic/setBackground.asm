@@ -20,7 +20,7 @@ bigpic_setBackground	proc far
 	mov	dx, seg seg021
 	push	dx
 	push	ax
-	CALL(bigpic_memcpy, 8)
+	CALL(bigpicmemcpy, 8)
 	jmp	l_return
 
 l_inDungeon:
@@ -44,7 +44,7 @@ l_inDungeon:
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	CALL(_memcpy, 0Ah)
+	CALL(memcpy, 0Ah)
 	lfs	bx, [bp+arg_0]
 	mov	ah, fs:(graphicsBuf+13h)[bx]
 	sub	al, al
@@ -64,7 +64,7 @@ l_inDungeon:
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	CALL(_memcpy, 0Ah)
+	CALL(memcpy, 0Ah)
 	cmp	lightDistance, 4
 	jnb	short l_return
 	mov	al, lightDistance
@@ -79,7 +79,7 @@ l_inDungeon:
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	CALL(_memset, 8)
+	CALL(memset, 8)
 	pop	si
 l_return:
 	FUNC_EXIT

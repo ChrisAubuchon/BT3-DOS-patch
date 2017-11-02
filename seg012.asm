@@ -218,7 +218,7 @@ loc_23144:
 	lea	ax, [bp+var_10A]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -230,7 +230,7 @@ loc_23174:
 	lea	ax, [bp+var_10A]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -241,7 +241,7 @@ loc_23174:
 	push	ax
 	push	[bp+var_2]
 	push	[bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -253,7 +253,7 @@ loc_23174:
 	push	ax
 	push	[bp+var_2]
 	push	[bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -276,7 +276,7 @@ loc_231FC:
 	push	ax
 	push	[bp+var_2]
 	push	[bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -295,7 +295,7 @@ loc_23229:
 	push	ax
 	push	[bp+var_2]
 	push	[bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -305,7 +305,7 @@ loc_23229:
 	push	[bp+var_A]
 	push	dx
 	push	[bp+var_4]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -314,7 +314,7 @@ loc_23229:
 	push	ax
 	push	dx
 	push	[bp+var_4]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
@@ -361,7 +361,7 @@ rev_doAdvance proc far
 	add	sp, 2
 	mov	[bp+var_8], ax
 	getCharP	[bp+charNo], si
-	call	_random
+	call	random
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
 	mov	bl, gs:party.class[bx]
@@ -492,7 +492,7 @@ hunterLevelUp:
 	mov	gs:party.specAbil[bx],	cl
 	jmp	loc_23594
 mageLevelUp:
-	call	_random
+	call	random
 	and	ax, 3
 	mov	cx, ax
 	getCharP	[bp+charNo], bx
@@ -588,7 +588,7 @@ loc_235D4:
 	push	ax
 	push	[bp+arg_4]
 	push	[bp+arg_2]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+arg_2], ax
 	mov	[bp+arg_4], dx
@@ -599,7 +599,7 @@ loc_235D4:
 	push	word ptr fullAttributeString[bx]
 	push	dx
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+arg_2], ax
 	mov	[bp+arg_4], dx
@@ -768,7 +768,7 @@ loc_23771:
 	lea	ax, [bp+var_10E]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
@@ -777,7 +777,7 @@ loc_23771:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_6]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
@@ -791,7 +791,7 @@ loc_23771:
 	push	ax
 	push	word ptr [bp+var_6+2]
 	push	word ptr [bp+var_6]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
@@ -807,7 +807,7 @@ loc_23771:
 	push	ax
 	push	word ptr [bp+var_6+2]
 	push	word ptr [bp+var_6]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
@@ -816,7 +816,7 @@ loc_23771:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_6]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
@@ -3157,7 +3157,7 @@ loc_24C3E:
 	lea	ax, [bp+var_100]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -3168,7 +3168,7 @@ loc_24C3E:
 	push	word ptr nonClassSpellList[bx]
 	push	dx
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -3181,7 +3181,7 @@ loc_24C3E:
 	push	word ptr specialSpellCost[bx]
 	push	dx
 	push	[bp+var_106]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -3190,7 +3190,7 @@ loc_24C3E:
 	push	ax
 	push	dx
 	push	[bp+var_106]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx

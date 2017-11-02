@@ -57,14 +57,12 @@ loc_17206:
 	mov	[bp+var_2], ax
 
 loc_1721B:
-	sub	ax, ax
-	push	ax
 	mov	bx, bigpicIndexMultiplier
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr lowPic[bx-2]
 	push	word ptr lowPic[bx-4]
-	CALL(openFile, 6)
+	CALL(openFile)
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_1726A
@@ -89,18 +87,18 @@ loc_1726A:
 	push	cx
 	push	ax
 	push	[bp+fd]
-	CALL(_lseek, 8)
+	CALL(lseek)
 	mov	ax, 4
 	push	ax
 	PUSH_STACK_ADDRESS(var_8)
 	push	[bp+fd]
-	READ
+	CALL(read)
 	mov	ax, 0FFFFh
 	push	ax
 	push	[bp+var_6]
 	push	[bp+var_8]
 	push	[bp+fd]
-	CALL(_lseek, 8)
+	CALL(lseek)
 	mov	ax, 19712
 	push	ax
 	CALL(_mallocMaybe, 2)
@@ -111,7 +109,7 @@ loc_1726A:
 	push	dx
 	push	[bp+var_E]
 	push	[bp+fd]
-	READ
+	CALL(read)
 	push	gs:bigpicCellData_seg
 	push	gs:bigpicCellData_off
 	push	[bp+var_C]
@@ -121,7 +119,7 @@ loc_1726A:
 	push	[bp+var_E]
 	CALL(_freeMaybe, 4)
 	push	[bp+fd]
-	CLOSE
+	CALL(close)
 	push	gs:bigpicCellData_seg
 	push	gs:bigpicCellData_off
 	NEAR_CALL(bigpic_configureCells, 4)

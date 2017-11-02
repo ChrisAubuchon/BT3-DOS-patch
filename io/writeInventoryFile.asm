@@ -17,9 +17,9 @@ writeInventoryStf proc far
 	push	dx
 	push	ax
 	push	[bp+fd]
-	CALL(_write, 8)
+	CALL(write)
 	push	[bp+fd]
-	CALL(_close, 2)
+	CALL(close)
 
 	FUNC_EXIT
 	retf

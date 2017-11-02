@@ -76,7 +76,7 @@ loc_13B80:
 	PRINTSTRING
 loc_13B8D:
 	push	[bp+var_6]
-	GETKEY
+	CALL(getKey)
 	mov	[bp+inputKey], ax
 	cmp	ax, dosKeys_ESC
 	jz	l_returnZero
@@ -147,7 +147,7 @@ l_payForDrink:
 l_hereToGoLoopEntry:
 	mov	ax, 6
 	push	ax
-	GETKEY
+	CALL(getKey)
 	mov	[bp+inputKey], ax
 	jmp	short l_hereToGoSwitch
 

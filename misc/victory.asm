@@ -56,17 +56,15 @@ loc_167BC:
 	cmp	[bp+fd], 0FFFFh
 	jz	short loc_1677F
 	mov	ax, 80E8h
-	sub	dx, dx
-	push	dx
 	push	ax
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	push	[bp+fd]
-	CALL(_read, 0Ah)
+	CALL(read)
 	push	[bp+fd]
-	CLOSE
+	CALL(close)
 
 	push	[bp+var_25C]
 	push	[bp+var_25E]
@@ -188,17 +186,15 @@ loc_1694C:
 	cmp	[bp+fd], 0FFFFh
 	jz	short loc_1690F
 	mov	ax, 80E8h
-	sub	dx, dx
-	push	dx
 	push	ax
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	push	[bp+fd]
-	CALL(_read, 0Ah)
+	CALL(read)
 	push	[bp+fd]
-	CLOSE
+	CALL(close)
 	push	[bp+var_25C]
 	push	[bp+var_25E]
 	mov	ax, offset g_rosterCharacterBuffer

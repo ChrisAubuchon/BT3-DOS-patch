@@ -97,7 +97,7 @@ _sp_convertMonToSummon proc far
 	push	ax
 	push	word ptr [bp+partySlotP+2]
 	push	word ptr [bp+partySlotP]
-	CALL(_memset,8)
+	CALL(memset)
 	lea	ax, [bp+var_14]
 	push	ss
 	push	ax

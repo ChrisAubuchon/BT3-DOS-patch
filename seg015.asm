@@ -216,7 +216,7 @@ loc_2600E:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	map_strcmp
+	call	mapstrcmp
 	add	sp, 8
 	or	ax, ax
 	jz	short loc_26041
@@ -309,7 +309,7 @@ loc_26101:
 	lea	ax, [bp+var_102]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -329,7 +329,7 @@ loc_26101:
 	push	ax
 	push	dx
 	push	[bp+var_106]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -382,7 +382,7 @@ sum_newMonGroup proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memcpy
+	call	memcpy
 
 	; FIXED: Set the group size to 0. 
 	getMonP	[bp+arg_2], bx

@@ -75,7 +75,7 @@ l_next:
 	PRINTSTRING
 l_getUserInput:
 	push	[bp+var_12]
-	GETKEY
+	CALL(getKey)
 	mov	[bp+var_14], ax
 	cmp	ax, 1Bh
 	jz	short loc_22C76

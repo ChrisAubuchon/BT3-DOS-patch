@@ -220,7 +220,7 @@ loc_dunMainLoop_popRowLoop_exit::
 	mov	gs:mapDataSeg, dx
 
 loc_dunMainLoop_wander_check:
-	call	_random
+	call	random
 	test	al, 0FCh
 	jnz	short loc_dunMainLoop_battleCheck
 	call	dun_wanderingCreature
@@ -230,7 +230,7 @@ loc_dunMainLoop_battleCheck:
 	jnz	short loc_dunMainLoop_doBattle
 	cmp	byte_4EECC, 0
 	jnz	short loc_dunMainLoop_doBattle
-	call	_random
+	call	random
 	test	al, 3Fh
 	jnz	short loc_107BE
 	cmp	gs:byte_42296, 0FFh
@@ -713,7 +713,7 @@ loc_wildMainLoop_loopStart:
 	lfs	bx, [bp+var_30]
 	test	byte ptr fs:[bx+12h], 1
 	jz	short loc_wildMainLoop_mapExecute
-	call	_random
+	call	random
 	test	al, 1Fh
 	jnz	short loc_wildMainLoop_mapExecute
 	cmp	gs:songAntiMonster, 0
@@ -1100,7 +1100,7 @@ loc_11288:
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	call	bigpic_memcpy
+	call	bigpicmemcpy
 	add	sp, 8
 	mov	[bp+counter], 0
 	jmp	short loc_112AA

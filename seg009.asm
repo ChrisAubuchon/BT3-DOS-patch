@@ -13,10 +13,10 @@ rnd_2d16 proc far
 	xor	ax, ax
 	call	someStackOperation
 	push	si
-	call	_random
+	call	random
 	and	ax, 15
 	mov	si, ax
-	call	_random
+	call	random
 	and	ax, 15
 	add	ax, si
 	add	ax, 2
@@ -35,10 +35,10 @@ rnd_2d8	proc far
 	xor	ax, ax
 	call	someStackOperation
 	push	si
-	call	_random
+	call	random
 	and	ax, 7
 	mov	si, ax
-	call	_random
+	call	random
 	and	ax, 7
 	add	ax, si
 	add	ax, 2
@@ -56,7 +56,7 @@ rnd_1d8	proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	call	_random
+	call	random
 	and	ax, 7
 	inc	ax
 	jmp	short $+2
@@ -734,7 +734,7 @@ bat_moveMonGroup proc far
 	lea	ax, monHpList[bx]
 	push	dx
 	push	ax
-	call	_memcpy
+	call	memcpy
 	add	sp, 0Ah
 	mov	ax, monStruSize
 	push	ax
@@ -745,7 +745,7 @@ bat_moveMonGroup proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memset
+	call	memset
 	add	sp, 8
 	mov	ax, 40h	
 	push	ax
@@ -758,7 +758,7 @@ bat_moveMonGroup proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memset
+	call	memset
 	add	sp, 8
 	mov	sp, bp
 	pop	bp
@@ -957,7 +957,7 @@ loc_1F279:
 	lea	ax, [bp+var_100]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
@@ -972,7 +972,7 @@ loc_1F279:
 	push	ax
 	push	word ptr [bp+var_108+2]
 	push	word ptr [bp+var_108]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
@@ -981,7 +981,7 @@ loc_1F279:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
@@ -1022,7 +1022,7 @@ loc_1F319:
 	push	ax
 	push	word ptr [bp+var_108+2]
 	push	word ptr [bp+var_108]
-	call	_itoa
+	call	itoa
 	add	sp, 0Ah
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
@@ -1031,7 +1031,7 @@ loc_1F319:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
@@ -1061,7 +1061,7 @@ loc_1F3B0:
 	jnz	short loc_1F3C8
 	delayNoTable	1
 loc_1F3C8:
-	call	_random
+	call	random
 	sub	ah, ah
 	cmp	ax, 224
 	jl	short loc_1F3E9
@@ -1092,7 +1092,7 @@ loc_1F3E9:
 	add	sp, 4
 	mov	[bp+var_10A], ax
 loc_1F43A:
-	call	_random
+	call	random
 	test	al, 7
 	jnz	short loc_1F448
 	mov	ax, 80h
@@ -1140,7 +1140,7 @@ loc_1F4A5:
 	push	ax
 	push	word ptr [bp+var_108+2]
 	push	word ptr [bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
@@ -1149,7 +1149,7 @@ loc_1F4A5:
 	push	ax
 	push	dx
 	push	word ptr [bp+var_108]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+var_108], ax
 	mov	word ptr [bp+var_108+2], dx
@@ -1290,7 +1290,7 @@ loc_1F65E:
 	getCharP	[bp+var_106], si
 	cmp	gs:party.class[si], class_rogue
 	jnz	short loc_1F67F
-	call	_random
+	call	random
 	cmp	gs:(party.specAbil+1)[si], al
 	jnb	short loc_1F690
 loc_1F67F:
@@ -1308,7 +1308,7 @@ loc_1F690:
 	lea	ax, [bp+var_100]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_104], ax
 	mov	[bp+var_102], dx
@@ -1322,7 +1322,7 @@ loc_1F690:
 	push	word ptr trapName[bx]
 	push	dx
 	push	[bp+var_104]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_104], ax
 	mov	[bp+var_102], dx
@@ -1362,7 +1362,7 @@ chest_setOffTrap proc far
 	lea	ax, [bp+var_100]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -1376,7 +1376,7 @@ chest_setOffTrap proc far
 	push	word ptr trapName[bx]
 	push	dx
 	push	[bp+var_106]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -1514,7 +1514,7 @@ loc_1F8D0:
 	sub	ax, ax
 	jmp	short loc_1F920
 loc_1F8E4:
-	call	_random
+	call	random
 	test	al, 80h
 	jz	short loc_1F8F9
 	push	[bp+var_2]
@@ -1596,7 +1596,7 @@ loc_1F967:
 	getCharP	[bp+var_2], si
 	cmp	gs:party.class[si], class_rogue
 	jnz	short loc_1F9F4
-	call	_random
+	call	random
 	cmp	gs:party.specAbil[si],	al
 	jb	short loc_1F9F4
 	mov	ax, offset aYouDisarmedIt
@@ -1815,7 +1815,7 @@ bat_doChest proc far
 	push	ax
 	call	setTitle
 	add	sp, 4
-	call	_random
+	call	random
 	and	ax, 3
 	mov	cl, levelNoMaybe
 	sub	ch, ch

@@ -36,9 +36,9 @@ loc_135E6:
 	push	dx
 	push	ax
 	push	[bp+fileDescriptor]
-	CALL(_read, 8)
+	CALL(read)
 	push	[bp+fileDescriptor]
-	CALL(_close, 2)
+	CALL(close)
 	NEAR_CALL(roster_countCharacters)
 	mov	[bp+characterCount], ax
 	mov	[bp+loopCounter], ax
@@ -79,7 +79,7 @@ loc_13667:
 	push	dx
 	push	ax
 	push	[bp+fileDescriptor]
-	CALL(_read, 8)
+	CALL(read)
 	NEAR_CALL(roster_countParties)
 	mov	[bp+loopCounter], ax
 	jmp	short loc_13699
@@ -96,7 +96,7 @@ loc_13699:
 	jmp	short loc_13696
 loc_136AF:
 	push	[bp+fileDescriptor]
-	CALL(_close, 2)
+	CALL(close)
 	mov	ax, [bp+characterCount]
 	jmp	short $+2
 	pop	si

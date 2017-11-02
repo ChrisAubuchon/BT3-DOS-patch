@@ -60,7 +60,7 @@ l_asdf:
 	push	ax
 	CALL(huf_flate, 6)
 	push	[bp+fd]
-	CLOSE
+	CALL(close)
 
 	FUNC_EXIT
 	retf

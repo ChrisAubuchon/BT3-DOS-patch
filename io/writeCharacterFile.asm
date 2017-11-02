@@ -19,9 +19,9 @@ writeCharacterFile proc far
 	push	dx
 	push	ax
 	push	[bp+var_2]
-	CALL(_write, 8)
+	CALL(write)
 	push	[bp+var_2]
-	CALL(_close, 2)
+	CALL(close)
 	mov	sp, bp
 	pop	bp
 	retf

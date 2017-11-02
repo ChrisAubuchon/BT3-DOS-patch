@@ -9,7 +9,7 @@ loc_loop_start:
 
 	mov	ax, 0Ch
 	push	ax
-	GETKEY
+	CALL(getKey)
 
 	cmp	ax, 1Bh
 	jz	loc_return_ff

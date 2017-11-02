@@ -13,7 +13,7 @@ dunsq_battleCheck proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	call	_random
+	call	random
 	and	ax, 80h
 	mov	[bp+var_2], ax
 	or	ax, ax
@@ -60,7 +60,7 @@ dunsq_doTrap proc far
 	jnz	short loc_24DCB
 	jmp	loc_24EB3
 loc_24DCB:
-	call	_random
+	call	random
 	and	ax, 3
 	mov	[bp+var_10A], ax
 	cmp	ax, 3
@@ -80,7 +80,7 @@ loc_24DDE:
 	lea	ax, [bp+var_100]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -94,7 +94,7 @@ loc_24DDE:
 	push	word ptr trapTypeString[bx]
 	push	dx
 	push	[bp+var_106]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
@@ -206,7 +206,7 @@ trap_levitationCheck proc far
 	mov	ax, 1
 	jmp	short loc_24FA9
 loc_24F97:
-	call	_random
+	call	random
 	and	al, 3
 	mov	cx, ax
 	cmp	cl, 1
@@ -281,7 +281,7 @@ loc_2501F:
 loc_2503D:
 	jmp	short loc_2501C
 loc_2503F:
-	call	_random
+	call	random
 	and	ax, 3
 	mov	dirFacing, ax
 	sub	ax, ax
@@ -480,7 +480,7 @@ loc_251A3:
 loc_251A6:
 	cmp	[bp+var_4], 7
 	jge	short loc_251F9
-	call	_random
+	call	random
 	and	ax, 3
 	mov	cl, levelNoMaybe
 	sub	ch, ch
@@ -549,7 +549,7 @@ loc_2524A:
 	; FIXED - Was jz. This activated the square when there were no monsters
 	; in the party.
 	jnz	short loc_25289
-	call	_random
+	call	random
 	test	al, 3
 	jnz	short loc_25289
 	getCharP	[bp+var_2], bx
@@ -579,7 +579,7 @@ dunsq_doStuck proc far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	call	_random
+	call	random
 	and	al, 3
 	mov	gs:stuckFlag, al
 	sub	ax, ax

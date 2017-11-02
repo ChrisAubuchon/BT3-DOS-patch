@@ -17,9 +17,9 @@ readInventoryStf proc far
 	push	dx
 	push	ax
 	push	[bp+fd]
-	CALL(_read, 8)
+	CALL(read)
 	push	[bp+fd]
-	CALL(_close, 2)
+	CALL(close)
 
 	FUNC_EXIT
 	retf

@@ -342,11 +342,27 @@ include(`song/strtnonc.asm')
 include(`song/endnonc.asm')
 
 seg011 ends
+
 include seg012.asm
 include seg013.asm
-include seg014.asm
+
+; Segment type: Pure code
+seg014 segment byte public 'CODE' use16
+        assume cs:seg014
+;org 8
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+include(`building/bardsHall/enter.asm')
+include(`building/bardsHall/listen.asm')
+include(`building/bardsHall/printLyrics.asm')
+
+include(`seg014.asm')
+
+seg014 ends
+
 include seg015.asm
-include seg016.asm
+include(`seg016.asm')
+
 include seg017.asm
 include seg018.asm
 include seg019.asm

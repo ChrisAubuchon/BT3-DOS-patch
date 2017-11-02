@@ -53,7 +53,7 @@ l_mainIoLoopEntry:
 	mov	ax, [bp+mouseBitmask]
 	or	ah, 20h
 	push	ax
-	GETKEY
+	CALL(getKey)
 	mov	[bp+currentKey], ax
 
 	cmp	ax, '0'			; Print character if 1-7

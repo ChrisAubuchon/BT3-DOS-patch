@@ -26,7 +26,7 @@ restoreGame proc far
 	push	dx
 	push	ax
 	push	[bp+fd]
-	READ
+	CALL(read)
 
 	mov	ax, offset byte_4EECC
 	mov	cx, offset currentLocationMaybe
@@ -38,10 +38,10 @@ restoreGame proc far
 	push	dx
 	push	ax
 	push	[bp+fd]
-	READ
+	CALL(read)
 
 	push	[bp+fd]
-	CLOSE
+	CALL(close)
 
 	mov	[bp+var_4], 0
 

@@ -15,7 +15,7 @@ loc_14D40:
 	push	ax
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	CALL(_open)
+	CALL(open)
 	add	sp, 6
 	mov	[bp+var_2], ax
 	inc	ax
@@ -27,7 +27,6 @@ loc_14D40:
 	PRINTSTRING
 	PUSH_OFFSET(s_diskTwo)
 	PRINTSTRING
-	add	sp, 4
 	IOWAIT
 loc_14D81:
 	cmp	[bp+var_2], 0FFFFh

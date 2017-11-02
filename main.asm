@@ -12,12 +12,12 @@ _main proc far
 
 	mov	ax, 55h
 	push	ax
-	CALL(bigpic_initBuffers, 2)
+	CALL(bigpic_initBuffers2)
 
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_thiefCfg)
-	CALL(openFile, 6)
+	CALL(openFile)
 	mov	[bp+var_4], ax
 
 	inc	ax
@@ -35,9 +35,9 @@ loc_10039:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	READ
+	call(read)
 	push	[bp+var_4]
-	CLOSE
+	CALL(close)
 	mov	gs, seg027_x
 	push	gs:word_4243E
 	CALL(disk1Swap)
@@ -57,7 +57,7 @@ loc_1007E:
 	mov	ax, 2
 	push	ax
 	PUSH_OFFSET(s_thiefCfg)
-	CALL(openFile, 6)
+	CALL(openFile)
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_100C5
@@ -73,9 +73,9 @@ loc_100C5:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	WRITE
+	CALL(write)
 	push	[bp+var_4]
-	CLOSE
+	CALL(close)
 loc_100E7:
 	sub	ax, ax
 	push	ax
@@ -101,7 +101,7 @@ loc_1011C:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	READ
+	call(read)
 	mov	ax, 1068h
 	push	ax
 	mov	ax, offset vid_setMode
@@ -109,9 +109,9 @@ loc_1011C:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	READ
+	call(read)
 	push	[bp+var_4]
-	CLOSE
+	CALL(close)
 	mov	ax, 1
 	push	ax
 	call	far ptr	vid_setMode
@@ -133,17 +133,15 @@ loc_1011C:
 	add	sp, 2
 loc_1018E:
 	mov	ax, 33000
-	sub	dx, dx
-	push	dx
 	push	ax
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(_read, 0Ah)
+	CALL(read)
 	push	[bp+var_4]
-	CLOSE
+	CALL(close)
 	mov	[bp+var_6], 0
 	jmp	short loc_101BD
 loc_101BA:
@@ -199,17 +197,15 @@ loc_101E6:
 	NEAR_CALL(cleanupAndExit)
 loc_10266:
 	mov	ax, 33000
-	sub	dx, dx
-	push	dx
 	push	ax
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(_read, 0Ah)
+	CALL(read)
 	push	[bp+var_4]
-	CLOSE
+	CALL(close)
 	push	gs:word_42564
 	push	gs:word_42562
 	mov	ax, offset g_rosterCharacterBuffer
@@ -250,14 +246,14 @@ loc_102FB:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 	mov	ax, 2
 	push	ax
 	lea	ax, [bp+var_2]
 	push	ss
 	push	ax
 	push	[bp+var_4]
-	READ
+	call(read)
 	mov	ax, 0FFFFh
 	push	ax
 	mov	ax, [bp+var_2]
@@ -265,7 +261,7 @@ loc_102FB:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 	mov	ax, 9C4h
 	push	ax
 	mov	ax, 0
@@ -273,7 +269,7 @@ loc_102FB:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	READ
+	call(read)
 	mov	[bp+var_6], 0
 	jmp	short loc_10366
 loc_10363:
@@ -290,14 +286,14 @@ loc_10366:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 	mov	ax, 2
 	push	ax
 	lea	ax, [bp+var_2]
 	push	ss
 	push	ax
 	push	[bp+var_4]
-	READ
+	call(read)
 	mov	ax, 0FFFFh
 	push	ax
 	mov	ax, [bp+var_2]
@@ -305,7 +301,7 @@ loc_10366:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(_lseek, 8)
+	CALL(lseek, 8)
 	mov	ax, 3200
 	push	ax
 	mov	bx, [bp+var_6]
@@ -314,11 +310,11 @@ loc_10366:
 	push	gs:musicBufs._segment[bx]
 	push	word ptr gs:musicBufs._offset[bx]
 	push	[bp+var_4]
-	READ
+	call(read)
 	jmp	short loc_10363
 loc_103D4:
 	push	[bp+var_4]
-	CLOSE
+	CALL(close)
 	CALL(sub_27F63)
 	mov	ax, 7
 	push	ax
@@ -342,17 +338,15 @@ loc_103D4:
 	NEAR_CALL(cleanupAndExit)
 loc_1043E:
 	mov	ax, 80E8h
-	sub	dx, dx
-	push	dx
 	push	ax
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(_read, 0Ah)
+	CALL(read)
 	push	[bp+var_4]
-	CLOSE
+	CALL(close)
 	push	gs:word_42564
 	push	gs:word_42562
 	mov	ax, offset g_rosterCharacterBuffer

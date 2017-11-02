@@ -30,7 +30,7 @@ l_tavernMainLoop:
 	PRINTSTRING(true)
 	mov	ax, 70h	
 	push	ax
-	GETKEY
+	CALL(getKey)
 	mov	[bp+var_2], ax
 	jmp	short l_optionSwitch
 

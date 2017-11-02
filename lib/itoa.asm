@@ -1,6 +1,6 @@
 ; Attributes: bp-based frame
 
-_itoa proc far
+itoa proc far
 
 	var_4= word ptr	-4
 	var_2= byte ptr	-2
@@ -120,5 +120,5 @@ l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-_itoa endp
+itoa endp
 

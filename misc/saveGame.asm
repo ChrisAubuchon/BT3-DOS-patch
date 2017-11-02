@@ -24,7 +24,7 @@ loc_11B3E:
 	mov	ax, 2
 	push	ax
 	PUSH_OFFSET(s_gameSav)
-	CALL(_open, 6)
+	CALL(open)
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short l_doSave
@@ -46,7 +46,7 @@ l_doSave:
 	push	dx
 	push	ax
 	push	[bp+fd]
-	WRITE
+	CALL(write)
 
 	mov	ax, offset byte_4EECC
 	mov	cx, offset currentLocationMaybe
@@ -58,10 +58,10 @@ l_doSave:
 	push	dx
 	push	ax
 	push	[bp+fd]
-	WRITE
+	CALL(write)
 
 	push	[bp+fd]
-	CALL(_close, 2)
+	CALL(close)
 
 	PUSH_OFFSET(s_gameHasBeenSaved)
 	PRINTSTRING(true)

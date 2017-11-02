@@ -9,7 +9,7 @@ camp_saveAndExit proc far
 	NEAR_CALL(roster_writeParty)
 	sub	ax, ax
 	push	ax
-	GETKEY
+	CALL(getKey)
 	cmp	ax, 0Dh
 	jnz	short loc_13412
 	mov	buildingRvalMaybe, 0FFh

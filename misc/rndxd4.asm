@@ -10,7 +10,7 @@ rnd_Xd4	proc far
 
 	mov	[bp+rval], 0
 l_loopEnter:
-	CALL(_random)
+	CALL(random)
 	and	ax, 3
 	inc	ax
 	add	[bp+rval], ax

@@ -13,7 +13,7 @@ l_loopEnter:
 	CHARINDEX(ax, STACKVAR(spellCaster), bx)
 	cmp	gs:party.hostileFlag[bx], 0
 	jz	short l_loopNext
-	CALL(_random)
+	CALL(random)
 	and	al, 1
 	mov	cx, ax
 	CHARINDEX(ax, STACKVAR(spellCaster), bx)

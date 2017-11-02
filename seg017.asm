@@ -142,7 +142,7 @@ loc_2649C:
 	push	ax
 	push	[bp+var_24]
 	push	[bp+var_26]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
@@ -152,7 +152,7 @@ loc_264E1:
 	push	ax
 	push	[bp+var_24]
 	push	[bp+var_26]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
@@ -161,7 +161,7 @@ loc_264E1:
 	lea	ax, [bp+var_1B4]
 	push	ss
 	push	ax
-	call	_open
+	call	open
 	add	sp, 6
 	mov	[bp+var_182], ax
 	inc	ax
@@ -200,10 +200,10 @@ loc_26572:
 	push	[bp+var_1C4]
 	push	[bp+var_1C6]
 	push	[bp+var_182]
-	call	_read
+	call	read
 	add	sp, 8
 	push	[bp+var_182]
-	call	_close
+	call	close
 	add	sp, 2
 	lea	ax, [bp+var_1E]
 	push	ss
@@ -211,7 +211,7 @@ loc_26572:
 	lea	ax, [bp+var_1B4]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
@@ -220,7 +220,7 @@ loc_26572:
 	push	ax
 	push	dx
 	push	[bp+var_26]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_26], ax
 	mov	[bp+var_24], dx
@@ -247,7 +247,7 @@ loc_265FB:
 	lea	ax, [bp+var_1B4]
 	push	ss
 	push	ax
-	call	_open
+	call	open
 	add	sp, 6
 	mov	[bp+var_182], ax
 	inc	ax
@@ -270,7 +270,7 @@ loc_2663C:
 	push	[bp+var_17E]
 	push	[bp+var_180]
 	push	[bp+var_182]
-	call	_read
+	call	read
 	add	sp, 8
 loc_26654:
 	mov	[bp+var_1C2], 0
@@ -451,7 +451,7 @@ loc_267E9:
 	push	ax
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	_strcmp
+	call	strcmp
 	add	sp, 8
 	or	ax, ax
 	jnz	short loc_26814
@@ -570,7 +570,7 @@ loc_268AD:
 	push	ax
 	push	[bp+var_22]
 	push	[bp+var_24]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_24], ax
 	mov	[bp+var_22], dx
@@ -582,7 +582,7 @@ loc_268F2:
 	push	word ptr oldCharFilters[bx]
 	push	[bp+var_22]
 	push	[bp+var_24]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_24], ax
 	mov	[bp+var_22], dx
@@ -628,7 +628,7 @@ loc_2696B:
 	lea	ax, [bp+var_1AE]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_24], ax
 	mov	[bp+var_22], dx
@@ -637,7 +637,7 @@ loc_2696B:
 	push	ax
 	push	dx
 	push	[bp+var_24]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_24], ax
 	mov	[bp+var_22], dx
@@ -646,7 +646,7 @@ loc_2696B:
 	lea	ax, [bp+var_1AE]
 	push	ss
 	push	ax
-	call	_open
+	call	open
 	add	sp, 6
 	mov	[bp+var_17C], ax
 	inc	ax
@@ -656,7 +656,7 @@ loc_2696B:
 	push	word ptr [bp+var_1F0+2]
 	push	word ptr [bp+var_1F0]
 	push	[bp+var_17C]
-	call	_read
+	call	read
 	add	sp, 8
 	lfs	bx, [bp+var_1F0]
 	cmp	byte ptr fs:[bx+10h], 1
@@ -672,7 +672,7 @@ loc_2696B:
 	add	word ptr [bp+var_1F0], 96h 
 loc_269F5:
 	push	[bp+var_17C]
-	call	_close
+	call	close
 	add	sp, 2
 loc_26A01:
 	call	sub_27C4A
@@ -806,7 +806,7 @@ importBIIChar proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memset
+	call	memset
 	add	sp, 8
 	mov	[bp+var_4], 0
 	jmp	short loc_26B16
@@ -1033,7 +1033,7 @@ importBICharacter proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	_memset
+	call	memset
 	add	sp, 8
 	mov	[bp+var_4], 0
 	jmp	short loc_26E03

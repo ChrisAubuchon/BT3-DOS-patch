@@ -1118,7 +1118,7 @@ loc_19B4A:
 	lea	ax, [bp+var_106]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -1164,7 +1164,7 @@ loc_19BB0:
 	lea	ax, [bp+var_106]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -1173,7 +1173,7 @@ loc_19BB0:
 	push	ax
 	push	dx
 	push	[bp+var_10C]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -1206,7 +1206,7 @@ loc_19C46:
 	lea	ax, [bp+var_106]
 	push	ss
 	push	ax
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -1217,7 +1217,7 @@ loc_19C46:
 	push	ax
 	push	[bp+var_10A]
 	push	[bp+var_10C]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -1226,7 +1226,7 @@ loc_19C46:
 	push	ax
 	push	dx
 	push	[bp+var_10C]
-	call	_strcat
+	call	strcat
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -2121,7 +2121,7 @@ loc_1A3CF:
 mfunc_getStrFromUser endp
 
 ; Attributes: bp-based frame
-map_strcmp proc	far
+mapstrcmp proc	far
 
 	arg_0= dword ptr  6
 	arg_4= dword ptr  0Ah
@@ -2153,7 +2153,7 @@ loc_1A40D:
 	mov	sp, bp
 	pop	bp
 	retf
-map_strcmp endp
+mapstrcmp endp
 
 ; Attributes: bp-based frame
 
@@ -2173,7 +2173,7 @@ mfunc_ifStrEq proc far
 	push	word ptr [bp+arg_0+2]
 	push	word ptr [bp+arg_0]
 	push	cs
-	call	near ptr map_strcmp
+	call	near ptr mapstrcmp
 	add	sp, 8
 	mov	[bp+var_2], ax
 loc_1A436:
@@ -2748,7 +2748,7 @@ loc_1A8DA:
 	push	word ptr [bp+arg_0+2]
 	push	word ptr [bp+arg_0]
 	push	cs
-	call	near ptr map_strcmp
+	call	near ptr mapstrcmp
 	add	sp, 8
 	or	ax, ax
 	jz	short loc_1A915

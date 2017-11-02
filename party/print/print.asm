@@ -55,7 +55,7 @@ l_printAc:
 	push	dx
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(_itoa, 10)
+	NEAR_CALL(itoa)
 	mov	word ptr [bp+partyLineP], ax
 	mov	word ptr [bp+partyLineP+2],	dx
 	lfs	bx, [bp+partyLineP]

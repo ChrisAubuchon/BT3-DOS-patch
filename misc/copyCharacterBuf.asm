@@ -17,7 +17,7 @@ copyCharacterBuf proc far
 	push	[bp+arg_0]
 	push	[bp+arg_6]
 	push	[bp+arg_4]
-	CALL(_memcpy, 0Ah)
+	CALL(memcpy, 0Ah)
 	mov	sp, bp
 	pop	bp
 	retf

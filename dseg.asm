@@ -3724,12 +3724,12 @@ aInTheLandOfNoT	db 'In the land of no time,',0Ah
 		db 'The Clock within burns like a flame,',0
 aLockingEachInH	db 'Locking each in his own crime:',0Ah
 		db 'One can only leave when he came.',0
-aWelcomeAndBeHa	db 'Welcome and be happy o',27h,' weary travelers! Step to the stage and listen to my tales.',0Ah,0Ah
+s_bardHallGreeting	db 'Welcome and be happy o',27h,' weary travelers! Step to the stage and listen to my tales.',0Ah,0Ah
 		db 'You can:',0Ah,0Ah
 		db 'Listen to the bard',0Ah
 		db 'Exit the hall',0
 align 2
-aTheseAreTheSon	db 'These are the songs I know...',0Ah,0Ah
+s_songTitleList	db 'These are the songs I know...',0Ah,0Ah
 		db '@Dragon Song',0Ah
 		db '@Flower Ballad',0Ah
 		db '@Kiel',27h,'s Overture',0Ah
@@ -3758,8 +3758,8 @@ aTheBardSmilesA	db 'The bard smiles and says, "That one will cost thee for your 
 aItWillCostYou	db '"It will cost you ',0
 align 2
 aTheBardPlaysTh	db 'The bard plays the song and you memorize the lines.',0
-aBardSHall	db 'Bard',27h,'s Hall',0
-word_4BDC4	dw 8, 5, 0, 3, 2, 0    ; 0
+s_bardsHall	db 'Bard',27h,'s Hall',0
+bardSongLineCount	dw 8, 5, 0, 3, 2, 0    ; 0
 bardSongLyrics	dd off_4BC98	       ; 0
 		dd off_4BCB8		; 1
 		dd offset word_42670	; 2
@@ -4617,7 +4617,7 @@ off_4C998	dd aCieraBrannia, aCelariaBree; 0
 off_4C9D8	dd aBrilhasti, s_urmech  ; 0
 		dd aTslotha, aCyanis	; 2
 		dd aTheOldMan, aHawkslayer; 4
-		dd s_scrapwood, aBardSHall; 6
+		dd s_scrapwood, s_bardsHall; 6
 		dd s_staggerInn, s_hicHaven; 8
 		dd aVioletMountain, aCrystalPalace; 10
 		dd aCatacombs, aTunnels	; 12
