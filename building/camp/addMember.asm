@@ -11,7 +11,7 @@ camp_addMember proc far
 	push	si
 
 	CALL(text_clear)
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	or	ax, ax
 	jz	l_noSavedCharacters
 	mov	[bp+var_15A], 0
@@ -68,7 +68,7 @@ l_ioLoopEnter:
 	push	[bp+var_15C]
 	PUSH_STACK_ADDRESS(savedList)
 	PUSH_OFFSET(s_whoJoins)
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 	mov	[bp+var_15A], ax
 	or	ax, ax
 	jl	l_return
@@ -76,7 +76,7 @@ l_ioLoopEnter:
 	cmp	[bp+var_15A], ax
 	jge	short l_addCharacter
 	push	[bp+var_15A]
-	NEAR_CALL(camp_insertParty, 2)
+	CALL(camp_insertParty, near)
 	jmp	l_return
 l_addCharacter:
 	mov	si, [bp+var_15A]
@@ -84,7 +84,7 @@ l_addCharacter:
 	shl	si, 1
 	push	word ptr [bp+si+savedList+2]
 	push	word ptr [bp+si+savedList]
-	NEAR_CALL(party_nameExists, 4)
+	CALL(party_nameExists, near)
 	or	ax, ax
 	jl	short l_loopContinue
 	mov	si, [bp+var_15A]
@@ -103,7 +103,7 @@ l_loopContinue:
 l_loopComparison:
 	cmp	[bp+var_158], 0
 	jnz	l_ioLoopEnter
-	NEAR_CALL(party_findEmptySlot)
+	CALL(party_findEmptySlot, near)
 	mov	[bp+var_158], ax
 	cmp	ax, 7
 	jge	short l_shortReturnLabel
@@ -120,8 +120,8 @@ l_loopComparison:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf, 8)
-	NEAR_CALL(party_addCharacter)
+	CALL(copyCharacterBuf, near)
+	CALL(party_addCharacter, near)
 	mov	byte ptr g_printPartyFlag,	0
 l_shortReturnLabel:
 	jmp	short l_return

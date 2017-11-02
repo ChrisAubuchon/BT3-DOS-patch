@@ -10,7 +10,7 @@ icon_deactivate proc far
 	sub	ah, ah
 	push	ax
 	push	bx
-	NEAR_CALL(icon_draw, 4)
+	CALL(icon_draw, near)
 	mov	bx, [bp+iconIndex]
 	mov	lightDuration[bx], 0
 	mov	ax, [bp+iconIndex]

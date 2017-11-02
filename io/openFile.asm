@@ -16,7 +16,6 @@ loc_14D40:
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	CALL(open)
-	add	sp, 6
 	mov	[bp+var_2], ax
 	inc	ax
 	jnz	short loc_14D81

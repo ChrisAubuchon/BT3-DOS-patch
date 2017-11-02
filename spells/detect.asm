@@ -14,7 +14,7 @@ sp_areaEnchant proc far
 	mov	detectType, al
 	mov	ax, icon_areaEnchant
 	push	ax
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 	mov	sp, bp
 	pop	bp
 	retf

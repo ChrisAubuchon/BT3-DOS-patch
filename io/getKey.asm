@@ -10,7 +10,7 @@ getKey proc far
 	CHKSTK(2)
 
 	mov	spell_mouseClicked, 0
-	NEAR_CALL(sub_1766A)
+	CALL(sub_1766A, near)
 l_loopEntry:
 	CALL(checkMouse)
 	cmp	mouse_moved, 0
@@ -18,12 +18,12 @@ l_loopEntry:
 	call	far ptr	sub_3E974
 
 	push	[bp+arg_0]
-	NEAR_CALL(mouse_updateIcon, 2)
-	NEAR_CALL(sub_1766A)
+	CALL(mouse_updateIcon, near)
+	CALL(sub_1766A, near)
 
 l_skipMouseUpdate:
 	push	[bp+arg_0]
-	NEAR_CALL(mouse_getClick, 2)
+	CALL(mouse_getClick, near)
 	mov	[bp+inputKey], ax
 	or	ax, ax
 	jz	short l_skipMouseClick
@@ -45,14 +45,14 @@ l_skipMouseClick:
 	mov	al, byte ptr [bp+inputKey]
 	sub	ah, ah
 	push	ax
-	CALL(_str_capitalize, 2)
+	CALL(_str_capitalize)
 	jmp	short l_return
 loc_14EB9:
 	mov	ax, [bp+inputKey]
 	jmp	short l_return
 loc_14EBE:
-	NEAR_CALL(doRealtimeEvents)
-	NEAR_CALL(party_print)
+	CALL(doRealtimeEvents, near)
+	CALL(party_print, near)
 	jmp	short l_loopEntry
 
 l_return:

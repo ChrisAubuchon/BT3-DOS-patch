@@ -13,7 +13,6 @@ sp_spellbind proc far
 	sub	ax, ax
 	push	ax
 	push	[bp+spellCaster]
-	NEAR_CALL(savingThrowCheck,4)
 	or	ax, ax
 	jz	l_printNoEffect
 
@@ -57,13 +56,13 @@ l_monTarget:
 	push	dx
 	push	ax
 	push	[bp+partySlotNumber]
-	NEAR_CALL(_sp_convertMonToSummon,6)
+	CALL(_sp_convertMonToSummon, near)
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_return
 l_printNoEffect:
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	NEAR_CALL(printNoEffect,4)
+	CALL(printNoEffect, near)
 l_return:
 	pop	si
 	FUNC_EXIT
@@ -103,7 +102,7 @@ _sp_convertMonToSummon proc far
 	push	ax
 	push	word ptr [bp+monBufferP+2]
 	push	word ptr [bp+monBufferP]
-	CALL(unmaskString,8)
+	CALL(unmaskString)
 	sub	ax, ax
 	push	ax
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
@@ -232,7 +231,7 @@ l_attackLoopExit:
 	mov	al, fs:[bx+mon_t.hpDice]
 	sub	ah, ah
 	push	ax
-	CALL(dice_doYDX, 2)
+	CALL(dice_doYDX)
 	lfs	bx, [bp+monBufferP]
 	mov	cx, fs:[bx+mon_t.hpBase]
 	add	cx, ax

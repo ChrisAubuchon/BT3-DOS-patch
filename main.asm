@@ -12,20 +12,19 @@ _main proc far
 
 	mov	ax, 55h
 	push	ax
-	CALL(bigpic_initBuffers2)
+	CALL(bigpic_initBuffers)
 
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_thiefCfg)
-	CALL(openFile)
+	CALL(open)
 	mov	[bp+var_4], ax
 
 	inc	ax
 	jnz	short loc_10039
 	mov	ax, 4
 	push	ax
-	call	far ptr	sub_28424		; Some kind of cleanup and exit
-	add	sp, 2
+	CALL(sub_28424, far)
 
 loc_10039:
 	mov	ax, 6
@@ -57,7 +56,7 @@ loc_1007E:
 	mov	ax, 2
 	push	ax
 	PUSH_OFFSET(s_thiefCfg)
-	CALL(openFile)
+	CALL(open)
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_100C5
@@ -85,7 +84,7 @@ loc_100E7:
 	shl	bx, 1
 	push	word ptr (graphicsDrivers+2)[bx]
 	push	word ptr graphicsDrivers[bx]
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_1011C
@@ -123,7 +122,7 @@ loc_1011C:
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_firstTitle)
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_1018E
@@ -151,7 +150,7 @@ loc_101BD:
 	jge	short loc_101E6
 	mov	ax, 3200
 	push	ax
-	CALL(_mallocMaybe, 2)
+	CALL(_mallocMaybe)
 	mov	bx, [bp+var_6]
 	shl	bx, 1
 	shl	bx, 1
@@ -160,10 +159,8 @@ loc_101BD:
 	jmp	short loc_101BA
 loc_101E6:
 	mov	ax, 33000
-	sub	dx, dx
-	push	dx
 	push	ax
-	CALL(_mallocMaybe, 4)
+	CALL(_mallocMaybe)
 	mov	gs:word_42562, ax
 	mov	gs:word_42564, dx
 	push	dx
@@ -172,7 +169,7 @@ loc_101E6:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp, 8)
+	CALL(d3comp)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -187,14 +184,14 @@ loc_101E6:
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_titleScreen)
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_10266
 	push	gs:word_42564
 	push	gs:word_42562
-	CALL(_freeMaybe, 4)
-	NEAR_CALL(cleanupAndExit)
+	CALL(_freeMaybe)
+	CALL(cleanupAndExit, near)
 loc_10266:
 	mov	ax, 33000
 	push	ax
@@ -212,7 +209,7 @@ loc_10266:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp, 8)
+	CALL(d3comp)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -227,14 +224,14 @@ loc_10266:
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_musicAll)
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_102FB
 	push	gs:word_42564
 	push	gs:word_42562
-	CALL(_freeMaybe, 4)
-	NEAR_CALL(cleanupAndExit)
+	CALL(_freeMaybe)
+	CALL(cleanupAndExit, near)
 loc_102FB:
 	mov	ax, 0FFFFh
 	push	ax
@@ -246,7 +243,7 @@ loc_102FB:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(lseek, 8)
+	CALL(lseek)
 	mov	ax, 2
 	push	ax
 	lea	ax, [bp+var_2]
@@ -261,7 +258,7 @@ loc_102FB:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(lseek, 8)
+	CALL(lseek)
 	mov	ax, 9C4h
 	push	ax
 	mov	ax, 0
@@ -286,7 +283,7 @@ loc_10366:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(lseek, 8)
+	CALL(lseek)
 	mov	ax, 2
 	push	ax
 	lea	ax, [bp+var_2]
@@ -301,7 +298,7 @@ loc_10366:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	CALL(lseek, 8)
+	CALL(lseek)
 	mov	ax, 3200
 	push	ax
 	mov	bx, [bp+var_6]
@@ -320,22 +317,22 @@ loc_103D4:
 	push	ax
 	mov	ax, 0FFh
 	push	ax
-	CALL(song_playSong, 4)
+	CALL(song_playSong)
 	CALL(icons_read)
 	call	far ptr j_nullsub_3
 	PUSH_OFFSET(s_titleText)
-	CALL(intro_scrollText, 4)
+	CALL(intro_scrollText)
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_bardscr)
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_1043E
 	push	gs:word_42564
 	push	gs:word_42562
-	CALL(_freeMaybe, 4)
-	NEAR_CALL(cleanupAndExit)
+	CALL(_freeMaybe)
+	CALL(cleanupAndExit, near)
 loc_1043E:
 	mov	ax, 80E8h
 	push	ax
@@ -353,7 +350,7 @@ loc_1043E:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp, 8)
+	CALL(d3comp)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -367,17 +364,17 @@ loc_1043E:
 	add	sp, 8
 	push	gs:word_42564
 	push	gs:word_42562
-	CALL(_freeMaybe, 4)
+	CALL(_freeMaybe)
 	mov	ax, 4D0Ah
 	push	ax
-	CALL(_mallocMaybe, 2)
+	CALL(_mallocMaybe)
 	mov	gs:bigpicCellData_off, ax
 	mov	gs:bigpicCellData_seg, dx
-	NEAR_CALL(sub_116CC)
+	CALL(sub_116CC, near)
 	CALL(restoreGame)
 	push	buildingRvalMaybe
-	NEAR_CALL(sub_10560, 2)
-	NEAR_CALL(cleanupAndExit)
+	CALL(sub_10560, near)
+	CALL(cleanupAndExit, near)
 	mov	sp, bp
 	pop	bp
 	retf

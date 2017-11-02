@@ -45,7 +45,7 @@ l_nullOrAt:
 	lfs	bx, [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 0			; Replace '@' with 0
 	PUSH_STACK_ADDRESS(stringBuffer)
-	CALL(printString, 4)				; and print the strint
+	CALL(printString)				; and print the strint
 
 	lea	ax, [bp+stringBuffer]			; Reset the buffer pointer to the
 	mov	word ptr [bp+stringBufferP], ax		; beginning of the string buffer

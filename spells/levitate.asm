@@ -12,7 +12,7 @@ sp_levitation proc far
 	mov	levitationDuration, al
 	mov	ax, icon_levitation
 	push	ax
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 	mov	sp, bp
 	pop	bp
 	retf

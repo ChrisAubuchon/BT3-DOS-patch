@@ -11,7 +11,7 @@ text_delayNoTable	proc far
 	shl	ax, 1
 	shl	ax, 1
 	push	ax
-	CALL(getKeyWithDelay, 4)
+	CALL(getKeyWithDelay)
 
 	FUNC_EXIT
 	retf

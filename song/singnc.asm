@@ -19,11 +19,11 @@ song_singNonCombat	proc far
 	jl	short l_return
 
 	push	ax
-	NEAR_CALL(sing_getSongSubtractor, 2)
+	CALL(sing_getSongSubtractor, near)
 	mov	[bp+subtractor], ax
 
 	push	[bp+partySlotNumber]
-	NEAR_CALL(_canSingSong,2)
+	CALL(_canSingSong, near)
 	or	ax, ax
 	jz	short l_waitAndReturn
 
@@ -34,19 +34,19 @@ song_singNonCombat	proc far
 	sub	ax, ax
 	push	ax
 	push	[bp+partySlotNumber]
-	NEAR_CALL(song_getSong, 4)
+	CALL(song_getSong, near)
 	mov	[bp+songNumber], ax
 	or	ax, ax
 	jl	short l_waitAndReturn
 
 	; End currently playing song
-	NEAR_CALL(endNoncombatSong)
+	CALL(endNoncombatSong, near)
 
 	push	[bp+songNumber]
 	push	[bp+partySlotNumber]
-	NEAR_CALL(song_playSong, 4)
+	CALL(song_playSong, near)
 
-	NEAR_CALL(song_doNoncombatEffect)
+	CALL(song_doNoncombatEffect, near)
 	mov	al, byte ptr [bp+subtractor]
 	mov	cx, ax
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)

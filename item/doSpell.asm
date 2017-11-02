@@ -25,10 +25,10 @@ item_doSpell proc far
 	push	[bp+arg_8]
 	push	[bp+spellNumber]
 	push	[bp+userSlotNumber]
-	CALL(doCastSpell, 8)
+	CALL(doCastSpell)
 	push	[bp+itemSlotNumber]
 	push	[bp+userSlotNumber]
-	NEAR_CALL(item_useCharge, 4)
+	CALL(item_useCharge, near)
 
 	FUNC_EXIT
 	retf

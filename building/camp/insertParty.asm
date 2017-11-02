@@ -40,7 +40,7 @@ l_loopComparison:
 	add	ax, 10h
 	push	dx
 	push	ax
-	NEAR_CALL(party_nameExists, 4)
+	CALL(party_nameExists, near)
 	or	ax, ax
 	jl	short l_findEmptySlot
 	mov	cl, 4
@@ -56,7 +56,7 @@ l_loopComparison:
 	DELAY(2)
 	jmp	short l_incrementCounter
 l_findEmptySlot:
-	NEAR_CALL(party_findEmptySlot)
+	CALL(party_findEmptySlot, near)
 	mov	[bp+var_2], ax
 	cmp	ax, 7
 	jge	l_rosterFull
@@ -71,7 +71,7 @@ l_findEmptySlot:
 	add	ax, 10h
 	push	dx
 	push	ax
-	NEAR_CALL(roster_nameExists, 4)
+	CALL(roster_nameExists, near)
 	mov	[bp+var_4], ax
 	or	ax, ax
 	jge	short l_addCharacter
@@ -99,8 +99,8 @@ l_addCharacter:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf,8)
-	NEAR_CALL(party_addCharacter)
+	CALL(copyCharacterBuf, near)
+	CALL(party_addCharacter, near)
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	l_incrementCounter
 l_rosterFull:

@@ -29,7 +29,7 @@ roster_makeParty proc far
 	inc	ax
 	push	dx
 	push	ax
-	CALL(_strcpy, 8)
+	CALL(_strcpy)
 	mov	[bp+var_6], 0
 	jmp	short loc_1333C
 loc_13339:
@@ -50,7 +50,7 @@ loc_1333C:
 	add	ax, 10h
 	push	dx
 	push	ax
-	CALL(_strcpy, 8)
+	CALL(_strcpy)
 	jmp	short loc_13339
 loc_1336F:
 	FUNC_EXIT

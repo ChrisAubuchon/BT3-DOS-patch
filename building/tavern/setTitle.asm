@@ -57,7 +57,7 @@ l_setTitleAndReturn:
 	shl	bx, 1
 	push	word ptr (tavernNames+2)[bx]
 	push	word ptr tavernNames[bx]
-	CALL(setTitle, 4)
+	CALL(setTitle)
 	mov	bx, [bp+tavernIndex]
 	mov	ax, bx
 	shl	bx, 1

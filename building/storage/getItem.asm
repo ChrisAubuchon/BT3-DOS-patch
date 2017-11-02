@@ -24,7 +24,7 @@ loc_14A05:
 	PUSH_STACK_ADDRESS(var_38)
 	PUSH_STACK_ADDRESS(itemListP)
 	PUSH_STACK_ADDRESS(itemList)
-	NEAR_CALL(storage_createItemList, 0Ch)
+	CALL(storage_createItemList, near)
 	mov	[bp+itemListLength], ax
 	or	ax, ax
 	jz	l_empty
@@ -53,7 +53,7 @@ loc_14A05:
 	push	[bp+itemListLength]
 	PUSH_STACK_ADDRESS(itemListP)
 	PUSH_STACK_ADDRESS(var_138)
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 	mov	[bp+var_13A], ax
 	or	ax, ax
 	jl	l_return
@@ -73,7 +73,7 @@ loc_14A05:
 	mov	al, strg_inventory[si]
 	push	ax
 	push	[bp+arg_0]
-	CALL(inven_addItem, 8)
+	CALL(inven_addItem)
 	or	ax, ax
 	jz	short l_allFull
 	mov	bx, [bp+var_13C]

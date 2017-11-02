@@ -33,7 +33,7 @@ l_revertAgeStatus:
 	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
-	CALL(_doAgeStatus, 0Ah)
+	CALL(_doAgeStatus)
 	jmp	short l_return
 
 l_dispossess:

@@ -24,7 +24,7 @@ sp_teleport proc far
 	jnz	short loc_20FCB
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	NEAR_CALL(printSpellFizzled, 4)
+	CALL(printSpellFizzled, near)
 	jmp	l_return
 loc_20FCB:
 	mov	word_4EE66, 0
@@ -82,7 +82,7 @@ loc_21086:
 	shl	si, 1
 	push	[bp+si+teleDeltaList]
 	push	cs
-	NEAR_CALL(_sp_teleportPrintNum, 4)
+	CALL(_sp_teleportPrintNum, near)
 	inc	gs:txt_numLines
 	jmp	short loc_2106E
 loc_210A1:
@@ -152,7 +152,7 @@ loc_21136:
 	mov	ax, sq_north
 	add	ax, [bp+teleDeltaList]
 	push	ax
-	NEAR_CALL(_sp_doTeleport, 6)
+	CALL(_sp_doTeleport, near)
 	or	ax, ax
 	jz	loc_211F3
 loc_21168:
@@ -251,7 +251,7 @@ loc_21255:
 loc_21276:
 	mov	ax, 0FA0h
 	push	ax
-	CALL(_mallocMaybe, 2)
+	CALL(_mallocMaybe)
 	mov	word ptr [bp+var_14], ax
 	mov	word ptr [bp+var_14+2],	dx
 	push	dx
@@ -262,7 +262,7 @@ loc_21276:
 	sub	ah, ah
 	add	ax, 0Ah
 	push	ax
-	CALL(map_read, 6)
+	CALL(map_read)
 loc_212A2:
 	lfs	bx, [bp+var_14]
 	mov	al, fs:[bx+dun_t.deltaSqN]
@@ -292,7 +292,7 @@ loc_212D5:
 loc_212E4:
 	push	word ptr [bp+var_14+2]
 	push	word ptr [bp+var_14]
-	CALL(_freeMaybe, 4)
+	CALL(_freeMaybe)
 loc_212F2:
 	sub	ax, ax
 	jmp	short loc_2136C
@@ -337,7 +337,7 @@ loc_212F6:
 loc_21359:
 	push	word ptr [bp+var_14+2]
 	push	word ptr [bp+var_14]
-	CALL(_freeMaybe, 4)
+	CALL(_freeMaybe)
 loc_21367:
 	mov	ax, [bp+var_10]
 	jmp	short $+2
@@ -378,7 +378,7 @@ loc_213A8:
 	mov	byte ptr fs:[bx], 0
 	mov	gs:g_currentCharPosition, 30h 
 	PUSH_STACK_ADDRESS(var_20)
-	CALL(text_writeString, 4)
+	CALL(text_writeString)
 
 	FUNC_EXIT
 	retf

@@ -9,7 +9,7 @@ writePartyFile proc far
 	CHKSTK(2)
 
 	PUSH_OFFSET(s_partiesInf)
-	NEAR_CALL(openFile, 4)
+	CALL(openFile, near)
 	mov	[bp+var_2], ax
 	mov	ax, [bp+arg_0]
 	mov	cl, 7

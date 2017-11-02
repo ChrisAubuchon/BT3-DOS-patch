@@ -13,7 +13,7 @@ sp_meleeMen proc far
 	CHKSTK(56h)
 
 	push	[bp+spellCaster]
-	NEAR_CALL(spellSavingThrowHelper,2)
+	CALL(spellSavingThrowHelper, near)
 	or	ax, ax
 	jz	short l_return
 
@@ -24,7 +24,7 @@ sp_meleeMen proc far
 	mov	ax, [bp+spellCaster]
 	and	ax, 3
 	push	ax
-	NEAR_CALL(_sp_setMonDistance,4)
+	CALL(_sp_setMonDistance, near)
 	jmp	short l_printMessage
 l_partyCaster:
 	mov	ax, 1
@@ -33,7 +33,7 @@ l_partyCaster:
 	sub	ah, ah
 	and	ax, 3
 	push	ax
-	NEAR_CALL(_sp_setMonDistance, 4)
+	CALL(_sp_setMonDistance, near)
 l_printMessage:
 	PUSH_OFFSET(s_andTheFoesAre)
 	PUSH_STACK_ADDRESS(stringBuffer)

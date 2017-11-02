@@ -21,7 +21,7 @@ doVictoryMaybe proc far
 	mov	[bp+var_262], 0
 loc_16745:
 	push	[bp+var_262]
-	CALL(icon_deactivate, 2)
+	CALL(icon_deactivate)
 	inc	[bp+var_262]
 	cmp	[bp+var_262], 5
 	jl	short loc_16745
@@ -29,10 +29,8 @@ loc_16745:
 loc_1675E:
 	mov	gs:byte_422A0, 0
 	mov	ax, 80E8h
-	sub	dx, dx
-	push	dx
 	push	ax
-	CALL(_mallocMaybe, 4)
+	CALL(_mallocMaybe)
 	mov	[bp+var_25E], ax
 	mov	[bp+var_25C], dx
 
@@ -40,7 +38,7 @@ loc_1677F:
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_victory)
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_167BC
@@ -72,7 +70,7 @@ loc_167BC:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp, 8)
+	CALL(d3comp)
 
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
@@ -102,7 +100,7 @@ loc_16840:
 	shl	bx, 1
 	push	word ptr (victoryMessageList+2)[bx]
 	push	word ptr victoryMessageList[bx]
-	NEAR_CALL(text_wrapLongString, 0Ch)
+	CALL(text_wrapLongString, near)
 	mov	[bp+var_A38], ax
 
 	mov	[bp+var_262], 0FFF8h
@@ -152,7 +150,7 @@ loc_168AD:
 	shl	si, 1
 	push	[bp+si+var_256]
 	push	[bp+si+var_258]
-	NEAR_CALL(writeStringAt, 0Ah)
+	CALL(writeStringAt, near)
 loc_168FC:
 	inc	[bp+var_264]
 	cmp	[bp+var_264], 8
@@ -161,14 +159,14 @@ loc_168FC:
 loc_168FE:
 	mov	ax, 2
 	push	ax
-	NEAR_CALL(timedGetKey, 2)
+	CALL(timedGetKey, near)
 	jmp	loc_16875
 
 loc_1690F:
 	sub	ax, ax
 	push	ax
 	PUSH_OFFSET(s_bardscr)
-	CALL(openFile, 6)
+	CALL(openFile)
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_1694C
@@ -180,7 +178,7 @@ loc_1690F:
 	PRINTSTRING
 	mov	ax, 0FFFFh
 	push	ax
-	NEAR_CALL(timedGetKey, 2)
+	CALL(timedGetKey, near)
 
 loc_1694C:
 	cmp	[bp+fd], 0FFFFh
@@ -201,7 +199,7 @@ loc_1694C:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp, 8)
+	CALL(d3comp)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -215,7 +213,7 @@ loc_1694C:
 	add	sp, 8
 	push	[bp+var_25C]
 	push	[bp+var_25E]
-	CALL(_freeMaybe, 4)
+	CALL(_freeMaybe)
 	CALL(sub_116CC)
 	mov	buildingRvalMaybe, 1
 

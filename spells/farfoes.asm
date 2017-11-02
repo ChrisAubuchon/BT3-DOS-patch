@@ -12,7 +12,7 @@ sp_farFoes proc	far
 	CHKSTK(5Ah)
 
 	push	[bp+spellCaster]
-	NEAR_CALL(spellSavingThrowHelper,2)
+	CALL(spellSavingThrowHelper, near)
 	or	ax, ax
 	jz	l_return
 	test	byte ptr [bp+spellCaster], 80h
@@ -35,7 +35,7 @@ l_loopEnter:
 l_notTooFar:
 	push	[bp+newDistance]
 	push	[bp+loopCounter]
-	NEAR_CALL(_sp_setMonDistance,4)
+	CALL(_sp_setMonDistance, near)
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 4
 	jl	short l_loopEnter
@@ -60,7 +60,7 @@ l_monCaster:
 l_partyNotTooFar:
 	push	[bp+newDistance]
 	push	[bp+loopCounter]
-	NEAR_CALL(_sp_setMonDistance,4)
+	CALL(_sp_setMonDistance, near)
 l_outputString:
 	PUSH_OFFSET(s_andTheFoesAre)
 	PUSH_STACK_ADDRESS(stringBuf)

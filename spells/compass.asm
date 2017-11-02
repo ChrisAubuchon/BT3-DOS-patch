@@ -12,7 +12,7 @@ sp_compassSpell	proc far
 	mov	compassDuration, al
 	mov	ax, icon_compass
 	push	ax
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 	mov	sp, bp
 	pop	bp
 	retf

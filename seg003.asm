@@ -5,7 +5,7 @@ sub_1766A proc far
 	mov	bp, sp
 	cmp	gs:byte_422A0, 0
 	jz	short loc_17688
-	NEAR_CALL(sub_17691)
+	CALL(sub_17691, near)
 	or	ax, ax
 	jz	short l_return
 loc_17688:

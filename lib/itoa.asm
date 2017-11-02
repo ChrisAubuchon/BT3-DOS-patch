@@ -18,7 +18,7 @@ itoa proc far
 
 	push	word ptr [bp+inString+2]
 	push	word ptr [bp+inString]
-	NEAR_CALL(_itoa_countDigits, 4)
+	CALL(_itoa_countDigits, near)
 	mov	[bp+maxDigits], ax
 
 loc_160A6:

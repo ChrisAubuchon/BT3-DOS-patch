@@ -13,7 +13,7 @@ sp_summonSpell proc far
 	sub	ah, ah
 	push	ax
 	push	[bp+spellCaster]
-	CALL(doSummon, 4)
+	CALL(doSummon)
 
 	FUNC_EXIT
 	retf

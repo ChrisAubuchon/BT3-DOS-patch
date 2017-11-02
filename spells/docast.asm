@@ -14,7 +14,7 @@ doCastSpell proc far
 
 	push	[bp+partySlotNumber]
 	PUSH_STACK_ADDRESS(stringBuf)
-	CALL(bat_getAttackerName,6)
+	CALL(bat_getAttackerName)
 	SAVE_PTR_STACK(dx, ax, stringBufP)
 	APPEND_CHAR(STACKVAR(stringBufP), ' ')
 
@@ -41,7 +41,7 @@ l_spptCheck:
 	jz	short l_castIt
 	push	[bp+spellNumber]
 	push	[bp+partySlotNumber]
-	NEAR_CALL(_sp_checkSPPT,4)
+	CALL(_sp_checkSPPT, near)
 	or	ax, ax
 	jz	short l_fizzled
 	mov	al, gs:sq_antiMagicFlag
@@ -64,7 +64,7 @@ l_castIt:
 	push	[bp+itemUsedFlag]
 	push	[bp+spellNumber]
 	push	[bp+partySlotNumber]
-	NEAR_CALL(spell_cast,6)
+	CALL(spell_cast, near)
 	mov	ax, 1
 l_return:
 	mov	sp, bp

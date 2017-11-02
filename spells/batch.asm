@@ -24,7 +24,7 @@ l_loopEnter:
 	jz	short l_return
 	push	ax
 	push	[bp+spellCaster]
-	NEAR_CALL(_batchSpellCast, 4)
+	CALL(_batchSpellCast, near)
 	jmp	short l_loopEnter
 l_return:
 	mov	sp, bp

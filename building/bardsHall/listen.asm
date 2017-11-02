@@ -22,13 +22,13 @@ loc_25BCC:
 	sub	ax, ax
 loc_25BCE:
 	push	ax
-	NEAR_CALL(sub_25E1B, 6)
+	CALL(sub_25E1B, near)
 	CALL(text_clear)
 	PUSH_STACK_ADDRESS(validMouseKeys)
 	PUSH_STACK_ADDRESS(validKeys)
 	PUSH_STACK_ADDRESS(var_C)
 	PUSH_OFFSET(s_songTitleList)
-	CALL(printVarString, 10h)
+	CALL(printVarString)
 	mov	[bp+var_E], ax
 l_readKey:
 	push	[bp+var_E]
@@ -69,12 +69,12 @@ loc_25C51:
 
 loc_25C53:
 	push	ax
-	NEAR_CALL(bards_learnSong, 2)
+	CALL(bards_learnSong, near)
 	jmp	short l_return
 
 loc_25C5D:
 	push	[bp+loopCounter]
-	NEAR_CALL(bards_printLyrics, 2)
+	CALL(bards_printLyrics, near)
 l_return:
 	pop	si
 	mov	sp, bp

@@ -14,7 +14,7 @@ _sp_useAcorn proc far
 	mov	ax, 94h	
 	push	ax
 	push	word ptr [bp+spellCaster]
-	NEAR_CALL(_batchSpellCast, 4)
+	CALL(_batchSpellCast)
 	mov	sp, bp
 	pop	bp
 	retf

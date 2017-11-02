@@ -47,7 +47,7 @@ _sp_useWineskin	proc far
 	cmp	gs:party.class[si], class_bard
 	jnz	short loc_2252F
 	push	gs:party.level[si]
-	NEAR_CALL(_returnXor255,2)
+	CALL(_returnXor255, near)
 	mov	gs:party.specAbil[si],	al
 	jmp	short l_return
 loc_2252F:
@@ -56,7 +56,7 @@ loc_2252F:
 	mov	ax, 94h	
 	push	ax
 	push	[bp+spellCaster]
-	NEAR_CALL(_batchSpellCast,4)
+	CALL(_batchSpellCast, near)
 l_return:
 	pop	si
 	FUNC_EXIT

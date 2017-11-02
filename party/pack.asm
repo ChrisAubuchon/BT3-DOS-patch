@@ -22,7 +22,7 @@ loc_127AE:
 	lea	ax, partySecondSlot._name[si]
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf,8)
+	CALL(copyCharacterBuf, near)
 	inc	[bp+partySlotNumber]
 	jmp	short loc_127AE
 l_return:

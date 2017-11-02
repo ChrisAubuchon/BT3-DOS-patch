@@ -28,7 +28,7 @@ l_loopEnter:
 	mov	al, byte_483AC[bx]
 	push	ax
 	push	[bp+spellCaster]
-	CALL(doSummon,4)
+	CALL(doSummon)
 	dec	[bp+loopCounter]
 	cmp	[bp+loopCounter], 0
 	jg	l_loopEnter

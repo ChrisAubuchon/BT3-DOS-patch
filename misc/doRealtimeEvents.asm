@@ -72,7 +72,7 @@ l_iconLoopEntry:
 	cmp	al, 1
 	jnz	short l_iconLoopIncrement
 	push	[bp+var_2]
-	CALL(icon_deactivate, 2)
+	CALL(icon_deactivate)
 l_iconLoopIncrement:
 	inc	[bp+var_2]
 	cmp	[bp+var_2], 5

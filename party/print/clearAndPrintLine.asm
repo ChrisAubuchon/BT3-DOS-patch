@@ -35,7 +35,7 @@ party_clearAndPrintLine proc far
 	mov	ax, 0Ch
 	push	ax
 	push	[bp+inString]
-	NEAR_CALL(writeStringAt, 0Ah)
+	CALL(writeStringAt, near)
 
 	FUNC_EXIT
 	retf

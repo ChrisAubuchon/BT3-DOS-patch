@@ -22,7 +22,7 @@ camp_configOptionList proc far
 	CHKSTK(2)
 	push	si
 
-	NEAR_CALL(party_findEmptySlot)
+	CALL(party_findEmptySlot, near)
 	cmp	ax, 7
 	jge	short loc_1387B
 	mov	al, 1
@@ -33,7 +33,7 @@ l_setElementZero:
 	lfs	bx, [bp+arg_0]
 	mov	fs:[bx+campStru_t.hasEmptySlot], al	; Add a member
 
-	NEAR_CALL(party_isNotEmpty)
+	CALL(party_isNotEmpty, near)
 	lfs	bx, [bp+arg_0]
 	mov	fs:[bx+campStru_t.notEmpty], al		; Remove a member
 
@@ -42,7 +42,7 @@ l_setElementZero:
 	neg	ax
 	mov	fs:[bx+campStru_t.isEmpty], al		; Rename a member
 
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	cmp	ax, 75
 	jge	short loc_138AB
 	mov	al, 1
@@ -71,7 +71,7 @@ loc_138DB:
 	lfs	bx, [bp+arg_0]
 	mov	al, fs:[bx+campStru_t.notEmpty]
 	mov	fs:[bx+campStru_t.field_6], al		; Save the party
-	NEAR_CALL(party_getLastSlot)
+	CALL(party_getLastSlot, near)
 	cmp	ax, 7
 	jge	short loc_138F3
 	mov	al, 1

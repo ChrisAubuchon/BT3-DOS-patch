@@ -20,7 +20,7 @@ intro_scrollText proc far
 	PUSH_STACK_ADDRESS(var_A2E)
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	NEAR_CALL(text_wrapLongString, 0Ch)
+	CALL(text_wrapLongString, near)
 	mov	[bp+var_A30], ax
 
 	mov	[bp+var_25A], 0FFF8h
@@ -70,7 +70,7 @@ loc_166C6:
 	shl	si, 1
 	push	[bp+si+var_256]
 	push	[bp+si+var_258]
-	NEAR_CALL(writeStringAt, 0Ah)
+	CALL(writeStringAt, near)
 
 loc_16715:
 	inc	[bp+var_25C]
@@ -80,7 +80,7 @@ loc_16715:
 loc_16717:
 	mov	ax, 2
 	push	ax
-	NEAR_CALL(timedGetKey, 2)
+	CALL(timedGetKey, near)
 	cmp	ax, dosKeys_ESC
 	jnz	loc_16690
 l_return:

@@ -40,7 +40,7 @@ l_skipThe:
 	PUSH_STACK_ADDRESS(unmaskedLocationName)
 	push	[bp+var_10C]
 	push	[bp+var_10E]
-	CALL(unmaskString, 8)
+	CALL(unmaskString)
 
 	PUSH_STACK_ADDRESS(unmaskedLocationName)
 	push	[bp+var_108]

@@ -90,7 +90,7 @@ loc_22C7B:
 	cmp	[bp+var_14], 'S'
 	jnz	short loc_22C96
 	push	[bp+partySlotNumber]
-	NEAR_CALL(song_stopPlaying, 2)
+	CALL(song_stopPlaying, near)
 	mov	ax, 0FFFFh
 	jmp	short l_return
 loc_22C96:

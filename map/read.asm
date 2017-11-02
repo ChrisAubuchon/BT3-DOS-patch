@@ -28,7 +28,7 @@ loc_173AD:
 	shl	bx, 1
 	push	word ptr (disk3+2)[bx]
 	push	word ptr disk3[bx]
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_173FA
@@ -57,7 +57,7 @@ loc_173FA:
 	push	dx
 	push	ax
 	push	[bp+fd]
-	CALL(lseek, 8)
+	CALL(lseek)
 	mov	ax, 2
 	push	ax
 	lea	ax, [bp+var_6]
@@ -71,10 +71,10 @@ loc_173FA:
 	push	ax
 	push	[bp+var_6]
 	push	[bp+fd]
-	CALL(lseek, 8)
+	CALL(lseek)
 	mov	ax, 4000
 	push	ax
-	CALL(_mallocMaybe, 2)
+	CALL(_mallocMaybe)
 	mov	[bp+memOffset],	ax
 	mov	[bp+memSegment], dx
 	mov	ax, 4000
@@ -88,11 +88,11 @@ loc_173FA:
 	push	[bp+arg_2]
 	push	[bp+memSegment]
 	push	[bp+memOffset]
-	CALL(d3comp, 8)
+	CALL(d3comp)
 
 	push	[bp+memSegment]
 	push	[bp+memOffset]
-	CALL(_freeMaybe, 4)
+	CALL(_freeMaybe)
 	push	[bp+fd]
 	CALL(close)
 

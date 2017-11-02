@@ -28,7 +28,7 @@ getSpellNumber proc far
 	jnz	loc_mouse_spell_select
 
 	push	[bp+partySlotNumber]
-	CALL(text_castSpell,2)
+	CALL(text_castSpell)
 	cmp	ax, 0FFFFh
 	jz	l_return
 	jmp	l_spellFound
@@ -44,7 +44,7 @@ loc_1FDC6:
 	jge	short loc_1FE1A
 	push	[bp+var_104]
 	push	[bp+partySlotNumber]
-	CALL(mage_hasLearnedSpell, 4)
+	CALL(mage_hasLearnedSpell)
 
 	or	ax, ax
 	jz	short loc_1FE18
@@ -75,7 +75,7 @@ loc_1FE1A:
 	mov	ax, offset s_spellToCast
 	push	ds
 	push	ax
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 	mov	[bp+var_102], ax
 	jmp	short loc_1FE5F
 loc_1FE3E:
@@ -94,7 +94,7 @@ l_spellFound:
 	mov	g_curSpellNumber, ax
 	push	ax
 	push	[bp+partySlotNumber]
-	NEAR_CALL(getSpptRequired,4)
+	CALL(getSpptRequired, near)
 	mov	cx, ax
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	cmp	gs:party.currentSppt[bx], cx

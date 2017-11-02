@@ -8,7 +8,7 @@ _mfunc_unpackChar proc far
 l_extractCharacter:
 	mov	ax, 5
 	push	ax
-	NEAR_CALL(_mfunc_extractCh, 2)
+	CALL(_mfunc_extractCh, near)
 	or	ax, ax
 	jz	short l_return
 	cmp	ax, 30
@@ -24,7 +24,7 @@ l_setCapitalFlag:
 l_hialphabetChar:
 	mov	ax, 6
 	push	ax
-	NEAR_CALL(_mfunc_extractCh, 2)
+	CALL(_mfunc_extractCh, near)
 	mov	bx, ax
 	mov	al, _str_Hialphabet[bx]
 	cbw
@@ -42,7 +42,7 @@ l_loalphabetChar:
 	mov	_str_capFlag, 0
 l_returnCapital:
 	push	ax
-	CALL(_str_capitalize, 2)
+	CALL(_str_capitalize)
 l_return:
 	FUNC_EXIT
 	retf

@@ -34,7 +34,7 @@ text_scrollingWindow proc far
 	mov	[bp+var_1E], ax
 	mov	[bp+var_10], ax
 	mov	[bp+var_E], 1
-	NEAR_CALL(sub_1766A)
+	CALL(sub_1766A, near)
 
 loc_1597F:
 	cmp	[bp+var_E], 0
@@ -107,19 +107,19 @@ loc_15A17:
 loc_15A35:
 	mov	ax, bitMask16bit+16h
 	or	[bp+var_4], ax
-	NEAR_CALL(scroll_printArrows)
+	CALL(scroll_printArrows, near)
 	mov	ax, [bp+highlightedLine]
 	add	ax, [bp+TxtNumLines]
 	sub	ax, [bp+var_12]
 	push	ax
 	call	far ptr	sub_3E96E			; This probably does the highlighting
 	add	sp, 2
-	NEAR_CALL(sub_1766A)
+	CALL(sub_1766A, near)
 	mov	[bp+var_E], 0
 	jmp	short l_getInput
 
 l_doRealTimeEvents:
-	NEAR_CALL(doRealtimeEvents)
+	CALL(doRealtimeEvents, near)
 
 l_getInput:
 	CALL(checkMouse)
@@ -127,13 +127,13 @@ l_getInput:
 	jz	short l_skipMouseIcon
 	call	far ptr	sub_3E974
 	push	[bp+var_4]
-	NEAR_CALL(mouse_setScrollingIcon, 2)
+	CALL(mouse_setScrollingIcon, near)
 	mov	[bp+var_2], 1
-	NEAR_CALL(sub_1766A)
+	CALL(sub_1766A, near)
 
 l_skipMouseIcon:
 	push	[bp+var_4]
-	NEAR_CALL(scroll_checkArrowClick, 2)
+	CALL(scroll_checkArrowClick, near)
 	mov	[bp+var_8], ax
 	or	ax, ax
 	jz	l_checkKeyboard
@@ -258,7 +258,7 @@ l_checkKeyboard:
 	mov	al, byte ptr [bp+var_18]
 	sub	ah, ah
 	push	ax
-	CALL(_str_capitalize, 2)
+	CALL(_str_capitalize)
 	mov	[bp+var_8], ax
 	jmp	short loc_15BDA
 loc_15BD4:

@@ -28,13 +28,13 @@ l_watchwood:
 	mov	lightDistance, 0
 	sub	ax, ax
 	push	ax
-	CALL(icon_deactivate, 2)
+	CALL(icon_deactivate)
 	mov	gs:gl_detectSecretDoorFlag, 0
 	jmp	short l_return
 l_overture:
 	mov	ax, 1
 	push	ax
-	CALL(icon_deactivate, 2)
+	CALL(icon_deactivate)
 	jmp	short l_return
 l_shield:
 	mov	gs:songHalfDamage, 0

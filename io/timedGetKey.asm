@@ -18,7 +18,7 @@ timedGetKey proc far
 
 	cmp	[bp+timeDelay], 0
 	jge	short l_getkeyWithDelay
-	NEAR_CALL(readChNoMouse)
+	CALL(readChNoMouse, near)
 	jmp	short l_return
 l_getkeyWithDelay:
 	mov	ax, [bp+timeDelay]

@@ -47,7 +47,7 @@ l_loop:
 	mov	al, fs:[bx]
 	cbw
 	push	ax
-	NEAR_CALL(text_characterWidth, 2)
+	CALL(text_characterWidth, near)
 	add	gs:g_currentCharPosition, al
 	jmp	short l_loop
 l_return:

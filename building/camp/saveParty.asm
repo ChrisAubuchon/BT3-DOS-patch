@@ -13,13 +13,13 @@ camp_saveParty proc far
 	mov	ax, 0Eh
 	push	ax
 	PUSH_STACK_ADDRESS(partyName)
-	CALL(readString, 6)
+	CALL(readString)
 	or	ax, ax
 	jz	short l_return
-	NEAR_CALL(roster_countParties)
+	CALL(roster_countParties, near)
 	mov	[bp+savedPartyCount], ax
 	PUSH_STACK_ADDRESS(partyName)
-	NEAR_CALL(roster_partyExists, 4)
+	CALL(roster_partyExists, near)
 	mov	[bp+var_2], ax
 	or	ax, ax
 	jge	short loc_13291
@@ -30,7 +30,7 @@ loc_13291:
 	jg	short l_return
 	PUSH_STACK_ADDRESS(partyName)
 	push	[bp+var_2]
-	NEAR_CALL(roster_makeParty, 6)
+	CALL(roster_makeParty, near)
 l_return:
 	FUNC_EXIT
 	retf

@@ -51,7 +51,7 @@ loc_11EBC:
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+userSlotNumber]
-	CALL(inven_hasTypeEquipped, 4)
+	CALL(inven_hasTypeEquipped)
 	or	ax, ax
 	jnz	short l_return
 	cmp	gs:byte_422A4, 0

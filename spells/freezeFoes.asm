@@ -9,7 +9,7 @@ sp_freezeFoes proc far
 	CHKSTK
 
 	push	[bp+spellCaster]
-	NEAR_CALL(spellSavingThrowHelper, 2)
+	CALL(spellSavingThrowHelper, near)
 	or	ax, ax
 	jz	short l_return
 

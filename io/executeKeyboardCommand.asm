@@ -10,7 +10,7 @@ executeKeyboardCommand proc far
 	cmp	[bp+arg_0], dosKeys_F7
 	jg	short l_notFunctionKeySpell
 	push	[bp+arg_0]
-	CALL(noncombatCast, 2)
+	CALL(noncombatCast)
 	jmp	l_success
 
 l_notFunctionKeySpell:
@@ -21,7 +21,7 @@ l_notFunctionKeySpell:
 	mov	ax, [bp+arg_0]
 	sub	ax, '1'
 	push	ax
-	CALL(printCharacter, 2)
+	CALL(printCharacter)
 	jmp	l_success
 	
 l_notPrintCharacter:
@@ -29,13 +29,13 @@ l_notPrintCharacter:
 	jmp	l_keySwitch
 
 l_printHelp:
-	NEAR_CALL(printCommandHelp)
+	CALL(printCommandHelp, near)
 	jmp	l_success
 
 l_castSpell:
 	sub	ax, ax
 	push	ax
-	CALL(noncombatCast, 2)
+	CALL(noncombatCast)
 	jmp	l_success
 	
 l_reorderParty:
@@ -59,7 +59,7 @@ l_pauseGame:
 	jz	l_fail
 	mov	gs:advanceTimeFlag, 1
 	PUSH_OFFSET(s_pausing)
-	CALL(printStringWithWait, 4)
+	CALL(printStringWithWait)
 	mov	gs:advanceTimeFlag, 0
 	jmp	l_success
 

@@ -11,14 +11,14 @@ readString_overwriteCursor proc far
 	push	ax
 	mov	ax, ch_OverwriteCursor
 	push	ax
-	NEAR_CALL(readString_echoChar, 4)
+	CALL(readString_echoChar, near)
 	mov	al, [bp+arg_0]
 	sub	gs:g_currentCharPosition, al
 	sub	ax, ax
 	push	ax
 	mov	ax, ch_OverwriteCursor
 	push	ax
-	NEAR_CALL(readString_echoChar, 4)
+	CALL(readString_echoChar, near)
 
 	FUNC_EXIT
 	retf

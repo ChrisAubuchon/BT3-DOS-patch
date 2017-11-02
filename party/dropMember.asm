@@ -24,7 +24,7 @@ dropPartyMember	proc far
 
 l_doDrop:
 	push	[bp+slotNumber]
-	CALL(party_pack, 2)
+	CALL(party_pack)
 	mov	ax, 1
 	jmp	short l_return
 l_returnZero:

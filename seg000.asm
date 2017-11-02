@@ -133,7 +133,7 @@ dunMainLoop proc far
 	mov	ax, dunLevelIndex
 	add	ax, 10
 	push	ax
-	CALL(map_read, 6)
+	CALL(map_read)
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.levFlags]
 	sub	ah, ah
@@ -143,12 +143,12 @@ dunMainLoop proc far
 	add	ax, 3
 	mov	[bp+var_22], ax
 	push	ax
-	CALL(map_readGraphics, 2)
+	CALL(map_readGraphics)
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.monIndex]
 	sub	ah, ah
 	push	ax
-	CALL(map_readMonsters, 2)
+	CALL(map_readMonsters)
 
 	push_ss_string	var_1E
 	push_ptr_stack	levP

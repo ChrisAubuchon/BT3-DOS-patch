@@ -8,7 +8,7 @@ txt_newLine proc far
 	inc	gs:txt_numLines
 	cmp	al, 0Bh
 	jb	short loc_16635
-	NEAR_CALL(text_scroll)
+	CALL(text_scroll, near)
 	mov	gs:txt_numLines, 0Bh
 loc_16635:
 	mov	sp, bp

@@ -14,7 +14,7 @@ _sp_checkSPPT proc far
 
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	NEAR_CALL(getSpptRequired, 4)
+	CALL(getSpptRequired, near)
 	mov	[bp+requiredSppt], ax
 	mov	cx, ax
 	CHARINDEX(ax, STACKVAR(spellCaster), bx)

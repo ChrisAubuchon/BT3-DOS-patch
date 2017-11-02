@@ -20,7 +20,7 @@ getSpptRequired	proc far
 	mov	ax, itemEff_quaterSpptUse
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(hasEffectEquipped,4)
+	CALL(hasEffectEquipped)
 	or	ax, ax
 	jnz	short l_checkHalf
 	mov	ax, [bp+sppt]
@@ -31,7 +31,7 @@ l_checkHalf:
 	mov	ax, itemEff_halfSpptUsage
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(hasEffectEquipped,4)
+	CALL(hasEffectEquipped)
 	or	ax, ax
 	jnz	short l_returnSppt
 	mov	ax, [bp+sppt]

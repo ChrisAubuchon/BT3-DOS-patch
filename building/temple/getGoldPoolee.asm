@@ -10,7 +10,7 @@ temple_getGoldPoolee proc far
 
 	PUSH_OFFSET(s_whomGathersGold)
 	PRINTSTRING(true)
-	NEAR_CALL(readSlotNumber)
+	CALL(readSlotNumber, near)
 	mov	[bp+pooleeSlotNumber], ax
 	or	ax, ax
 	jl	short l_return
@@ -20,7 +20,7 @@ temple_getGoldPoolee proc far
 
 	push	ax
 	push	[bp+pooleeSlotNumber]
-	NEAR_CALL(doPoolGold, 4)
+	CALL(doPoolGold, near)
 	CHARINDEX(ax, STACKVAR(pooleeSlotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027

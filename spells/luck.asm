@@ -13,7 +13,7 @@ sp_luckSpell proc far
 	add	gs:byte_41E70, al
 	push	bx
 	push	[bp+spellCaster]
-	NEAR_CALL(sp_antiMagic,4)
+	CALL(sp_antiMagic, near)
 	mov	sp, bp
 	pop	bp
 	retf

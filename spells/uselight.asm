@@ -12,7 +12,7 @@ _sp_useLightObj	proc far
 	PRINTSTRING
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	NEAR_CALL(sp_lightSpell,4)
+	CALL(sp_lightSpell)
 
 	FUNC_EXIT
 	retf

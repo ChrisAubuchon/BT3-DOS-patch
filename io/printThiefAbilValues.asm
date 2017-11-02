@@ -17,7 +17,7 @@ printThiefAbilValues proc far
 	sar	ax, cl
 	push	ax
 	push	[bp+arg_0]
-	NEAR_CALL(printStringAndThreeDigits, 6)
+	CALL(printStringAndThreeDigits, near)
 
 	FUNC_EXIT
 	retf

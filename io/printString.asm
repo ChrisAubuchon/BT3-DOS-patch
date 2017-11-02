@@ -48,7 +48,7 @@ l_stringEnd:
 	cmp	[bp+characterCount], 0
 	jz	l_return
 	PUSH_STACK_ADDRESS(lineBuffer)
-	NEAR_CALL(text_nlWriteString, 4)
+	CALL(text_nlWriteString, near)
 	jmp	l_return
 
 l_newline:
@@ -57,10 +57,10 @@ l_newline:
 	cmp	[bp+characterCount], 0
 	jz	short loc_16441
 	PUSH_STACK_ADDRESS(lineBuffer)
-	NEAR_CALL(text_nlWriteString, 4)
+	CALL(text_nlWriteString, near)
 
 loc_16441:
-	NEAR_CALL(txt_newLine)
+	CALL(txt_newLine, near)
 
 loc_16445:
 	mov	ax, [bp+linesPrinted]
@@ -89,7 +89,7 @@ l_otherCharacter:
 	mov	al, byte ptr [bp+currentCharacter]
 	mov	byte ptr [bp+si+lineBuffer], al
 	push	[bp+currentCharacter]
-	NEAR_CALL(text_characterWidth, 2)
+	CALL(text_characterWidth, near)
 	add	[bp+pixelsUsed], ax
 	cmp	[bp+pixelsUsed], 138
 	jl	l_nextCharacter
@@ -125,7 +125,7 @@ l_spaceFound:
 	mov	si, [bp+characterCount]
 	mov	byte ptr [bp+si+lineBuffer], 0
 	PUSH_STACK_ADDRESS(lineBuffer)
-	NEAR_CALL(text_nlWriteString, 4)
+	CALL(text_nlWriteString, near)
 	mov	[bp+pixelsUsed], 0
 	mov	[bp+characterCount], 0
 	mov	ax, word ptr [bp+inStringP]
@@ -143,7 +143,7 @@ loc_16506:
 	mov	word ptr [bp+inStringP], ax
 	mov	word ptr [bp+inStringP+2],	dx
 	PUSH_STACK_ADDRESS(lineBuffer)
-	NEAR_CALL(text_nlWriteString, 4)
+	CALL(text_nlWriteString, near)
 	mov	[bp+pixelsUsed], 0
 	mov	[bp+characterCount], 0
 	mov	ax, word ptr [bp+inStringP]

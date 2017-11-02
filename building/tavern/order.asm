@@ -22,7 +22,7 @@ tav_orderDrink proc far
 	PUSH_OFFSET(s_whoWillOrder)
 	PRINTSTRING(true)
 
-	NEAR_CALL(readSlotNumber)
+	CALL(readSlotNumber, near)
 	mov	[bp+orderer], ax
 	or	ax, ax
 	jl	l_returnZero
@@ -117,7 +117,7 @@ l_checkDrunkLevel:
 	PUSH_OFFSET(s_cantOrder)
 	PRINTSTRING
 	push	[bp+lastCharNo]
-	NEAR_CALL(tav_isPartyDrunk, 2)
+	CALL(tav_isPartyDrunk, near)
 	or	ax, ax
 	jz	l_returnZero
 	PUSH_OFFSET(s_partyIsDisgrace)
@@ -138,7 +138,7 @@ l_payForDrink:
 	push	dx
 	push	ax
 	push	bx
-	NEAR_CALL(character_removeGold, 6)
+	CALL(character_removeGold, near)
 	or	ax, ax
 	jz	short l_notEnoughGold
 	PUSH_OFFSET(s_hereOrToGo)
@@ -154,13 +154,13 @@ l_hereToGoLoopEntry:
 l_drinkHere:
 	push	[bp+drinkIndexNumber]
 	push	[bp+orderer]
-	NEAR_CALL(tavern_drink, 4)
+	CALL(tavern_drink, near)
 	jmp	l_returnZero
 
 l_drinkToGo:
 	push	[bp+drinkIndexNumber]
 	push	[bp+orderer]
-	NEAR_CALL(tavern_getWineskin, 4)
+	CALL(tavern_getWineskin, near)
 	jmp	short l_returnZero
 
 l_hereToGoSwitch:

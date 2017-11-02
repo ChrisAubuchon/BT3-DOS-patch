@@ -7,7 +7,7 @@ readString_insertCursor proc far
 	push	ax
 	mov	ax, ch_InsertCursor
 	push	ax
-	NEAR_CALL(readString_echoChar, 4)
+	CALL(readString_echoChar, near)
 
 	FUNC_EXIT
 	retf

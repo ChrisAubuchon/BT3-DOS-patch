@@ -29,7 +29,7 @@ useItem	proc far
 	PUSH_STACK_ADDRESS(var_32)
 	PUSH_STACK_ADDRESS(var_FA)
 	push	[bp+userSlotNumber]
-	CALL(sub_188E8, 0Ah)
+	CALL(sub_188E8)
 
 	or	ax, ax
 	jz	l_emptyPockets
@@ -37,7 +37,7 @@ loc_11D4B:
 	push	ax
 	PUSH_STACK_ADDRESS(var_32)
 	PUSH_OFFSET(s_whichItem)
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 
 	mov	[bp+itemSlotNumber], ax
 	or	ax, ax
@@ -45,7 +45,7 @@ loc_11D4B:
 
 	push	[bp+itemSlotNumber]
 	push	[bp+userSlotNumber]
-	CALL(item_canBeUsed, 4)
+	CALL(item_canBeUsed)
 	or	ax, ax
 	jz	short l_powerless
 	mov	bx, g_curSpellNumber
@@ -57,7 +57,7 @@ loc_11D4B:
 	jge	short l_doUse
 	PUSH_OFFSET(s_UseOn)
 	push	[bp+targetSlotNumber]
-	CALL(getTarget, 6)
+	CALL(getTarget)
 	mov	[bp+targetSlotNumber], ax
 	or	ax, ax
 	jl	short l_return
@@ -70,7 +70,7 @@ l_doUse:
 	push	[bp+targetSlotNumber]
 	push	[bp+itemSlotNumber]
 	push	[bp+userSlotNumber]
-	NEAR_CALL(item_doSpell, 0Ah)
+	CALL(item_doSpell, near)
 	jmp	short l_waitAndReturn
 
 l_powerless:

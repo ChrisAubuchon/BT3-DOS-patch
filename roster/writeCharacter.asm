@@ -12,11 +12,11 @@ roster_writeCharacter proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	NEAR_CALL(roster_nameExists, 4)
+	CALL(roster_nameExists, near)
 	mov	[bp+var_4], ax
 	or	ax, ax
 	jge	short l_overwrite
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	mov	[bp+var_2], ax
 	CHARINDEX(ax, STACKVAR(var_2), bx)
 	lea	ax, g_rosterCharacterBuffer[bx]
@@ -28,7 +28,7 @@ roster_writeCharacter proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf, near)
 	jmp	short l_return
 
 l_overwrite:
@@ -42,7 +42,7 @@ l_overwrite:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf, near)
 
 l_return:
 	FUNC_EXIT

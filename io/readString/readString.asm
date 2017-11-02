@@ -13,17 +13,17 @@ readString proc far
 	push	si
 
 	mov	[bp+var_6], 0
-	NEAR_CALL(txt_newLine)
-	NEAR_CALL(readString_insertCursor)
+	CALL(txt_newLine, near)
+	CALL(readString_insertCursor, near)
 loc_15E2D:
-	NEAR_CALL(readChNoMouse)
+	CALL(readChNoMouse, near)
 	mov	[bp+var_2], ax
 	cmp	ax, 0Dh
 	jz	loc_15F0D
 
 	mov	[bp+var_4], ax
 	push	ax
-	NEAR_CALL(isAlphaNum, 2)
+	CALL(isAlphaNum, near)
 	or	ax, ax
 	jnz	short loc_15E6F
 	cmp	[bp+var_2], ' '
@@ -50,15 +50,15 @@ loc_15E6F:
 	push	ax
 	mov	ax, 5Fh	
 	push	ax
-	NEAR_CALL(readString_echoChar, 4)
+	CALL(readString_echoChar, near)
 	mov	bx, [bp+var_6]
 	inc	[bp+var_6]
 	lfs	si, [bp+arg_0]
 	mov	al, fs:[bx+si]
 	cbw
 	push	ax
-	NEAR_CALL(readString_printChar, 2)
-	NEAR_CALL(readString_insertCursor)
+	CALL(readString_printChar, near)
+	CALL(readString_insertCursor, near)
 loc_15EAA:
 	jmp	short loc_15F0A
 loc_15EAC:
@@ -72,10 +72,10 @@ loc_15EAC:
 	mov	al, fs:[bx+si]
 	cbw
 	push	ax
-	NEAR_CALL(text_characterWidth), 2)
+	CALL(text_characterWidth, near)
 	push	ax
-	NEAR_CALL(readString_overwriteCursor, 2)
-	NEAR_CALL(readString_insertCursor)
+	CALL(readString_overwriteCursor, near)
+	CALL(readString_insertCursor, near)
 	jmp	short loc_15F0A
 loc_15EDB:
 	cmp	[bp+var_2], 1Bh
@@ -89,12 +89,12 @@ loc_15EE1:
 	mov	al, fs:[bx+si]
 	cbw
 	push	ax
-	NEAR_CALL(text_characterWidth, 2)
+	CALL(text_characterWidth, near)
 	push	ax
-	NEAR_CALL(readString_overwriteCursor, 2)
+	CALL(readString_overwriteCursor, near)
 	jmp	short loc_15EE1
 loc_15F06:
-	NEAR_CALL(readString_insertCursor)
+	CALL(readString_insertCursor, near)
 loc_15F0A:
 	jmp	loc_15E2D
 
@@ -106,7 +106,7 @@ loc_15F0D:
 	push	ax
 	mov	ax, 5Fh	
 	push	ax
-	NEAR_CALL(readString_echoChar, 4)
+	CALL(readString_echoChar, near)
 	cmp	[bp+var_6], 0
 	jz	short l_returnNull
 	mov	ax, word ptr [bp+arg_0]

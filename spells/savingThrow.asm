@@ -14,7 +14,7 @@ spellSavingThrowHelper proc far
         sub     ax, ax				; Saving throw type is 0 for spell
         push    ax
         push    [bp+spellCaster]
-	NEAR_CALL(savingThrowCheck,4)
+	CALL(savingThrowCheck, near)
         or      ax, ax
         jnz     short l_firstCharFailedSave
         sub     ax, ax
@@ -30,7 +30,7 @@ l_partyCaster:
         sub     ax, ax				; Saving throw type is 0 for spell
         push    ax
         push    [bp+spellCaster]
-	NEAR_CALL(savingThrowCheck,4)
+	CALL(savingThrowCheck, near)
 l_return:
 	FUNC_EXIT
         retf
@@ -58,7 +58,7 @@ savingThrowCheck proc far
 	sub	ax, ax
 	push	ax
 	push	[bp+saveSource]
-	NEAR_CALL(_savingThrowCheck,4)
+	CALL(_savingThrowCheck, near)
 	mov	[bp+sourceSaveValue], ax
 
 	mov	gs:byte_4228E, 0			; Doesnt seem to do anything
@@ -67,7 +67,7 @@ savingThrowCheck proc far
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	push	ax
-	NEAR_CALL(_savingThrowCheck, 4)
+	CALL(_savingThrowCheck, near)
 	mov	[bp+targetSaveValue], ax
 
 	; Always seems to be zero. byte_41E63 isnt set anywhere
@@ -76,7 +76,7 @@ savingThrowCheck proc far
 
 	add	ax, [bp+targetSaveValue]
 	push	ax
-	NEAR_CALL(_returnXor255,2)
+	CALL(_returnXor255, near)
 	mov	[bp+targetSaveValue], ax
 	mov	gs:byte_41E63, 0
 	mov	ax, [bp+sourceSaveValue]
@@ -150,7 +150,7 @@ l_monSpellSave:
 loc_20B8D:
 	push	[bp+saveHi]
 	push	[bp+saveLo]
-	CALL(randomBetweenXandY,4)
+	CALL(randomBetweenXandY)
 	jmp	l_return
 
 	; This line is unreachable in the code. It might be correct
@@ -183,7 +183,7 @@ l_partyMonSpellSave:
 l_partyMonRandomSaveValue:
 	push	[bp+saveHi]
 	push	[bp+saveLo]
-	CALL(randomBetweenXandY,4)
+	CALL(randomBetweenXandY)
 	mov	[bp+partySaveValue], ax
 	jmp	short l_antiMagicCheck
 l_partyMemberNotMonster:
@@ -194,7 +194,7 @@ l_partyMemberNotMonster:
 	mov	ax, itemEff_alwaysHide
 	push	ax
 	push	[bp+indexNo]
-	CALL(hasEffectEquipped,4)
+	CALL(hasEffectEquipped)
 	or	ax, ax
 	jnz	short l_noLuckBonus
 	add	[bp+partySaveValue], 2
@@ -202,7 +202,7 @@ l_noLuckBonus:
 	CHARINDEX(ax, STACKVAR(indexNo), si)
 	mov	ax, 41h	
 	push	ax
-	CALL(dice_doYDX,2)
+	CALL(dice_doYDX)
 	mov	bl, gs:party.class[si]
 	sub	bh, bh
 	mov	cl, classSavingBonus[bx]
@@ -217,7 +217,7 @@ l_antiMagicCheck:
 	sub	ah, ah
 	add	ax, [bp+partySaveValue]
 	push	ax
-	NEAR_CALL(_returnXor255,2)
+	CALL(_returnXor255, near)
 l_return:
 	pop	si
 	mov	sp, bp

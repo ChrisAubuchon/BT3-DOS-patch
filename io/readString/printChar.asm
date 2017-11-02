@@ -12,9 +12,9 @@ readString_printChar proc far
 	mov	ax, [bp+inCharacter]
 	sub	ax, ' '
 	push	ax
-	NEAR_CALL(readString_echoChar, 4)
+	CALL(readString_echoChar, near)
 	push	[bp+inCharacter]
-	NEAR_CALL(text_characterWidth, 2)
+	CALL(text_characterWidth, near)
 	add	gs:g_currentCharPosition, al
 
 	FUNC_EXIT

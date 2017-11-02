@@ -15,7 +15,7 @@ camp_deleteMember proc far
 	push	si
 
 	CALL(text_clear)
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	or	ax, ax
 	jz	l_noSavedCharacters
 	mov	[bp+counter], 0
@@ -70,7 +70,7 @@ l_characterLoopExit:
 	push	[bp+counter]
 	PUSH_STACK_ADDRESS(var_154)
 	PUSH_OFFSET(s_deleteWho)
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 	mov	[bp+nameToDelete], ax
 	or	ax, ax
 	jl	l_return
@@ -78,7 +78,7 @@ l_characterLoopExit:
 	cmp	[bp+nameToDelete], ax
 	jge	short l_checkInParty
 	push	[bp+nameToDelete]
-	NEAR_CALL(camp_deleteParty, 2)
+	CALL(camp_deleteParty, near)
 	jmp	l_return
 l_checkInParty:
 	mov	si, [bp+nameToDelete]
@@ -86,7 +86,7 @@ l_checkInParty:
 	shl	si, 1
 	push	word ptr [bp+si+var_154+2]
 	push	word ptr [bp+si+var_154]
-	NEAR_CALL(party_nameExists, 4)
+	CALL(party_nameExists, near)
 	or	ax, ax
 	jl	short l_verifyDelete
 	mov	si, [bp+nameToDelete]
@@ -128,7 +128,7 @@ l_packRoster:
 	shl	si, 1
 	push	[bp+si+var_14E]
 	push	[bp+si+var_150]
-	NEAR_CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf, near)
 	inc	[bp+var_158]
 	jmp	short l_packRoster
 l_zeroName:

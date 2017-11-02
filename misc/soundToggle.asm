@@ -8,7 +8,7 @@ snd_toggle proc	far
 	neg	ax
 	mov	g_soundActiveFlag, ax
 	push	ax
-	CALL(sub_27E05, 2)
+	CALL(sub_27E05)
 
 	FUNC_EXIT
 	retf

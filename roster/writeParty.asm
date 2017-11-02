@@ -7,7 +7,7 @@ roster_writeParty proc far
 
 	FUNC_ENTER
 	CHKSTK(8)
-	NEAR_CALL(party_findEmptySlot)
+	CALL(party_findEmptySlot, near)
 	mov	[bp+emptySlot],	ax
 	mov	[bp+counter], 0
 	jmp	short loc_13769
@@ -18,7 +18,7 @@ loc_13769:
 	cmp	[bp+counter], ax
 	jge	l_return
 	push	[bp+counter]
-	CALL(roster_writeCharacter,2)
+	CALL(roster_writeCharacter)
 	jmp	loc_13766
 l_return:
 	FUNC_EXIT

@@ -11,7 +11,7 @@ getYesNo proc far
 	push	di
 	push	si
 
-	NEAR_CALL(txt_newLine)
+	CALL(txt_newLine, near)
 	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	si, ax
@@ -47,12 +47,12 @@ loc_14E0B:
 	jmp	short l_loopEntry
 
 l_clearAndReturnOne:
-	NEAR_CALL(text_clear)
+	CALL(text_clear, near)
 	mov	ax, 1
 	jmp	short l_return
 
 l_clearAndReturnZero:
-	NEAR_CALL(text_clear)
+	CALL(text_clear, near)
 	sub	ax, ax
 	jmp	short l_return
 

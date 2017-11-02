@@ -15,7 +15,7 @@ _mfunc_getString proc far
 	mov	bitsLeft, 0
 	mov	_str_capFlag, 0
 loc_157E6:
-	NEAR_CALL(_mfunc_unpackChar)
+	CALL(_mfunc_unpackChar, near)
 	lfs	bx, [bp+rbuf]
 	inc	word ptr [bp+rbuf]
 	mov	fs:[bx], al

@@ -5,13 +5,13 @@ camp_exit	proc far
 	FUNC_ENTER
 	CHKSTK
 
-	NEAR_CALL(roster_writeParty)
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_writeParty, near)
+	CALL(roster_countCharacters, near)
 	push	ax
-	NEAR_CALL(writeCharacterFile, 2)
-	NEAR_CALL(roster_countParties)
+	CALL(writeCharacterFile, near)
+	CALL(roster_countParties, near)
 	push	ax
-	NEAR_CALL(writePartyFile, 2)
+	CALL(writePartyFile, near)
 
 	mov	g_currentHour, 6
 	sub	al, al

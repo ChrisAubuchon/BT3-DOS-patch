@@ -24,7 +24,7 @@ party_printAt proc far
 	add	ax, 0Ch
 	push	ax
 	push	[bp+inString]
-	NEAR_CALL(printAt, 0Ah)
+	CALL(printAt, near)
 
 	FUNC_EXIT
 	retf

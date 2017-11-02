@@ -26,7 +26,7 @@ minimap_show proc far
 	mov	[bp+upDownValue], 6
 l_loopEntry:
 	mov	gs:g_text_clearFlag, 1
-	NEAR_CALL(text_clear)
+	CALL(text_clear, near)
 	mov	gs:g_text_clearFlag, 1
 
 	mov	[bp+ewCounter], 0
@@ -92,7 +92,7 @@ loc_155C9:
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
-	CALL(minimap_clearSquare, 4)
+	CALL(minimap_clearSquare)
 	mov	bx, [bp+ewValue]
 	mov	ax, bx
 	shl	bx, 1
@@ -126,7 +126,7 @@ loc_1562A:
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
-	CALL(minimap_setSquare, 6)
+	CALL(minimap_setSquare)
 loc_1564E:
 	cmp	word_43F12, 0
 	jz	short loc_15671
@@ -138,7 +138,7 @@ loc_1564E:
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
-	CALL(minimap_setSquare, 6)
+	CALL(minimap_setSquare)
 loc_1566F:
 	jmp	short loc_1568B
 loc_15671:
@@ -150,7 +150,7 @@ loc_15671:
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
-	CALL(minimap_setSquare, 6)
+	CALL(minimap_setSquare)
 
 loc_1568B:
 	mov	bx, [bp+nsValue]
@@ -174,7 +174,7 @@ loc_1568B:
 	sub	ch, ch
 	add	ax, cx
 	push	ax
-	NEAR_CALL(minimap_getWalls, 2)
+	CALL(minimap_getWalls, near)
 	jmp	short l_drawSquare
 
 l_squareUndiscovered:
@@ -184,7 +184,7 @@ l_squareUndiscovered:
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
-	CALL(minimap_setSquare, 6)
+	CALL(minimap_setSquare)
 
 l_drawSquare:
 	mov	ax, 1
@@ -199,7 +199,7 @@ loc_156F6:
 	jmp	loc_1557A
 
 l_getInput:
-	NEAR_CALL(getKey)
+	CALL(getKey, near)
 	cmp	ax, dosKeys_ESC
 	jz	short l_clearAndReturn
 	cmp	ax, dosKeys_upArrow
@@ -243,7 +243,7 @@ l_afterLeftLoop:
 	jmp	l_loopEntry
 
 l_clearAndReturn:
-	NEAR_CALL(text_clear)
+	CALL(text_clear, near)
 
 l_return:
 	pop	si

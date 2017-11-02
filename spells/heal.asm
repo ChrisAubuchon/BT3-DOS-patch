@@ -19,7 +19,7 @@ sp_healSpell proc far
 	mov	al, gs:bat_curTarget
 	push	ax
 	push	[bp+partySlotNumber]
-	NEAR_CALL(_doHeal,6)
+	CALL(_doHeal, near)
 	jmp	short l_return
 l_healAll:
 	mov	gs:bat_curTarget, 0
@@ -29,7 +29,7 @@ l_healAllLoop:
 	sub	ah, ah
 	push	ax
 	push	[bp+partySlotNumber]
-	NEAR_CALL(_doHeal,6)
+	CALL(_doHeal, near)
 	inc	gs:bat_curTarget
 	cmp	gs:bat_curTarget, 7
 	jb	short l_healAllLoop
@@ -63,7 +63,7 @@ _doHeal	proc far
 					; hit points.
 	jge	short l_quickFixCheck
 	push	ax
-	NEAR_CALL(rnd_Xd4,2)
+	CALL(rnd_Xd4, near)
 	mov	[bp+hpToHeal], ax
 	jmp	short l_healHp
 
@@ -84,7 +84,7 @@ l_healTimesLevel:
 	and	ax, cx
 	add	ax, 0FFh
 	push	ax
-	NEAR_CALL(rnd_Xd4,2)
+	CALL(rnd_Xd4, near)
 	mov	[bp+hpToHeal], ax
 
 l_healHp:
@@ -121,7 +121,7 @@ l_cureStoned:
 	CHARINDEX(ax, STACKVAR(target), bx)
 	and	gs:party.status[bx], 0F3h
 	push	[bp+target]
-	NEAR_CALL(_sp_postHeal,2)
+	CALL(_sp_postHeal, near)
 l_stonedReturn:
 	jmp	l_return
 
@@ -133,7 +133,7 @@ l_curePossession:
 	CHARINDEX(ax, STACKVAR(target), bx)
 	and	gs:party.status[bx], 0DFh
 	push	[bp+target]
-	NEAR_CALL(_sp_postHeal,2)
+	CALL(_sp_postHeal, near)
 l_curePossessionReturn:
 	jmp	l_return
 
@@ -145,7 +145,7 @@ l_cureDeath:
 	CHARINDEX(ax, STACKVAR(target), bx)
 	and	gs:party.status[bx], 0FBh
 	push	[bp+target]
-	NEAR_CALL(_sp_postHeal,2)
+	CALL(_sp_postHeal, near)
 l_cureDeathReturn:
 	jmp	short l_return
 
@@ -164,7 +164,7 @@ l_cureOld:
 	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
-	CALL(_doAgeStatus, 0Ah)
+	CALL(_doAgeStatus)
 l_cureOldReturn:
 	jmp	short l_return
 

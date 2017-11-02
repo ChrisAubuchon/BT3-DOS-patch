@@ -21,7 +21,7 @@ l_checkInstrument:
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(inven_hasTypeEquipped,4)
+	CALL(inven_hasTypeEquipped)
 	or	ax, ax
 	jz	short l_noInstrument
 

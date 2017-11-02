@@ -29,12 +29,12 @@ song_playSong proc far
 	shl	bx, 1
 	push	gs:musicBufs._segment[bx]
 	push	word ptr gs:musicBufs._offset[bx]
-	CALL(d3comp, 8)
+	CALL(d3comp)
 
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(inven_getTypeEqSlot, 4)
+	CALL(inven_getTypeEqSlot)
 	mov	[bp+var_4], ax
 	inc	ax
 	jz	short loc_22D59
@@ -51,7 +51,7 @@ loc_22D5E:
 	mov	dx, seg	seg026
 	push	dx
 	push	ax
-	CALL(song_initSound, 6)
+	CALL(song_initSound)
 	FUNC_EXIT
 	retf
 song_playSong endp

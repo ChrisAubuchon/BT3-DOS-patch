@@ -8,7 +8,7 @@ tav_enter proc far
 
 	FUNC_ENTER
 	CHKSTK(6)
-	NEAR_CALL(party_findEmptySlot)
+	CALL(party_findEmptySlot, near)
 	mov	[bp+lastCharNo], ax
 
 	; Reset drunk status
@@ -22,8 +22,8 @@ l_resetDrunkLoop:
 
 	mov	ax, 83
 	push	ax
-	CALL(bigpic_drawPictureNumber, 2)
-	NEAR_CALL(tav_setTitle)
+	CALL(bigpic_drawPictureNumber)
+	CALL(tav_setTitle, near)
 	mov	tavern_sayingBase, ax
 l_tavernMainLoop:
 	PUSH_OFFSET(s_tavernGreeting)
@@ -36,7 +36,7 @@ l_tavernMainLoop:
 
 l_orderDrink:
 	push	[bp+lastCharNo]
-	NEAR_CALL(tav_orderDrink, 2)
+	CALL(tav_orderDrink, near)
 	or	ax, ax
 	jz	short l_refreshParty
 	sub	ax, ax
@@ -47,7 +47,7 @@ l_refreshParty:
 
 l_talkToBarkeep:
 	push	[bp+lastCharNo]
-	NEAR_CALL(tavern_talkToBarkeep, 2)
+	CALL(tavern_talkToBarkeep, near)
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_waitAndLoop
 

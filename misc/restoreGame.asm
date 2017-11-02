@@ -17,7 +17,7 @@ restoreGame proc far
 
 	CALL(endNoncombatSong)
 	PUSH_OFFSET(s_gameSav)
-	CALL(openFile, 4)
+	CALL(openFile)
 	mov	[bp+fd], ax
 	mov	ax, 348h
 	push	ax
@@ -50,7 +50,7 @@ l_durationSpellLoopEntry:
 	cmp	lightDuration[bx], 0
 	jz	short l_doNotActivate
 	push	bx
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 l_doNotActivate:
 	inc	[bp+var_4]
 	cmp	[bp+var_4], 5

@@ -14,7 +14,7 @@ tavern_talkToBarkeep proc far
 
 	PUSH_OFFSET(s_whoTalksToBarkeep)
 	PRINTSTRING(true)
-	NEAR_CALL(readSlotNumber)
+	CALL(readSlotNumber, near)
 	mov	[bp+talkerSlotNumber], ax
 	or	ax, ax
 	jl	l_returnZero
@@ -49,7 +49,7 @@ l_skipNameCalling:
 	push	[bp+var_2]
 	push	[bp+var_4]
 	push	[bp+talkerSlotNumber]
-	NEAR_CALL(character_removeGold, 6)
+	CALL(character_removeGold, near)
 	or	ax, ax
 	jnz	short l_hasEnoughGold
 

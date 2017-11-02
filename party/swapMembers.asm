@@ -17,7 +17,7 @@ party_swapMembers proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf)
 
 	CHARINDEX(ax, STACKVAR(arg_0), bx)
 	lea	ax, party._name[bx]
@@ -29,7 +29,7 @@ party_swapMembers proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf)
 
 	CHARINDEX(ax, STACKVAR(arg_2), bx)
 	lea	ax, party._name[bx]
@@ -39,7 +39,7 @@ party_swapMembers proc far
 	mov	ax, offset newCharBuffer
 	push	dx
 	push	ax
-	CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf)
 
 	FUNC_EXIT
 	retf

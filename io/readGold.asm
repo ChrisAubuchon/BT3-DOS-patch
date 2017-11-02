@@ -11,13 +11,13 @@ readGold proc far
 	mov	ax, 10h
 	push	ax
 	PUSH_STACK_ADDRESS(stringBuffer)
-	NEAR_CALL(readString, 6)
+	CALL(readString, near)
 	or	dx, ax
 	jz	short l_returnZero
 	PUSH_STACK_ADDRESS(gold)
 	PUSH_OFFSET(s_u)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	CALL(sscanf, 0Ch)
+	CALL(sscanf)
 	mov	ax, word ptr [bp+gold]
 	mov	dx, word ptr [bp+gold+2]
 	jmp	short l_return

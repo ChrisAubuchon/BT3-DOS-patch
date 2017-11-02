@@ -24,7 +24,7 @@ l_loopEntry:
 	push	ax
 	push	[bp+_segment]
 	push	[bp+_offset]
-	CALL(strcmp, 8)
+	CALL(strcmp)
 	or	ax, ax
 	jz	l_returnValue
 	inc	[bp+loopCounter]

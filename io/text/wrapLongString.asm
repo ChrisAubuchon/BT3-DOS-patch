@@ -76,7 +76,7 @@ l_copyCharacter:
 	mov	al, byte ptr [bp+currenCharacter]
 	mov	fs:[bx], al
 	push	[bp+currenCharacter]
-	NEAR_CALL(text_characterWidth, 2)
+	CALL(text_characterWidth, near)
 	add	[bp+var_8], ax
 	cmp	[bp+var_8], 96h	
 	jl	short loc_16AEA
@@ -96,7 +96,7 @@ loc_16A97:
 	mov	al, fs:[bx]
 	cbw
 	push	ax
-	NEAR_CALL(text_characterWidth, 2)
+	CALL(text_characterWidth, near)
 	mov	[bp+var_10], ax
 	add	[bp+var_2], ax
 	sub	[bp+var_8], ax

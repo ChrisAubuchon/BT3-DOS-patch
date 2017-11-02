@@ -25,7 +25,7 @@ l_loop:
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
-	CALL(wrapNumber, 4)
+	CALL(wrapNumber)
 	mov	[bp+_sq_north],	ax
 	mov	al, g_dunWidth
 	sub	ah, ah
@@ -35,7 +35,7 @@ l_loop:
 	mov	ax, dirDeltaE[bx]
 	add	ax, [bp+_sq_east]
 	push	ax
-	CALL(wrapNumber, 4)
+	CALL(wrapNumber)
 	mov	[bp+_sq_east], ax
 	mov	bx, [bp+_sq_north]
 	shl	bx, 1

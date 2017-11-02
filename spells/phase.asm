@@ -16,13 +16,13 @@ sp_phaseDoor proc far
 	jz	loc_216E2
 	push	sq_north
 	push	sq_east
-	CALL(dun_getWalls,4)
+	CALL(dun_getWalls)
 	mov	[bp+var_2], ax
 	mov	ax, dirFacing
 	dec	ax
 	push	ax
 	push	[bp+var_2]
-	CALL(dungeon_getWallInDirection, 4)
+	CALL(dungeon_getWallInDirection)
 	mov	[bp+var_8], ax
 	mov	al, byte ptr [bp+var_8]
 	and	al, 0Fh
@@ -30,7 +30,7 @@ sp_phaseDoor proc far
 	jb	short loc_21671
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	NEAR_CALL(printSpellFizzled, 4)
+	CALL(printSpellFizzled, near)
 	jmp	short l_return
 loc_21671:
 	mov	gs:wallIsPhased, 1
@@ -67,7 +67,7 @@ loc_216E0:
 loc_216E2:
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	NEAR_CALL(printSpellFizzled,4)
+	CALL(printSpellFizzled, near)
 l_return:
 	FUNC_EXIT
 	retf

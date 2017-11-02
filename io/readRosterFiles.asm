@@ -27,7 +27,7 @@ loc_135CF:
 	jmp	short loc_135CC
 loc_135E6:
 	PUSH_OFFSET(s_thievesInf)
-	NEAR_CALL(openFile, 4)
+	CALL(openFile, near)
 	mov	[bp+fileDescriptor], ax
 	mov	ax, 9000
 	push	ax
@@ -39,7 +39,7 @@ loc_135E6:
 	CALL(read)
 	push	[bp+fileDescriptor]
 	CALL(close)
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	mov	[bp+characterCount], ax
 	mov	[bp+loopCounter], ax
 	jmp	short loc_13626
@@ -70,7 +70,7 @@ loc_13651:
 	jmp	short loc_1364E
 loc_13667:
 	PUSH_OFFSET(s_partiesInf)
-	NEAR_CALL(openFile, 4)
+	CALL(openFile, near)
 	mov	[bp+fileDescriptor], ax
 	mov	ax, 500h
 	push	ax
@@ -80,7 +80,7 @@ loc_13667:
 	push	ax
 	push	[bp+fileDescriptor]
 	CALL(read)
-	NEAR_CALL(roster_countParties)
+	CALL(roster_countParties, near)
 	mov	[bp+loopCounter], ax
 	jmp	short loc_13699
 loc_13696:

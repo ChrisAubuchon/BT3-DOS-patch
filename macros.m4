@@ -21,12 +21,6 @@ define(`CHKSTK', `ifelse(`$1', `', `xor	ax, ax', `mov	ax, $1')
 #
 define(`PUSH', `push	$1')
 
-# NEAR_CALL(function_name, [stack fixup value])
-#
-define(`NEAR_CALL', `PUSH(`cs')
-	call	near ptr $1
-ifelse(`$2', `', `dnl', `	add	sp, $2')')dnl
-
 # STACKVAR(stackVariableName)
 #
 define(`STACKVAR', `[bp+$1]')dnl
@@ -89,7 +83,7 @@ define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear)', `CALL(pri
 # DELAY([count]
 #
 define(`DELAY', `ifelse(`$1', `', `CALL(text_delayWithTable)', `PUSH_IMM($1)
-	CALL(text_delayNoTable, 2)')')
+	CALL(text_delayNoTable)')')
 
 # STRCAT([destination])
 #

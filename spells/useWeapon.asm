@@ -90,7 +90,7 @@ loc_225C3:
 	movsb
 	pop	si
 	push	[bp+spellCaster]
-	NEAR_CALL(bat_doBreathAttack, 0Ch)
+	CALL(bat_doBreathAttack, near)
 loc_2262F:
 	jmp	loc_2259C
 loc_22632:

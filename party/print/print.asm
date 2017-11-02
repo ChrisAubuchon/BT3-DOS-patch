@@ -42,7 +42,7 @@ l_copyCharName:
 l_printAc:
 	push	[bp+slotNumber]
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_clearAndPrintLine, 6)
+	CALL(party_clearAndPrintLine, near)
 
 	mov	ax, 3
 	push	ax
@@ -55,7 +55,7 @@ l_printAc:
 	push	dx
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(itoa)
+	CALL(itoa, near)
 	mov	word ptr [bp+partyLineP], ax
 	mov	word ptr [bp+partyLineP+2],	dx
 	lfs	bx, [bp+partyLineP]
@@ -66,7 +66,7 @@ l_printAc:
 	mov	ax, 10h
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_printAt, 0Ah)
+	CALL(party_printAt, near)
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	cmp	gs:party.status[bx], 0
 	jz	short l_printMaxHp
@@ -109,7 +109,7 @@ l_strcpyStatusString:
 	mov	ax, 14h
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_printAt, 0Ah)
+	CALL(party_printAt, near)
 	jmp	short l_printCurrentHp
 
 l_printMaxHp:
@@ -129,7 +129,7 @@ l_printMaxHp:
 	mov	ax, 14h
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_printAt, 0Ah)
+	CALL(party_printAt, near)
 
 l_printCurrentHp:
 	mov	ax, 3
@@ -148,7 +148,7 @@ l_printCurrentHp:
 	mov	ax, 18h
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_printAt, 0Ah)
+	CALL(party_printAt, near)
 
 	mov	ax, 3
 	push	ax
@@ -166,7 +166,7 @@ l_printCurrentHp:
 	mov	ax, 1Ch
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_printAt, 0Ah)
+	CALL(party_printAt, near)
 
 	mov	ax, 3
 	push	ax
@@ -184,7 +184,7 @@ l_printCurrentHp:
 	mov	ax, 20h	
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_printAt, 0Ah)
+	CALL(party_printAt, near)
 
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	al, gs:party.class[bx]
@@ -202,20 +202,20 @@ l_printCurrentHp:
 	mov	ax, 24h	
 	push	ax
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_printAt, 0Ah)
+	CALL(party_printAt, near)
 	jmp	short l_charNumberLoopIncrement
 
 l_emptyPartySlot:
 	mov	byte ptr [bp+partyLine], 0
 	push	[bp+slotNumber]
 	PUSH_STACK_ADDRESS(partyLine)
-	NEAR_CALL(party_clearAndPrintLine, 6)
+	CALL(party_clearAndPrintLine, near)
 
 l_charNumberLoopIncrement:
 	inc	[bp+slotNumber]
 	cmp	[bp+slotNumber], 7
 	jl	l_charNumberLoopEntry
-	NEAR_CALL(sub_1766A)
+	CALL(sub_1766A, near)
 
 l_return:
 	pop	si

@@ -8,7 +8,7 @@ writeInventoryStf proc far
 	CHKSTK(2)
 
 	PUSH_OFFSET(a_inventoryStf)
-	NEAR_CALL(openFile, 4)
+	CALL(openFile, near)
 	mov	[bp+fd], ax
 	mov	ax, 54h	
 	push	ax

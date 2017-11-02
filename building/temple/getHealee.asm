@@ -21,7 +21,7 @@ temple_getHealee proc far
 	PUSH_OFFSET(s_whoNeedsHealing)
 	PRINTSTRING(true)
 
-	NEAR_CALL(readSlotNumber)
+	CALL(readSlotNumber, near)
 	mov	[bp+healeeSlotNumber], ax
 	or	ax, ax
 	jl	l_return
@@ -41,7 +41,7 @@ temple_getHealee proc far
 	mov	[bp+var_108], dx
 
 	push	[bp+healeeSlotNumber]
-	NEAR_CALL(temple_getStatusAilment, 2)
+	CALL(temple_getStatusAilment, near)
 	mov	[bp+statusAilment], ax
 	or	ax, ax
 	jz	short l_noStatusAilment
@@ -59,7 +59,7 @@ temple_getHealee proc far
 	mov	[bp+var_108], dx
 	push	[bp+statusAilment]
 	push	[bp+healeeSlotNumber]
-	NEAR_CALL(temple_getHealPrice, 4)
+	CALL(temple_getHealPrice, near)
 	mov	[bp+healCost], ax
 	jmp	l_getPayer
 l_noStatusAilment:
@@ -94,7 +94,7 @@ l_healLevelDrain:
 	mov	ax, 8
 	push	ax
 	push	[bp+healeeSlotNumber]
-	NEAR_CALL(temple_getHealPrice, 4)
+	CALL(temple_getHealPrice, near)
 	mov	[bp+healCost], ax
 	jmp	short l_getPayer
 l_healHpAmount:
@@ -138,7 +138,7 @@ l_getPayer:
 	mov	[bp+var_108], dx
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING(true)
-	NEAR_CALL(readSlotNumber)
+	CALL(readSlotNumber, near)
 	mov	[bp+payee], ax
 	or	ax, ax
 	jl	l_return
@@ -148,7 +148,7 @@ l_getPayer:
 	push	dx
 	push	ax
 	push	[bp+payee]
-	NEAR_CALL(character_removeGold, 6)
+	CALL(character_removeGold, near)
 	or	ax, ax
 	jnz	short l_clearStatus
 	PUSH_OFFSET(s_sorryButWithoutProper)
@@ -159,7 +159,7 @@ l_clearStatus:
 	jz	short l_healLevel
 	push	[bp+statusAilment]
 	push	[bp+healeeSlotNumber]
-	NEAR_CALL(temple_clearStatusAilment, 4)
+	CALL(temple_clearStatusAilment, near)
 	jmp	short l_layHands
 l_healLevel:
 	CHARINDEX(ax, STACKVAR(healeeSlotNumber), si)
@@ -169,7 +169,7 @@ l_healLevel:
 	dec	ax
 	push	ax
 	push	[bp+healeeSlotNumber]
-	NEAR_CALL(getLevelXp, 4)
+	CALL(getLevelXp, near)
 	mov	word ptr gs:party.experience[si], ax
 	mov	word ptr gs:(party.experience+2)[si], dx
 	CHARINDEX(ax, STACKVAR(healeeSlotNumber), si)
@@ -193,7 +193,7 @@ l_layHands:
 	push	[bp+healeeSlotNumber]
 	push	dx
 	push	[bp+var_10A]
-	NEAR_CALL(printCharPronoun, 0Ah)
+	CALL(printCharPronoun, near)
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 	PUSH_OFFSET(s_elipsis)
@@ -214,7 +214,7 @@ l_layHands:
 	push	[bp+healeeSlotNumber]
 	push	dx
 	push	[bp+var_10A]
-	NEAR_CALL(printCharPronoun, 0Ah)
+	CALL(printCharPronoun, near)
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 	PUSH_OFFSET(s_isHealed)

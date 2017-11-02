@@ -13,13 +13,13 @@ party_addCharacter proc far
 	CHKSTK(6)
 	push	si
 
-	NEAR_CALL(party_getLastSlot)
+	CALL(party_getLastSlot, near)
 	mov	[bp+emptySlot],	ax
 	cmp	ax, 7
 	jge	l_return
 	mov	[bp+var_4], 0
 loc_14CB5:
-	NEAR_CALL(party_getLastSlot)
+	CALL(party_getLastSlot, near)
 	cmp	ax, [bp+var_4]
 	jle	short l_return
 	CHARINDEX(ax, STACKVAR(var_4), si)
@@ -32,14 +32,14 @@ loc_14CB5:
 	lea	ax, party._name[si]
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf, near)
 	push	[bp+var_4]
-	NEAR_CALL(party_pack, 2)
+	CALL(party_pack, near)
 	cmp	gs:newCharBuffer.class,	class_illusion
 	jz	short loc_14D29
 	cmp	gs:newCharBuffer.specAbil+3, 0
 	jnz	short loc_14D29
-	NEAR_CALL(party_findEmptySlot)
+	CALL(party_findEmptySlot, near)
 	mov	[bp+var_6], ax
 	CHARINDEX(ax, STACKVAR(var_6) ,bx)
 	lea	ax, party._name[bx]
@@ -49,7 +49,7 @@ loc_14CB5:
 	mov	ax, offset newCharBuffer
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf)
+	CALL(copyCharacterBuf, near)
 loc_14D29:
 	jmp	short loc_14D2E
 loc_14D2B:

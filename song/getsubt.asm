@@ -15,7 +15,7 @@ sing_getSongSubtractor proc far
 	mov	ax, itemEff_freeSinging
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(hasEffectEquipped, 4)
+	CALL(hasEffectEquipped)
 	or	ax, ax
 	jz	short l_returnZero
 

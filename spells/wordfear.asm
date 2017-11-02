@@ -10,7 +10,7 @@ sp_wordOfFear proc far
 	push	si
 
 	push	[bp+spellCaster]
-	NEAR_CALL(spellSavingThrowHelper,2)
+	CALL(spellSavingThrowHelper, near)
 	or	ax, ax
 	jz	short l_return
 	cmp	[bp+spellCaster], 80h

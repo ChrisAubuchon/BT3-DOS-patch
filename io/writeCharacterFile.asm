@@ -9,7 +9,7 @@ writeCharacterFile proc far
 	CHKSTK(2)
 
 	PUSH_OFFSET(s_thievesInf)
-	NEAR_CALL(openFile, 4)
+	CALL(openFile, near)
 	mov	[bp+var_2], ax
 	CHARINDEX(ax, STACKVAR(arg_0))
 	inc	ax

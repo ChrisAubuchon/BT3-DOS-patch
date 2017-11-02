@@ -18,7 +18,7 @@ icon_activate proc far
 	sub	ax, ax
 	push	ax
 	push	[bp+iconIndex]
-	NEAR_CALL(icon_draw)
+	CALL(icon_draw, near)
 
 	pop	si
 	FUNC_EXIT

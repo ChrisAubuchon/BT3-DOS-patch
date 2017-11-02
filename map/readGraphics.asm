@@ -21,7 +21,7 @@ l_retry:
 	shl	bx, 1
 	push	word ptr (map_graphicsTable+2)[bx]
 	push	word ptr map_graphicsTable[bx]
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_17513

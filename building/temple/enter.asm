@@ -11,9 +11,9 @@ temple_enter proc far
 	CALL(text_clear)
 	mov	ax, 49
 	push	ax
-	CALL(bigpic_drawPictureNumber, 2)
-	NEAR_CALL(temple_setTitle)
-	NEAR_CALL(party_findEmptySlot)
+	CALL(bigpic_drawPictureNumber)
+	CALL(temple_setTitle, near)
+	CALL(party_findEmptySlot, near)
 	mov	[bp+lastSlot], ax
 l_templeIoLoopEntry:
 	PUSH_OFFSET(s_templeGreeting)
@@ -36,11 +36,11 @@ l_skipMouseSubtract:
 	mov	ax, [bp+inputKey]
 	jmp	short l_keySwitch
 l_healCharacter:
-	NEAR_CALL(temple_getHealee)
+	CALL(temple_getHealee, near)
 	jmp	short l_ioWaitAndLoop
 l_poolGold:
 	push	[bp+lastSlot]
-	NEAR_CALL(temple_getGoldPoolee, 2)
+	CALL(temple_getGoldPoolee, near)
 l_ioWaitAndLoop:
 	mov	byte ptr g_printPartyFlag,	0
 	IOWAIT

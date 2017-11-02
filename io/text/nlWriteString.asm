@@ -10,11 +10,11 @@ text_nlWriteString proc far
 	mov	gs:g_text_clearFlag, 1		; Mark text window as clearable
 	cmp	gs:g_currentCharPosition, 0		; If not at the beginning of the line
 	jz	short l_writeString
-	NEAR_CALL(txt_newLine)				;   Newline
+	CALL(txt_newLine, near)				;   Newline
 
 l_writeString:
 	push	[bp+inString]
-	NEAR_CALL(text_writeString, 4)			; Write the string
+	CALL(text_writeString, near)			; Write the string
 
 	FUNC_EXIT
 	retf

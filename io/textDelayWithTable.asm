@@ -9,7 +9,7 @@ text_delayWithTable	proc far
 	mov	al, txtDelayTable[bx]
 	sub	ah, ah
 	push	ax
-	CALL(getKeyWithDelay, 4)
+	CALL(getKeyWithDelay)
 
 	FUNC_EXIT
 	retf

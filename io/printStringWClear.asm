@@ -2,12 +2,12 @@
 
 printStringWClear proc far
 
-	arg_0= dword ptr	 6
+	inString= dword ptr	 6
 
 	FUNC_ENTER
 	CHKSTK
-	NEAR_CALL(text_clear)
-	push	[bp+arg_0]
+	CALL(text_clear, near)
+	push	[bp+inString]
 	PRINTSTRING
 
 	mov	sp, bp

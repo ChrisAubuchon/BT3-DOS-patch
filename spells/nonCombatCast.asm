@@ -43,7 +43,7 @@ l_isSpellCaster:
 	sub	ax, ax
 	push	ax
 	push	[bp+castSlotNumber]
-	NEAR_CALL(getSpellNumber,4)
+	CALL(getSpellNumber, near)
 	mov	[bp+spellTargetFlag], ax
 	or	ax, ax
 	jl	l_returnZero
@@ -52,7 +52,7 @@ l_isSpellCaster:
 	jge	short l_doCast
 	PUSH_OFFSET(s_castAt)
 	push	[bp+spellTargetFlag]
-	CALL(getTarget,6)
+	CALL(getTarget)
 	mov	[bp+var_2], ax
 	or	ax, ax
 	jl	l_returnZero
@@ -66,7 +66,7 @@ l_doCast:
 	push	ax
 	push	g_curSpellNumber
 	push	[bp+castSlotNumber]
-	NEAR_CALL(doCastSpell,8)
+	CALL(doCastSpell, near)
 	DELAY(2)
 l_returnOne:
 	mov	ax, 1

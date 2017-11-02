@@ -9,10 +9,10 @@ bards_enter proc far
 	push	si
 
 	PUSH_OFFSET(s_bardsHall)
-	CALL(setTitle, 4)
+	CALL(setTitle)
 	mov	ax, 83
 	push	ax
-	CALL(bigpic_drawPictureNumber, 2)
+	CALL(bigpic_drawPictureNumber)
 l_loop:
 	mov	ax, offset s_bardHallGreeting
 	PRINTSTRING(true)
@@ -39,7 +39,7 @@ loc_25B7D:
 	cmp	[bp+var_4], 10Eh
 	jnz	short loc_25B8E
 l_listen:
-	NEAR_CALL(bards_listen)
+	CALL(bards_listen, near)
 loc_25B8E:
 	cmp	[bp+var_4], dosKeys_ESC
 	jz	short l_return

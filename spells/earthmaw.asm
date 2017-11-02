@@ -55,7 +55,7 @@ l_monTarget:
 	push	si
 	push	[bp+var_104]
 	push	[bp+var_106]
-	NEAR_CALL(strcatTargetName,8)
+	CALL(strcatTargetName, near)
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
 	mov	al, gs:bat_curTarget

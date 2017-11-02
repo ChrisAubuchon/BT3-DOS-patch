@@ -9,7 +9,7 @@ readChNoMouse proc far
 
 	sub	ax, ax
 	push	ax
-	NEAR_CALL(mouse_getClick, 2)
+	CALL(mouse_getClick, near)
 loc_151FF:
 	CALL(checkKeyboard)
 	or	ax, ax

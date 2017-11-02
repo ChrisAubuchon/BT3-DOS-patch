@@ -40,14 +40,14 @@ loc_129BD:
 	mov	byte ptr fs:[bx+si], 0
 	jmp	short loc_129BA
 loc_129CF:
-	NEAR_CALL(getCharacterGender)
+	CALL(getCharacterGender, near)
 	mov	gs:newCharBuffer.gender, al
 	cmp	al, 0FFh
 	jnz	short loc_129E4
 	sub	ax, ax
 	jmp	loc_12DAE
 loc_129E4:
-	NEAR_CALL(getCharacterRace)
+	CALL(getCharacterRace, near)
 	mov	gs:newCharBuffer.race, al
 	cmp	al, 0FFh
 	jnz	short loc_129F9
@@ -105,7 +105,7 @@ loc_12A5A:
 	push	ax
 	PUSH_STACK_ADDRESS(var_E8)
 	PUSH_STACK_ADDRESS(var_2E)
-	CALL(getAttributeString, 0Ah)
+	CALL(getAttributeString)
 
 	PUSH_STACK_ADDRESS(var_E8)
 	PRINTSTRING(false)
@@ -145,7 +145,7 @@ loc_12AD8:
 	push	word ptr (classString+2)[bx]
 	push	word ptr classString[bx]
 	push	[bp+var_EA]
-	NEAR_CALL(printListItem, 6)
+	CALL(printListItem, near)
 	mov	si, [bp+var_EA]
 	inc	[bp+var_EA]
 	shl	si, 1
@@ -158,7 +158,7 @@ loc_12B30:
 	mov	[bp+var_34], 1
 loc_12B3A:
 	push	[bp+var_2]
-	CALL(getKey,2)
+	CALL(getKey)
 	mov	[bp+var_22], ax
 	mov	ax, [bp+var_8]
 	add	ax, 10Eh
@@ -304,7 +304,7 @@ loc_12CFD:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(readString, 6)
+	CALL(readString)
 	or	ax, ax
 	jnz	short loc_12D25
 	jmp	loc_12DAE
@@ -317,7 +317,7 @@ loc_12D37:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	NEAR_CALL(roster_nameExists, 4)
+	CALL(roster_nameExists, near)
 	or	ax, ax
 	jl	short loc_12D6A
 	PUSH_OFFSET(s_nameAlreadyExists)
@@ -330,7 +330,7 @@ loc_12D6A:
 loc_12D6F:
 	cmp	[bp+var_4], 0
 	jnz	short loc_12CFD
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	mov	[bp+var_30], ax
 	CHARINDEX(ax, STACKVAR(var_30), bx)
 	lea	ax, g_rosterCharacterBuffer[bx]
@@ -341,7 +341,7 @@ loc_12D6F:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	NEAR_CALL(copyCharacterBuf, 8)
+	CALL(copyCharacterBuf, near)
 	CHARINDEX(ax, STACKVAR(var_30), bx)
 	mov	fs, seg022_x
 	assume fs:seg022

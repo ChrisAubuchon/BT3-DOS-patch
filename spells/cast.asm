@@ -19,7 +19,7 @@ spell_cast proc	far
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	CALL(map_execute, 6)
+	CALL(map_execute)
 	or	ax, ax
 	jnz	l_return
 

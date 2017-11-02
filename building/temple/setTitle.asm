@@ -52,7 +52,7 @@ l_setTitle:
 	shl	bx, 1
 	push	word ptr (templeTitles+2)[bx]
 	push	word ptr templeTitles[bx]
-	CALL(setTitle, 4)
+	CALL(setTitle)
 
 	pop	si
 	FUNC_EXIT

@@ -10,7 +10,7 @@ bat_doCombatSong proc far
 	CHKSTK(2)
 	push	[bp+songNumber]
 	push	[bp+partySlotNumber]
-	CALL(song_playSong, 4)
+	CALL(song_playSong)
 
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	cmp	gs:party.class[bx], class_monster
@@ -73,7 +73,7 @@ l_overture:
 	mov	ax, 237
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(_batchSpellCast, 4)
+	CALL(_batchSpellCast)
 	jmp	short l_return
 
 l_shield:

@@ -52,7 +52,7 @@ loc_17577:
 	shl	bx, 1
 	push	word ptr (monsterFiles+2)[bx]
 	push	word ptr monsterFiles[bx]
-	CALL(openFile, 6)
+	CALL(open)
 	mov	[bp+_fd], ax
 	inc	ax
 	jnz	short loc_175C4
@@ -80,7 +80,7 @@ loc_175D4:
 	push	dx
 	push	ax
 	PUSH	[bp+_fd]
-	CALL(lseek, 8)
+	CALL(lseek)
 
 	mov	ax, 2
 	push	ax
@@ -109,7 +109,7 @@ l_read_data:
 	push	dx
 	push	ax
 	push	[bp+_fd]
-	CALL(lseek, 8)
+	CALL(lseek)
 
 	push	[bp+_size]
 	mov	ax, offset monsterBuf

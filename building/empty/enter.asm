@@ -21,9 +21,9 @@ loc_14956:
 
 loc_14959:
 	push	ax
-	CALL(bigpic_drawPictureNumber, 2)
+	CALL(bigpic_drawPictureNumber)
 	PUSH_OFFSET(s_building)
-	CALL(setTitle, 4)
+	CALL(setTitle)
 	PUSH_OFFSET(s_emptyBuilding)
 	PRINTSTRING(true)
 	IOWAIT

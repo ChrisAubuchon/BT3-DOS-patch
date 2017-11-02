@@ -12,7 +12,7 @@ party_getLastSlot proc far
 	mov	[bp+loopCounter], 6
 l_loopEntry:
 	push	[bp+loopCounter]
-	NEAR_CALL(party_isSlotActive, 2)
+	CALL(party_isSlotActive, near)
 	or	ax, ax
 	jnz	l_returnCounter
 	dec	[bp+loopCounter]

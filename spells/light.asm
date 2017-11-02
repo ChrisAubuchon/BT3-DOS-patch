@@ -19,7 +19,7 @@ sp_lightSpell proc far
 	mov	lightDuration, al
 	sub	ax, ax
 	push	ax
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 	mov	bx, [bp+spellEffect]
 	mov	al, lightDetectList[bx]
 	mov	gs:gl_detectSecretDoorFlag, al

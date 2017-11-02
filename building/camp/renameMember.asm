@@ -16,7 +16,7 @@ camp_renameMember proc far
 	push	si
 
 	CALL(text_clear)
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	or	ax, ax
 	jz	l_noSavedCharacters
 loc_12835:
@@ -45,7 +45,7 @@ l_selectFromList:
 	push	[bp+loopCounter]
 	PUSH_STACK_ADDRESS(characterNameList)
 	PUSH_OFFSET(s_renameWho)
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 	mov	[bp+nameSelected], ax
 	or	ax, ax
 	jl	l_return
@@ -86,11 +86,11 @@ l_clearNameLoopEntry:
 	lea	ax, [bp+nameBuf]
 	push	ss
 	push	ax
-	CALL(readString, 6)
+	CALL(readString)
 	or	ax, ax
 	jz	short l_return
 	PUSH_STACK_ADDRESS(nameBuf)
-	NEAR_CALL(roster_nameExists, 4)
+	CALL(roster_nameExists, near)
 	or	ax, ax
 	jl	short l_renameCharacter
 	PUSH_OFFSET(s_nameAlreadyExists)

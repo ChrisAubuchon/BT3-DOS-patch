@@ -31,7 +31,7 @@ l_loopEnter:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(memcpy, 0Ah)
+	CALL(memcpy)
 l_nextChar:
 	inc	[bp+var_2]
 	cmp	[bp+var_2], 7

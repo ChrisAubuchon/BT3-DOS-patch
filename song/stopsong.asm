@@ -13,7 +13,7 @@ song_stopPlaying proc far
 	jnz	short l_return			; Not the current singer
 	cmp	gs:g_currentSongPlusOne, ah
 	jz	short l_return			; No song playing
-	NEAR_CALL(endNoncombatSong)
+	CALL(endNoncombatSong, near)
 l_return:
 	mov	sp, bp
 	pop	bp

@@ -14,7 +14,7 @@ camp_enter proc	far
 	CHKSTK(58h)
 	push	si
 
-	CALL(endNonCombatSong)
+	CALL(endNoncombatSong)
 
 	; End all duration spells when entering camp
 	mov	[bp+loopCounter], 0
@@ -23,7 +23,7 @@ l_durationSpellLoopEntry:
 	cmp	lightDuration[bx], 0
 	jz	short l_notActive
 	push	bx
-	CALL(icon_deactivate, 2)
+	CALL(icon_deactivate)
 l_notActive:
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 5
@@ -31,24 +31,24 @@ l_notActive:
 
 	mov	gs:gl_detectSecretDoorFlag, 0
 	mov	gs:songACBonus,	0
-	NEAR_CALL(readRosterFiles)
-	NEAR_CALL(roster_writeParty)
+	CALL(readRosterFiles, near)
+	CALL(roster_writeParty, near)
 	PUSH_OFFSET(s_ruinTitle)
-	CALL(setTitle, 4)
+	CALL(setTitle)
 	sub	ax, ax
 	push	ax
-	CALL(bigpic_drawPictureNumber, 2)
+	CALL(bigpic_drawPictureNumber)
 l_mainIoLoopEntry:
 	CALL(text_clear)
 	PUSH_STACK_ADDRESS(campOptionList)
-	NEAR_CALL(camp_configOptionList, 4)
+	CALL(camp_configOptionList, near)
 	PUSH_STACK_ADDRESS(optionMouse)
 	PUSH_STACK_ADDRESS(optionKeys)
 	PUSH_STACK_ADDRESS(campOptionList)
 	PUSH_OFFSET(s_campMenuString)
-	CALL(printVarString, 10h)
+	CALL(printVarString)
 	mov	[bp+mouseBitmask], ax
-	NEAR_CALL(party_findEmptySlot)
+	CALL(party_findEmptySlot, near)
 	mov	[bp+lastActiveSlot], ax
 	mov	ax, [bp+mouseBitmask]
 	or	ah, 20h
@@ -65,12 +65,12 @@ l_mainIoLoopEntry:
 	mov	ax, [bp+currentKey]
 	sub	ax, '1'
 	push	ax
-	CALL(printCharacter, 2)
+	CALL(printCharacter)
 	sub	ax, ax
 	push	ax
-	CALL(bigpic_drawPictureNumber, 2)
+	CALL(bigpic_drawPictureNumber)
 	PUSH_OFFSET(s_ruinTitle)
-	CALL(setTitle, 4)
+	CALL(setTitle)
 	jmp	short loc_135A7
 
 l_checkKeyAgainstOptions:

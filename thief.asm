@@ -78,15 +78,15 @@ _main proc far
 	mov	ax, offset s_thiefCfg
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+var_4], ax
 
 	inc	ax
 	jnz	short loc_10039
 	mov	ax, 4
 	push	ax
-	call	far ptr	sub_28424		; Some kind of cleanup and exit
+	call	far ptr sub_28424
 	add	sp, 2
 
 loc_10039:
@@ -100,6 +100,7 @@ loc_10039:
 	call(read)
 	push	[bp+var_4]
 	call	close
+	add	sp, 2
 	mov	gs, seg027_x
 	push	gs:word_4243E
 	call	disk1Swap
@@ -121,8 +122,8 @@ loc_1007E:
 	mov	ax, offset s_thiefCfg
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_100C5
@@ -142,6 +143,7 @@ loc_100C5:
 	add	sp, 8
 	push	[bp+var_4]
 	call	close
+	add	sp, 2
 loc_100E7:
 	sub	ax, ax
 	push	ax
@@ -151,8 +153,8 @@ loc_100E7:
 	shl	bx, 1
 	push	word ptr (graphicsDrivers+2)[bx]
 	push	word ptr graphicsDrivers[bx]
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_1011C
@@ -179,6 +181,7 @@ loc_1011C:
 	call(read)
 	push	[bp+var_4]
 	call	close
+	add	sp, 2
 	mov	ax, 1
 	push	ax
 	call	far ptr	vid_setMode
@@ -192,8 +195,8 @@ loc_1011C:
 	mov	ax, offset s_firstTitle
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_1018E
@@ -213,6 +216,7 @@ loc_1018E:
 	add	sp, 8
 	push	[bp+var_4]
 	call	close
+	add	sp, 2
 	mov	[bp+var_6], 0
 	jmp	short loc_101BD
 loc_101BA:
@@ -232,8 +236,6 @@ loc_101BD:
 	jmp	short loc_101BA
 loc_101E6:
 	mov	ax, 33000
-	sub	dx, dx
-	push	dx
 	push	ax
 	call	_mallocMaybe
 	add	sp, 2
@@ -263,8 +265,8 @@ loc_101E6:
 	mov	ax, offset s_titleScreen
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_10266
@@ -286,6 +288,7 @@ loc_10266:
 	add	sp, 8
 	push	[bp+var_4]
 	call	close
+	add	sp, 2
 	push	gs:word_42564
 	push	gs:word_42562
 	mov	ax, offset g_rosterCharacterBuffer
@@ -310,8 +313,8 @@ loc_10266:
 	mov	ax, offset s_musicAll
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_102FB
@@ -405,6 +408,7 @@ loc_10366:
 loc_103D4:
 	push	[bp+var_4]
 	call	close
+	add	sp, 2
 	call	sub_27F63
 	mov	ax, 7
 	push	ax
@@ -424,8 +428,8 @@ loc_103D4:
 	mov	ax, offset s_bardscr
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_1043E
@@ -447,6 +451,7 @@ loc_1043E:
 	add	sp, 8
 	push	[bp+var_4]
 	call	close
+	add	sp, 2
 	push	gs:word_42564
 	push	gs:word_42562
 	mov	ax, offset g_rosterCharacterBuffer
@@ -2717,6 +2722,7 @@ loc_11B3E:
 	push	ds
 	push	ax
 	call	open
+	add	sp, 6
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short l_doSave
@@ -2765,6 +2771,7 @@ l_doSave:
 
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 
 	mov	ax, offset s_gameHasBeenSaved
 	push	ds
@@ -2840,6 +2847,7 @@ restoreGame proc far
 
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 
 	mov	[bp+var_4], 0
 
@@ -3384,6 +3392,7 @@ loc_12170:
 	push	[bp+var_108]
 	push	[bp+var_10A]
 	call	itoa
+	add	sp, 0Ah
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 
@@ -3449,6 +3458,7 @@ loc_1222D:
 	push	[bp+var_108]
 	push	[bp+var_10A]
 	call	itoa
+	add	sp, 0Ah
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 	mov	ax, [bp+pacesEast]
@@ -5470,7 +5480,7 @@ camp_enter proc	far
 	call	someStackOperation
 	push	si
 
-	call	endNonCombatSong
+	call	endNoncombatSong
 
 	; End all duration spells when entering camp
 	mov	[bp+loopCounter], 0
@@ -5644,6 +5654,7 @@ loc_135E6:
 	add	sp, 8
 	push	[bp+fileDescriptor]
 	call	close
+	add	sp, 2
 	push	cs
 	call	near ptr roster_countCharacters
 	mov	[bp+characterCount], ax
@@ -5711,6 +5722,7 @@ loc_13699:
 loc_136AF:
 	push	[bp+fileDescriptor]
 	call	close
+	add	sp, 2
 	mov	ax, [bp+characterCount]
 	jmp	short $+2
 	pop	si
@@ -5751,6 +5763,7 @@ writeCharacterFile proc far
 	add	sp, 8
 	push	[bp+var_2]
 	call	close
+	add	sp, 2
 	mov	sp, bp
 	pop	bp
 	retf
@@ -5789,6 +5802,7 @@ writePartyFile proc far
 	add	sp, 8
 	push	[bp+var_2]
 	call	close
+	add	sp, 2
 	mov	sp, bp
 	pop	bp
 	retf
@@ -6215,6 +6229,7 @@ l_resetDrunkLoop:
 	add	sp, 2
 	push	cs
 	call	near ptr tav_setTitle
+	add	sp, 2
 	mov	tavern_sayingBase, ax
 l_tavernMainLoop:
 	mov	ax, offset s_tavernGreeting
@@ -7223,6 +7238,7 @@ l_getPayer:
 	push	[bp+var_108]
 	push	[bp+var_10A]
 	call	itoa
+	add	sp, 0Ah
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 	mov	ax, offset s_templeGoldForfeit
@@ -8202,6 +8218,7 @@ writeInventoryStf proc far
 	add	sp, 8
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 
 	mov	sp, bp
 	pop	bp
@@ -8237,6 +8254,7 @@ readInventoryStf proc far
 	add	sp, 8
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 
 	mov	sp, bp
 	pop	bp
@@ -8406,6 +8424,7 @@ loc_14CB5:
 	push	ax
 	push	cs
 	call	near ptr copyCharacterBuf
+	add	sp, 8
 loc_14D29:
 	jmp	short loc_14D2E
 loc_14D2B:
@@ -9602,6 +9621,7 @@ loc_156F6:
 l_getInput:
 	push	cs
 	call	near ptr getKey
+	add	sp, 2
 	cmp	ax, dosKeys_ESC
 	jz	short l_clearAndReturn
 	cmp	ax, dosKeys_upArrow
@@ -10523,6 +10543,7 @@ loc_15EAC:
 	push	ax
 	push	cs
 	call	near ptr text_characterWidth
+	add	sp, 2
 	push	ax
 	push	cs
 	call	near ptr readString_overwriteCursor
@@ -10983,6 +11004,7 @@ printStringAndThreeDigits proc far
 	push	word ptr [bp+var_4+2]
 	push	word ptr [bp+var_4]
 	call	itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
 
@@ -11233,7 +11255,7 @@ stairsPluralHelper endp
 
 printStringWClear proc far
 
-	arg_0= dword ptr	 6
+	inString= dword ptr	 6
 
 	push	bp
 	mov	bp, sp
@@ -11241,7 +11263,7 @@ printStringWClear proc far
 	call	someStackOperation
 	push	cs
 	call	near ptr text_clear
-	push	[bp+arg_0]
+	push	[bp+inString]
 	call	printString
 	add	sp, 4
 
@@ -11698,8 +11720,6 @@ loc_16745:
 loc_1675E:
 	mov	gs:byte_422A0, 0
 	mov	ax, 80E8h
-	sub	dx, dx
-	push	dx
 	push	ax
 	call	_mallocMaybe
 	add	sp, 2
@@ -11712,8 +11732,8 @@ loc_1677F:
 	mov	ax, offset s_victory
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_167BC
@@ -11746,6 +11766,7 @@ loc_167BC:
 	add	sp, 8
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 
 	push	[bp+var_25C]
 	push	[bp+var_25E]
@@ -11900,6 +11921,7 @@ loc_1694C:
 	add	sp, 8
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 	push	[bp+var_25C]
 	push	[bp+var_25E]
 	mov	ax, offset g_rosterCharacterBuffer
@@ -12145,6 +12167,7 @@ l_printAc:
 	push	ax
 	push	cs
 	call	near ptr itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+partyLineP], ax
 	mov	word ptr [bp+partyLineP+2],	dx
 	lfs	bx, [bp+partyLineP]
@@ -12226,6 +12249,7 @@ l_printMaxHp:
 	push	ss
 	push	ax
 	call	itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+partyLineP], ax
 	mov	word ptr [bp+partyLineP+2], dx
 	lfs	bx, [bp+partyLineP]
@@ -12255,6 +12279,7 @@ l_printCurrentHp:
 	push	ss
 	push	ax
 	call	itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+partyLineP], ax
 	mov	word ptr [bp+partyLineP+2], dx
 	lfs	bx, [bp+partyLineP]
@@ -12283,6 +12308,7 @@ l_printCurrentHp:
 	push	ss
 	push	ax
 	call	itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+partyLineP], ax
 	mov	word ptr [bp+partyLineP+2], dx
 	lfs	bx, [bp+partyLineP]
@@ -12311,6 +12337,7 @@ l_printCurrentHp:
 	push	ss
 	push	ax
 	call	itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+partyLineP], ax
 	mov	word ptr [bp+partyLineP+2], dx
 	lfs	bx, [bp+partyLineP]
@@ -12719,8 +12746,8 @@ l_retry:
 	mov	ax, offset s_iconFilePath
 	push	ds
 	push	ax
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+fd], ax
 	cmp	ax, 0FFFFh
 	jnz	l_asdf
@@ -12783,6 +12810,7 @@ l_asdf:
 	add	sp, 6
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 
 	mov	sp, bp
 	pop	bp
@@ -12860,8 +12888,8 @@ loc_1721B:
 	shl	bx, 1
 	push	word ptr lowPic[bx-2]
 	push	word ptr lowPic[bx-4]
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_1726A
@@ -12935,6 +12963,7 @@ loc_1726A:
 	add	sp, 4
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 	push	gs:bigpicCellData_seg
 	push	gs:bigpicCellData_off
 	push	cs
@@ -13031,8 +13060,8 @@ loc_173AD:
 	shl	bx, 1
 	push	word ptr (disk3+2)[bx]
 	push	word ptr disk3[bx]
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_173FA
@@ -13113,6 +13142,7 @@ loc_173FA:
 	add	sp, 4
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 
 	mov	sp, bp
 	pop	bp
@@ -13144,8 +13174,8 @@ l_retry:
 	shl	bx, 1
 	push	word ptr (map_graphicsTable+2)[bx]
 	push	word ptr map_graphicsTable[bx]
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_17513
@@ -13185,6 +13215,7 @@ loc_17513:
 	add	sp, 8
 	push	[bp+fd]
 	call	close
+	add	sp, 2
 l_return:
 	mov	sp, bp
 	pop	bp
@@ -13248,8 +13279,8 @@ loc_17577:
 	shl	bx, 1
 	push	word ptr (monsterFiles+2)[bx]
 	push	word ptr monsterFiles[bx]
-	call	openFile
-	add	sp, 4
+	call	open
+	add	sp, 6
 	mov	[bp+_fd], ax
 	inc	ax
 	jnz	short loc_175C4
@@ -13334,6 +13365,7 @@ l_read_data:
 
 	push	[bp+_fd]
 	call	close
+	add	sp, 2
 
 	mov	sp, bp
 	pop	bp
@@ -13743,6 +13775,7 @@ icon_activate proc far
 	push	[bp+iconIndex]
 	push	cs
 	call	near ptr icon_draw
+	add	sp, 4
 
 	pop	si
 	mov	sp, bp
@@ -20680,6 +20713,7 @@ loc_206A1:
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
 	call	itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+outputStringP], ax
 	mov	word ptr [bp+outputStringP+2], dx
 	mov	ax, gs:damageAmount
@@ -21628,7 +21662,6 @@ sp_teleport proc far
 	push	[bp+spellCaster]
 	push	cs
 	call	near ptr printSpellFizzled
-	add	sp, 4
 	jmp	l_return
 loc_20FCB:
 	mov	word_4EE66, 0
@@ -22018,6 +22051,7 @@ _sp_teleportPrintNum proc far
 	push	ss
 	push	ax
 	call	itoa
+	add	sp, 0Ah
 	mov	word ptr [bp+var_24], ax
 	mov	word ptr [bp+var_24+2], dx
 	cmp	[bp+arg_2], 0
@@ -22332,7 +22366,6 @@ sp_phaseDoor proc far
 	push	[bp+spellCaster]
 	push	cs
 	call	near ptr printSpellFizzled
-	add	sp, 4
 	jmp	short l_return
 loc_21671:
 	mov	gs:wallIsPhased, 1
@@ -22371,7 +22404,6 @@ loc_216E2:
 	push	[bp+spellCaster]
 	push	cs
 	call	near ptr printSpellFizzled
-	add	sp, 4
 l_return:
 	mov	sp, bp
 	pop	bp
@@ -22556,6 +22588,7 @@ loc_21840:
 	push	[bp+var_114]
 	push	[bp+var_116]
 	call	itoa
+	add	sp, 0Ah
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	ax, [bp+var_118]
@@ -22634,6 +22667,7 @@ loc_2194B:
 	push	[bp+var_114]
 	push	[bp+var_116]
 	call	itoa
+	add	sp, 0Ah
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	ax, [bp+var_112]
@@ -22716,6 +22750,7 @@ loc_21A2F:
 	push	[bp+var_114]
 	push	[bp+var_116]
 	call	itoa
+	add	sp, 0Ah
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
 	mov	ax, [bp+var_112]
@@ -22882,9 +22917,6 @@ sp_spellbind proc far
 	sub	ax, ax
 	push	ax
 	push	[bp+spellCaster]
-	push	cs
-	call	near ptr savingThrowCheck
-	add	sp, 4
 	or	ax, ax
 	jz	l_printNoEffect
 
@@ -23868,8 +23900,7 @@ _sp_useLightObj	proc far
 	add	sp, 4
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
-	push	cs
-	call	near ptr sp_lightSpell
+	call	sp_lightSpell
 	add	sp, 4
 
 	mov	sp, bp
@@ -23898,8 +23929,7 @@ _sp_useAcorn proc far
 	mov	ax, 94h	
 	push	ax
 	push	word ptr [bp+spellCaster]
-	push	cs
-	call	near ptr _batchSpellCast
+	call	_batchSpellCast
 	add	sp, 4
 	mov	sp, bp
 	pop	bp

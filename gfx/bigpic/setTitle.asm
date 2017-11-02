@@ -24,7 +24,7 @@ setTitle proc far
 	mov	ax, 70h	
 	push	ax
 	push	[bp+inString]
-	NEAR_CALL(centerString, 6)
+	CALL(centerString, near)
 	mov	[bp+startingColumn], ax
 	sub	ax, ax
 	push	ax
@@ -34,7 +34,7 @@ setTitle proc far
 	add	ax, 12h
 	push	ax
 	push	[bp+inString]
-	NEAR_CALL(writeStringAt, 0Ah)
+	CALL(writeStringAt, near)
 
 	mov	sp, bp
 	pop	bp

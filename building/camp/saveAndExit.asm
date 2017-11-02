@@ -6,19 +6,19 @@ camp_saveAndExit proc far
 	CHKSTK()
 	PUSH_OFFSET(s_saveAndExit)
 	PRINTSTRING(true)
-	NEAR_CALL(roster_writeParty)
+	CALL(roster_writeParty, near)
 	sub	ax, ax
 	push	ax
 	CALL(getKey)
 	cmp	ax, 0Dh
 	jnz	short loc_13412
 	mov	buildingRvalMaybe, 0FFh
-	NEAR_CALL(roster_countCharacters)
+	CALL(roster_countCharacters, near)
 	push	ax
-	NEAR_CALL(writeCharacterFile, 2)
-	NEAR_CALL(roster_countParties)
+	CALL(writeCharacterFile, near)
+	CALL(roster_countParties, near)
 	push	ax
-	NEAR_CALL(writePartyFile, 2)
+	CALL(writePartyFile, near)
 loc_13412:
 	CALL(text_clear)
 	mov	sp, bp

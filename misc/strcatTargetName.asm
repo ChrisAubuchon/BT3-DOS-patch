@@ -30,7 +30,7 @@ l_monTarget:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(unmaskString, 8)
+	CALL(unmaskString)
 
 	cmp	[bp+targetCount], 0
 	jz	short l_monSingular
@@ -43,7 +43,7 @@ l_monSingular:
 	mov	al, byte ptr [bp+monName]
 	cbw
 	push	ax
-	CALL(str_startsWithVowel, 2)
+	CALL(str_startsWithVowel)
 	or	ax, ax
 	jz	short l_appendSpace
 	APPEND_CHAR(STACKVAR(destString), 'n')

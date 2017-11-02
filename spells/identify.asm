@@ -16,7 +16,7 @@ sp_identifySpell proc far
 	PUSH_STACK_ADDRESS(var_32)
 	PUSH_STACK_ADDRESS(var_F4)
 	push	[bp+spellCaster]
-	CALL(sub_188E8,0Ah)
+	CALL(sub_188E8)
 	mov	[bp+var_34], ax
 	or	ax, ax
 	jnz	short loc_22080
@@ -28,7 +28,7 @@ loc_22080:
 	push	[bp+var_34]
 	PUSH_STACK_ADDRESS(var_32)
 	PUSH_OFFSET(s_whichItem)
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 	mov	[bp+var_2], ax
 loc_22098:
 	cmp	[bp+var_2], 0

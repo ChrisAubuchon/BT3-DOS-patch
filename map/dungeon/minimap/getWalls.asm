@@ -17,7 +17,7 @@ l_loopEntry:
 	dec	ax
 	push	ax
 	push	[bp+squareWalls]
-	CALL(dungeon_getWallInDirection, 4)
+	CALL(dungeon_getWallInDirection)
 	and	ax, 0Fh
 	mov	bx, ax
 	cmp	minimap_bitmaskOffsetList[bx],	80h
@@ -30,7 +30,7 @@ l_loopEntry:
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
-	CALL(minimap_setSquare, 6)
+	CALL(minimap_setSquare)
 l_loopIncrement:
 	inc	[bp+directionLoopCounter]
 	cmp	[bp+directionLoopCounter], 4

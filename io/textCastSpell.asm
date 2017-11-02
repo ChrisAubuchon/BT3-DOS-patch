@@ -17,10 +17,10 @@ text_castSpell proc far
 
 	PUSH_IMM(4)
 	PUSH_STACK_ADDRESS(_instr)
-	CALL(readString, 6)
+	CALL(readString)
 
 	PUSH_STACK_ADDRESS(_instr)
-	CALL(_strlen, 4)
+	CALL(_strlen)
 	cmp	ax, 4
 	jl	l_fail_no_print
 
@@ -34,7 +34,7 @@ l_toupper_start:
 	mov	al, ss:[si+bx]
 	sub	ah, ah
 	push	ax
-	CALL(_str_capitalize,2)
+	CALL(_str_capitalize)
 
 	mov	bx, [bp+counter]
 	mov	ss:[si+bx], al
@@ -70,7 +70,7 @@ l_spellNotFound:
 l_spellFound:
 	push	[bp+counter]
 	push	[bp+arg_0]
-	CALL(mage_hasLearnedSpell, 4)
+	CALL(mage_hasLearnedSpell)
 	or	ax, ax
 	jz	l_notLearned
 	

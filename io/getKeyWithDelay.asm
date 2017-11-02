@@ -14,7 +14,7 @@ getKeyWithDelay proc far
 	mov	ax, [bp+delayTime]
 	add	ax, _clockTicks
 	mov	[bp+var_2], ax
-	NEAR_CALL(sub_1766A)
+	CALL(sub_1766A, near)
 
 l_loopEntry:
 	CALL(checkKeyboard)
@@ -72,8 +72,8 @@ l_skipFastCheck:
 
 l_doTimeEvents:
 	CALL(checkMouse)
-	NEAR_CALL(doRealtimeEvents)
-	NEAR_CALL(party_print)
+	CALL(doRealtimeEvents, near)
+	CALL(party_print, near)
 	mov	ax, [bp+var_2]
 	cmp	_clockTicks, ax
 	jl	short loc_1550B
@@ -83,7 +83,7 @@ loc_1550B:
 	cmp	mouse_moved, 0
 	jz	short loc_15520
 	call	far ptr	sub_3E974
-	NEAR_CALL(sub_1766A)
+	CALL(sub_1766A, near)
 loc_15520:
 	jmp	l_loopEntry
 l_return:

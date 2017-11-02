@@ -86,7 +86,7 @@ loc_17AA3:
 	cbw
 	push	ax
 	push	bx
-	NEAR_CALL(icon_draw, 4)
+	CALL(icon_draw, near)
 
 loc_17AE0:
 	mov	bx, [bp+iconNumber]

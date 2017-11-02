@@ -41,20 +41,20 @@ l_watchwood:
 	mov	gs:gl_detectSecretDoorFlag, 0FFh
 	sub	ax, ax
 	push	ax
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 	jmp	short l_return
 l_overture:
 	mov	compassDuration, 0FFh
 	mov	ax, 1
 	push	ax
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 	jmp	short l_return
 l_shield:
 	mov	gs:songHalfDamage, 1
 	mov	shieldDuration, 0FFh
 	mov	ax, 3
 	push	ax
-	CALL(icon_activate, 2)
+	CALL(icon_activate)
 	jmp	short l_return
 l_songSwitch:
 	cmp	ax, song_safety

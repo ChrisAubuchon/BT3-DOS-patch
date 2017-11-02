@@ -29,7 +29,7 @@ l_loop:
 	mov	al, fs:[bx]
 	cbw
 	push	ax
-	NEAR_CALL(text_characterWidth, 2)
+	CALL(text_characterWidth, near)
 	add	[bp+column], ax
 	inc	word ptr [bp+inString]
 	jmp	short l_loop

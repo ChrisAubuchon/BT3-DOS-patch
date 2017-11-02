@@ -50,7 +50,7 @@ loc_20118:
 	movsw
 	movsb
 	push	[bp+partySlotNumber]
-	NEAR_CALL(bat_doBreathAttack, 0Ch)
+	CALL(bat_doBreathAttack, near)
 	pop	si
 	pop	di
 	mov	sp, bp

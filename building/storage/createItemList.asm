@@ -25,7 +25,7 @@ storage_createItemList proc far
 	mov	[bp+itemListLength], 0
 	mov	ax, 46h	
 	push	ax
-	CALL(checkProgressFlags, 2)
+	CALL(checkProgressFlags)
 	or	ax, ax
 	jz	short l_flagNotSet
 	mov	ax, 28

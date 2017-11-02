@@ -37,7 +37,7 @@ loc_1275A:
 	push	ax
 	PUSH_STACK_ADDRESS(partyMemberList)
 	PUSH_OFFSET(s_whichPartyMemberToRemove)
-	CALL(text_scrollingWindow, 0Ah)
+	CALL(text_scrollingWindow)
 
 	mov	[bp+slotToRemove], ax
 	or	ax, ax
@@ -45,22 +45,22 @@ loc_1275A:
 l_removeAll:
 	cmp	[bp+slotToRemove], 0
 	jnz	short l_removeOneCharacter
-	NEAR_CALL(party_clear)
+	CALL(party_clear, near)
 	jmp	short l_saveAndReturn
 l_removeOneCharacter:
 	mov	ax, [bp+slotToRemove]
 	dec	ax
 	push	ax
-	CALL(roster_writeCharacter,2)
+	CALL(roster_writeCharacter)
 
 	mov	ax, [bp+slotToRemove]
 	dec	ax
 	push	ax
-	NEAR_CALL(party_pack, 2)
+	CALL(party_pack, near)
 l_saveAndReturn:
 	CALL(roster_countCharacters)
 	push	ax
-	CALL(writeCharacterFile,2)
+	CALL(writeCharacterFile)
 	mov	byte ptr g_printPartyFlag,	0
 l_return:
 	pop	si

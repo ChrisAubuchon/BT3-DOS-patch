@@ -40,7 +40,7 @@ bat_doBreathAttack proc	far
 l_partyMultiplier:
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	push	gs:party.level[bx]
-	NEAR_CALL(_returnXor255,2)
+	CALL(_returnXor255, near)
 	mov	[bp+levelMultiplier], al
 
 l_allFoesCheck:
@@ -88,7 +88,7 @@ loc_201E6:
 	inc	[bp+partyAttackRval]
 	push	[bp+spellRange]
 	push	[bp+partySlotNumber]
-	NEAR_CALL(bat_isPartyInRange, 4)
+	CALL(bat_isPartyInRange, near)
 	or	ax, ax
 	jnz	loc_20324
 	PUSH_OFFSET(s_partyTooFarAway)
@@ -142,7 +142,7 @@ loc_202B3:
 	push	ax
 	push	dx
 	push	word ptr [bp+outputStringP]
-	NEAR_CALL(strcatTargetName,8)
+	CALL(strcatTargetName, near)
 	mov	word ptr [bp+outputStringP], ax
 	mov	word ptr [bp+outputStringP+2], dx
 	mov	ax, offset s_elipsisNl
@@ -175,7 +175,7 @@ loc_20345:
 	jbe	short loc_20379
 	mov	al, [bp+arg_6]
 	push	ax
-	CALL(dice_doYDX, 2)
+	CALL(dice_doYDX)
 	add	gs:damageAmount, ax
 	cmp	gs:damageAmount, 20000
 	jle	short loc_20377
@@ -203,7 +203,7 @@ loc_203AA:
 	sub	ah, ah
 	push	ax
 	push	bx
-	NEAR_CALL(_canAttackChar, 4)
+	CALL(_canAttackChar, near)
 	or	ax, ax
 	jz	loc_2047A
 	CHARINDEX(ax, STACKVAR(target), bx)
@@ -218,7 +218,7 @@ loc_203AA:
 	mov	ax, itemEff_breathDefense
 	push	ax
 	push	[bp+target]
-	CALL(hasEffectEquipped, 4)
+	CALL(hasEffectEquipped)
 	or	ax, ax
 	jl	short loc_20467
 	test	[bp+breathFlags], breath_isBreath
@@ -278,7 +278,7 @@ loc_2050C:
 loc_20515:
 	push	[bp+spellRange]
 	push	[bp+partySlotNumber]
-	NEAR_CALL(bat_isPartyInRange, 4)
+	CALL(bat_isPartyInRange, near)
 	mov	[bp+var_4], ax
 	or	ax, ax
 	jz	loc_207F3
@@ -291,7 +291,7 @@ loc_2053B:
 	and	ax, 2
 	push	ax
 	push	[bp+partySlotNumber]
-	NEAR_CALL(savingThrowCheck, 4)
+	CALL(savingThrowCheck, near)
 	mov	[bp+var_118], ax
 	or	ax, ax
 	jnz	short loc_20559
@@ -430,12 +430,12 @@ loc_206A1:
 	mov	gs:specialAttackVal, ax
 	mov	al, gs:bat_curTarget
 	push	ax
-	CALL(bat_doHPDamage, 2)
+	CALL(bat_doHPDamage)
 	or	ax, ax
 	jz	short loc_207A7
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
-	CALL(bat_getKillString, 4)
+	CALL(bat_getKillString)
 	SAVE_PTR_STACK(dx,ax,outputStringP)
 	mov	ax, 1
 	push	ax
@@ -446,7 +446,7 @@ loc_206A1:
 	push	ax
 	push	dx
 	push	word ptr [bp+outputStringP]
-	CALL(printCharPronoun, 0Ah)
+	CALL(printCharPronoun)
 	SAVE_PTR_STACK(dx,ax,outputStringP)
 	jmp	short loc_207D2
 loc_207A7:
