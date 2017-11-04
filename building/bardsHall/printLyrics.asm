@@ -11,7 +11,7 @@ bards_printLyrics proc far
 
 	CALL(text_clear)
 	mov	[bp+loopCounter], 0
-loc_25C8A:
+l_loop:
 	mov	si, [bp+loopCounter]
 	shl	si, 1
 	shl	si, 1
@@ -28,10 +28,9 @@ loc_25C8A:
 	shl	bx, 1
 	mov	ax, [bp+loopCounter]
 	cmp	bardSongLineCount[bx],	ax
-	jg	short loc_25C8A
-loc_25CC9:
+	jg	short l_loop
+
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bards_printLyrics endp

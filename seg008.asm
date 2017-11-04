@@ -241,7 +241,7 @@ loc_1B356:
 	jb	short loc_1B373
 	push	[bp+charNo]
 	push	cs
-	call	near ptr bat_doSummonAttack
+	call	near ptr bat_summon_executeAttack
 	add	sp, 2
 	jmp	loc_1B3FA
 loc_1B373:
@@ -462,7 +462,7 @@ loc_tarLoopEntry:
 	push	ax
 	mov	ax, 80h
 	push	ax
-	call	far ptr doSummon
+	call	far ptr summon_execute
 	add	sp, 4
 
 	cmp	[bp+counter], 0Ah
@@ -1198,7 +1198,7 @@ loc_1BC85:
 bat_charCanBeAttacked endp
 
 ; Attributes: bp-based frame
-bat_doSummonAttack proc	far
+bat_summon_executeAttack proc	far
 
 	var_C= word ptr	-0Ch
 	attDamage= word	ptr -0Ah
@@ -1287,7 +1287,7 @@ loc_1BD50:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doSummonAttack endp
+bat_summon_executeAttack endp
 
 ; Attributes: bp-based frame
 

@@ -811,7 +811,7 @@ loc_23771:
 	add	sp, 0Ah
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
-	mov	ax, offset aInGold_WhoWill
+	mov	ax, offset s_bardInGold
 	push	ds
 	push	ax
 	push	dx
@@ -842,7 +842,7 @@ loc_23844:
 	cmp	word ptr gs:party.gold[si], cx
 	jnb	short loc_23877
 loc_23868:
-	mov	ax, offset aNotEnoughGoldNL
+	mov	ax, offset s_notEnoughGoldNl
 	push	ds
 	push	ax
 	call	printStringWithWait
@@ -3185,7 +3185,7 @@ loc_24C3E:
 	add	sp, 0Ah
 	mov	[bp+var_106], ax
 	mov	[bp+var_104], dx
-	mov	ax, offset aInGold_WhoWill
+	mov	ax, offset s_bardInGold
 	push	ds
 	push	ax
 	push	dx
@@ -3219,7 +3219,7 @@ loc_24CDB:
 	cmp	word ptr gs:party.gold[si], cx
 	jnb	short loc_24D27
 loc_24D0C:
-	mov	ax, offset aNotEnoughGoldNL
+	mov	ax, offset s_notEnoughGoldNl
 	push	ds
 	push	ax
 	call	printStringWClear

@@ -34,7 +34,7 @@ loc_10039:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	CALL(read)
 	push	[bp+var_4]
 	CALL(close)
 	mov	gs, seg027_x
@@ -50,8 +50,7 @@ loc_1007E:
 	push	[bp+arg_4]
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	sub_2625E
-	add	sp, 6
+	CALL(configureBT3)
 	mov	gs:word_4243C, ax
 	mov	ax, 2
 	push	ax
@@ -100,7 +99,7 @@ loc_1011C:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	CALL(read)
 	mov	ax, 1068h
 	push	ax
 	mov	ax, offset vid_setMode
@@ -108,7 +107,7 @@ loc_1011C:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	CALL(read)
 	push	[bp+var_4]
 	CALL(close)
 	mov	ax, 1
@@ -250,7 +249,7 @@ loc_102FB:
 	push	ss
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	CALL(read)
 	mov	ax, 0FFFFh
 	push	ax
 	mov	ax, [bp+var_2]
@@ -266,7 +265,7 @@ loc_102FB:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	CALL(read)
 	mov	[bp+var_6], 0
 	jmp	short loc_10366
 loc_10363:
@@ -290,7 +289,7 @@ loc_10366:
 	push	ss
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	CALL(read)
 	mov	ax, 0FFFFh
 	push	ax
 	mov	ax, [bp+var_2]
@@ -307,7 +306,7 @@ loc_10366:
 	push	gs:musicBufs._segment[bx]
 	push	word ptr gs:musicBufs._offset[bx]
 	push	[bp+var_4]
-	call(read)
+	CALL(read)
 	jmp	short loc_10363
 loc_103D4:
 	push	[bp+var_4]

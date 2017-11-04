@@ -22,7 +22,7 @@ loc_25BCC:
 	sub	ax, ax
 loc_25BCE:
 	push	ax
-	CALL(sub_25E1B, near)
+	CALL(bards_configOptionList, near)
 	CALL(text_clear)
 	PUSH_STACK_ADDRESS(validMouseKeys)
 	PUSH_STACK_ADDRESS(validKeys)

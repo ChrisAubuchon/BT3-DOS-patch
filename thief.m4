@@ -355,13 +355,38 @@ seg014 segment byte public 'CODE' use16
 include(`building/bardsHall/enter.asm')
 include(`building/bardsHall/listen.asm')
 include(`building/bardsHall/printLyrics.asm')
-
-include(`seg014.asm')
+include(`building/bardsHall/learnSong.asm')
+include(`building/bardsHall/configOptionList.asm')
 
 seg014 ends
 
-include seg015.asm
-include(`seg016.asm')
+; Segment type: Pure code
+seg015 segment word public 'CODE' use16
+        assume cs:seg015
+;org 0Dh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+include(`spells/summon/execute.asm')
+include(`spells/summon/partySummon.asm')
+include(`spells/summon/monSummon.asm')
+include(`spells/summon/getMatchingMonsterGroup.asm')
+include(`spells/summon/addMonToGroup.asm')
+include(`spells/summon/newMonsterGroup.asm')
+include(`spells/summon/maskSummonName.asm')
+include(`spells/summon/printNoRoom.asm')
+
+seg015 ends
+
+; Segment type: Pure code
+seg016 segment byte public 'CODE' use16
+        assume cs:seg016
+;org 0Eh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+include(`misc/configureBT3.asm')
+
+seg016 ends
 
 include seg017.asm
 include seg018.asm

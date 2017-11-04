@@ -3373,7 +3373,7 @@ aWhoSeeksTheSpecialK	db 'Who seeks the special knowledge of the mystic arts?',0
 aThouMayLearn	db 'Thou may learn ',0
 nonClassSpellList	dd aGillesGillsFor, aDivineInterven; 0
 			dd aGotterdamuru_0	; 2
-aInGold_WhoWill	db ' in gold. Who will pay?',0
+s_bardInGold	db ' in gold. Who will pay?',0
 aTheLastOfTheGu	db 'The last of the guild elders is here. Would you like...',0Ah,0Ah
 		db 'Advancement',0Ah
 		db 'Spell Acquiring',0Ah
@@ -3404,7 +3404,7 @@ aThouCannotAcqu	db 'Thou cannot acquire new spells yet.'
 		db 0
 aSpellLevel	db ' spell level ',0
 aWillCost	db ' will cost ',0
-aNotEnoughGoldNL	db 'Not enough gold.',0Ah,0
+s_notEnoughGoldNl	db 'Not enough gold.',0Ah,0
 aTheElderTeache	db 'The Elder teaches you the lore.',0
 aWhichMageSeeks	db 'Which mage seeks to change classes?'
 		db 0
@@ -3754,10 +3754,10 @@ off_4BCCC	dd aMadGodBadGodTh
 		dd aCleverGodNever
 off_4BCD8	dd aInTheLandOfNoT
 		dd aLockingEachInH
-aTheBardSmilesA	db 'The bard smiles and says, "That one will cost thee for your bards will learn the magic of my song."',0
-aItWillCostYou	db '"It will cost you ',0
+s_bardSmiles	db 'The bard smiles and says, "That one will cost thee for your bards will learn the magic of my song."',0
+s_itWillCostYou	db '"It will cost you ',0
 align 2
-aTheBardPlaysTh	db 'The bard plays the song and you memorize the lines.',0
+s_bardPlaysSong	db 'The bard plays the song and you memorize the lines.',0
 s_bardsHall	db 'Bard',27h,'s Hall',0
 bardSongLineCount	dw 8, 5, 0, 3, 2, 0    ; 0
 bardSongLyrics	dd off_4BC98	       ; 0
@@ -3768,11 +3768,11 @@ bardSongLyrics	dd off_4BC98	       ; 0
 align 8
 bardSongPrice	dd 30000, 60000       ;	0
 byte_4BDF0	db 1, 2     ; 0
-aButNoRoomForASummoni db 'but no room for a summoning!',0Ah,0Ah,0
+s_noRoomForSummon db 'but no room for a summoning!',0Ah,0Ah,0
 		db    0
-aAndA		db 'and a ',0
+s_andA		db 'and a ',0
 		db    0
-aAppears	db ' appears!',0Ah,0Ah,0
+s_appears	db ' appears!',0Ah,0Ah,0
 summonData      db 'Wol/f\ves',0,0,0,0,0,0,0; _name
 summonHpDice    db 0A1h                 ; [0].hpDice
                 dw 0Ah                  ; [0].hpBase
@@ -4477,24 +4477,23 @@ summonHpDice    db 0A1h                 ; [0].hpDice
                 db 3Ch                  ; [21].toHitHi
                 db 28h                  ; [21].spellSaveLo
                 db 46h                  ; [21].spellSaveHi
-unk_4C246	db  0Ah
+s_nl	db  0Ah
 		db    0
-aWhatTypeOfDisp	db 'What type of display do you wish to use?',0
-a1CompositeOrTv	db 0Ah,0Ah
+s_displayQuestion	db 'What type of display do you wish to use?',0
+s_videoOption1	db 0Ah,0Ah
 		db '1) Composite or TV monitor.',0
-a2RgbMonitor_	db 0Ah,'2) RGB monitor.',0
-a3EgaMonitor_	db 0Ah,'3) EGA monitor.',0
-a4TandyComputer	db 0Ah,'4) Tandy computer with RGB monitor.',0
-aPleaseEnterThe	db 0Ah,0Ah
+s_videoOption2	db 0Ah,'2) RGB monitor.',0
+s_videoOption3	db 0Ah,'3) EGA monitor.',0
+s_videoOption4	db 0Ah,'4) Tandy computer with RGB monitor.',0
+s_videoQuestion	db 0Ah,0Ah
 		db 'Please enter the appropriate number for your system type:',0
-asc_4C312	db  0Ah, 0
-aWhatTypeOfSoundOutput db 'What type of sound output device do you wish to use?',0
-a1Mt32_		db 0Ah,0Ah,'1) MT32.',0
-a2AdLib_	db 0Ah,'2) Ad Lib.',0
-a3InternalIbmSpeaker_ db 0Ah,'3) Internal IBM speaker.',0
-a4Tandy_	db 0Ah,'4) Tandy.',0
-a5Ps1		db 0Ah,'5) PS/1',0
-aPleaseEnterTheAppropr db 0Ah,0Ah,'Please enter the appropriate number for your system type:',0
+s_soundQuestion db 'What type of sound output device do you wish to use?',0
+s_soundOption1		db 0Ah,0Ah,'1) MT32.',0
+s_soundOption2	db 0Ah,'2) Ad Lib.',0
+s_soundOption3 db 0Ah,'3) Internal IBM speaker.',0
+s_soundOption4	db 0Ah,'4) Tandy.',0
+s_soundOption5		db 0Ah,'5) PS/1',0
+s_soundPrompt db 0Ah,0Ah,'Please enter the appropriate number for your system type:',0
 aDiskToTransfer	db 'Disk to transfer characters from?',0
 aWhoShallTransfer?	db 'Who shall transfer?',0
 aThisCharacterAlready	db 'This character already exists',0

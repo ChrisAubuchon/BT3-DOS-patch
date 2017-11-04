@@ -97,7 +97,8 @@ loc_10039:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	call	read
+	add	sp, 8
 	push	[bp+var_4]
 	call	close
 	add	sp, 2
@@ -114,7 +115,7 @@ loc_1007E:
 	push	[bp+arg_4]
 	push	[bp+arg_2]
 	push	[bp+arg_0]
-	call	sub_2625E
+	call	configureBT3
 	add	sp, 6
 	mov	gs:word_4243C, ax
 	mov	ax, 2
@@ -170,7 +171,8 @@ loc_1011C:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	call	read
+	add	sp, 8
 	mov	ax, 1068h
 	push	ax
 	mov	ax, offset vid_setMode
@@ -178,7 +180,8 @@ loc_1011C:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	call	read
+	add	sp, 8
 	push	[bp+var_4]
 	call	close
 	add	sp, 2
@@ -343,7 +346,8 @@ loc_102FB:
 	push	ss
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	call	read
+	add	sp, 8
 	mov	ax, 0FFFFh
 	push	ax
 	mov	ax, [bp+var_2]
@@ -360,7 +364,8 @@ loc_102FB:
 	push	dx
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	call	read
+	add	sp, 8
 	mov	[bp+var_6], 0
 	jmp	short loc_10366
 loc_10363:
@@ -385,7 +390,8 @@ loc_10366:
 	push	ss
 	push	ax
 	push	[bp+var_4]
-	call(read)
+	call	read
+	add	sp, 8
 	mov	ax, 0FFFFh
 	push	ax
 	mov	ax, [bp+var_2]
@@ -403,7 +409,8 @@ loc_10366:
 	push	gs:musicBufs._segment[bx]
 	push	word ptr gs:musicBufs._offset[bx]
 	push	[bp+var_4]
-	call(read)
+	call	read
+	add	sp, 8
 	jmp	short loc_10363
 loc_103D4:
 	push	[bp+var_4]
@@ -14214,7 +14221,7 @@ loc_1B356:
 	jb	short loc_1B373
 	push	[bp+charNo]
 	push	cs
-	call	near ptr bat_doSummonAttack
+	call	near ptr bat_summon_executeAttack
 	add	sp, 2
 	jmp	loc_1B3FA
 loc_1B373:
@@ -14435,7 +14442,7 @@ loc_tarLoopEntry:
 	push	ax
 	mov	ax, 80h
 	push	ax
-	call	far ptr doSummon
+	call	far ptr summon_execute
 	add	sp, 4
 
 	cmp	[bp+counter], 0Ah
@@ -15179,7 +15186,7 @@ loc_1BC85:
 bat_charCanBeAttacked endp
 
 ; Attributes: bp-based frame
-bat_doSummonAttack proc	far
+bat_summon_executeAttack proc	far
 
 	var_C= word ptr	-0Ch
 	attDamage= word	ptr -0Ah
@@ -15268,7 +15275,7 @@ loc_1BD50:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doSummonAttack endp
+bat_summon_executeAttack endp
 
 ; Attributes: bp-based frame
 
@@ -21624,7 +21631,7 @@ sp_summonSpell proc far
 	sub	ah, ah
 	push	ax
 	push	[bp+spellCaster]
-	call	doSummon
+	call	summon_execute
 	add	sp, 4
 
 	mov	sp, bp
@@ -24216,7 +24223,7 @@ l_loopEnter:
 	mov	al, byte_483AC[bx]
 	push	ax
 	push	[bp+spellCaster]
-	call	doSummon
+	call	summon_execute
 	add	sp, 4
 	dec	[bp+loopCounter]
 	cmp	[bp+loopCounter], 0
@@ -25314,7 +25321,7 @@ loc_25BCC:
 loc_25BCE:
 	push	ax
 	push	cs
-	call	near ptr sub_25E1B
+	call	near ptr bards_configOptionList
 	add	sp, 6
 	call	text_clear
 	lea	ax, [bp+validMouseKeys]
@@ -25404,7 +25411,7 @@ bards_printLyrics proc far
 
 	call	text_clear
 	mov	[bp+loopCounter], 0
-loc_25C8A:
+l_loop:
 	mov	si, [bp+loopCounter]
 	shl	si, 1
 	shl	si, 1
@@ -25425,41 +25432,45 @@ loc_25C8A:
 	shl	bx, 1
 	mov	ax, [bp+loopCounter]
 	cmp	bardSongLineCount[bx],	ax
-	jg	short loc_25C8A
-loc_25CC9:
+	jg	short l_loop
+
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 bards_printLyrics endp
 
-
+; DWORD - var_2 & var_4
 ; Attributes: bp-based frame
 
 bards_learnSong	proc far
 
-	var_108= word ptr -108h
-	var_8= word ptr	-8
+	stringBuffer= word ptr -108h
+	partySlotNumber= word ptr	-8
 	var_6= word ptr	-6
 	var_4= word ptr	-4
 	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	songNumber= word ptr	 6
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 108h
 	call	someStackOperation
 	push	si
-	mov	ax, offset aTheBardSmilesA
+
+	mov	ax, offset s_bardSmiles
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	wait4IO
-	mov	ax, offset aItWillCostYou
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	mov	ax, offset s_itWillCostYou
 	push	ds
 	push	ax
-	lea	ax, [bp+var_108]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	strcat
@@ -25468,7 +25479,7 @@ bards_learnSong	proc far
 	mov	[bp+var_2], dx
 	sub	ax, ax
 	push	ax
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+songNumber]
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (bardSongPrice+2)[bx]
@@ -25479,7 +25490,7 @@ bards_learnSong	proc far
 	add	sp, 0Ah
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
-	mov	ax, offset aInGold_WhoWill
+	mov	ax, offset s_bardInGold
 	push	ds
 	push	ax
 	push	dx
@@ -25488,138 +25499,641 @@ bards_learnSong	proc far
 	add	sp, 8
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
-	lea	ax, [bp+var_108]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
 	add	sp, 4
 	call	readSlotNumber
-	mov	[bp+var_8], ax
+	mov	[bp+partySlotNumber], ax
 	or	ax, ax
-	jge	short loc_25D64
-	jmp	loc_25E16
-loc_25D64:
-	mov	bx, [bp+arg_0]
+	jl	l_return
+
+	mov	bx, [bp+songNumber]
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr bardSongPrice[bx]
 	mov	dx, word ptr (bardSongPrice+2)[bx]
 	mov	cx, ax
 	mov	bx, dx
-	getCharP	[bp+var_8], si
+	mov	ax, charSize
+	imul	[bp+partySlotNumber]
+	mov	si, ax
 	cmp	word ptr gs:(party.gold+2)[si], bx
 	ja	short loc_25DA2
 	jb	short loc_25D93
 	cmp	word ptr gs:party.gold[si], cx
 	jnb	short loc_25DA2
 loc_25D93:
-	mov	ax, offset aNotEnoughGoldNL
+	mov	ax, offset s_notEnoughGoldNl
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	jmp	short loc_25E0A
+	jmp	short l_waitAndReturn
+
 loc_25DA2:
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+songNumber]
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr bardSongPrice[bx]
 	mov	dx, word ptr (bardSongPrice+2)[bx]
 	mov	cx, ax
 	mov	bx, dx
-	getCharP	[bp+var_8], si
+	mov	ax, charSize
+	imul	[bp+partySlotNumber]
+	mov	si, ax
 	sub	word ptr gs:party.gold[si], cx
 	sbb	word ptr gs:(party.gold+2)[si], bx
 	mov	[bp+var_6], 0
-	jmp	short loc_25DD5
-loc_25DD2:
-	inc	[bp+var_6]
-loc_25DD5:
-	cmp	[bp+var_6], 7
-	jge	short loc_25DFD
-	getCharP	[bp+var_6], si
+l_loop:
+	mov	ax, charSize
+	imul	[bp+var_6]
+	mov	si, ax
 	cmp	gs:party.class[si], class_bard
-	jnz	short loc_25DFB
-	mov	bx, [bp+arg_0]
+	jnz	short l_increment
+	mov	bx, [bp+songNumber]
 	mov	al, byte_4BDF0[bx]
 	or	gs:(party.specAbil+1)[si], al
-loc_25DFB:
-	jmp	short loc_25DD2
-loc_25DFD:
-	mov	ax, offset aTheBardPlaysTh
+l_increment:
+	inc	[bp+var_6]
+	cmp	[bp+var_6], 7
+	jl	short l_loop
+
+l_playSong:
+	mov	ax, offset s_bardPlaysSong
 	push	ds
 	push	ax
-	call	printStringWClear
+	call	printString
 	add	sp, 4
-loc_25E0A:
-	wait4IO
-loc_25E16:
+l_waitAndReturn:
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 bards_learnSong	endp
 
+; Set up the song list that you can learn from the Bard's Hall
+;
+; optionList[0] = !locationFlag
+; optionList[1] = !locationFlag
+; optionList[2] = !locationFlag
+; optionList[3] = locationFlag
+; optionList[4] = locationFlag
+; optionList[5] = locationFlag
+;
+
 ; Attributes: bp-based frame
 
-sub_25E1B proc far
+bards_configOptionList proc far
 
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
-	arg_2= dword ptr  8
+	loopCounter= word ptr	-2
+	locationFlag= word ptr	 6
+	optionList= dword ptr  8
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
 	push	si
-	mov	[bp+var_2], 0
-	jmp	short loc_25E31
+
+	mov	[bp+loopCounter], 0
 loc_25E2E:
-	inc	[bp+var_2]
-loc_25E31:
-	cmp	[bp+var_2], 3
-	jge	short loc_25E4A
-	mov	bx, [bp+var_2]
-	lfs	si, [bp+arg_2]
-	cmp	[bp+arg_0], 1
+	mov	bx, [bp+loopCounter]
+	lfs	si, [bp+optionList]
+	cmp	[bp+locationFlag], 1
 	sbb	ax, ax
 	neg	ax
 	mov	fs:[bx+si], al
-	jmp	short loc_25E2E
-loc_25E4A:
-	mov	[bp+var_2], 3
-	jmp	short loc_25E54
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 3
+	jl	short loc_25E2E
+
+	mov	[bp+loopCounter], 3
 loc_25E51:
-	inc	[bp+var_2]
-loc_25E54:
-	cmp	[bp+var_2], 6
-	jge	short loc_25E68
-	mov	bx, [bp+var_2]
-	lfs	si, [bp+arg_2]
-	mov	al, byte ptr [bp+arg_0]
+	mov	bx, [bp+loopCounter]
+	lfs	si, [bp+optionList]
+	mov	al, byte ptr [bp+locationFlag]
 	mov	fs:[bx+si], al
-	jmp	short loc_25E51
-loc_25E68:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 6
+	jl	short loc_25E51
+
 	pop	si
 	mov	sp, bp
 	pop	bp
-locret_25E6C:
 	retf
-sub_25E1B endp
+bards_configOptionList endp
 
 
 seg014 ends
 
-include seg015.asm
-; Segment type:	Pure code
-seg016 segment byte public 'CODE' use16
-	assume cs:seg016
-;org 0Eh
-	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
+; Segment type: Pure code
+seg015 segment word public 'CODE' use16
+        assume cs:seg015
+;org 0Dh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
 ; Attributes: bp-based frame
 
-sub_2625E proc far
+summon_execute proc far
+
+	spellCaster= byte ptr	 6
+	spellNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+
+	test	gs:disbelieveFlags, disb_nosummon
+	jz	short loc_25E96
+	mov	ax, offset s_butItFizzledNl
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	jmp	short l_return
+
+loc_25E96:
+	test	[bp+spellCaster], 80h
+	jz	short loc_25EA8
+	push	[bp+spellNumber]
+	push	cs
+	call	near ptr summon_monSummon
+	add	sp, 2
+	jmp	short l_return
+
+loc_25EA8:
+	push	[bp+spellNumber]
+	push	cs
+	call	near ptr summon_partySummon
+	add	sp, 2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+summon_execute endp
+
+; Attributes: bp-based frame
+
+summon_partySummon proc far
+
+	skipNoRoomFlag= word ptr	-4
+	emptySlot= word ptr	-2
+	summonIndex= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	[bp+skipNoRoomFlag], 0
+l_loop:
+	call	party_findEmptySlot
+	mov	[bp+emptySlot], ax
+	cmp	ax, 7
+	jge	short l_noRoom
+	mov	ax, [bp+summonIndex]
+	and	ax, 1Fh
+	mov	cx, monStruSize
+	imul	cx
+	add	ax, offset summonData
+	push	ds
+	push	ax
+	push	[bp+emptySlot]
+	call	_sp_convertMonToSummon
+	add	sp, 6
+	test	byte ptr [bp+summonIndex], 80h
+	jz	short loc_25EF8
+	mov	al, class_illusion
+	jmp	short loc_25EFA
+loc_25EF8:
+	mov	al, class_monster
+loc_25EFA:
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+emptySlot]
+	mov	bx, ax
+	mov	gs:party.class[bx], cl
+	mov	byte ptr g_printPartyFlag, 0
+	mov	[bp+skipNoRoomFlag], 1
+	cmp	g_curSpellNumber, 77			; Kringle Bros spell
+	jz	short l_loop
+
+l_noRoom:
+	push	[bp+skipNoRoomFlag]
+	push	cs
+	call	near ptr summon_printNoRoom
+	add	sp, 2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+summon_partySummon endp
+
+
+; Attributes: bp-based frame
+
+summon_monSummon proc far
+
+	groupNo= word ptr -6
+	skipNoRoomFlag= word ptr	-4
+	spellNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+
+	mov	[bp+skipNoRoomFlag], 0
+
+l_entry:
+	mov	[bp+groupNo], 0
+
+l_searchForEmptyGroup:
+	mov	ax, monStruSize
+	imul	[bp+groupNo]
+	mov	bx, ax
+	test	gs:monGroups.groupSize[bx], 1Fh
+	jz	short l_makeNewMonsterGroup
+	inc	[bp+groupNo]
+	cmp	[bp+groupNo], 4
+	jl	short l_searchForEmptyGroup
+
+l_makeNewMonsterGroup:
+	cmp	[bp+groupNo], 4				; If no empty groups,
+	jge	short l_findMatchingGroup		;   Try to find a matching group
+	push	[bp+groupNo]
+	push	[bp+spellNumber]
+	push	cs
+	call	near ptr summon_newMonGroup
+	add	sp, 4			; Create new group
+	push	[bp+groupNo]
+	push	[bp+spellNumber]
+	push	cs
+	call	near ptr summon_addMonToGroup
+	add	sp, 4			; Add monster to group
+	or	[bp+skipNoRoomFlag], ax
+	jmp	short l_kringleBrosCheck
+
+l_findMatchingGroup:
+	cmp	g_curSpellNumber, 77			; Skip if kringle bros spell
+	jz	l_printNoRoom
+
+	push	[bp+spellNumber]
+	push	cs
+	call	near ptr summon_getMatchMonGroup
+	add	sp, 2
+	mov	[bp+groupNo], ax
+	or	ax, ax
+	jl	short l_kringleBrosCheck
+	push	ax
+	push	[bp+spellNumber]
+	push	cs
+	call	near ptr summon_addMonToGroup
+	add	sp, 4
+	or	[bp+skipNoRoomFlag], ax
+	jmp	l_printNoRoom
+
+l_kringleBrosCheck:
+	cmp	g_curSpellNumber, 77			; Kringle Bros
+	jnz	l_entry
+
+l_printNoRoom:
+	push	[bp+skipNoRoomFlag]
+	call	summon_printNoRoom
+	add	sp, 2
+	
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+summon_monSummon endp
+
+; This function	looks for a monster group that matches
+; the summonData.name given by summonNo. It returns
+; the matching group number. If	not found, it returns
+; 0xffff
+;
+; Attributes: bp-based frame
+
+summon_getMatchMonGroup proc far
+
+	groupCounter= word ptr	-2
+	summonNo= word ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+groupCounter], 0
+loc_2600B:
+	mov	ax, monStruSize
+	imul	[bp+summonNo]
+	add	ax, offset summonData
+	push	ds
+	push	ax
+	mov	ax, monStruSize
+	imul	[bp+groupCounter]
+	mov	bx, ax
+	lea	ax, monGroups._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	mapstrcmp
+	add	sp, 8
+	or	ax, ax
+	jnz	l_returnValue
+	inc	[bp+groupCounter]
+	cmp	[bp+groupCounter], 4
+	jl	short loc_2600B
+
+l_returnValue:
+	mov	ax, [bp+groupCounter]
+	jmp	short l_return
+
+l_returnFail:
+	mov	ax, 0FFFFh
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+summon_getMatchMonGroup endp
+
+; DWORD - stringBuffer & var_104
+;
+; Attributes: bp-based frame
+
+summon_addMonToGroup proc far
+
+	var_116= word ptr -116h
+	var_106= word ptr -106h
+	var_104= word ptr -104h
+	stringBuffer= word ptr -102h
+	groupSize= word	ptr -2
+	arg_0= byte ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 116h
+	call	someStackOperation
+	push	si
+
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	bx, ax
+	mov	al, gs:monGroups.groupSize[bx]
+	sub	ah, ah
+	and	ax, 1Fh
+	mov	[bp+groupSize],	ax
+	cmp	ax, 1Fh
+	jnz	short loc_2607B
+	sub	ax, ax
+	jmp	l_return
+loc_2607B:
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	si, ax
+	inc	gs:monGroups.groupSize[si]
+	mov	al, gs:monGroups.hpDice[si]
+	sub	ah, ah
+	push	ax
+	call	dice_doYDX
+	add	sp, 2
+	mov	cx, gs:monGroups.hpBase[si]
+	add	cx, ax
+	mov	bx, [bp+arg_2]
+	mov	ax, cx
+	mov	cl, 6
+	shl	bx, cl
+	mov	cx, [bp+groupSize]
+	shl	cx, 1
+	add	bx, cx
+	mov	gs:monHpList[bx], ax
+	mov	bx, [bp+arg_2]
+	mov	cl, 6
+	shl	bx, cl
+	mov	ax, [bp+groupSize]
+	shl	ax, 1
+	add	bx, ax
+	mov	gs:bat_monPriorityList[bx], 0
+	test	[bp+arg_0], 80h
+	jz	short loc_260EF
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	bx, ax
+	or	gs:monGroups.flags[bx],	10h
+	jmp	short loc_26101
+loc_260EF:
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	bx, ax
+	and	gs:monGroups.flags[bx],	0EFh
+loc_26101:
+	lea	ax, [bp+var_116]
+	push	ss
+	push	ax
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	bx, ax
+	lea	ax, monGroups._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	unmaskString
+	add	sp, 8
+	mov	ax, offset s_andA
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	sub	ax, ax
+	push	ax
+	push	dx
+	push	[bp+var_106]
+	lea	ax, [bp+var_116]
+	push	ss
+	push	ax
+	call	str_pluralize
+	add	sp, 0Ah
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	mov	ax, offset s_appears
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_106]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 1
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+summon_addMonToGroup endp
+
+; Attributes: bp-based frame
+
+summon_newMonGroup proc far
+
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+
+	and	[bp+arg_0], 1Fh
+	mov	ax, monStruSize
+	imul	[bp+arg_0]
+	add	ax, offset summonData
+	push	ds
+	push	ax
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	bx, ax
+	lea	ax, monGroups._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	cs
+	call	near ptr summon_maskSummonName
+	add	sp, 8
+	mov	ax, 20h
+	push	ax
+	mov	ax, monStruSize
+	imul	[bp+arg_0]
+	add	ax, offset summonHpDice
+	push	ds
+	push	ax
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	bx, ax
+	lea	ax, monGroups.hpDice[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	memcpy
+	add	sp, 0Ah
+
+	; FIXED: Set the group size to 0. 
+	mov	ax, monStruSize
+	imul	[bp+arg_2]
+	mov	bx, ax
+	mov	monGroups.groupSize[bx], 0
+
+	mov	sp, bp
+	pop	bp
+	retf
+summon_newMonGroup endp
+
+; Attributes: bp-based frame
+
+summon_maskSummonName proc far
+
+	loopCounter= word ptr	-2
+	destAddress= dword ptr  6
+	srcAddress= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	[bp+loopCounter], 0
+l_zeroLoop:
+	mov	bx, [bp+loopCounter]
+	lfs	si, [bp+destAddress]
+	mov	byte ptr fs:[bx+si], 0FFh
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 10h
+	jl	short l_zeroLoop
+
+l_copyLoop:
+	lfs	bx, [bp+srcAddress]
+	cmp	byte ptr fs:[bx], 0
+	jz	short l_return
+	inc	word ptr [bp+srcAddress]
+	mov	al, fs:[bx]
+	or	al, 80h
+	lfs	bx, [bp+destAddress]
+	inc	word ptr [bp+destAddress]
+	mov	fs:[bx], al
+	jmp	short l_copyLoop
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+summon_maskSummonName endp
+
+; Attributes: bp-based frame
+
+summon_printNoRoom	proc far
+
+	noRoomFlag= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+
+	cmp	[bp+noRoomFlag], 0
+	jnz	short l_return
+	mov	ax, offset s_noRoomForSummon
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	call	text_delayWithTable
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+summon_printNoRoom	endp
+
+
+
+seg015 ends
+
+; Segment type: Pure code
+seg016 segment byte public 'CODE' use16
+        assume cs:seg016
+;org 0Eh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+; Attributes: bp-based frame
+
+configureBT3 proc far
 
 	var_8= word ptr	-8
 	var_6= word ptr	-6
@@ -25632,6 +26146,7 @@ sub_2625E proc far
 	mov	bp, sp
 	mov	ax, 8
 	call	someStackOperation
+
 	cmp	[bp+arg_0], 1
 	jle	short loc_2627C
 	lfs	bx, [bp+arg_2]
@@ -25643,64 +26158,63 @@ loc_2627C:
 	mov	ax, 0FFh
 loc_2627F:
 	mov	[bp+var_4], ax
-	cmp	ax, 31h	
+	cmp	ax, '1'
 	jl	short loc_2628C
-	cmp	ax, 34h	
+	cmp	ax, '4'
 	jle	short loc_2630B
 loc_2628C:
+
 	mov	[bp+var_8], 0
-	jmp	short loc_26296
-loc_26293:
+l_clearScreenLoop:
+	mov	ax, offset s_nl
+	push	ds
+	push	ax
+	call	printf
+	add	sp, 4
 	inc	[bp+var_8]
-loc_26296:
-	cmp	[bp+var_8], 19h
-	jge	short loc_262AB
-	mov	ax, offset unk_4C246
-	push	ds
-	push	ax
-	call	printf
-	add	sp, 4
-	jmp	short loc_26293
+	cmp	[bp+var_8], 25
+	jl	short l_clearScreenLoop
+
 loc_262AB:
-	mov	ax, offset aWhatTypeOfDisp
+	mov	ax, offset s_displayQuestion
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a1CompositeOrTv
+	mov	ax, offset s_videoOption1
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a2RgbMonitor_
+	mov	ax, offset s_videoOption2
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a3EgaMonitor_
+	mov	ax, offset s_videoOption3
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a4TandyComputer
+	mov	ax, offset s_videoOption4
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset aPleaseEnterThe
+	mov	ax, offset s_videoQuestion
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
 	call	sub_2A9D4
 	mov	[bp+var_4], ax
-	cmp	ax, 31h	
+	cmp	ax, '1'	
 	jl	short loc_2628C
-	cmp	ax, 34h	
+	cmp	ax, '4'	
 	jg	short loc_2628C
 loc_2630B:
 	mov	ax, [bp+var_4]
-	sub	ax, 31h	
+	sub	ax, '1'	
 	mov	[bp+var_6], ax
 	cmp	[bp+arg_0], 2
 	jle	short loc_26327
@@ -25713,86 +26227,81 @@ loc_26327:
 	mov	ax, 0FFh
 loc_2632A:
 	mov	[bp+var_4], ax
-	cmp	ax, 31h	
+	cmp	ax, '1'	
 	jl	short loc_2633A
-	cmp	ax, 34h	
-	jg	short loc_2633A
-	jmp	loc_263CC
+	cmp	ax, '4'	
+	jle	l_return
+
 loc_2633A:
 	mov	[bp+var_8], 0
-	jmp	short loc_26344
 loc_26341:
+	mov	ax, offset s_nl
+	push	ds
+	push	ax
+	call	printf
+	add	sp, 4
 	inc	[bp+var_8]
-loc_26344:
-	cmp	[bp+var_8], 19h
-	jge	short loc_26359
-	mov	ax, offset asc_4C312
-	push	ds
-	push	ax
-	call	printf
-	add	sp, 4
-	jmp	short loc_26341
+	cmp	[bp+var_8], 25
+	jl	short loc_26341
+
 loc_26359:
-	mov	ax, offset aWhatTypeOfSoundOutput
+	mov	ax, offset s_soundQuestion
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a1Mt32_
+	mov	ax, offset s_soundOption1
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a2AdLib_
+	mov	ax, offset s_soundOption2
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a3InternalIbmSpeaker_
+	mov	ax, offset s_soundOption3
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a4Tandy_
+	mov	ax, offset s_soundOption4
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset a5Ps1
+	mov	ax, offset s_soundOption5
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
-	mov	ax, offset aPleaseEnterTheAppropr
+	mov	ax, offset s_soundPrompt
 	push	ds
 	push	ax
 	call	printf
 	add	sp, 4
 	call	sub_2A9D4
 	mov	[bp+var_4], ax
-	cmp	ax, 31h	
-	jge	short loc_263C4
-	jmp	loc_2633A
-loc_263C4:
-	cmp	ax, 35h	
-	jle	short loc_263CC
-	jmp	loc_2633A
-loc_263CC:
+	cmp	ax, '1'	
+	jl	loc_2633A
+	cmp	ax, '5'	
+	jg	loc_2633A
+l_return:
 	mov	ax, [bp+var_4]
-	sub	ax, 31h	
+	sub	ax, '1'	
 	mov	[bp+var_2], ax
 	mov	ah, byte ptr [bp+var_2]
 	sub	al, al
 	or	ax, [bp+var_6]
 	jmp	short $+2
+
 	mov	sp, bp
 	pop	bp
-locret_263E2:
 	retf
-sub_2625E endp
+configureBT3 endp
+
 
 seg016 ends
-
 
 include seg017.asm
 include seg018.asm
