@@ -3,7 +3,6 @@ icon_deactivate proc far
 	iconIndex= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	bx, [bp+iconIndex]
 	mov	al, iconClearIndex[bx]

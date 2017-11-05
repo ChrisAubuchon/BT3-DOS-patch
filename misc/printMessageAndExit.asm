@@ -5,7 +5,6 @@ printMessageAndExit proc far
 	arg_0= dword ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	CALL(text_clear)
 	push	[bp+arg_0]

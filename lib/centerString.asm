@@ -9,8 +9,7 @@ centerString proc far
 	inString= dword ptr  6
 	maxWidth= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	[bp+var_2], 0
 l_loop:

@@ -8,7 +8,6 @@ printAt proc far
 	colorFlag= word ptr	 0Eh
 
 	FUNC_ENTER
-	CHKSTK
 
 l_loop:
 	lfs	bx, [bp+inString]

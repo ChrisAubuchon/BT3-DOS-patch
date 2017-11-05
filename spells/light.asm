@@ -5,8 +5,7 @@ sp_lightSpell proc far
 	spellEffect= word ptr	-2
 	spellNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	bx, [bp+spellNumber]
 	mov	al, spellEffectFlags[bx]

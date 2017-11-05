@@ -6,8 +6,7 @@ _sp_useFigurine	proc far
 	itemNo=	word ptr -2
 	spellCaster=	word ptr  6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	PUSH_OFFSET(s_invokesFigurine)
 	PRINTSTRING

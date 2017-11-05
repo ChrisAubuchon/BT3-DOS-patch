@@ -7,8 +7,7 @@ song_playSong proc far
 	partySlotNumber= word ptr	 6
 	songNumber= byte ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	al, byte ptr [bp+partySlotNumber]
 	mov	gs:g_currentSinger, al

@@ -2,7 +2,6 @@
 storage_enter proc	far
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	ax, 50
 	push	ax

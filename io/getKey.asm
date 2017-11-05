@@ -6,8 +6,7 @@ getKey proc far
 	inputKey= word ptr	-2
 	arg_0= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	spell_mouseClicked, 0
 	CALL(sub_1766A, near)

@@ -18,8 +18,7 @@ minimap_show proc far
 	leftLimit= word ptr	 0Eh
 	downLimit= word ptr	 10h
 
-	FUNC_ENTER
-	CHKSTK(16h)
+	FUNC_ENTER(16h)
 	push	si
 
 	mov	[bp+rightLeftValue], 8

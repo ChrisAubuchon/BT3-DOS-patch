@@ -8,8 +8,7 @@ sp_identifySpell proc far
 	var_2= word ptr	-2
 	spellCaster= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(0F4h)
+	FUNC_ENTER(0F4h)
 
 	CALL(text_clear)
 	and	[bp+spellCaster], 7Fh

@@ -5,7 +5,6 @@ spellSavingThrowHelper proc far
         spellCaster= word ptr  6
 
 	FUNC_ENTER
-	CHKSTK
 
         cmp     [bp+spellCaster], 80h
         jl      short l_partyCaster
@@ -52,8 +51,7 @@ savingThrowCheck proc far
 	saveSource= word ptr	 6
 	saveType= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 
 	sub	ax, ax
 	push	ax
@@ -109,8 +107,7 @@ _savingThrowCheck proc far
 	indexNo= word ptr  6
 	savingThrowType= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(0Ah)
+	FUNC_ENTER(0Ah)
 	push	si
 
 	cmp	[bp+indexNo], 80h
@@ -236,7 +233,6 @@ _returnXor255 proc far
 	val= word ptr  6
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	ax, [bp+val]
 	cmp	ax, 255

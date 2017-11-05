@@ -10,8 +10,8 @@ sp_phaseDoor proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(0Ah)
+	FUNC_ENTER(8)
+
 	cmp	inDungeonMaybe, 0
 	jz	loc_216E2
 	push	sq_north

@@ -12,8 +12,7 @@ text_wrapLongString proc far
 	stringBuffer= dword ptr  0Ah
 	linePList= dword ptr  0Eh		; A list of pointers to each line after wrapping
 
-	FUNC_ENTER
-	CHKSTK(10h)
+	FUNC_ENTER(10h)
 	push	si
 
 	mov	[bp+var_8], 0

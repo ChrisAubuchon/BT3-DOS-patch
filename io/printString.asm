@@ -13,8 +13,7 @@ printString proc far
 	var_2= word ptr	-2
 	inString= dword ptr  6
 
-	FUNC_ENTER
-	CHKSTK(62h)
+	FUNC_ENTER(62h)
 	push	si
 
 	mov	ax, word ptr [bp+inString]

@@ -9,7 +9,6 @@ _batchSpellCast proc far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	and	[bp+spellIndexNumber], 7Fh
 	push	[bp+spellIndexNumber]

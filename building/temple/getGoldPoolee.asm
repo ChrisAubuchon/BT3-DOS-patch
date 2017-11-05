@@ -5,8 +5,7 @@ temple_getGoldPoolee proc far
 	pooleeSlotNumber= word ptr	-2
 	lastSlot= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	PUSH_OFFSET(s_whomGathersGold)
 	PRINTSTRING(true)

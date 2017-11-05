@@ -3,7 +3,6 @@
 _mfunc_unpackChar proc far
 
 	FUNC_ENTER
-	CHKSTK
 
 l_extractCharacter:
 	mov	ax, 5

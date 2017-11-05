@@ -3,7 +3,7 @@
 camp_saveAndExit proc far
 
 	FUNC_ENTER
-	CHKSTK()
+
 	PUSH_OFFSET(s_saveAndExit)
 	PRINTSTRING(true)
 	CALL(roster_writeParty, near)

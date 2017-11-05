@@ -5,8 +5,7 @@ minimap_getWalls proc far
 	directionLoopCounter= word ptr	-2
 	squareWalls= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	; Loop through all of the directions getting the value
 	; of the walls in each direction

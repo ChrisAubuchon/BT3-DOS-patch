@@ -10,8 +10,7 @@ printListItem proc far
 	arg_2= word ptr	 8
 	arg_4= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(2Ch)
+	FUNC_ENTER(2Ch)
 
 	lea	ax, [bp+stringBuf]
 	mov	word ptr [bp+stringBufP], ax

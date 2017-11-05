@@ -7,8 +7,7 @@ _mfunc_extractCh proc far
 	var_2= word ptr	-2
 	bitCount= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	[bp+var_2], 0
 loc_158BC:

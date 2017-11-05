@@ -4,8 +4,8 @@ party_clear proc far
 
 	slotNo=	word ptr -2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	CALL(roster_writeParty)
 	mov	[bp+slotNo], 0
 l_loopEnter:

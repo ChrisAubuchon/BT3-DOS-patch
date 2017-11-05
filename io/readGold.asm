@@ -5,8 +5,7 @@ readGold proc far
 	stringBuffer=	word ptr -14h
 	gold= dword ptr	-4
 
-	FUNC_ENTER
-	CHKSTK(14h)
+	FUNC_ENTER(14h)
 
 	mov	ax, 10h
 	push	ax

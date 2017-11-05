@@ -5,8 +5,7 @@ temple_enter proc far
 	lastSlot= word ptr	-4
 	inputKey= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	CALL(text_clear)
 	mov	ax, 49

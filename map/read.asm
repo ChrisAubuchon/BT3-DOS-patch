@@ -12,8 +12,7 @@ map_read proc far
 	arg_2= word ptr	 8
 	arg_4= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(0Eh)
+	FUNC_ENTER(0Eh)
 
 	mov	bx, [bp+arg_0]
 	shl	bx, 1

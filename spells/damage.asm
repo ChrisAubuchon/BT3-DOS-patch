@@ -10,8 +10,7 @@ sp_damageSpell proc far
 	partySlotNumber=	word ptr  6
 	spellNumber= word ptr  8
 
-	FUNC_ENTER
-	CHKSTK(10h)
+	FUNC_ENTER(10h)
 	push	di
 	push	si
 

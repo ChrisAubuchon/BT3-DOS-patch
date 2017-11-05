@@ -7,7 +7,7 @@ disk1Swap proc far
 	arg_0= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
+
 	cmp	[bp+arg_0], 0
 	jz	short l_return
 	lfs	bx, disk3

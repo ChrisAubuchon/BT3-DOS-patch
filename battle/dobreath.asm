@@ -25,8 +25,7 @@ bat_doBreathAttack proc	far
 	levelMultiplier= byte ptr	 0Eh
 	spellRange= word ptr	 10h
 
-	FUNC_ENTER
-	CHKSTK(11Ah)
+	FUNC_ENTER(11Ah)
 
 	cmp	[bp+levelMultiplier], 0
 	jnz	short l_allFoesCheck
@@ -516,7 +515,6 @@ _canAttackChar proc far
         specialAttackIndex= word ptr  8
 
 	FUNC_ENTER
-	CHKSTK
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 
         cmp     byte ptr gs:party._name[bx], 0			; if partySlot.isEmpty

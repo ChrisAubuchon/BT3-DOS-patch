@@ -18,8 +18,7 @@ bigpic_drawTopology proc far
 	sq= word ptr  8
 	gbuf= dword ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(1Eh)
+	FUNC_ENTER(1Eh)
 	push	di
 	push	si
 

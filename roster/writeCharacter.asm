@@ -5,8 +5,8 @@ roster_writeCharacter proc far
 	var_2= word ptr	-2
 	partySlotNumber= word ptr  6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
+
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027

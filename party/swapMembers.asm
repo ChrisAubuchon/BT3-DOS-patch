@@ -6,7 +6,6 @@ party_swapMembers proc far
 	arg_2= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	ax, offset newCharBuffer
 	mov	dx, seg	seg027

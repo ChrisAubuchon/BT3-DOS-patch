@@ -9,7 +9,6 @@ item_doSpell proc far
 	arg_8= word ptr	 0Eh
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	ax, [bp+itemSlotNumber]
 	mov	cx, ax

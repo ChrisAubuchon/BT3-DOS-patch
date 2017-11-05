@@ -4,8 +4,7 @@ sp_possessChar proc far
 
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 	push	si
 
 	mov	al, gs:bat_curTarget

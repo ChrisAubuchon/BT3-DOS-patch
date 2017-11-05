@@ -5,7 +5,6 @@ text_nlWriteString proc far
 	inString= dword ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	gs:g_text_clearFlag, 1		; Mark text window as clearable
 	cmp	gs:g_currentCharPosition, 0		; If not at the beginning of the line

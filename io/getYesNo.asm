@@ -6,8 +6,7 @@ getYesNo proc far
 	mouseOffset= word ptr	-4
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	di
 	push	si
 

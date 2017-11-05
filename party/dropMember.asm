@@ -4,8 +4,7 @@ dropPartyMember	proc far
 
 	slotNumber= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	PUSH_OFFSET(s_whoToDrop)
 	PRINTSTRING(true)

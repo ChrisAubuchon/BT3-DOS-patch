@@ -5,7 +5,6 @@ tav_isPartyDrunk proc far
 	lastCharNo= word ptr  6
 
 	FUNC_ENTER
-	CHKSTK
 
 l_loopEntry:
 	cmp	[bp+lastCharNo], 0

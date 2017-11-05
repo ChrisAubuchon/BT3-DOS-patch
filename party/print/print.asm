@@ -10,8 +10,7 @@ party_print proc far
 	var_26=	byte ptr -26h
 	var_24=	byte ptr -24h
 
-	FUNC_ENTER
-	CHKSTK(32h)
+	FUNC_ENTER(32h)
 	push	si
 
 	cmp	byte ptr g_printPartyFlag,	0

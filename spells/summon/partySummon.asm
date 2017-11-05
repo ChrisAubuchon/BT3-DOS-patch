@@ -6,8 +6,7 @@ summon_partySummon proc far
 	emptySlot= word ptr	-2
 	summonIndex= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	[bp+skipNoRoomFlag], 0
 l_loop:

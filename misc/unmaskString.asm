@@ -9,8 +9,7 @@ unmaskString proc far
 	fromBuffer= dword ptr  6
 	toBuffer= dword	ptr  0Ah
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	[bp+loopCounter], 0
 l_loopEntry:

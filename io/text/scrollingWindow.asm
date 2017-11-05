@@ -24,8 +24,7 @@ text_scrollingWindow proc far
 	arg_4= dword ptr  0Ah
 	itemCount= word ptr	 0Eh
 
-	FUNC_ENTER
-	CHKSTK(20h)
+	FUNC_ENTER(20h)
 	push	si
 
 	sub	ax, ax

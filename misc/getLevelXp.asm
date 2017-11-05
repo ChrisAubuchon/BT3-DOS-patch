@@ -18,8 +18,7 @@ getLevelXp proc far
 	playerNo= word ptr  6
 	level= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 	push	si
 
 	; For levels higher than 11, the xp calculation is

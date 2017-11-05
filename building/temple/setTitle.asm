@@ -7,8 +7,7 @@ temple_setTitle	proc far
 	templeIndex= word ptr	-4
 	deltaEW= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 	push	si
 
 	mov	si, dirFacing

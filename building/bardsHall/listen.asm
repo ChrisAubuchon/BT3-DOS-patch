@@ -9,8 +9,7 @@ bards_listen proc far
 	var_C= word ptr	-0Ch
 	inKey= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2Eh)
+	FUNC_ENTER(2Eh)
 	push	si
 
 	PUSH_STACK_ADDRESS(var_C)

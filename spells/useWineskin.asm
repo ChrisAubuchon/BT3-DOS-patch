@@ -10,8 +10,7 @@ _sp_useWineskin	proc far
 	var_100= word ptr -100h
 	spellCaster= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(106h)
+	FUNC_ENTER(106h)
 	push	si
 
 	CHARINDEX(ax, STACKVAR(spellCaster), bx)

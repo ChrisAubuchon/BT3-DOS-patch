@@ -6,8 +6,7 @@ sp_trapZap proc	far
 	_sq_north= word	ptr -6
 	dungeonSquareP= dword ptr -4
 
-	FUNC_ENTER
-	CHKSTK(0Ah)
+	FUNC_ENTER(0Ah)
 
 	mov	ax, sq_north
 	mov	[bp+_sq_north],	ax

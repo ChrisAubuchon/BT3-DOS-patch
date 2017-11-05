@@ -6,8 +6,7 @@ temple_getStatusAilment proc far
 	status=	word ptr -2
 	targetSlotNumber= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	CHARINDEX(ax, STACKVAR(targetSlotNumber), bx)
 	mov	al, gs:party.status[bx]

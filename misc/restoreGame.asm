@@ -5,8 +5,7 @@ restoreGame proc far
 	var_4= word ptr	-4
 	fd= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	buildingRvalMaybe, 1
 	PUSH_OFFSET(s_confirmRestore)

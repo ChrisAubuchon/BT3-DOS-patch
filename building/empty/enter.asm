@@ -2,7 +2,6 @@
 
 empty_enter proc	far
 	FUNC_ENTER
-	CHKSTK
 
 	CALL(random)
 	test	al, 3

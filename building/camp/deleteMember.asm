@@ -10,8 +10,7 @@ camp_deleteMember proc far
 	var_150= word ptr -150h
 	var_14E= word ptr -14Eh
 
-	FUNC_ENTER
-	CHKSTK(15Ch)
+	FUNC_ENTER(15Ch)
 	push	si
 
 	CALL(text_clear)

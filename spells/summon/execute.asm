@@ -6,7 +6,6 @@ summon_execute proc far
 	spellNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	test	gs:disbelieveFlags, disb_nosummon
 	jz	short loc_25E96

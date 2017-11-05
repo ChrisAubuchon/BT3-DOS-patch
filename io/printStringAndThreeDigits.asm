@@ -11,8 +11,7 @@ printStringAndThreeDigits proc far
 	arg_2= word ptr	 8
 	arg_4= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(24h)
+	FUNC_ENTER(24h)
 
 	push	[bp+arg_2]
 	push	[bp+arg_0]

@@ -13,8 +13,7 @@ sp_teleport proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(116h)
+	FUNC_ENTER(116h)
 	push	di
 	push	si
 
@@ -209,8 +208,7 @@ _sp_doTeleport proc far
 	sqE= word ptr  8
 	level= word ptr	 0Ah
 
-	FUNC_EXIT
-	CHKSTK(1Ah)
+	FUNC_EXIT(1Ah)
 	push	si
 
 	cmp	[bp+level], 0
@@ -357,8 +355,7 @@ _sp_teleportPrintNum proc far
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(24h)
+	FUNC_ENTER(24h)
 
 	sub	ax, ax
 	push	ax

@@ -6,8 +6,8 @@ camp_saveParty proc far
 	partyName=	word ptr -16h
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(18h)
+	FUNC_ENTER(18h)
+
 	PUSH_OFFSET(s_askPartyName)
 	PRINTSTRING(true)
 	mov	ax, 0Eh

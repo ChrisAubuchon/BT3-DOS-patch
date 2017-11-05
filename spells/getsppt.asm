@@ -10,8 +10,7 @@ getSpptRequired	proc far
 	partySlotNumber= word ptr  6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spptRequired[bx]

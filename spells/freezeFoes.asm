@@ -6,7 +6,6 @@ sp_freezeFoes proc far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	push	[bp+spellCaster]
 	CALL(spellSavingThrowHelper, near)

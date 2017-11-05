@@ -7,8 +7,8 @@ party_getLastSlot proc far
 
 	loopCounter= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	mov	[bp+loopCounter], 6
 l_loopEntry:
 	push	[bp+loopCounter]

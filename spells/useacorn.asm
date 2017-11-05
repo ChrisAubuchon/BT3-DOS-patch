@@ -5,7 +5,6 @@ _sp_useAcorn proc far
 	spellCaster= byte ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	PUSH_OFFSET(s_ateIt)
 	PRINTSTRING

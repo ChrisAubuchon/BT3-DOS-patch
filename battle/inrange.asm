@@ -8,8 +8,7 @@ bat_isPartyInRange proc	far
 	source=	word ptr  6
 	range= word ptr  8
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 
 	; Return success if party attack
 	cmp	gs:bat_curTarget, 80h

@@ -5,7 +5,6 @@ sp_acBonus proc	far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster

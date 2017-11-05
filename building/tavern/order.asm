@@ -16,8 +16,7 @@ tav_orderDrink proc far
 	var_2= word ptr	-2
 	lastCharNo= word ptr  6
 
-	FUNC_ENTER
-	CHKSTK(112h)
+	FUNC_ENTER(112h)
 
 	PUSH_OFFSET(s_whoWillOrder)
 	PRINTSTRING(true)

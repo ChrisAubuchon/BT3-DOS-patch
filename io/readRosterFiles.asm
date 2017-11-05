@@ -8,8 +8,7 @@ readRosterFiles proc far
 	fileDescriptor= word ptr	-4
 	characterCount= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(0Ah)
+	FUNC_ENTER(0Ah)
 
 	push	si
 	mov	word ptr [bp+bufferP], offset g_rosterCharacterBuffer

@@ -8,8 +8,7 @@ itoa proc far
 	inString= dword ptr	 0Ah
 	maxDigits= word ptr	 0Eh
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 	push	si
 
 	mov	[bp+var_2], 20h	

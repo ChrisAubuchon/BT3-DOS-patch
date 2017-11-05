@@ -7,8 +7,7 @@ mouse_updateIcon proc far
 	iconNumber= word ptr	-2
 	arg_0= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	si
 
 	test	[bp+arg_0], 4000h

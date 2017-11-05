@@ -6,8 +6,7 @@ summon_monSummon proc far
 	skipNoRoomFlag= word ptr	-4
 	spellNumber= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 
 	mov	[bp+skipNoRoomFlag], 0
 

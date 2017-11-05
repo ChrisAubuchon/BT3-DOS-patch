@@ -6,7 +6,6 @@ readString_echoChar proc far
 	arg_2= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	push	[bp+arg_2]
 	push	[bp+arg_0]

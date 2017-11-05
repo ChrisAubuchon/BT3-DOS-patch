@@ -5,8 +5,7 @@ sp_camaraderie proc far
 	loopCounter= word ptr	-2
 	spellCaster= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	[bp+loopCounter], 0
 l_loopEnter:

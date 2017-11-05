@@ -4,7 +4,6 @@ sp_haltFoe proc	far
 	spellCaster= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	push	[bp+spellCaster]
 	CALL(spellSavingThrowHelper, near)

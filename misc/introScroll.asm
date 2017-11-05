@@ -12,8 +12,7 @@ intro_scrollText proc far
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(0A30h)
+	FUNC_ENTER(0A30h)
 	push	si
 
 	PUSH_STACK_ADDRESS(var_258)

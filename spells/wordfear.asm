@@ -6,7 +6,6 @@ sp_wordOfFear proc far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 	push	si
 
 	push	[bp+spellCaster]

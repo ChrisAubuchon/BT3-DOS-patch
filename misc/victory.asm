@@ -14,8 +14,7 @@ doVictoryMaybe proc far
 	var_258= word ptr -258h
 	var_256= word ptr -256h
 
-	FUNC_ENTER
-	CHKSTK(0A38h)
+	FUNC_ENTER(0A38h)
 	push	si
 
 	mov	[bp+var_262], 0

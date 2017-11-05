@@ -20,8 +20,7 @@ sp_scrySight proc far
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(11Ah)
+	FUNC_ENTER(11Ah)
 	push	si
 
 	mov	[bp+var_6], 0

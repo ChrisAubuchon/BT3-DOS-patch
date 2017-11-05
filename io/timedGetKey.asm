@@ -13,8 +13,7 @@ timedGetKey proc far
 	var_2= word ptr	-2
 	timeDelay= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	cmp	[bp+timeDelay], 0
 	jge	short l_getkeyWithDelay

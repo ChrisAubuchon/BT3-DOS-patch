@@ -11,8 +11,7 @@ camp_renameMember proc far
 	characterNameList= dword ptr -22Ch
 	var_100= word ptr -100h
 
-	FUNC_ENTER
-	CHKSTK(25Eh)
+	FUNC_ENTER(25Eh)
 	push	si
 
 	CALL(text_clear)

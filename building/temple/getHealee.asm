@@ -14,8 +14,7 @@ temple_getHealee proc far
 	healCost= word ptr -2
 	lastPartySlot= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(112h)
+	FUNC_ENTER(112h)
 	push	si
 
 	PUSH_OFFSET(s_whoNeedsHealing)

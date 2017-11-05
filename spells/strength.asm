@@ -6,7 +6,6 @@ sp_strengthBonus proc far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	test	byte ptr [bp+spellCaster], 80h
 	jz	short l_partCaster

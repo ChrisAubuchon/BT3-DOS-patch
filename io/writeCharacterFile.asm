@@ -5,8 +5,7 @@ writeCharacterFile proc far
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	PUSH_OFFSET(s_thievesInf)
 	CALL(openFile, near)

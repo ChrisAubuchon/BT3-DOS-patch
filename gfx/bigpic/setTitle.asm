@@ -5,8 +5,7 @@ setTitle proc far
 	startingColumn= word ptr	-2
 	inString= dword ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	sub	ax, ax
 	push	ax

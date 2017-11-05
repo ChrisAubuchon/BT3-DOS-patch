@@ -4,8 +4,7 @@ readChNoMouse proc far
 
 	inputKey= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	sub	ax, ax
 	push	ax

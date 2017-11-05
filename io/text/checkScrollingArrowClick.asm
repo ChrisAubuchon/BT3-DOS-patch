@@ -6,8 +6,7 @@ scroll_checkArrowClick proc far
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	[bp+var_2], 0
 

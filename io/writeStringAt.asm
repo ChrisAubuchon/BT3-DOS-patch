@@ -8,8 +8,7 @@ writeStringAt proc far
 	row= word ptr	 0Ch
 	colorFlag= word ptr	 0Eh
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 l_loop:
 	lfs	bx, [bp+inString]

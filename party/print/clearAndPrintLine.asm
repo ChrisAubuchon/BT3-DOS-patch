@@ -6,8 +6,7 @@ party_clearAndPrintLine proc far
 	inString= dword ptr	 6
 	partySlotNumber= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	ax, [bp+partySlotNumber]
 	mov	cl, 3

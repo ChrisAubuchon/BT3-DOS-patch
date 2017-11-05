@@ -2,7 +2,6 @@
 
 song_endNoncombatEffect	proc far
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	gs:g_currentSongPlusOne, 0
 	jz	l_return

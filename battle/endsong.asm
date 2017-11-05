@@ -2,7 +2,7 @@
 
 bat_endCombatSong proc far
 	FUNC_ENTER
-	CHKSTK
+
 	cmp	gs:g_currentSongPlusOne, 0
 	jz	short l_return
 	mov	gs:g_currentSongPlusOne, 0

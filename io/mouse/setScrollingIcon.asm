@@ -10,8 +10,7 @@ mouse_setScrollingIcon proc far
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	ax, mouseBoxes._left[1 * sizeof mouseBox_t]
 	cmp	mouse_x, ax

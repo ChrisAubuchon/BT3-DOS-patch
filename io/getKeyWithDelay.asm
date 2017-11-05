@@ -5,8 +5,7 @@ getKeyWithDelay proc far
 	delayTime= word ptr	 6
 	speedupFlag= word ptr 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	cmp	[bp+delayTime], 0
 	jl	l_return

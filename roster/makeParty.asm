@@ -12,8 +12,8 @@ roster_makeParty proc far
 	arg_2= word ptr	 8
 	arg_4= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
+
 	mov	ax, [bp+partyIndexNumber]
 	mov	cl, 7
 	shl	ax, cl

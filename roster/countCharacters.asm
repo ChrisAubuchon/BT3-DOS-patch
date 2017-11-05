@@ -7,9 +7,9 @@ roster_countCharacters	proc far
 	bufferP= dword ptr -6
 	loopCounter= word ptr -2
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	si
+
 	mov	word ptr [bp+bufferP], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+bufferP+2], seg seg022
 	mov	[bp+loopCounter], 0

@@ -8,8 +8,7 @@ useItem	proc far
 	var_32=	word ptr -32h
 	userSlotNumber= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(0F8h)
+	FUNC_ENTER(0F8h)
 
 	PUSH_OFFSET(s_whoUsesItem)
 	PRINTSTRING(true)

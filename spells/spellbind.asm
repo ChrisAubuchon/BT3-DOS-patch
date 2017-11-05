@@ -6,8 +6,7 @@ sp_spellbind proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 	push	si
 
 	sub	ax, ax
@@ -82,8 +81,7 @@ _sp_convertMonToSummon proc far
 	partySlotNumber= word ptr	 6
 	monBufferP= dword ptr  8
 
-	FUNC_ENTER
-	CHKSTK(1Ah)
+	FUNC_ENTER(1Ah)
 	push	si
 
 	CHARINDEX(ax, STACKVAR(partySlotNumber))

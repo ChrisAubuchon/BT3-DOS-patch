@@ -1,7 +1,6 @@
 ; Attributes: bp-based frame
 snd_toggle proc	far
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	g_soundActiveFlag, 1
 	sbb	ax, ax

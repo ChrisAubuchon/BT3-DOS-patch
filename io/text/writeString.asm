@@ -10,8 +10,7 @@ text_writeString proc far
 	currentCharacter= byte ptr	-2
 	inString= dword ptr  6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 l_loop:
 	lfs	bx, [bp+inString]

@@ -3,7 +3,6 @@ executeKeyboardCommand proc far
 	arg_0= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	[bp+arg_0], dosKeys_F1
 	jl	short l_notFunctionKeySpell

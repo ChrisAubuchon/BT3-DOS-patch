@@ -4,8 +4,8 @@ getCharacterRace proc far
 
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 l_ioLoopEntry:
 	PUSH_OFFSET(s_raceOptions)
 	PRINTSTRING(true)

@@ -4,7 +4,6 @@ _sp_reenergizeMage proc	far
 	spellCaster= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 	push	si
 
 	CHARINDEX(ax, STACKVAR(spellCaster), si)

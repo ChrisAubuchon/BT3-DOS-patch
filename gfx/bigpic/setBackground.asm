@@ -6,8 +6,7 @@ bigpic_setBackground	proc far
 	var_2= word ptr	-2
 	arg_0= dword ptr  6
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	test	levFlags, 20h
 	jz	l_inDungeon

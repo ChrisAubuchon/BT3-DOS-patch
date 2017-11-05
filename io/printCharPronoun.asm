@@ -12,8 +12,7 @@ printCharPronoun proc far
 	arg_6= word ptr	 0Ch
 	arg_8= word ptr  0Eh
 
-	FUNC_ENTER
-	CHKSTK(16h)
+	FUNC_ENTER(16h)
 	push	si
 
 	test	[bp+arg_4], 80h

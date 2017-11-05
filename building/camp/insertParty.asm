@@ -8,9 +8,9 @@ camp_insertParty proc far
 	var_2= word ptr	-2
 	savedPartyNumber= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(0Ah)
+	FUNC_ENTER(0Ah)
 	push	si
+
 	mov	ax, [bp+savedPartyNumber]
 	mov	cl, 7
 	shl	ax, cl

@@ -18,8 +18,7 @@ _sp_useWeapon proc far
 	var_2= word ptr	-2
 	spellCaster=	word ptr  6
 
-	FUNC_ENTER
-	CHKSTK(10h)
+	FUNC_ENTER(10h)
 	push	di
 	push	si
 

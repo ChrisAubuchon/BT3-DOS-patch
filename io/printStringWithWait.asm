@@ -7,7 +7,6 @@ printStringWithWait proc	far
 	arg_2= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	CALL(text_clear)
 	push	[bp+arg_2]

@@ -9,8 +9,7 @@ party_addCharacter proc far
 	var_4= word ptr	-4
 	emptySlot= word	ptr -2
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	si
 
 	CALL(party_getLastSlot, near)

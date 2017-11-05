@@ -9,8 +9,7 @@ party_reorder proc far
 	slotNumberRead=	word ptr -10h
 	var_E= word ptr	-0Eh
 
-	FUNC_ENTER
-	CHKSTK(24h)
+	FUNC_ENTER(24h)
 	push	di
 	push	si
 

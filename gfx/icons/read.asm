@@ -4,8 +4,7 @@ icons_read proc far
 
 	fd= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 l_retry:
 	sub	ax, ax

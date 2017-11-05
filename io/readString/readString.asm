@@ -8,8 +8,7 @@ readString proc far
 	arg_0= dword ptr  6
 	arg_4= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	si
 
 	mov	[bp+var_6], 0

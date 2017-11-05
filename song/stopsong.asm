@@ -6,7 +6,7 @@ song_stopPlaying proc far
 	partySlotNumber= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
+
 	mov	al, gs:g_currentSinger
 	sub	ah, ah
 	cmp	ax, [bp+partySlotNumber]

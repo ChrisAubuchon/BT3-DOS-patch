@@ -4,7 +4,6 @@ isAlphaNum proc	far
 	arg_0= byte ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	al, [bp+arg_0]
 	cbw

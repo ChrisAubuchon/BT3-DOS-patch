@@ -15,8 +15,7 @@ storage_getItem proc far
 	var_38=	word ptr -38h
 	arg_0= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(372h)
+	FUNC_ENTER(372h)
 	push	di
 	push	si
 

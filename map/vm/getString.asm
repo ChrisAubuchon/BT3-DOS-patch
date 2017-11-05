@@ -7,7 +7,7 @@ _mfunc_getString proc far
 	rbuf= dword ptr	 0Ah
 
 	FUNC_ENTER
-	CHKSTK
+
 	mov	ax, [bp+memOffset]
 	mov	dx, [bp+memSegment]
 	mov	dataBufOff, ax

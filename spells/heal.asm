@@ -6,7 +6,6 @@ sp_healSpell proc far
 	spellNo= word ptr  8
 
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	[bp+partySlotNumber], 80h
 	jge	short l_return
@@ -49,8 +48,7 @@ _doHeal	proc far
 	target=	word ptr  8
 	spellNo= word ptr  0Ah
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	si
 
 	mov	bx, [bp+spellNo]
@@ -210,7 +208,6 @@ _sp_postHeal proc far
 	partySlotNumber=	word ptr  6
 
 	FUNC_ENTER
-	CHKSTK
 
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	cmp	gs:party.currentHP[bx], 0

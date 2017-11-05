@@ -6,7 +6,6 @@ sp_shieldSpell proc far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	[bp+spellCaster], 80h
 	jl	short l_partyCaster

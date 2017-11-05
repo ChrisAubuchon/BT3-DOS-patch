@@ -9,7 +9,6 @@ bigpic_configureCells proc far
 	arg_0= dword ptr  6
 
 	FUNC_ENTER
-	CHKSTK
 	push	si
 
 	mov	si, 1340h

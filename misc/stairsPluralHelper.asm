@@ -7,8 +7,7 @@ stairsPluralHelper proc far
 	arg_0= dword ptr	 6
 	arg_4= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(54h)
+	FUNC_ENTER(54h)
 
 	push	[bp+arg_4]
 	PUSH_STACK_ADDRESS(stringBuffer)

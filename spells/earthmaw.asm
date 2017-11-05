@@ -10,8 +10,7 @@ sp_earthMaw proc far
 	var_102= word ptr -102h
 	var_100= word ptr -100h
 
-	FUNC_ENTER
-	CHKSTK(108h)
+	FUNC_ENTER(108h)
 	push	si
 
 	PUSH_OFFSET(s_earthSwallows)

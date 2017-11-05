@@ -5,8 +5,7 @@ rnd_Xd4	proc far
 	rval= word ptr -2
 	numOfDice= word	ptr  6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	[bp+rval], 0
 l_loopEnter:

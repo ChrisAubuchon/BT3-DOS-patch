@@ -8,8 +8,7 @@ mouse_getClick proc far
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 	push	si
 
 	CALL(checkGamePort)

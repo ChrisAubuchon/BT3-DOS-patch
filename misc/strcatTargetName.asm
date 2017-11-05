@@ -7,8 +7,7 @@ strcatTargetName proc far
 	targetIndexNumber= word ptr	 0Ah
 	targetCount= word ptr	 0Ch
 
-	FUNC_ENTER
-	CHKSTK(10h)
+	FUNC_ENTER(10h)
 
 	cmp	[bp+targetIndexNumber], 80h
 	jge	short l_monTarget

@@ -8,7 +8,6 @@ party_printAt proc far
 	colorFlag= word ptr	 0Eh
 
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	[bp+colorFlag], 1
 	sbb	ax, ax

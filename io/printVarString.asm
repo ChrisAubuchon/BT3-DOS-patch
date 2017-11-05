@@ -15,9 +15,9 @@ printVarString proc far
 	validOptionCharacters= dword ptr  0Eh
 	validOptionMouse= dword ptr  12h
 
-	FUNC_ENTER
-	CHKSTK(10Ah)
+	FUNC_ENTER(10Ah)
 	push	si
+
 	sub	ax, ax
 	mov	[bp+currentOptionIndex], ax
 	mov	[bp+mouseBitmask], ax

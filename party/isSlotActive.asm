@@ -7,7 +7,7 @@ party_isSlotActive proc	far
 	slotNo=	word ptr  6
 
 	FUNC_ENTER
-	CHKSTK
+
 	CHARINDEX(ax, STACKVAR(slotNo), bx)
 	cmp	byte ptr gs:party._name[bx], 0
 	jz	short l_returnZero

@@ -3,7 +3,6 @@
 camp_exit	proc far
 
 	FUNC_ENTER
-	CHKSTK
 
 	CALL(roster_writeParty, near)
 	CALL(roster_countCharacters, near)

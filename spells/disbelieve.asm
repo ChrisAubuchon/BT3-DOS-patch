@@ -6,8 +6,7 @@ sp_disbelieve proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 	push	si
 
 	cmp	[bp+spellCaster], 80h

@@ -5,7 +5,6 @@ readString_overwriteCursor proc far
 	arg_0= byte ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	sub	ax, ax
 	push	ax

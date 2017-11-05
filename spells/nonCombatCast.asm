@@ -5,8 +5,7 @@ noncombatCast proc far
 	var_2= word ptr	-2
 	inFunctionKey= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 
 	cmp	[bp+inFunctionKey], 0
 	jz	short l_askForCaster

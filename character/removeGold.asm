@@ -9,8 +9,8 @@ character_removeGold	proc far
 	goldAmount= word ptr	 0Ah
 
 	FUNC_ENTER
-	CHKSTK
 	push	si
+
 	mov	ax, [bp+arg_2]
 	mov	dx, [bp+goldAmount]
 	mov	cx, ax

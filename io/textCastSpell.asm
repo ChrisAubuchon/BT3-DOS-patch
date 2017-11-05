@@ -6,8 +6,7 @@ text_castSpell proc far
 	counter = word ptr -2
 	arg_0 = word ptr 6
 
-	FUNC_ENTER
-	CHKSTK(7)
+	FUNC_ENTER(7)
 	push	si
 
 	CALL(text_clear)

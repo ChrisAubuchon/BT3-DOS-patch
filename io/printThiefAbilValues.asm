@@ -9,7 +9,6 @@ printThiefAbilValues proc far
 	arg_4= word ptr	 0Ah
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	ax, 64h	
 	imul	[bp+arg_4]

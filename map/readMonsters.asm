@@ -9,8 +9,7 @@ map_readMonsters	proc far
 	_fd= word ptr	-2
 	index= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(0Ah)
+	FUNC_ENTER(0Ah)
 
 	mov	ax, 480h
 	push	ax

@@ -9,8 +9,7 @@ tavern_talkToBarkeep proc far
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(0Ah)
+	FUNC_ENTER(0Ah)
 
 	PUSH_OFFSET(s_whoTalksToBarkeep)
 	PRINTSTRING(true)

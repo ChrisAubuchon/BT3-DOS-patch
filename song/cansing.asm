@@ -5,7 +5,7 @@ _canSingSong proc far
 	partySlotNumber=	word ptr  6
 
 	FUNC_ENTER
-	CHKSTK
+
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	test	gs:party.status[bx], stat_dead	or stat_stoned or stat_paralyzed
 	jnz	short l_returnZero

@@ -4,8 +4,7 @@ bards_enter proc far
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 	push	si
 
 	PUSH_OFFSET(s_bardsHall)

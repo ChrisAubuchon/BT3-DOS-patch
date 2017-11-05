@@ -5,17 +5,14 @@ include(`functionTable.m4')
 # Function entry code
 #
 define(`FUNC_ENTER', `push	bp
-	mov	bp, sp')
+	mov	bp, sp
+ifelse(`$1', `', `dnl', `	mov	ax, $1
+	call	someStackOperation')')
 
 # Function exit code
 #
 define(`FUNC_EXIT', `mov	sp, bp
 	pop	bp')
-
-# CHKSTK([stack space used])
-#
-define(`CHKSTK', `ifelse(`$1', `', `xor	ax, ax', `mov	ax, $1')
-	call	someStackOperation')dnl
 
 # PUSH(value)
 #

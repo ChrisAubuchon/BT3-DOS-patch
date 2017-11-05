@@ -12,8 +12,7 @@ summon_addMonToGroup proc far
 	arg_0= byte ptr	 6
 	arg_2= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(116h)
+	FUNC_ENTER(116h)
 	push	si
 
 	MONINDEX(ax, STACKVAR(arg_2), bx)

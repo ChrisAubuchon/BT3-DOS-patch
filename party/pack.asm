@@ -9,8 +9,8 @@ party_pack proc far
 	partySlotNumber=	word ptr  6
 
 	FUNC_ENTER
-	CHKSTK
 	push	si
+
 loc_127AE:
 	cmp	[bp+partySlotNumber], 6
 	jge	short l_return

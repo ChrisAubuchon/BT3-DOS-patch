@@ -16,8 +16,7 @@ bards_configOptionList proc far
 	locationFlag= word ptr	 6
 	optionList= dword ptr  8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 	push	si
 
 	mov	[bp+loopCounter], 0

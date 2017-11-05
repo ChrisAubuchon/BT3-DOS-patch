@@ -10,7 +10,6 @@ sing_getSongSubtractor proc far
 	partySlotNumber= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	ax, itemEff_freeSinging
 	push	ax

@@ -6,7 +6,6 @@ strcat	proc far
 	fromStr= dword ptr  0Ah
 
 	FUNC_ENTER
-	CHKSTK
 
 l_loopEntry:
 	lfs	bx, [bp+fromStr]

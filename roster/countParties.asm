@@ -5,9 +5,9 @@ roster_countParties proc far
 	loopCounter= word ptr	-6
 	partyBufferP= dword ptr -4
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	si
+
 	mov	word ptr [bp+partyBufferP], offset g_rosterPartyBuffer
 	mov	word ptr [bp+partyBufferP+2], seg seg022
 	mov	[bp+loopCounter], 0

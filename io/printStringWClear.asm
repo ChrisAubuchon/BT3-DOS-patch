@@ -5,7 +5,7 @@ printStringWClear proc far
 	inString= dword ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
+
 	CALL(text_clear, near)
 	push	[bp+inString]
 	PRINTSTRING

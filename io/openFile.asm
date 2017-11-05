@@ -8,8 +8,8 @@ openFile proc far
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 loc_14D40:
 	mov	ax, 2
 	push	ax

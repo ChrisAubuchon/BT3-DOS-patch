@@ -9,8 +9,7 @@ sp_meleeMen proc far
 	var_2= word ptr	-2
 	spellCaster= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(56h)
+	FUNC_ENTER(56h)
 
 	push	[bp+spellCaster]
 	CALL(spellSavingThrowHelper, near)

@@ -6,8 +6,7 @@ camp_addMember proc far
 	var_156= word ptr -156h
 	savedList= dword	ptr -154h
 
-	FUNC_ENTER
-	CHKSTK(15Ch)
+	FUNC_ENTER(15Ch)
 	push	si
 
 	CALL(text_clear)

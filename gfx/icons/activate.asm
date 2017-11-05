@@ -5,7 +5,6 @@ icon_activate proc far
 	iconIndex= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 	push	si
 
 	mov	bx, [bp+iconIndex]

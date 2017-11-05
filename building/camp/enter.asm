@@ -10,8 +10,7 @@ camp_enter proc	far
 	optionMouse=	word ptr -3Ch
 	campOptionList=	word ptr -14h
 
-	FUNC_ENTER
-	CHKSTK(58h)
+	FUNC_ENTER(58h)
 	push	si
 
 	CALL(endNoncombatSong)

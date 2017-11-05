@@ -6,7 +6,6 @@ summon_newMonGroup proc far
 	arg_2= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	and	[bp+arg_0], 1Fh
 	MONINDEX(ax, STACKVAR(arg_0))

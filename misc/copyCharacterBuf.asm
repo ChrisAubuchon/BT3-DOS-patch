@@ -10,7 +10,7 @@ copyCharacterBuf proc far
 	arg_6= word ptr	 0Ch
 
 	FUNC_ENTER
-	CHKSTK
+
 	mov	ax, 78h	
 	push	ax
 	push	[bp+arg_2]

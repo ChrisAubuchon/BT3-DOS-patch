@@ -6,8 +6,7 @@ spGeo_removeTrap proc far
 	row= word ptr  6
 	column=	word ptr  8
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	bx, [bp+row]
 	shl	bx, 1
@@ -38,8 +37,7 @@ dun_maskSquare proc far
 	_byte=	word ptr 0Ah
 	_mask=  byte ptr 0Ch
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	bx, [bp+row]
 	shl	bx, 1
@@ -71,8 +69,7 @@ spGeo_revealSquare proc far
 	row= word ptr  6
 	column=	word ptr  8
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	bx, [bp+row]
 	shl	bx, 1
@@ -103,8 +100,7 @@ dun_revealSpSquare proc	far
 	column=	word ptr  8
 	geoSpMaskIndex= word ptr	 0Ah
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	push	si
 	mov	bx, [bp+row]
@@ -154,8 +150,7 @@ sp_geomancerSpell proc far
 	column=	word ptr -2
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 
 	cmp	inDungeonMaybe, 0
 	jz	short l_return

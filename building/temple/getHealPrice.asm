@@ -7,7 +7,6 @@ temple_getHealPrice proc far
 	ailmentIndex= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	CHARINDEX(ax, STACKVAR(targetSlotNumber), bx)
 	cmp	gs:party.class[bx], class_monster

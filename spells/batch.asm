@@ -7,8 +7,7 @@ sp_batchspell proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(4)
+	FUNC_ENTER(4)
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]

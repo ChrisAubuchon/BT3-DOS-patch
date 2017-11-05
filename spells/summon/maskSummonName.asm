@@ -6,8 +6,7 @@ summon_maskSummonName proc far
 	destAddress= dword ptr  6
 	srcAddress= dword ptr  0Ah
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 	push	si
 
 	mov	[bp+loopCounter], 0

@@ -6,7 +6,6 @@ _sp_useLightObj	proc far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	PUSH_OFFSET(s_makesLight)
 	PRINTSTRING

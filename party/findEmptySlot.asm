@@ -7,8 +7,8 @@ party_findEmptySlot proc	far
 
 	loopCounter= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	mov	[bp+loopCounter], 0
 l_loopEntry:
 	CHARINDEX(ax, STACKVAR(loopCounter), bx)

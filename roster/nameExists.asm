@@ -9,8 +9,8 @@ roster_nameExists proc far
 	nameOffset= word ptr  6
 	nameString= word ptr  8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	mov	[bp+counter], 0
 l_loopEntry:
 	CHARINDEX(ax, STACKVAR(counter), bx)

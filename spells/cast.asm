@@ -6,7 +6,6 @@ spell_cast proc	far
 	itemUsedFlag= word ptr	 0Ah
 
 	FUNC_ENTER
-	CHKSTK
 
 	cmp	[bp+itemUsedFlag], 0
 	jnz	short l_notMapSpell

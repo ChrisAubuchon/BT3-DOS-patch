@@ -2,7 +2,7 @@
 
 song_doNoncombatEffect proc far
 	FUNC_ENTER
-	CHKSTK
+
 	mov	al, gs:g_currentSong
 	sub	ah, ah
 	jmp	l_songSwitch

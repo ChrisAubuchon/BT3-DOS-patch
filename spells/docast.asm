@@ -9,8 +9,7 @@ doCastSpell proc far
 	itemUsedFlag= word ptr	 0Ah
 	useSppt= word ptr	 0Ch
 
-	FUNC_ENTER
-	CHKSTK(108h)
+	FUNC_ENTER(108h)
 
 	push	[bp+partySlotNumber]
 	PUSH_STACK_ADDRESS(stringBuf)

@@ -9,9 +9,9 @@ camp_removeMember proc far
 	var_1C=	word ptr -1Ch
 	var_1A=	word ptr -1Ah
 
-	FUNC_ENTER
-	CHKSTK(24h)
+	FUNC_ENTER(24h)
 	push	si
+
 	mov	[bp+loopCounter], 0
 	mov	ax, offset s_removeAll
 	mov	[bp+partyMemberList], ax

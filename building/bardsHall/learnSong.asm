@@ -10,8 +10,7 @@ bards_learnSong	proc far
 	var_2= word ptr	-2
 	songNumber= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(108h)
+	FUNC_ENTER(108h)
 	push	si
 
 	PUSH_OFFSET(s_bardSmiles)

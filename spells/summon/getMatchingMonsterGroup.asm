@@ -10,8 +10,7 @@ summon_getMatchMonGroup proc far
 	groupCounter= word ptr	-2
 	summonNo= word ptr  6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	[bp+groupCounter], 0
 loc_2600B:

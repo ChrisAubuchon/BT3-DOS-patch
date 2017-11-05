@@ -18,8 +18,7 @@ camp_configOptionList proc far
 	counter= word ptr -2
 	arg_0= dword ptr  6
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 	push	si
 
 	CALL(party_findEmptySlot, near)

@@ -15,8 +15,7 @@ printLocation proc far
 	pacesEast= word ptr -102h
 	stringBuffer= word ptr -100h
 
-	FUNC_ENTER
-	CHKSTK(126h)
+	FUNC_ENTER(126h)
 
 	mov	[bp+var_10E], offset g_rosterCharacterBuffer
 	mov	[bp+var_10C], seg seg022

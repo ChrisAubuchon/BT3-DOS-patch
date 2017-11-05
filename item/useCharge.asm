@@ -7,7 +7,6 @@ item_useCharge proc far
 	itemSlotNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	CHARINDEX(ax, STACKVAR(userSlotNumber))
 	mov	bx, [bp+itemSlotNumber]

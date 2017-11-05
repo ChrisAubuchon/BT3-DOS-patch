@@ -6,8 +6,7 @@ song_singNonCombat	proc far
 	subtractor= word ptr	-4
 	songNumber= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 
 	CALL(text_clear)
 	PUSH_OFFSET(s_whoWillPlay)

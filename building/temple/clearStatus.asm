@@ -6,7 +6,6 @@ temple_clearStatusAilment proc far
 	ailmentIndex= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	CHARINDEX(ax, STACKVAR(targetSlotNumber), si)
 	mov	bx, [bp+ailmentIndex]

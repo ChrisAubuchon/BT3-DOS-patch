@@ -6,8 +6,7 @@ _sp_checkSPPT proc far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	cmp	[bp+spellCaster], 80h
 	jge	short l_returnOne

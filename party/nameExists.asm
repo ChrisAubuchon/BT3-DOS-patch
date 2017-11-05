@@ -13,8 +13,8 @@ party_nameExists	proc far
 	_offset= word ptr  6
 	_segment= word ptr  8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	mov	[bp+loopCounter], 0
 l_loopEntry:
 	CHARINDEX(ax, STACKVAR(loopCounter), bx)

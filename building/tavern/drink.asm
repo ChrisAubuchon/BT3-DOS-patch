@@ -6,8 +6,7 @@ tavern_drink proc far
 	arg_0= word ptr	 6
 	drinkIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	CALL(text_clear)
 

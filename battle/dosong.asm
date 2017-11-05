@@ -6,8 +6,8 @@ bat_doCombatSong proc far
 	partySlotNumber= word ptr	 6
 	songNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	push	[bp+songNumber]
 	push	[bp+partySlotNumber]
 	CALL(song_playSong)

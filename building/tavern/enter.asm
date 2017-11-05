@@ -6,8 +6,8 @@ tav_enter proc far
 	lastCharNo= word ptr -4
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
+
 	CALL(party_findEmptySlot, near)
 	mov	[bp+lastCharNo], ax
 

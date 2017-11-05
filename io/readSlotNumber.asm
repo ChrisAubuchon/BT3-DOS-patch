@@ -5,7 +5,6 @@ readSlotNumber proc far
 	inputKey= word ptr	-2
 
 	FUNC_ENTER
-	CHKSTK
 
 l_loopEntry:
 	mov	ax, 2000h

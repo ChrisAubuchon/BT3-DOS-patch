@@ -6,8 +6,7 @@ tav_setTitle proc far
 	tavernIndex= word ptr	-4
 	deltaE=	word ptr -2
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 	push	si
 
 	mov	[bp+tavernIndex], 4

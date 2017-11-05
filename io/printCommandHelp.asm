@@ -2,7 +2,6 @@
 
 printCommandHelp proc far
 	FUNC_ENTER
-	CHKSTK
 
 	CALL(text_clear)
 	PUSH_OFFSET(s_helpMessage1)

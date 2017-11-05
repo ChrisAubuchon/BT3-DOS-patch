@@ -26,8 +26,7 @@ str_pluralize proc far
 	destString= dword ptr  0Ah
 	value= word ptr	 0Eh
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	mov	[bp+stringState], 0
 l_stateCheck:

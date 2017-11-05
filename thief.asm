@@ -65,8 +65,7 @@ _main proc far
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 6
-	call	someStackOperation
+	
 
 	mov	ax, 55h
 	push	ax
@@ -2258,8 +2257,6 @@ executeKeyboardCommand proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	[bp+arg_0], dosKeys_F1
 	jl	short l_notFunctionKeySpell
@@ -2391,8 +2388,6 @@ printStringWithWait proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	call	text_clear
 	push	[bp+arg_2]
@@ -2414,8 +2409,6 @@ printStringWithWait endp
 printCommandHelp proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	call	text_clear
 	mov	ax, offset s_helpMessage1
@@ -2643,8 +2636,6 @@ party_swapMembers proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, offset newCharBuffer
 	mov	dx, seg	seg027
@@ -3024,8 +3015,6 @@ item_doSpell proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, [bp+itemSlotNumber]
 	mov	cx, ax
@@ -3064,8 +3053,6 @@ item_useCharge proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, charSize
 	imul	[bp+userSlotNumber]
@@ -3134,8 +3121,6 @@ item_useCharge endp
 snd_toggle proc	far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	g_soundActiveFlag, 1
 	sbb	ax, ax
@@ -3172,6 +3157,7 @@ printVarString proc far
 	mov	ax, 10Ah
 	call	someStackOperation
 	push	si
+
 	sub	ax, ax
 	mov	[bp+currentOptionIndex], ax
 	mov	[bp+mouseBitmask], ax
@@ -3617,8 +3603,6 @@ dropPartyMember	endp
 quitGame proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, offset s_confirmQuit
 	push	ds
@@ -3841,6 +3825,7 @@ camp_insertParty proc far
 	mov	ax, 0Ah
 	call	someStackOperation
 	push	si
+
 	mov	ax, [bp+savedPartyNumber]
 	mov	cl, 7
 	shl	ax, cl
@@ -3993,6 +3978,7 @@ camp_removeMember proc far
 	mov	ax, 24h
 	call	someStackOperation
 	push	si
+
 	mov	[bp+loopCounter], 0
 	mov	ax, offset s_removeAll
 	mov	[bp+partyMemberList], ax
@@ -4076,9 +4062,8 @@ party_pack proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
+
 loc_127AE:
 	cmp	[bp+partySlotNumber], 6
 	jge	short l_return
@@ -4115,6 +4100,7 @@ party_clear proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	call	roster_writeParty
 	mov	[bp+slotNo], 0
 l_loopEnter:
@@ -4736,6 +4722,7 @@ getCharacterRace proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 l_ioLoopEntry:
 	mov	ax, offset s_raceOptions
 	push	ds
@@ -4791,6 +4778,7 @@ party_nameExists	proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	mov	[bp+loopCounter], 0
 l_loopEntry:
 	mov	ax, charSize
@@ -4834,6 +4822,7 @@ roster_nameExists proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	mov	[bp+counter], 0
 l_loopEntry:
 	mov	ax, charSize
@@ -5107,6 +5096,7 @@ camp_deleteParty proc far
 	mov	ax, 10Ah
 	call	someStackOperation
 	push	si
+
 	mov	ax, [bp+partyIndexNumber]
 	mov	cl, 7
 	shl	ax, cl
@@ -5203,6 +5193,7 @@ camp_saveParty proc far
 	mov	bp, sp
 	mov	ax, 18h
 	call	someStackOperation
+
 	mov	ax, offset s_askPartyName
 	push	ds
 	push	ax
@@ -5260,6 +5251,7 @@ roster_partyExists proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	mov	[bp+loopCounter], 0
 l_loopEntry:
 	mov	bx, [bp+loopCounter]
@@ -5308,6 +5300,7 @@ roster_makeParty proc far
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
+
 	mov	ax, [bp+partyIndexNumber]
 	mov	cl, 7
 	shl	ax, cl
@@ -5368,6 +5361,7 @@ roster_countParties proc far
 	mov	ax, 6
 	call	someStackOperation
 	push	si
+
 	mov	word ptr [bp+partyBufferP], offset g_rosterPartyBuffer
 	mov	word ptr [bp+partyBufferP+2], seg seg022
 	mov	[bp+loopCounter], 0
@@ -5399,8 +5393,7 @@ camp_saveAndExit proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	ax, offset s_saveAndExit
 	push	ds
 	push	ax
@@ -5440,8 +5433,6 @@ camp_exit	proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	push	cs
 	call	near ptr roster_writeParty
@@ -5826,6 +5817,7 @@ roster_writeParty proc far
 	mov	bp, sp
 	mov	ax, 8
 	call	someStackOperation
+
 	push	cs
 	call	near ptr party_findEmptySlot
 	mov	[bp+emptySlot],	ax
@@ -5858,6 +5850,7 @@ roster_writeCharacter proc far
 	mov	bp, sp
 	mov	ax, 4
 	call	someStackOperation
+
 	mov	ax, charSize
 	imul	[bp+partySlotNumber]
 	mov	bx, ax
@@ -5931,8 +5924,7 @@ copyCharacterBuf proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	ax, 78h	
 	push	ax
 	push	[bp+arg_2]
@@ -5961,6 +5953,7 @@ roster_countCharacters	proc far
 	mov	ax, 6
 	call	someStackOperation
 	push	si
+
 	mov	word ptr [bp+bufferP], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+bufferP+2], seg seg022
 	mov	[bp+loopCounter], 0
@@ -6093,6 +6086,7 @@ party_findEmptySlot proc	far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	mov	[bp+loopCounter], 0
 l_loopEntry:
 	mov	ax, charSize
@@ -6142,6 +6136,7 @@ party_getLastSlot proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	mov	[bp+loopCounter], 6
 l_loopEntry:
 	push	[bp+loopCounter]
@@ -6173,8 +6168,7 @@ party_isSlotActive proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	ax, charSize
 	imul	[bp+slotNo]
 	mov	bx, ax
@@ -6217,6 +6211,7 @@ tav_enter proc far
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
+
 	push	cs
 	call	near ptr party_findEmptySlot
 	mov	[bp+lastCharNo], ax
@@ -6547,9 +6542,8 @@ character_removeGold	proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
+
 	mov	ax, [bp+arg_2]
 	mov	dx, [bp+goldAmount]
 	mov	cx, ax
@@ -6685,6 +6679,7 @@ tavern_getWineskin	proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	cmp	[bp+arg_2], 4
 	jnz	short loc_13DF3
 	sub	ax, ax
@@ -6748,8 +6743,6 @@ tav_isPartyDrunk proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 l_loopEntry:
 	cmp	[bp+lastCharNo], 0
@@ -7571,8 +7564,6 @@ temple_getHealPrice proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, charSize
 	imul	[bp+targetSlotNumber]
@@ -7657,8 +7648,6 @@ temple_clearStatusAilment proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, charSize
 	imul	[bp+targetSlotNumber]
@@ -7778,8 +7767,6 @@ readSlotNumber proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 l_loopEntry:
 	mov	ax, 2000h
@@ -7954,8 +7941,6 @@ getLevelXp endp
 empty_enter proc	far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	call	random
 	test	al, 3
@@ -8002,8 +7987,6 @@ storage_enter proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, 50
 	push	ax
@@ -8459,6 +8442,7 @@ openFile proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 loc_14D40:
 	mov	ax, 2
 	push	ax
@@ -8513,8 +8497,7 @@ disk1Swap proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	cmp	[bp+arg_0], 0
 	jz	short l_return
 	lfs	bx, disk3
@@ -9185,8 +9168,6 @@ isAlphaNum proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	al, [bp+arg_0]
 	cbw
@@ -9739,8 +9720,7 @@ _mfunc_getString proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	ax, [bp+memOffset]
 	mov	dx, [bp+memSegment]
 	mov	dataBufOff, ax
@@ -9770,8 +9750,6 @@ _mfunc_unpackChar proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 l_extractCharacter:
 	mov	ax, 5
@@ -10637,8 +10615,6 @@ readString_overwriteCursor proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	sub	ax, ax
 	push	ax
@@ -10670,8 +10646,6 @@ readString_printChar proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, 1
 	push	ax
@@ -10702,8 +10676,6 @@ readString_echoChar proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	push	[bp+arg_2]
 	push	[bp+arg_0]
@@ -10780,8 +10752,6 @@ strcat	proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 l_loopEntry:
 	lfs	bx, [bp+fromStr]
@@ -11040,8 +11010,6 @@ printThiefAbilValues proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, 64h	
 	imul	[bp+arg_4]
@@ -11266,8 +11234,7 @@ printStringWClear proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	push	cs
 	call	near ptr text_clear
 	push	[bp+inString]
@@ -11469,8 +11436,6 @@ text_nlWriteString proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	gs:g_text_clearFlag, 1		; Mark text window as clearable
 	cmp	gs:g_currentCharPosition, 0		; If not at the beginning of the line
@@ -12469,8 +12434,6 @@ party_printAt proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	[bp+colorFlag], 1
 	sbb	ax, ax
@@ -12643,8 +12606,6 @@ printAt proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 l_loop:
 	lfs	bx, [bp+inString]
@@ -13014,8 +12975,6 @@ bigpic_configureCells proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
 
 	mov	si, 1340h
@@ -13387,8 +13346,6 @@ printMessageAndExit proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	call	text_clear
 	push	[bp+arg_0]
@@ -13717,8 +13674,6 @@ icon_deactivate proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	bx, [bp+iconIndex]
 	mov	al, iconClearIndex[bx]
@@ -13766,8 +13721,6 @@ icon_activate proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
 
 	mov	bx, [bp+iconIndex]
@@ -17164,6 +17117,7 @@ bat_doCombatSong proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	push	[bp+songNumber]
 	push	[bp+partySlotNumber]
 	call	song_playSong
@@ -17271,8 +17225,7 @@ bat_doCombatSong endp
 bat_endCombatSong proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	cmp	gs:g_currentSongPlusOne, 0
 	jz	short l_return
 	mov	gs:g_currentSongPlusOne, 0
@@ -20859,8 +20812,6 @@ _canAttackChar proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	mov	ax, charSize
 	imul	[bp+partySlotNumber]
 	mov	bx, ax
@@ -20970,8 +20921,6 @@ sp_freezeFoes proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	push	[bp+spellCaster]
 	push	cs
@@ -21008,8 +20957,6 @@ spellSavingThrowHelper proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
         cmp     [bp+spellCaster], 80h
         jl      short l_partyCaster
@@ -21273,8 +21220,6 @@ _returnXor255 proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, [bp+val]
 	cmp	ax, 255
@@ -21294,8 +21239,6 @@ sp_compassSpell	proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
@@ -21319,8 +21262,6 @@ sp_healSpell proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	[bp+partySlotNumber], 80h
 	jge	short l_return
@@ -21566,8 +21507,6 @@ _sp_postHeal proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, charSize
 	imul	[bp+partySlotNumber]
@@ -21599,8 +21538,6 @@ sp_levitation proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
@@ -21623,8 +21560,6 @@ sp_summonSpell proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
@@ -21891,8 +21826,6 @@ _sp_doTeleport proc far
 
 	mov	sp, bp
 	pop	bp
-	mov	ax, 1Ah
-	call	someStackOperation
 	push	si
 
 	cmp	[bp+level], 0
@@ -22198,8 +22131,6 @@ _sp_setMonDistance proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
 
 	mov	ax, monStruSize
@@ -22227,8 +22158,6 @@ sp_vorpalPlating proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
@@ -22249,8 +22178,6 @@ sp_areaEnchant proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
@@ -22275,8 +22202,6 @@ sp_shieldSpell proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	[bp+spellCaster], 80h
 	jl	short l_partyCaster
@@ -22312,8 +22237,6 @@ sp_strengthBonus proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	test	byte ptr [bp+spellCaster], 80h
 	jz	short l_partCaster
@@ -22349,8 +22272,9 @@ sp_phaseDoor proc far
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 0Ah
+	mov	ax, 8
 	call	someStackOperation
+
 	cmp	inDungeonMaybe, 0
 	jz	loc_216E2
 	push	sq_north
@@ -22426,8 +22350,6 @@ sp_acBonus proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster
@@ -22850,8 +22772,7 @@ sp_antiMagic proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
 	add	gs:antiMagicFlag, al
@@ -22869,8 +22790,6 @@ sp_wordOfFear proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
 
 	push	[bp+spellCaster]
@@ -23192,8 +23111,6 @@ sp_haltFoe proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	push	[bp+spellCaster]
 	push	cs
@@ -23370,8 +23287,6 @@ sp_camaraderie endp
 printSpellFizzled proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, offset s_butItFizzled
 	push	ds
@@ -23392,8 +23307,6 @@ sp_luckSpell proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	bx, [bp+spelIndexNumber]
 	mov	al, spellEffectFlags[bx]
@@ -23601,8 +23514,6 @@ sp_earthMaw endp
 printNoEffect proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, offset s_butItHadNoEffect
 	push	ds
@@ -23897,8 +23808,6 @@ _sp_useLightObj	proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, offset s_makesLight
 	push	ds
@@ -23923,8 +23832,6 @@ _sp_useAcorn proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, offset s_ateIt
 	push	ds
@@ -24034,8 +23941,6 @@ _sp_useWineskin	endp
 printCantFindUse proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, offset s_cantFindUse
 	push	ds
@@ -24165,8 +24070,6 @@ _sp_reenergizeMage proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
 
 	mov	ax, charSize
@@ -24344,8 +24247,6 @@ spell_cast proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	[bp+itemUsedFlag], 0
 	jnz	short l_notMapSpell
@@ -24410,8 +24311,6 @@ _batchSpellCast proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	and	[bp+spellIndexNumber], 7Fh
 	push	[bp+spellIndexNumber]
@@ -24671,8 +24570,7 @@ _canSingSong proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	ax, charSize
 	imul	[bp+partySlotNumber]
 	mov	bx, ax
@@ -24743,9 +24641,8 @@ _charCanPlaySong proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
+
 	mov	ax, charSize
 	imul	[bp+partySlotNumber]
 	mov	si, ax
@@ -24785,8 +24682,6 @@ sing_getSongSubtractor proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	mov	ax, itemEff_freeSinging
 	push	ax
@@ -24838,6 +24733,7 @@ song_getSong proc far
 	mov	ax, 34h
 	call	someStackOperation
 	push	si
+
 	sub	ax, ax
 	mov	[bp+var_12], ax
 	mov	[bp+var_16], ax
@@ -25032,8 +24928,7 @@ song_stopPlaying proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	al, gs:g_currentSinger
 	sub	ah, ah
 	cmp	ax, [bp+partySlotNumber]
@@ -25054,8 +24949,7 @@ song_stopPlaying endp
 endNoncombatSong proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	push	cs
 	call	near ptr song_endNoncombatEffect
 	call	song_endMusic
@@ -25070,8 +24964,7 @@ endNoncombatSong endp
 song_doNoncombatEffect proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	al, gs:g_currentSong
 	sub	ah, ah
 	jmp	l_songSwitch
@@ -25153,8 +25046,6 @@ song_doNoncombatEffect endp
 song_endNoncombatEffect	proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	gs:g_currentSongPlusOne, 0
 	jz	l_return
@@ -25649,8 +25540,6 @@ summon_execute proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	test	gs:disbelieveFlags, disb_nosummon
 	jz	short loc_25E96
@@ -26006,8 +25895,6 @@ summon_newMonGroup proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	and	[bp+arg_0], 1Fh
 	mov	ax, monStruSize
@@ -26103,8 +25990,6 @@ summon_printNoRoom	proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 
 	cmp	[bp+noRoomFlag], 0
 	jnz	short l_return

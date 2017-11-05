@@ -10,8 +10,7 @@ doPoolGold proc	far
 	poolTarget= word ptr	 6
 	lastSlot= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 	push	si
 
 	sub	ax, ax

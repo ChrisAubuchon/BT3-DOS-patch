@@ -5,8 +5,8 @@ roster_writeParty proc far
 	emptySlot= word ptr -4
 	counter= word ptr -2
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
+
 	CALL(party_findEmptySlot, near)
 	mov	[bp+emptySlot],	ax
 	mov	[bp+counter], 0

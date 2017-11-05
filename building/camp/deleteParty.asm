@@ -8,9 +8,9 @@ camp_deleteParty proc far
 	outputStringBuf= word ptr -100h
 	partyIndexNumber= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(10Ah)
+	FUNC_ENTER(10Ah)
 	push	si
+
 	mov	ax, [bp+partyIndexNumber]
 	mov	cl, 7
 	shl	ax, cl

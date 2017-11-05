@@ -6,8 +6,8 @@ tavern_getWineskin	proc far
 	partySlotNumber= word ptr	 6
 	arg_2= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	cmp	[bp+arg_2], 4
 	jnz	short loc_13DF3
 	sub	ax, ax

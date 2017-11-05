@@ -9,8 +9,7 @@ configureBT3 proc far
 	arg_0= word ptr	 6
 	arg_2= dword ptr  8
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 
 	cmp	[bp+arg_0], 1
 	jle	short loc_2627C

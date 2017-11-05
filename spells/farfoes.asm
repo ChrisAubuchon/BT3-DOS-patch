@@ -8,8 +8,7 @@ sp_farFoes proc	far
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(5Ah)
+	FUNC_ENTER(5Ah)
 
 	push	[bp+spellCaster]
 	CALL(spellSavingThrowHelper, near)
@@ -87,7 +86,6 @@ _sp_setMonDistance proc	far
 	newDistance= byte ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 	push	si
 
 	MONINDEX(ax, STACKVAR(monsterGroupIndex), si)

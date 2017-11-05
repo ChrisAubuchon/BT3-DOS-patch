@@ -5,7 +5,6 @@ sp_areaEnchant proc far
 	spellIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]

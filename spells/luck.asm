@@ -6,7 +6,6 @@ sp_luckSpell proc far
 	spelIndexNumber= word ptr	 8
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	bx, [bp+spelIndexNumber]
 	mov	al, spellEffectFlags[bx]

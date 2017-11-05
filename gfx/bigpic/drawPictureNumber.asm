@@ -10,8 +10,7 @@ bigpic_drawPictureNumber proc far
 	var_2= word ptr	-2
 	indexNo= word ptr  6
 
-	FUNC_ENTER
-	CHKSTK(0Eh)
+	FUNC_ENTER(0Eh)
 	push	si
 
 	cmp	[bp+indexNo], 0FEh

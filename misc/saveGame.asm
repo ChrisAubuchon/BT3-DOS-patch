@@ -4,8 +4,7 @@ saveGame proc far
 
 	fd= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
 
 	PUSH_OFFSET(s_confirmSave)
 	PRINTSTRING(true)

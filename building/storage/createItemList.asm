@@ -18,8 +18,7 @@ storage_createItemList proc far
 	itemListP= dword ptr  0Ah
 	arg_8= dword ptr  0Eh
 
-	FUNC_ENTER
-	CHKSTK(8)
+	FUNC_ENTER(8)
 	push	si
 
 	mov	[bp+itemListLength], 0

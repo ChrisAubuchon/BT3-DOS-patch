@@ -6,8 +6,8 @@ roster_partyExists proc far
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(2)
+	FUNC_ENTER(2)
+
 	mov	[bp+loopCounter], 0
 l_loopEntry:
 	mov	bx, [bp+loopCounter]

@@ -5,7 +5,6 @@ readString_printChar proc far
 	inCharacter= word ptr	 6
 
 	FUNC_ENTER
-	CHKSTK
 
 	mov	ax, 1
 	push	ax

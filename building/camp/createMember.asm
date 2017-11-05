@@ -21,8 +21,7 @@ camp_createMember proc far
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 
-	FUNC_ENTER
-	CHKSTK(0ECh)
+	FUNC_ENTER(0ECh)
 	push	di
 	push	si
 	mov	word ptr [bp+var_20], offset newCharBuffer

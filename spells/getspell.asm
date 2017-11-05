@@ -14,8 +14,7 @@ getSpellNumber proc far
 	var_100= word ptr -100h
 	partySlotNumber= word ptr	 6
 
-	FUNC_ENTER
-	CHKSTK(306h)
+	FUNC_ENTER(306h)
 	push	si
 
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)

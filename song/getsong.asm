@@ -14,9 +14,9 @@ song_getSong proc far
 	partySlotNumber=	word ptr  6
 	songPlayingFlag= word ptr	 8
 
-	FUNC_ENTER
-	CHKSTK(34h)
+	FUNC_ENTER(34h)
 	push	si
+
 	sub	ax, ax
 	mov	[bp+var_12], ax
 	mov	[bp+var_16], ax
