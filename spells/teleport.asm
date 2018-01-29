@@ -26,7 +26,7 @@ sp_teleport proc far
 	CALL(printSpellFizzled, near)
 	jmp	l_return
 loc_20FCB:
-	mov	word_4EE66, 0
+	mov	g_sameSquareFlag, 0
 	mov	[bp+var_A], 0
 	mov	[bp+counter], 0
 	jmp	short loc_20FE5

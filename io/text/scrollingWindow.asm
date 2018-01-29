@@ -257,7 +257,7 @@ l_checkKeyboard:
 	mov	al, byte ptr [bp+var_18]
 	sub	ah, ah
 	push	ax
-	CALL(_str_capitalize)
+	CALL(toUpper)
 	mov	[bp+var_8], ax
 	jmp	short loc_15BDA
 loc_15BD4:

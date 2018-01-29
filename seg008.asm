@@ -104,7 +104,7 @@ loc_1B215:
 	or	ax, ax
 	jz	short loc_1B28E
 loc_1B227:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jz	short partyWon
 	mov	ax, offset aDoYouWishToCon
 	push	ds
@@ -946,7 +946,7 @@ loc_1B9C4:
 	mov	word ptr [bp+var_106+2], dx
 	jmp	loc_1BA3B
 loc_1BA2F:
-	PUSH_OFFSET(s_period)
+	PUSH_OFFSET(s_periodNlNl)
 	PUSH_STACK_PTR(var_106)
 	STRCAT(var_106)
 loc_1BA3B:
@@ -1656,7 +1656,7 @@ loc_1C04B:
 	jmp	short loc_1C0B3
 
 loc_1C0A7:
-	PUSH_OFFSET(s_period)
+	PUSH_OFFSET(s_periodNlNl)
 	PUSH_STACK_PTR(var_10C)
 	STRCAT(var_10C)
 
@@ -1754,7 +1754,7 @@ str_startsWithVowel proc far
 	mov	ax, 2
 	call	someStackOperation
 	push	[bp+arg_0]
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 	mov	[bp+arg_0], ax
 	mov	[bp+var_2], 0
@@ -2383,7 +2383,7 @@ bat_getOpponents proc far
 	call	near ptr bat_convertSongToCombat
 	add	sp, 4
 loc_1C7D3:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jz	short loc_1C7EC
 	sub	ax, ax
 	push	ax
@@ -2392,30 +2392,30 @@ loc_1C7D3:
 	add	sp, 2
 	jmp	loc_1C992
 loc_1C7EC:
-	cmp	gs:byte_42458, 0
+	cmp	gs:g_nonRandomBattleFlag, 0
 	jnz	short loc_1C81D
 loc_1C7F8:
 	call	random
 	and	al, 3
-	mov	byte_4EEC9, al
+	mov	g_monsterGroupCount, al
 	cmp	al, levelNoMaybe
 	jbe	short loc_1C814
 	jmp	short loc_1C7F8
 loc_1C814:
-	inc	byte_4EEC9
+	inc	g_monsterGroupCount
 loc_1C81D:
 	mov	[bp+var_4], 0
 	jmp	short loc_1C827
 loc_1C824:
 	inc	[bp+var_4]
 loc_1C827:
-	mov	al, byte_4EEC9
+	mov	al, g_monsterGroupCount
 	sub	ah, ah
 	cmp	ax, [bp+var_4]
 	ja	short loc_1C839
 	jmp	loc_1C978
 loc_1C839:
-	cmp	gs:byte_42458, ah
+	cmp	gs:g_nonRandomBattleFlag, ah
 	jz	short loc_1C889
 	getMonP	[bp+var_4], si
 	mov	al, byte ptr gs:monGroups._name[si]
@@ -2518,9 +2518,9 @@ loc_1C92C:
 loc_1C975:
 	jmp	loc_1C824
 loc_1C978:
-	cmp	byte_4EEC9, 4
+	cmp	g_monsterGroupCount, 4
 	jnb	short loc_1C992
-	mov	al, byte_4EEC9
+	mov	al, g_monsterGroupCount
 	sub	ah, ah
 	push	ax
 	push	cs
@@ -3836,7 +3836,7 @@ bat_getPartyOptions proc far
 	mov	ax, 138h
 	call	someStackOperation
 	push	si
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jz	short loc_1D720
 	jmp	loc_1D7BE
 loc_1D720:
@@ -4155,7 +4155,7 @@ bat_getCharOptions proc	far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jnz	short loc_1DA49
 	test	gs:monGroups.groupSize,	1Fh
 	jz	short loc_1DA49
@@ -5472,13 +5472,13 @@ partyDied proc far
 	add	sp, 4
 	wait4IO
 	sub	al, al
-	mov	gs:byte_42458, al
-	mov	partyAttackFlag, al
+	mov	gs:g_nonRandomBattleFlag, al
+	mov	g_partyAttackFlag, al
 	sub	ah, ah
 	mov	currentLocationMaybe, ax
 	mov	sq_north, 0Bh
 	mov	sq_east, 0Fh
-	mov	dirFacing, 0
+	mov	g_direction, 0
 	mov	ax, 1
 	jmp	short $+2
 	mov	sp, bp

@@ -35,7 +35,7 @@ partySecondSlot	character_t <>
 		character_t <>
 partyTail	character_t <>
 newCharBuffer	character_t <>
-byte_42242	db 0
+g_lastDetectSqN	db 0
 		db 0
 byte_42244	db 0
 		db 0
@@ -69,7 +69,7 @@ g_usedItemSlotNumber	db 0
 byte_42280	db 6	dup(0)		   ; 0
 byte_42286	db 0
 align 2
-byte_42288	db 0
+g_userSlotNumber	db 0
 wildWrapFlag	db	0
 		db    0
 byte_4228B	db 0
@@ -130,7 +130,7 @@ word_42410	dw 0
 damageAmount	dw 0
 stuckFlag	db 0
 align 2
-word_42416	dw 0
+g_inventoryPackStart	dw 0
 db    0
 g_currentCharPosition	db 0
 g_text_clearFlag	db 0
@@ -142,7 +142,7 @@ g_currentSong	db 0
 db    0
 monAttackBonus	db 4	dup(0)		   ; 0
 mfunc_ioBuf	db 10h dup(0)	    ; 0
-dword_42436	dd 0
+g_currentVmFunction	dd 0
 word_4243A	dw 0
 word_4243C	dw 0
 word_4243E	dw 0
@@ -152,7 +152,7 @@ songRegenHP	db 0
 db    0
 byte_42444	db 7	dup(0)
 align 2
-word_4244C	dw 0
+g_inventoryPackTarget	dw 0
 partySpellAcBonus	db 0
 align 2
 advanceTimeFlag	dw 0
@@ -160,18 +160,18 @@ breakAfterFunc	dw 0
 sq_antiMagicFlag		db 0
 align 2
 word_42456	dw 0
-byte_42458	db 0
+g_nonRandomBattleFlag	db 0
 align 2
 word_4245A	dw 0
 monHpList	dw 80h dup(0)		  ; 0
 songCanRun	db 0
-byte_4255D	db 0
+g_lastDetectSqE	db 0
 byte_4255E	db 0
 align 2
 word_42560	dw 0
 word_42562	dw 0
 word_42564	dw 0
-byte_42566	db 0
+g_lastDetectDirection	db 0
 byte_42567	db 0
 songACBonus	db 0
 songHalfDamage	db 0

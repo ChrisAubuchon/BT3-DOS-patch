@@ -94,12 +94,12 @@ loc_15378:
 	CALL(doEquipmentEffect)
 	cmp	gs:sqRegenHPFlag, 0
 	jz	loc_doRealtimeEvents_label_1
-	CALL(do_partyHPRegen)
+	CALL(party_regenHp)
 
 loc_doRealtimeEvents_label_1:
 	cmp	gs:byte_41E81, 0
 	jz	short loc_1538E
-	CALL(dunsq_drainHP)
+	CALL(dunsq_drainHp)
 loc_1538E:
 	mov	ax, gs:word_42410
 	mov	cl, 6

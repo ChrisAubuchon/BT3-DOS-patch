@@ -23,7 +23,7 @@ loc_2600B:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	CALL(mapstrcmp)
+	CALL(vm_strcmp)
 	or	ax, ax
 	jnz	l_returnValue
 	inc	[bp+groupCounter]

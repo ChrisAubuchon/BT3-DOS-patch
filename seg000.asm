@@ -87,13 +87,13 @@ loc_105C2:
 	jmp	short loc_105DE
 	jmp	short loc_105DC
 loc_105C6:
-	cmp	ax, 1
+	cmp	ax, gameState_inCamp
 	jz	short loc_10586
-	cmp	ax, 2
+	cmp	ax, gameState_inWilderness
 	jz	short loc_10590
-	cmp	ax, 4
+	cmp	ax, gameState_inDungeon
 	jz	short loc_10599
-	cmp	ax, 5
+	cmp	ax, gameState_partyDied
 	jz	short loc_105B8
 	jmp	short loc_105C2
 loc_105DC:
@@ -226,7 +226,7 @@ loc_dunMainLoop_wander_check:
 	call	dun_wanderingCreature
 
 loc_dunMainLoop_battleCheck:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jnz	short loc_dunMainLoop_doBattle
 	cmp	byte_4EECC, 0
 	jnz	short loc_dunMainLoop_doBattle
@@ -262,7 +262,7 @@ loc_107BE:
 	std_call	dun_buildView, 8
 	mov	[bp+var_E], ax
 
-	push	dirFacing
+	push	g_direction
 	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
@@ -274,7 +274,7 @@ loc_107BE:
 	push	offset rowOffset
 	std_call	sub_10B3D, 0Eh
 
-	push	dirFacing
+	push	g_direction
 	push	sq_north
 	push	sq_east
 	std_call	dun_detectSquares,6
@@ -286,7 +286,7 @@ loc_107BE:
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	std_call	map_execute, 6
+	std_call	vm_execute, 6
 loc_10886:
 	cmp	buildingRvalMaybe, 0
 	jz	short loc_10899
@@ -386,7 +386,7 @@ loc_dunMainLoop_go_forward:
 	or	ax, ax
 	jz	loc_dunMainLoop_buildingRvalMaybe_check
 	call	text_clear
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]
@@ -429,10 +429,10 @@ loc_dunMainLoop_key_downArrow:
 	mov	bx, 2
 
 loc_dunMainLoop_incDirFacing:
-	mov	ax, dirFacing
+	mov	ax, g_direction
 	add	ax, bx
 	and	ax, 3
-	mov	dirFacing, ax
+	mov	g_direction, ax
 	mov	gs:wallIsPhased, 0
 	call	text_clear
 
@@ -462,7 +462,7 @@ sub_10B3D proc far
 	sqN= word ptr  0Ch
 	_width=	word ptr  0Eh
 	_height= word ptr  10h
-	_dirFacing= word ptr  12h
+	direction= word ptr  12h
 
 	push	bp
 	mov	bp, sp
@@ -499,7 +499,7 @@ loc_10B86:
 	call	near ptr dun_getWalls
 	add	sp, 4
 	mov	[bp+var_2], ax
-	mov	ax, [bp+_dirFacing]
+	mov	ax, [bp+direction]
 	dec	ax
 	push	ax
 	push	[bp+var_2]
@@ -513,7 +513,7 @@ loc_10B86:
 	jmp	short loc_10C1E
 loc_10BBC:
 	push	[bp+_width]
-	mov	bx, [bp+_dirFacing]
+	mov	bx, [bp+direction]
 	shl	bx, 1
 	mov	ax, dirDeltaE[bx]
 	add	ax, [bp+sqE]
@@ -524,7 +524,7 @@ loc_10BBC:
 	mov	[bp+sqE], ax
 	push	[bp+_height]
 	mov	ax, [bp+sqN]
-	mov	bx, [bp+_dirFacing]
+	mov	bx, [bp+direction]
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
@@ -593,7 +593,7 @@ loc_dun_goForwardCheck_not_zero:
 	jz	loc_dun_goForwardCheck_return_zero
 
 loc_dun_goForwardCheck_success:
-	mov	word_4EE66, 0
+	mov	g_sameSquareFlag, 0
 	call	text_clear
 	mov	ax, 1
 	jmp	loc_dun_goForwardCheck_exit
@@ -708,7 +708,7 @@ loc_wildMainLoop_rowPopLoop_exit:
 	mov	gs:mapDataSeg, seg seg022
 
 loc_wildMainLoop_loopStart:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jnz	short loc_wildMainLoop_battleCheck
 	lfs	bx, [bp+var_30]
 	test	byte ptr fs:[bx+12h], 1
@@ -734,7 +734,7 @@ loc_wildMainLoop_mapExecute:
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	std_call	map_execute, 6
+	std_call	vm_execute, 6
 
 loc_10E48:
 	cmp	buildingRvalMaybe, 0
@@ -798,7 +798,7 @@ loc_wildMainLoop_exitBuilding:
 	jz	loc_wildMainLoop_loopStart
 
 	call	text_clear
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]
@@ -893,16 +893,16 @@ loc_wildMainLoop_key_downArrow:
 	mov	bx, 2
 
 loc_wildMainLoop_incDirFacing:
-	mov	ax, dirFacing
+	mov	ax, g_direction
 	add	ax, bx
 	and	ax, 3
-	mov	dirFacing, ax
+	mov	g_direction, ax
 
 	push_ds_string aFacing
 	push_ss_string var_28
 	STRCAT
 
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	push_ptr_stringList	dirStringList, bx
@@ -1023,7 +1023,7 @@ loc_map_enterBuilding_return_zero:
 
 loc_map_enterBuilding_turn_around:
 	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
+	call	map_turnAround
 	mov	ax, 1
 
 loc_map_enterBuilding_exit:
@@ -1054,7 +1054,7 @@ bigpic_buildViewMaybe proc far
 	push	si
 	mov	[bp+gbuf], offset graphicsBuf
 	mov	[bp+gseg], seg seg023
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr off_44268[bx]
@@ -1182,7 +1182,7 @@ dun_buildView proc far
 	mov	ax, 5Ch	
 	call	someStackOperation
 	push	si
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr off_44474[bx]
@@ -1217,7 +1217,7 @@ loc_11372:
 	call	near ptr dun_getWalls
 	add	sp, 4
 	mov	[bp+var_50], ax
-	push	dirFacing
+	push	g_direction
 	push	ax
 	call	dungeon_getWallInDirection
 	add	sp, 4
@@ -1584,7 +1584,7 @@ sub_116CC proc far
 	mov	bp, sp
 	mov	sq_north, 0Bh
 	mov	sq_east, 0Fh
-	mov	dirFacing, 0
+	mov	g_direction, 0
 	mov	currentLocationMaybe, 0
 	mov	sp, bp
 	pop	bp

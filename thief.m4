@@ -233,7 +233,6 @@ seg004 segment word public 'CODE' use16
         assume cs:seg004
 ;org 7
         assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
-algn_17737:
 align 2
 
 include(`gfx/bigpic/drawTopology.asm')
@@ -255,7 +254,104 @@ include(`gfx/icons/draw.asm')
 seg005 ends
 
 include seg006.asm
-include seg007.asm
+
+; Segment type: Pure code
+seg007 segment word public 'CODE' use16
+        assume cs:seg007
+;org 0Dh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+include(`map/turnAround.asm')
+include(`map/moveOneSquare.asm')
+include(`map/vm/if.asm')
+include(`map/dungeon/changeLevels.asm')
+include(`map/dungeon/setExitLocation.asm')
+include(`map/vm/functions/downStairs.asm')
+include(`map/vm/functions/upStairs.asm')
+include(`map/vm/functions/utility.asm')
+include(`map/vm/functions/teleport.asm')
+include(`map/vm/functions/battle.asm')
+include(`map/vm/functions/clearPrintString.asm')
+include(`map/vm/functions/clearSpecial.asm')
+include(`map/vm/functions/drawBigpic.asm')
+include(`map/vm/functions/setTitle.asm')
+include(`map/vm/functions/waitForIo.asm')
+include(`map/vm/functions/clearText.asm')
+include(`map/vm/functions/ifFlag.asm')
+include(`map/vm/functions/ifNotFlag.asm')
+include(`map/vm/lib/checkProgressFlags.asm')
+include(`map/vm/functions/makeDoor.asm')
+include(`map/vm/functions/setFlag.asm')
+include(`map/vm/functions/clearFlag.asm')
+include(`map/vm/lib/updateFlags.asm')
+include(`map/vm/functions/ifSpellEq.asm')
+include(`map/vm/functions/setMapRval.asm')
+include(`map/vm/functions/printString.asm')
+include(`map/vm/functions/doNothing.asm')
+include(`map/vm/functions/ifLiquid.asm')
+include(`map/vm/functions/getItem.asm')
+include(`map/vm/functions/ifPartyHasItem.asm')
+include(`map/vm/functions/ifPartyNotHasItem.asm')
+include(`map/vm/lib/findItem.asm')
+include(`map/vm/functions/ifSameSquare.asm')
+include(`map/vm/functions/ifYesNo.asm')
+include(`map/vm/functions/goto.asm')
+include(`map/vm/functions/battleNoCry.asm')
+include(`map/vm/functions/setSameSquareFlag.asm')
+include(`map/vm/functions/turnAround.asm')
+include(`map/vm/functions/removeItem.asm')
+include(`map/vm/lib/removeItem.asm')
+include(`map/vm/functions/incrementRegister.asm')
+include(`map/vm/functions/decrementRegister.asm')
+include(`map/vm/functions/ifRegisterClear.asm')
+include(`map/vm/functions/ifRegisterSet.asm')
+include(`map/vm/functions/drainHp.asm')
+include(`map/vm/functions/ifInBox.asm')
+include(`map/vm/functions/setLiquid.asm')
+include(`map/vm/functions/addToContainer.asm')
+include(`map/vm/functions/subtractFromContainer.asm')
+include(`map/vm/functions/addToRegister.asm')
+include(`map/vm/functions/subtractFromRegister.asm')
+include(`map/vm/functions/setDirection.asm')
+include(`map/vm/functions/readString.asm')
+include(`map/vm/lib/strcmp.asm')
+include(`map/vm/functions/ifStringEquals.asm')
+include(`map/vm/functions/parseNumber.asm')
+include(`map/vm/functions/getCharacter.asm')
+include(`map/vm/functions/ifGiveGold.asm')
+include(`map/vm/functions/addGold.asm')
+include(`map/vm/functions/ifRegisterLt.asm')
+include(`map/vm/functions/ifRegisterEq.asm')
+include(`map/vm/functions/ifRegisterGe.asm')
+include(`map/vm/functions/learnSpell.asm')
+include(`map/vm/functions/setRegister.asm')
+include(`map/vm/functions/ifHasItem.asm')
+include(`map/vm/functions/packInventory.asm')
+include(`map/vm/functions/addMonster.asm')
+include(`map/vm/functions/ifMonsterInParty.asm')
+include(`map/vm/functions/clearPrintOffset.asm')
+include(`map/vm/functions/ifIsNight.asm')
+include(`map/vm/functions/removeMonster.asm')
+include(`map/vm/functions/buggedIfQuestFlagSet.asm')
+include(`quest/partyHasFlagSet.asm')
+include(`map/vm/functions/ifQuestFlagNotSet.asm')
+include(`quest/partyNotHasFlagSet.asm')
+include(`map/vm/functions/setQuestFlag.asm')
+include(`quest/setFlag.asm')
+include(`map/vm/functions/clearQuestFlag.asm')
+include(`map/vm/functions/partyUnderLevel.asm')
+include(`map/vm/lib/partyUnderLevel.asm')
+include(`map/vm/functions/ifWildFace.asm')
+include(`map/vm/functions/setWildFace.asm')
+include(`map/vm/functions/ifIsClass.asm')
+include(`map/vm/functions/printOffset.asm')
+include(`map/vm/functions/clearTeleport.asm')
+include(`map/vm/execute.asm')
+include(`map/vm/functions/notImplemented.asm')
+
+seg007 ends
+
 include(`seg008.asm')
 include seg009.asm
 
@@ -344,7 +440,51 @@ include(`song/endnonc.asm')
 seg011 ends
 
 include seg012.asm
-include seg013.asm
+
+; Segment type: Pure code
+seg013 segment byte public 'CODE' use16
+        assume cs:seg013
+;org 4
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+include(`map/dungeon/specialSquares/battleCheck.asm')
+include(`map/dungeon/specialSquares/trap/trap.asm')
+include(`map/dungeon/specialSquares/trap/doDamage.asm')
+include(`map/dungeon/specialSquares/trap/levitationCheck.asm')
+include(`map/dungeon/specialSquares/darkness.asm')
+include(`map/dungeon/specialSquares/spinner.asm')
+include(`map/dungeon/specialSquares/antiMagic.asm')
+include(`map/dungeon/specialSquares/drainHp.asm')
+include(`party/regenHp.asm')
+include(`map/dungeon/specialSquares/somethingOdd.asm')
+include(`map/dungeon/specialSquares/silence.asm')
+include(`map/dungeon/specialSquares/regenSppt.asm')
+include(`map/dungeon/specialSquares/drainSppt.asm')
+include(`map/dungeon/specialSquares/makeHostile.asm')
+include(`map/dungeon/specialSquares/stuck.asm')
+include(`map/dungeon/specialSquares/regenHp.asm')
+include(`map/dungeon/specialSquares/explosion.asm')
+include(`map/dungeon/specialSquares/portalAbove.asm')
+include(`map/dungeon/specialSquares/portalBelow.asm')
+include(`map/dungeon/specialSquare.asm')
+include(`map/vm/brilhasti/bonus.asm')
+include(`map/vm/brilhasti/checkQuest.asm')
+include(`map/vm/brilhasti/levelMagicUser.asm')
+include(`map/vm/brilhasti/setAttributes.asm')
+include(`map/vm/geomancer/convert.asm')
+include(`map/vm/geomancer/convertEquipment.asm')
+include(`map/dungeon/detect/detect.asm')
+include(`map/dungeon/detect/getSquares.asm')
+include(`map/dungeon/portal/ascend.asm')
+include(`map/dungeon/portal/descend.asm')
+include(`map/dungeon/portal/decrementLevel.asm')
+include(`map/dungeon/portal/incrementLevel.asm')
+include(`map/dungeon/wanderingCreature/join.asm')
+include(`map/dungeon/wanderingCreature/fight.asm')
+include(`map/dungeon/wanderingCreature/leave.asm')
+include(`map/dungeon/wanderingCreature/wanderer.asm')
+
+seg013 ends
 
 ; Segment type: Pure code
 seg014 segment byte public 'CODE' use16
@@ -388,8 +528,38 @@ include(`misc/configureBT3.asm')
 
 seg016 ends
 
-include seg017.asm
-include seg018.asm
+
+
+; Segment type: Pure code
+seg017 segment word public 'CODE' use16
+        assume cs:seg017
+;org 3
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+include(`misc/transfer/transfer.asm')
+include(`misc/transfer/getTransferCharacters.asm')
+include(`misc/transfer/findName.asm')
+include(`misc/transfer/bt3transfer.asm')
+include(`misc/transfer/import.asm')
+include(`misc/transfer/convertSpellLevel.asm')
+include(`misc/transfer/bt2transfer.asm')
+include(`misc/transfer/bt1transfer.asm')
+
+seg017 ends
+
+; Segment type: Pure code
+seg018 segment byte public 'CODE' use16
+        assume cs:seg018
+;org 0Ch
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+include(`misc/copyProtection/copyProtection.asm')
+include(`misc/copyProtection/toDigit.asm')
+include(`misc/copyProtection/compareStrings.asm')
+
+seg018 ends
+
 include seg019.asm
 include seg020.asm
 include seg021.asm

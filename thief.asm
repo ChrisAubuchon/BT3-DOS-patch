@@ -65,7 +65,8 @@ _main proc far
 
 	push	bp
 	mov	bp, sp
-	
+	mov	ax, 6
+	call	someStackOperation
 
 	mov	ax, 55h
 	push	ax
@@ -591,13 +592,13 @@ loc_105C2:
 	jmp	short loc_105DE
 	jmp	short loc_105DC
 loc_105C6:
-	cmp	ax, 1
+	cmp	ax, gameState_inCamp
 	jz	short loc_10586
-	cmp	ax, 2
+	cmp	ax, gameState_inWilderness
 	jz	short loc_10590
-	cmp	ax, 4
+	cmp	ax, gameState_inDungeon
 	jz	short loc_10599
-	cmp	ax, 5
+	cmp	ax, gameState_partyDied
 	jz	short loc_105B8
 	jmp	short loc_105C2
 loc_105DC:
@@ -733,7 +734,7 @@ loc_dunMainLoop_wander_check:
 	call	dun_wanderingCreature
 
 loc_dunMainLoop_battleCheck:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jnz	short loc_dunMainLoop_doBattle
 	cmp	byte_4EECC, 0
 	jnz	short loc_dunMainLoop_doBattle
@@ -769,7 +770,7 @@ loc_107BE:
 	std_call	dun_buildView, 8
 	mov	[bp+var_E], ax
 
-	push	dirFacing
+	push	g_direction
 	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
@@ -781,7 +782,7 @@ loc_107BE:
 	push	offset rowOffset
 	std_call	sub_10B3D, 0Eh
 
-	push	dirFacing
+	push	g_direction
 	push	sq_north
 	push	sq_east
 	std_call	dun_detectSquares,6
@@ -793,7 +794,7 @@ loc_107BE:
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	std_call	map_execute, 6
+	std_call	vm_execute, 6
 loc_10886:
 	cmp	buildingRvalMaybe, 0
 	jz	short loc_10899
@@ -893,7 +894,7 @@ loc_dunMainLoop_go_forward:
 	or	ax, ax
 	jz	loc_dunMainLoop_buildingRvalMaybe_check
 	call	text_clear
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]
@@ -936,10 +937,10 @@ loc_dunMainLoop_key_downArrow:
 	mov	bx, 2
 
 loc_dunMainLoop_incDirFacing:
-	mov	ax, dirFacing
+	mov	ax, g_direction
 	add	ax, bx
 	and	ax, 3
-	mov	dirFacing, ax
+	mov	g_direction, ax
 	mov	gs:wallIsPhased, 0
 	call	text_clear
 
@@ -969,7 +970,7 @@ sub_10B3D proc far
 	sqN= word ptr  0Ch
 	_width=	word ptr  0Eh
 	_height= word ptr  10h
-	_dirFacing= word ptr  12h
+	direction= word ptr  12h
 
 	push	bp
 	mov	bp, sp
@@ -1006,7 +1007,7 @@ loc_10B86:
 	call	near ptr dun_getWalls
 	add	sp, 4
 	mov	[bp+var_2], ax
-	mov	ax, [bp+_dirFacing]
+	mov	ax, [bp+direction]
 	dec	ax
 	push	ax
 	push	[bp+var_2]
@@ -1020,7 +1021,7 @@ loc_10B86:
 	jmp	short loc_10C1E
 loc_10BBC:
 	push	[bp+_width]
-	mov	bx, [bp+_dirFacing]
+	mov	bx, [bp+direction]
 	shl	bx, 1
 	mov	ax, dirDeltaE[bx]
 	add	ax, [bp+sqE]
@@ -1031,7 +1032,7 @@ loc_10BBC:
 	mov	[bp+sqE], ax
 	push	[bp+_height]
 	mov	ax, [bp+sqN]
-	mov	bx, [bp+_dirFacing]
+	mov	bx, [bp+direction]
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
@@ -1100,7 +1101,7 @@ loc_dun_goForwardCheck_not_zero:
 	jz	loc_dun_goForwardCheck_return_zero
 
 loc_dun_goForwardCheck_success:
-	mov	word_4EE66, 0
+	mov	g_sameSquareFlag, 0
 	call	text_clear
 	mov	ax, 1
 	jmp	loc_dun_goForwardCheck_exit
@@ -1215,7 +1216,7 @@ loc_wildMainLoop_rowPopLoop_exit:
 	mov	gs:mapDataSeg, seg seg022
 
 loc_wildMainLoop_loopStart:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jnz	short loc_wildMainLoop_battleCheck
 	lfs	bx, [bp+var_30]
 	test	byte ptr fs:[bx+12h], 1
@@ -1241,7 +1242,7 @@ loc_wildMainLoop_mapExecute:
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	std_call	map_execute, 6
+	std_call	vm_execute, 6
 
 loc_10E48:
 	cmp	buildingRvalMaybe, 0
@@ -1305,7 +1306,7 @@ loc_wildMainLoop_exitBuilding:
 	jz	loc_wildMainLoop_loopStart
 
 	call	text_clear
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]
@@ -1400,17 +1401,17 @@ loc_wildMainLoop_key_downArrow:
 	mov	bx, 2
 
 loc_wildMainLoop_incDirFacing:
-	mov	ax, dirFacing
+	mov	ax, g_direction
 	add	ax, bx
 	and	ax, 3
-	mov	dirFacing, ax
+	mov	g_direction, ax
 
 	push_ds_string aFacing
 	push_ss_string var_28
 	call	strcat
 	add	sp, 8
 
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	push_ptr_stringList	dirStringList, bx
@@ -1532,7 +1533,7 @@ loc_map_enterBuilding_return_zero:
 
 loc_map_enterBuilding_turn_around:
 	mov	buildingRvalMaybe, ax
-	call	map_turnPartyAround
+	call	map_turnAround
 	mov	ax, 1
 
 loc_map_enterBuilding_exit:
@@ -1563,7 +1564,7 @@ bigpic_buildViewMaybe proc far
 	push	si
 	mov	[bp+gbuf], offset graphicsBuf
 	mov	[bp+gseg], seg seg023
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr off_44268[bx]
@@ -1691,7 +1692,7 @@ dun_buildView proc far
 	mov	ax, 5Ch	
 	call	someStackOperation
 	push	si
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr off_44474[bx]
@@ -1726,7 +1727,7 @@ loc_11372:
 	call	near ptr dun_getWalls
 	add	sp, 4
 	mov	[bp+var_50], ax
-	push	dirFacing
+	push	g_direction
 	push	ax
 	call	dungeon_getWallInDirection
 	add	sp, 4
@@ -2093,7 +2094,7 @@ sub_116CC proc far
 	mov	bp, sp
 	mov	sq_north, 0Bh
 	mov	sq_east, 0Fh
-	mov	dirFacing, 0
+	mov	g_direction, 0
 	mov	currentLocationMaybe, 0
 	mov	sp, bp
 	pop	bp
@@ -2181,7 +2182,7 @@ l_toupper_start:
 	mov	al, ss:[si+bx]
 	sub	ah, ah
 	push	ax
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 
 	mov	bx, [bp+counter]
@@ -2324,7 +2325,7 @@ l_pauseGame:
 	jmp	l_success
 
 l_partyAttack:
-	mov	partyAttackFlag, 1
+	mov	g_partyAttackFlag, 1
 	jmp	l_fail
 
 l_useItem:
@@ -3022,7 +3023,7 @@ item_doSpell proc far
 	add	ax, cx
 	mov	gs:g_usedItemSlotNumber, al
 	mov	al, byte ptr [bp+userSlotNumber]
-	mov	gs:byte_42288, al
+	mov	gs:g_userSlotNumber, al
 	mov	al, [bp+targetSlotNumber]
 	mov	gs:bat_curTarget, al
 	sub	ax, ax
@@ -3083,9 +3084,9 @@ loc_11EBC:
 	mov	cx, ax
 	shl	ax, 1
 	add	ax, cx
-	mov	gs:word_42416, ax
+	mov	gs:g_inventoryPackStart, ax
 	mov	ax, [bp+userSlotNumber]
-	mov	gs:word_4244C, ax
+	mov	gs:g_inventoryPackTarget, ax
 	call	inven_pack
 	mov	al, gs:g_currentSinger
 	sub	ah, ah
@@ -4501,7 +4502,7 @@ loc_12BC6:
 	and	di, 0FFh
 	mov	bx, si
 	shl	bx, 1
-	mov	al, byte_42F8C[bx+di]
+	mov	al, g_classPictureNumber[bx+di]
 	mov	gs:newCharBuffer.picIndex, al
 	mov	ax, si
 	jmp	short loc_12C3B
@@ -6781,7 +6782,7 @@ tav_setTitle proc far
 	push	si
 
 	mov	[bp+tavernIndex], 4
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]
@@ -7504,7 +7505,7 @@ temple_setTitle	proc far
 	call	someStackOperation
 	push	si
 
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]
@@ -7946,7 +7947,7 @@ empty_enter proc	far
 	test	al, 3
 	jnz	short l_noBattle
 
-	mov	partyAttackFlag, 0
+	mov	g_partyAttackFlag, 0
 	call	bat_init
 
 l_noBattle:
@@ -8639,7 +8640,7 @@ l_skipMouseClick:
 	mov	al, byte ptr [bp+inputKey]
 	sub	ah, ah
 	push	ax
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 	jmp	short l_return
 loc_14EB9:
@@ -9120,12 +9121,12 @@ loc_15378:
 	call	doEquipmentEffect
 	cmp	gs:sqRegenHPFlag, 0
 	jz	loc_doRealtimeEvents_label_1
-	call	do_partyHPRegen
+	call	party_regenHp
 
 loc_doRealtimeEvents_label_1:
 	cmp	gs:byte_41E81, 0
 	jz	short loc_1538E
-	call	dunsq_drainHP
+	call	dunsq_drainHp
 loc_1538E:
 	mov	ax, gs:word_42410
 	mov	cl, 6
@@ -9172,7 +9173,7 @@ isAlphaNum proc	far
 	mov	al, [bp+arg_0]
 	cbw
 	push	ax
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 	mov	[bp+arg_0], al
 	cmp	al, 'A'
@@ -9792,7 +9793,7 @@ l_loalphabetChar:
 	mov	_str_capFlag, 0
 l_returnCapital:
 	push	ax
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 l_return:
 	mov	sp, bp
@@ -10164,7 +10165,7 @@ l_checkKeyboard:
 	mov	al, byte ptr [bp+var_18]
 	sub	ah, ah
 	push	ax
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 	mov	[bp+var_8], ax
 	jmp	short loc_15BDA
@@ -13419,7 +13420,6 @@ seg004 segment word public 'CODE' use16
         assume cs:seg004
 ;org 7
         assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
-algn_17737:
 align 2
 
 ; XXX - Revisit after bigpic_copyTopoElem
@@ -13701,7 +13701,7 @@ l_light:
 	jmp	short l_return
 
 l_detect:
-	mov	detectType, 0
+	mov	g_detectType, 0
 	jmp	short l_return
 
 l_shield:
@@ -13755,7 +13755,7 @@ gfx_animate proc far
 	call	someStackOperation
 	push	si
 
-	mov	al, byte ptr dirFacing
+	mov	al, byte ptr g_direction
 	mov	iconCurrentCell[1], al
 
 	cmp	gs:byte_422A0, 0
@@ -13930,7 +13930,3647 @@ icon_draw endp
 seg005 ends
 
 include seg006.asm
-include seg007.asm
+
+; Segment type: Pure code
+seg007 segment word public 'CODE' use16
+        assume cs:seg007
+;org 0Dh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+; This function	sets the direction facing in the
+; opposite direction. Used when	exiting	buildings.
+; If the party was facing north, after this function
+; they would be	facing south.
+; Attributes: bp-based frame
+
+map_turnAround proc far
+	push	bp
+	mov	bp, sp
+	mov	ax, g_direction
+	add	ax, 2
+	and	ax, 3
+	mov	g_direction, ax
+	mov	sp, bp
+	pop	bp
+	retf
+map_turnAround endp
+
+; Attributes: bp-based frame
+map_moveOneSquare proc	far
+	push	bp
+	mov	bp, sp
+	push	si
+
+	mov	si, g_direction
+	shl	si, 1
+	mov	ax, dirDeltaN[si]
+	sub	sq_north, ax
+	mov	ax, dirDeltaE[si]
+	add	sq_east, ax
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+map_moveOneSquare endp
+
+; This function	is the mechanism behind	an if-then
+; clause in the	code.
+; Attributes: bp-based frame
+
+mapvm_if	proc far
+
+	memOff=	word ptr  6
+	memSeg=	word ptr  8
+	rval= word ptr	0Ah
+
+	push	bp
+	mov	bp, sp
+
+	cmp	[bp+rval], 0
+	jz	short loc_1926C
+
+	cmp	gs:breakAfterFunc, 0
+	jz	short loc_1925F
+
+	push	[bp+memSeg]
+	push	[bp+memOff]
+	call	map_getDataOffsetP
+	add	sp, 4
+	mov	[bp+memOff], ax
+	mov	[bp+memSeg], dx
+	jmp	short l_return
+
+loc_1925F:
+	mov	gs:breakAfterFunc, 1
+	jmp	short l_return
+
+loc_1926C:
+	cmp	gs:breakAfterFunc, 0
+	jz	short l_return
+	add	[bp+memOff], 2
+
+l_return:
+	mov	ax, [bp+memOff]
+	mov	dx, [bp+memSeg]
+	mov	sp, bp
+	pop	bp
+	retf
+mapvm_if	endp
+
+; Attributes: bp-based frame
+
+dun_changeLevels proc far
+
+	dungeonDataP= dword ptr -4
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	mov	word ptr [bp+dungeonDataP], offset g_rosterCharacterBuffer
+	mov	word ptr [bp+dungeonDataP+2], seg seg022
+	mov	si, dunLevelNum
+	lfs	bx, [bp+dungeonDataP]
+	mov	al, fs:[bx+si+dun_t.dunLevel]
+	sub	ah, ah
+	mov	dunLevelIndex, ax
+	mov	al, fs:[bx+dun_t.deltaSqN]
+	cbw
+	add	sq_north, ax
+	mov	al, fs:[bx+dun_t.deltaSqE]
+	cbw
+	add	sq_east, ax
+	mov	gs:levelChangedFlag, 1
+	mov	buildingRvalMaybe, 4
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+dun_changeLevels endp
+
+; Attributes: bp-based frame
+
+dun_setExitLocation proc far
+
+	dungeonDataP= dword ptr -4
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	mov	word ptr [bp+dungeonDataP], offset g_rosterCharacterBuffer
+	mov	word ptr [bp+dungeonDataP+2], seg seg022
+	lfs	bx, [bp+dungeonDataP]
+	mov	al, fs:[bx+dun_t.exitSqN]
+	sub	ah, ah
+	mov	sq_north, ax
+	mov	al, fs:[bx+dun_t.exitSqE]
+	mov	sq_east, ax
+	mov	al, fs:[bx+dun_t.exitLocation]
+	mov	currentLocationMaybe, ax
+	mov	buildingRvalMaybe, 2
+	mov	sp, bp
+	pop	bp
+	retf
+dun_setExitLocation endp
+
+; Attributes: bp-based frame
+
+mfunc_downStairs proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+
+	cmp	g_sameSquareFlag, 0
+	jnz	short l_return
+
+	mov	g_sameSquareFlag, 1
+	call	text_clear
+	mov	al, levFlags
+	sub	ah, ah
+	and	ax, 10h
+	push	ax
+	mov	ax, offset s_thereAreStairs
+	push	ds
+	push	ax
+	call	stairsPluralHelper
+	add	sp, 6
+	call	getYesNo
+	or	ax, ax
+	jz	short l_return
+
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mfunc_setSameSquareFlag
+	add	sp, 4
+	dec	dunLevelNum
+	jns	short l_changeLevel
+
+	push	cs
+	call	near ptr dun_setExitLocation
+	jmp	short l_return
+
+l_changeLevel:
+	push	cs
+	call	near ptr dun_changeLevels
+
+l_return:
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_downStairs endp
+
+; Attributes: bp-based frame
+
+mfunc_upStairs proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+
+	cmp	g_sameSquareFlag, 0
+	jnz	short l_return
+	mov	g_sameSquareFlag, 1
+	call	text_clear
+	mov	al, levFlags
+	and	al, 10h
+	cmp	al, 1
+	sbb	cx, cx
+	neg	cx
+	push	cx
+	mov	ax, offset s_thereAreStairs
+	push	ds
+	push	ax
+	call	stairsPluralHelper
+	add	sp, 6
+	call	getYesNo
+	or	ax, ax
+	jz	short l_return
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mfunc_setSameSquareFlag
+	add	sp, 4
+	inc	dunLevelNum
+	push	cs
+	call	near ptr dun_changeLevels
+l_return:
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_upStairs endp
+
+; Attributes: bp-based frame
+
+mfunc_utility proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	cmp	ax, 3
+	jz	short l_geomancer_convert
+	cmp	ax, 4
+	jz	short l_doScrySite
+	cmp	ax, 5
+	jz	short l_doVictory
+	cmp	ax, 9
+	jz	short l_copyProtection
+	jmp	short l_notImplemented
+
+l_geomancer_convert:
+	mov	al, gs:g_userSlotNumber
+	sub	ah, ah
+	push	ax
+	call	far ptr geomancer_convert
+	add	sp, 2
+	jmp	short l_returnSuccess
+
+l_doScrySite:
+	cmp	inDungeonMaybe, 0
+	jz	short l_printLocation
+	call	brilhasti_doBonus
+	jmp	short l_returnSuccess
+l_printLocation:
+	call	printLocation
+	jmp	short l_returnSuccess
+
+l_doVictory:
+	call	doVictoryMaybe
+	jmp	short l_returnSuccess
+
+l_copyProtection:
+	call	copyProtection
+	mov	gs:breakAfterFunc, ax
+	jmp	short l_returnSuccess
+
+l_notImplemented:
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mfunc_notImplemented
+	add	sp, 4
+	jmp	short l_return
+
+l_returnSuccess:
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_utility endp
+
+; Attributes: bp-based frame
+
+mfunc_teleport proc far
+
+	destinationDungeon= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	mfunc_setSameSquareFlag
+	add	sp, 4
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+
+	; Set new sq_north
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	sq_north, ax
+
+	; Set new sq_east
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	sq_east, ax
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+destinationDungeon], ax
+
+	cmp	inDungeonMaybe, 0
+	jz	short loc_19557
+
+	cmp	ax, 80h
+	jb	short loc_19531
+	mov	buildingRvalMaybe, gameState_inWilderness
+	and	ax, 7Fh
+	mov	currentLocationMaybe, ax
+	jmp	short loc_19555
+loc_19531:
+	mov	ax, [bp+destinationDungeon]
+	cmp	dunLevelIndex, ax
+	jz	short loc_1954A
+	mov	buildingRvalMaybe, gameState_inDungeon
+loc_1954A:
+	mov	ax, [bp+destinationDungeon]
+	mov	dunLevelIndex, ax
+loc_19555:
+	jmp	short l_return
+
+loc_19557:
+	cmp	[bp+destinationDungeon], 80h
+	jb	short loc_19579
+	mov	buildingRvalMaybe, gameState_inDungeon
+	mov	ax, [bp+destinationDungeon]
+	and	ax, 7Fh
+	mov	dunLevelIndex, ax
+	jmp	short l_return
+
+loc_19579:
+	mov	ax, [bp+destinationDungeon]
+	cmp	currentLocationMaybe, ax
+	jz	short loc_19592
+	mov	buildingRvalMaybe, gameState_inWilderness
+loc_19592:
+	mov	ax, [bp+destinationDungeon]
+	mov	currentLocationMaybe, ax
+
+l_return:
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_teleport endp
+
+; Attributes: bp-based frame
+
+mfunc_battle proc far
+
+	loopCounter= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	g_monsterGroupCount, al
+	cmp	al, 4
+	jb	short l_skipZounds
+	mov	ax, offset s_zounds
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+
+l_skipZounds:
+	mov	[bp+loopCounter], 0
+l_setEncounterLoop:
+	mov	al, g_monsterGroupCount
+	sub	ah, ah
+	cmp	ax, [bp+loopCounter]
+	jbe	short l_doBattle
+	mov	ax, monStruSize
+	imul	[bp+loopCounter]
+	mov	si, ax
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	byte ptr gs:monGroups._name[si], al
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	gs:monGroups.groupSize[si], al
+	inc	[bp+loopCounter]
+	jmp	short l_setEncounterLoop
+
+l_doBattle:
+	mov	gs:g_nonRandomBattleFlag, 1
+	mov	g_partyAttackFlag, 0
+	call	bat_init
+	or	ax, ax
+	jz	short l_battleOver
+	mov	buildingRvalMaybe, gameState_partyDied
+	mov	gs:breakAfterFunc, 0
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	jmp	short l_return
+
+l_battleOver:
+	cmp	gs:runAwayFlag,	1
+	sbb	ax, ax
+	neg	ax
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	mapvm_if
+	add	sp, 6
+	jmp	short $+2
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_battle endp
+
+; Attributes: bp-based frame
+
+mfunc_clearPrintString proc far
+
+	arg_0= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	call	text_clear
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mfunc_printString
+	add	sp, 4
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_clearPrintString endp
+
+; Replace the opcode at	*dataP with 0xff effectively
+; removing the code from the level. Used so the	party
+; only runs the	code at	the current square once	per
+; level.
+; Attributes: bp-based frame
+
+mfunc_clearSpecial proc far
+
+	destinationP= dword ptr -4
+	dataP= dword ptr 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	map_getDataOffsetP
+	add	sp, 4
+	mov	word ptr [bp+destinationP], ax
+	mov	word ptr [bp+destinationP+2], dx
+	lfs	bx, [bp+destinationP]
+	mov	byte ptr fs:[bx], 0FFh
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	add	ax, 2
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_clearSpecial endp
+
+; This function	draws the bigpic image located at *dataP;
+; Attributes: bp-based frame
+
+mfunc_drawBigpic proc far
+
+	picNo= word ptr	-2
+	dataP=	dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+picNo], ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_drawBigpic endp
+
+; This function	reads an 0x80AND'd string from *membuf
+; and sets the title. The string is 0xff terminated.
+; Attributes: bp-based frame
+
+mfunc_setTitle proc far
+
+	stringBufferP= word ptr -102h
+	stringBuffer= word ptr -100h
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 102h
+	call	someStackOperation
+	push	si
+
+	mov	[bp+stringBufferP], 0
+l_unmaskLoop:
+	lfs	bx, [bp+dataP]
+	cmp	byte ptr fs:[bx], 0FFh
+	jz	short l_setTitle
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	and	al, 7Fh
+	mov	si, [bp+stringBufferP]
+	inc	[bp+stringBufferP]
+	mov	byte ptr [bp+si+stringBuffer], al
+	jmp	short l_unmaskLoop
+
+l_setTitle:
+	mov	si, [bp+stringBufferP]
+	mov	byte ptr [bp+si+stringBuffer], 0
+	inc	word ptr [bp+dataP]
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	setTitle
+	add	sp, 4
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setTitle endp
+
+; Attributes: bp-based frame
+
+mfunc_waitForIo proc far
+
+	arg_0= dword ptr 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_waitForIo endp
+
+; Attributes: bp-based frame
+
+mfunc_clearText proc far
+
+	dataP= dword ptr 6
+
+	push	bp
+	mov	bp, sp
+	call	text_clear
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_clearText endp
+
+; Attributes: bp-based frame
+
+mfunc_ifFlag proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	push	cs
+	call	near ptr checkProgressFlags
+	add	sp, 2
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifFlag endp
+
+; Attributes: bp-based frame
+
+mfunc_ifNotFlag	proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	push	cs
+	call	near ptr checkProgressFlags
+	add	sp, 2
+	cmp	ax, 1
+	sbb	cx, cx
+	neg	cx
+	push	cx
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifNotFlag	endp
+
+; Attributes: bp-based frame
+
+checkProgressFlags proc far
+
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	flagData= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	mov	ax, [bp+flagData]
+	mov	cl, 3
+	shr	ax, cl
+	mov	[bp+var_4], ax
+	mov	ax, [bp+flagData]
+	and	ax, 7
+	mov	[bp+var_2], ax
+	mov	bx, [bp+var_4]
+	mov	al, g_gameProgressFlags[bx]
+	sub	ah, ah
+	mov	bx, [bp+var_2]
+	mov	cl, byteMaskList[bx]
+	sub	ch, ch
+	and	ax, cx
+	mov	sp, bp
+	pop	bp
+	retf
+checkProgressFlags endp
+
+; Attributes: bp-based frame
+;
+; DWORD rowOffsetSeg & rowOffsetOff, charBufOff & charBufSeg
+
+mfunc_makeDoor proc far
+
+	squareP=	dword ptr -1Ch
+	doorData=	word ptr -18h
+	squareNumber=	word ptr -14h
+	var_12=	dword ptr -12h
+	rowNumber= word ptr	-0Eh
+	charBufOff= word ptr -0Ch
+	charBufSeg= word ptr -0Ah
+	var_8= word ptr	-8
+	rowOffsetOff= word ptr	-6
+	rowOffsetSeg= word ptr	-4
+	var_2= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 1Ch
+	call	someStackOperation
+
+	mov	[bp+charBufOff], offset	g_rosterCharacterBuffer
+	mov	[bp+charBufSeg], seg seg022
+	mov	ax, [bp+charBufOff]
+	mov	dx, [bp+charBufSeg]
+	add	ax, 24h					; 24h == rowOffset
+	mov	[bp+rowOffsetOff], ax
+	mov	[bp+rowOffsetSeg], dx
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+rowNumber], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+squareNumber], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+doorData], ax
+
+	mov	ax, [bp+rowNumber]
+	shl	ax, 1
+	add	ax, [bp+rowOffsetOff]
+	mov	word ptr [bp+squareP], ax
+	mov	word ptr [bp+squareP+2], dx
+	lfs	bx, [bp+squareP]
+	mov	ah, fs:[bx+1]
+	sub	al, al
+	mov	cl, fs:[bx]
+	sub	ch, ch
+	add	ax, cx
+	mov	cx, [bp+squareNumber]
+	mov	dx, cx
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, dx
+	add	ax, cx
+	add	ax, offset g_rosterCharacterBuffer
+	mov	word ptr [bp+var_12], ax
+	mov	word ptr [bp+var_12+2],	seg seg022
+	mov	ax, [bp+doorData]
+	and	ax, 0Fh
+	mov	[bp+var_2], ax
+	mov	cl, 4
+	shr	[bp+doorData], cl
+	test	byte ptr [bp+doorData], 2
+	jz	short loc_198EC
+	inc	word ptr [bp+var_12]
+loc_198EC:
+	test	byte ptr [bp+doorData], 1
+	jz	short loc_1990E
+	lfs	bx, [bp+var_12]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	and	ax, 0F0h
+	mov	[bp+var_8], ax
+	mov	ax, [bp+var_2]
+	or	[bp+var_8], ax
+	mov	al, byte ptr [bp+var_8]
+	mov	fs:[bx], al
+	jmp	short loc_1992C
+loc_1990E:
+	lfs	bx, [bp+var_12]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	and	ax, 0Fh
+	mov	[bp+var_8], ax
+	mov	ax, [bp+var_2]
+	mov	cl, 4
+	shl	ax, cl
+	or	[bp+var_8], ax
+	mov	al, byte ptr [bp+var_8]
+	mov	fs:[bx], al
+loc_1992C:
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_makeDoor endp
+
+; Attributes: bp-based frame
+
+mfunc_setFlag proc far
+
+	flagNo=	word ptr -2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+flagNo], ax
+	mov	ax, 0FFh
+	push	ax
+	push	[bp+flagNo]
+	push	cs
+	call	near ptr _updateFlags
+	add	sp, 4
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setFlag endp
+
+; Attributes: bp-based frame
+
+mfunc_clearFlag	proc far
+
+	flagNo= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+flagNo], ax
+	sub	ax, ax
+	push	ax
+	push	[bp+flagNo]
+	call	_updateFlags
+	add	sp, 4
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_clearFlag	endp
+
+; Attributes: bp-based frame
+
+_updateFlags proc far
+
+	flagNumber=	word ptr -6
+	flagMaskIndex=	word ptr -4
+	flagMask=	word ptr -2
+	flagData=	word ptr  6
+	initialMask=	byte ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+
+	mov	ax, [bp+flagData]
+	mov	cl, 3
+	shr	ax, cl
+	mov	[bp+flagNumber], ax
+
+	mov	ax, [bp+flagData]
+	and	ax, 7
+	mov	[bp+flagMaskIndex], ax
+
+	mov	bx, [bp+flagNumber]
+	mov	al, g_gameProgressFlags[bx]
+	sub	ah, ah
+	mov	bx, [bp+flagMaskIndex]
+	mov	cl, flagMaskList[bx]
+	sub	ch, ch
+	and	ax, cx
+	mov	[bp+flagMask], ax
+
+	mov	al, byteMaskList[bx]
+	and	al, [bp+initialMask]
+	or	al, byte ptr [bp+flagMask]
+	mov	bx, [bp+flagNumber]
+	mov	g_gameProgressFlags[bx], al
+	mov	sp, bp
+	pop	bp
+	retf
+_updateFlags endp
+
+; Attributes: bp-based frame
+mfunc_ifCurSpellEQ proc	far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	cmp	ax, g_curSpellNumber
+	jnz	short l_returnZero
+	mov	ax, 1
+	jmp	short l_return
+l_returnZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifCurSpellEQ endp
+
+; Attributes: bp-based frame
+
+mfunc_setMapRval proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	gs:mapRval, 1
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setMapRval endp
+
+; Attributes: bp-based frame
+
+mfunc_printString proc far
+
+	stringBuffer= word ptr -100h
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 100h
+	call	someStackOperation
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	_mfunc_getString
+	add	sp, 8
+	mov	word ptr [bp+dataP], ax
+	mov	word ptr [bp+dataP+2], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_printString endp
+
+; Attributes: bp-based frame
+
+mfunc_doNothing	proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_doNothing	endp
+
+; Attributes: bp-based frame
+mfunc_ifLiquid proc	far
+
+	liquidIndex= word ptr	-4
+	var_2= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+liquidIndex], ax
+	mov	al, charSize
+	mul	gs:g_userSlotNumber
+	mov	bx, ax
+	mov	al, gs:g_usedItemSlotNumber
+	sub	ah, ah
+	add	bx, ax
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sar	ax, 1
+	sar	ax, 1
+	and	ax, 0Fh
+	mov	[bp+var_2], ax
+	cmp	[bp+liquidIndex], ax
+	jnz	short l_returnZero
+	mov	ax, 1
+	jmp	short l_return
+l_returnZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifLiquid endp
+
+; Attributes: bp-based frame
+;
+; DWORD - var_10A & var_10C
+
+mfunc_getItem proc far
+
+	var_10C= word ptr -10Ch
+	var_10A= word ptr -10Ah
+	var_108= word ptr -108h
+	stringBuffer= word ptr -106h
+	var_6= word ptr	-6
+	slotNumber= word ptr	-4
+	var_2= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 10Ch
+	call	someStackOperation
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+var_108], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+var_2], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+var_6], ax
+
+l_retry:
+	call	text_clear
+	mov	ax, offset s_whoWantsToGetThe
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	push	[bp+var_108]
+	push	[bp+var_2]
+	push	dx
+	push	ax
+	call	item_getName
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+slotNumber], ax
+	or	ax, ax
+	jge	short l_addItem
+	sub	ax, ax
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	jmp	l_return
+
+l_addItem:
+	push	[bp+var_6]
+	push	[bp+var_108]
+	push	[bp+var_2]
+	push	[bp+slotNumber]
+	call	inven_addItem
+	add	sp, 8
+	or	ax, ax
+	jz	short l_inventoryFull
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	mov	ax, offset s_gotThe
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_10C]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	push	[bp+var_108]
+	push	[bp+var_2]
+	push	dx
+	push	ax
+	call	item_getName
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 1
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	jmp	short l_return
+
+l_inventoryFull:
+	mov	ax, offset s_sorryBut
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	[bp+var_10A]
+	push	[bp+var_10C]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	mov	ax, offset s_cantCarryAnyMore
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_10C]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_10C], ax
+	mov	[bp+var_10A], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	jmp	l_retry
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_getItem endp
+
+mfunc_ifPartyHasItem	proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	push	cs
+	call	near ptr vm_findItem
+	add	sp, 2
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifPartyHasItem	endp
+
+; Attributes: bp-based frame
+mfunc_ifPartyNotHasItem proc	far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	push	cs
+	call	near ptr vm_findItem
+	add	sp, 2
+	cmp	ax, 1
+	sbb	cx, cx
+	neg	cx
+	push	cx
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifPartyNotHasItem endp
+
+; Attributes: bp-based frame
+
+vm_findItem proc far
+
+	slotNumber=	word ptr -4
+	inventorySlotNumber= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	mov	[bp+slotNumber], 0
+
+l_characterLoop:
+	mov	[bp+inventorySlotNumber], 1
+l_inventoryLoop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sub	ah, ah
+	cmp	ax, [bp+arg_0]
+	jnz	short l_inventoryLoopNext
+	mov	al, byte ptr [bp+inventorySlotNumber]
+	dec	al
+	mov	gs:g_usedItemSlotNumber, al
+	mov	al, byte ptr [bp+slotNumber]
+	mov	gs:g_userSlotNumber, al
+	mov	ax, 1
+	jmp	short l_return
+l_inventoryLoopNext:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], inventorySize
+	jl	short l_inventoryLoop
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_characterLoop
+	sub	ax, ax
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+vm_findItem endp
+
+; Attributes: bp-based frame
+
+mfunc_ifSameSquare proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, g_sameSquareFlag
+	mov	g_sameSquareFlag, 1
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifSameSquare endp
+
+; Attributes: bp-based frame
+
+mfunc_ifYesNo proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	call	getYesNo
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifYesNo endp
+
+; Attributes: bp-based frame
+mfunc_goto proc	far
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	map_getDataOffsetP
+	add	sp, 4
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_goto endp
+
+; Attributes: bp-based frame
+
+mfunc_battleNoCry proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	gs:byte_4228B, 1
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mfunc_battle
+	add	sp, 4
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_battleNoCry endp
+
+; Attributes: bp-based frame
+
+mfunc_setSameSquareFlag	proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	g_sameSquareFlag, 0
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setSameSquareFlag	endp
+
+; Attributes: bp-based frame
+
+mfunc_turnAround proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	cs
+	call	near ptr map_turnAround
+	push	cs
+	call	near ptr map_moveOneSquare
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_turnAround endp
+
+; Attributes: bp-based frame
+
+mfunc_removeItem proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	push	cs
+	call	near ptr vm_removeItem
+	add	sp, 2
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_removeItem endp
+
+; Attributes: bp-based frame
+
+vm_removeItem proc far
+
+	slotNumber=	word ptr -4
+	inventorySlotNumber= word ptr	-2
+	itemNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	[bp+slotNumber], 0
+
+l_characterLoop:
+	mov	[bp+inventorySlotNumber], 1
+
+l_inventoryLoop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sub	ah, ah
+	cmp	ax, [bp+itemNumber]
+	jnz	short l_inventoryLoopNext
+	mov	ax, [bp+inventorySlotNumber]
+	dec	ax
+	mov	gs:g_inventoryPackStart, ax
+	mov	ax, [bp+slotNumber]
+	mov	gs:g_inventoryPackTarget, ax
+	call	inven_pack
+	jmp	short l_characterLoopNext
+
+l_inventoryLoopNext:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], 24h	
+	jl	short l_inventoryLoop
+
+l_characterLoopNext:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_characterLoop
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+vm_removeItem endp
+
+; Attributes: bp-based frame
+
+mfunc_incrementRegister proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	bx, ax
+	shl	bx, 1
+	inc	g_vm_registers[bx]
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_incrementRegister endp
+
+; Attributes: bp-based frame
+
+mfunc_decrementRegister proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	bx, ax
+	shl	bx, 1
+	dec	g_vm_registers[bx]
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_decrementRegister endp
+
+; Attributes: bp-based frame
+mfunc_ifRegisterClear proc	far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	bx, ax
+	shl	bx, 1
+	cmp	g_vm_registers[bx], 1
+	sbb	ax, ax
+	neg	ax
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifRegisterClear endp
+
+; Attributes: bp-based frame
+
+mfunc_ifRegisterSet proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	bx, ax
+	shl	bx, 1
+	push	g_vm_registers[bx]
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifRegisterSet endp
+
+; Attributes: bp-based frame
+
+mfunc_drainHp proc far
+
+	slotNumber= word ptr	-4
+	drainAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+drainAmount], ax
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	ah, fs:[bx]
+	sub	al, al
+	add	[bp+drainAmount], ax
+	mov	[bp+slotNumber], 0
+
+l_loop:
+	mov	ax, [bp+drainAmount]
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.currentHP[bx], cx
+	jbe	short l_killCharacter
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	sub	gs:party.currentHP[bx], cx
+	jmp	short l_next
+
+l_killCharacter:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	gs:party.currentHP[si], 0
+	or	gs:party.status[si], 4
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+	call	party_getLastSlot
+	cmp	ax, 7
+	jle	short l_return
+	mov	buildingRvalMaybe, gameState_partyDied
+
+l_return:
+	mov	byte ptr g_printPartyFlag,	0
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_drainHp endp
+
+; Attributes: bp-based frame
+
+mfunc_ifInBox proc far
+
+	sqE= word ptr	-0Ch
+	sqN= word ptr	-0Ah
+	northLowerBound= word ptr	-8
+	eastLowerBound= word ptr	-6
+	northUpperBound= word ptr	-4
+	eastUpperBound= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ch
+	call	someStackOperation
+	push	si
+
+	mov	ax, sq_north
+	mov	[bp+sqN], ax
+	mov	ax, sq_east
+	mov	[bp+sqE], ax
+	cmp	inDungeonMaybe, 0
+	jnz	short l_skipWildernessOffset
+	mov	si, g_direction
+	shl	si, 1
+	mov	ax, dirDeltaN[si]
+	sub	[bp+sqN], ax
+	mov	ax, dirDeltaE[si]
+	add	[bp+sqE], ax
+l_skipWildernessOffset:
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+northLowerBound], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+eastLowerBound], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+northUpperBound], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+eastUpperBound], ax
+
+	mov	ax, [bp+northLowerBound]
+	cmp	[bp+sqN], ax
+	jl	short l_returnZero
+
+	mov	ax, [bp+northUpperBound]
+	cmp	[bp+sqN], ax
+	jg	short l_returnZero
+
+	mov	ax, [bp+eastLowerBound]
+	cmp	[bp+sqE], ax
+	jl	short l_returnZero
+
+	mov	ax, [bp+eastUpperBound]
+	cmp	[bp+sqE], ax
+	jg	short l_returnZero
+
+	mov	ax, 1
+	jmp	short l_return
+l_returnZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	fs
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifInBox endp
+
+; Attributes: bp-based frame
+
+mfunc_setLiquid proc far
+
+	inventoryP= dword ptr -6
+	liquidNumber= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	shl	ax, 1
+	shl	ax, 1
+	mov	[bp+liquidNumber], ax
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	cl, gs:g_usedItemSlotNumber
+	sub	ch, ch
+	add	ax, cx
+	add	ax, offset party.inventory
+	mov	word ptr [bp+inventoryP], ax
+	mov	word ptr [bp+inventoryP+2], seg seg027
+	lfs	bx, [bp+inventoryP]
+	mov	al, fs:[bx]
+	and	al, 0C3h
+	or	al, byte ptr [bp+liquidNumber]
+	mov	fs:[bx], al
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setLiquid endp
+
+; Attributes: bp-based frame
+
+mfunc_addToContainer proc far
+
+	var_4= word ptr	-4
+	addAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	si, ax
+	mov	al, gs:g_usedItemSlotNumber
+	sub	ah, ah
+	add	si, ax
+	mov	al, gs:party.inventory.itemCount[si]
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	cl, fs:[bx]
+	sub	ch, ch
+	add	ax, cx
+	mov	[bp+addAmount], ax
+	mov	al, gs:party.inventory.itemNo[si]
+	sub	ah, ah
+	mov	[bp+var_4], ax
+	cmp	[bp+addAmount], 0FEh 
+	jle	short loc_1A1FC
+	mov	[bp+addAmount], 0FEh 
+loc_1A1FC:
+	mov	bx, [bp+var_4]
+	mov	al, g_itemBaseCount[bx]
+	sub	ah, ah
+	sub	ax, [bp+addAmount]
+	sbb	cx, cx
+	and	ax, cx
+	add	ax, [bp+addAmount]
+	mov	cx, ax
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	bx, ax
+	mov	al, gs:g_usedItemSlotNumber
+	sub	ah, ah
+	add	bx, ax
+	mov	gs:party.inventory.itemCount[bx], cl
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_addToContainer endp
+
+; Attributes: bp-based frame
+
+mfunc_subtractFromContainer proc far
+
+	itemCountP= dword ptr -0Ah
+	var_4= word ptr	-4
+	subtractAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ah
+	call	someStackOperation
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	cl, gs:g_usedItemSlotNumber
+	sub	ch, ch
+	add	ax, cx
+	add	ax, offset party.inventory.itemCount
+	mov	word ptr [bp+itemCountP], ax
+	mov	word ptr [bp+itemCountP+2], seg seg027
+	lfs	bx, [bp+itemCountP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+subtractAmount], ax
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+var_4], ax
+	cmp	[bp+subtractAmount], 0FEh 
+	jz	short l_return
+	cmp	[bp+subtractAmount], ax
+	jl	short l_setToZero
+	mov	al, byte ptr [bp+subtractAmount]
+	sub	al, byte ptr [bp+var_4]
+	jmp	short l_setCount
+l_setToZero:
+	sub	al, al
+l_setCount:
+	lfs	bx, [bp+itemCountP]
+	mov	fs:[bx], al
+l_return:
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_subtractFromContainer endp
+
+; Attributes: bp-based frame
+
+mfunc_addToRegister proc far
+
+	registerNumber= word ptr	-4
+	addAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+addAmount], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	ah, fs:[bx]
+	sub	al, al
+	add	[bp+addAmount], ax
+	mov	ax, [bp+addAmount]
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	add	g_vm_registers[bx], ax
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_addToRegister endp
+
+; Attributes: bp-based frame
+
+mfunc_subtractFromRegister proc far
+
+	registerNumber= word ptr -4
+	subtractAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+subtractAmount], ax
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	ah, fs:[bx]
+	sub	al, al
+	add	[bp+subtractAmount], ax
+
+	mov	ax, [bp+subtractAmount]
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	sub	g_vm_registers[bx], ax
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_subtractFromRegister endp
+
+; Attributes: bp-based frame
+mfunc_setDirection proc	far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	g_direction, ax
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setDirection endp
+
+; Attributes: bp-based frame
+
+mfunc_readString proc far
+
+	loopCounter= word ptr	-2
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	ax, 10h
+	push	ax
+	mov	ax, offset mfunc_ioBuf
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	readString
+	add	sp, 6
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	mov	bx, [bp+loopCounter]
+	mov	al, gs:mfunc_ioBuf[bx]
+	sub	ah, ah
+	push	ax
+	call	toUpper
+	add	sp, 2
+	mov	bx, [bp+loopCounter]
+	mov	gs:mfunc_ioBuf[bx], al
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 10h
+	jl	short l_loop
+
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_readString endp
+
+; Attributes: bp-based frame
+vm_strcmp proc	far
+
+	dataP= dword ptr  6
+	stringBuffer= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+l_loop:
+	lfs	bx, [bp+dataP]
+	mov	al, fs:[bx]
+	and	al, 7Fh
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	cmp	al, fs:[bx]
+	jnz	short l_doneComparing
+	inc	word ptr [bp+dataP]
+	jmp	short l_loop
+l_doneComparing:
+	lfs	bx, [bp+dataP]
+	cmp	byte ptr fs:[bx], 0FFh
+	jnz	short l_returnZero
+	mov	ax, 1
+	jmp	short l_return
+l_returnZero:
+	sub	ax, ax
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+vm_strcmp endp
+
+; Attributes: bp-based frame
+
+mfunc_ifStringEquals proc far
+
+	rval= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	ax, offset mfunc_ioBuf
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr vm_strcmp
+	add	sp, 8
+	mov	[bp+rval], ax
+
+l_skipString:
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	cmp	byte ptr fs:[bx], 0FFh
+	jnz	short l_skipString
+
+	push	[bp+rval]
+	push	fs
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifStringEquals endp
+
+; Attributes: bp-based frame
+
+mfunc_parseNumber proc far
+
+	registerNumber= word ptr	-4
+	value= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+	lea	ax, [bp+value]
+	push	ss
+	push	ax
+	mov	ax, offset s_percentD
+	push	ds
+	push	ax
+	mov	ax, offset mfunc_ioBuf
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	sscanf
+	add	sp, 0Ch
+	mov	ax, [bp+value]
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	mov	g_vm_registers[bx], ax
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_parseNumber endp
+
+; Attributes: bp-based frame
+mfunc_getCharacter proc	far
+
+	slotNumber= word ptr	-2
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	call	readSlotNumber
+	mov	[bp+slotNumber], ax
+	or	ax, ax
+	jl	short loc_1A4CA
+	mov	al, byte ptr [bp+slotNumber]
+	mov	gs:g_userSlotNumber, al
+loc_1A4CA:
+	cmp	[bp+slotNumber], 0
+	jl	short l_returnZero
+	mov	ax, 1
+	jmp	short l_return
+l_returnZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_getCharacter endp
+
+; Attributes: bp-based frame
+;
+; Remove an amount of gold from a player. The amount is stored
+; in the register specified.
+;
+
+mfunc_ifGiveGold proc far
+
+	registerAmountLo= word ptr	-0Ah
+	registerAmountHi= word ptr	-8
+	registerNumber= word ptr	-6
+	memberGoldLo= word ptr	-4
+	memberGoldHi= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ah
+	call	someStackOperation
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	bx, ax
+	mov	ax, word ptr gs:party.gold[bx]
+	mov	dx, word ptr gs:(party.gold+2)[bx]
+	mov	[bp+memberGoldLo], ax
+	mov	[bp+memberGoldHi], dx
+
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	mov	ax, g_vm_registers[bx]
+	cwd
+	mov	[bp+registerAmountLo], ax
+	mov	[bp+registerAmountHi], dx
+
+	mov	ax, [bp+memberGoldLo]
+	mov	dx, [bp+memberGoldHi]
+	cmp	[bp+registerAmountHi], dx
+	ja	short l_notEnough
+	jb	short l_removeGold
+	cmp	[bp+registerAmountLo], ax
+	ja	short l_notEnough
+
+l_removeGold:
+	mov	ax, [bp+registerAmountLo]
+	mov	dx, [bp+registerAmountHi]
+	mov	cx, ax
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	bx, ax
+	sub	word ptr gs:party.gold[bx], cx
+	sbb	word ptr gs:(party.gold+2)[bx], dx
+	jmp	short l_setReturnValue
+
+l_notEnough:
+	mov	ax, offset s_youDontHaveEnoughGold
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 3
+	push	ax
+	call	text_delayNoTable
+	add	sp, 2
+
+l_setReturnValue:
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	mov	ax, g_vm_registers[bx]
+	cwd
+	cmp	dx, [bp+memberGoldHi]
+	ja	short l_returnZero
+	jb	short l_returnOne
+	cmp	ax, [bp+memberGoldLo]
+	ja	short l_returnZero
+
+l_returnOne:
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifGiveGold endp
+
+; Attributes: bp-based frame
+
+mfunc_addGold proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	bx, ax
+	shl	bx, 1
+	mov	ax, g_vm_registers[bx]
+	cwd
+	mov	cx, ax
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	bx, ax
+	add	word ptr gs:party.gold[bx], cx
+	adc	word ptr gs:(party.gold+2)[bx], dx
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_addGold endp
+
+; Attributes: bp-based frame
+
+mfunc_ifRegisterLt proc far
+
+	registerNumber= word ptr	-4
+	comparisonAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+comparisonAmount], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	ah, fs:[bx]
+	sub	al, al
+	add	[bp+comparisonAmount], ax
+
+	mov	ax, [bp+comparisonAmount]
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	cmp	g_vm_registers[bx], ax
+	jge	short l_setToZero
+	mov	ax, 1
+	jmp	short l_return
+l_setToZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifRegisterLt endp
+
+; Attributes: bp-based frame
+
+mfunc_ifRegisterEq proc far
+	registerNumber= word ptr	-4
+	comparisonAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+comparisonAmount], ax
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	ah, fs:[bx]
+	sub	al, al
+	add	[bp+comparisonAmount], ax
+	mov	ax, [bp+comparisonAmount]
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	cmp	g_vm_registers[bx], ax
+	jnz	short l_setToZero
+	mov	ax, 1
+	jmp	short l_return
+l_setToZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifRegisterEq endp
+
+; Attributes: bp-based frame
+
+mfunc_ifRegisterGe proc far
+
+	registerNumber= word ptr	-4
+	comparisonAmount= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+comparisonAmount], ax
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	ah, fs:[bx]
+	sub	al, al
+	add	[bp+comparisonAmount], ax
+	mov	ax, [bp+comparisonAmount]
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	cmp	g_vm_registers[bx], ax
+	jl	short l_setToZero
+	mov	ax, 1
+	jmp	short l_return
+l_setToZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifRegisterGe endp
+
+; Attributes: bp-based frame
+
+mfunc_learnSpell proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	mov	al, gs:g_userSlotNumber
+	push	ax
+	call	mage_learnSpell
+	add	sp, 4
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_learnSpell endp
+
+; Attributes: bp-based frame
+
+mfunc_setRegister proc far
+
+	registerNumber=	word ptr -4
+	setAmount= word ptr -2
+	dataP=	dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+registerNumber], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	mov	[bp+setAmount], ax
+
+	mov	bx, word ptr [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	ah, fs:[bx]
+	sub	al, al
+	add	[bp+setAmount], ax
+
+	mov	ax, [bp+setAmount]
+	mov	bx, [bp+registerNumber]
+	shl	bx, 1
+	mov	g_vm_registers[bx], ax
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setRegister endp
+
+; Attributes: bp-based frame
+
+mfunc_ifHasItem proc far
+
+	itemNumber= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+itemNumber], ax
+	mov	al, 78h	
+	mul	gs:g_userSlotNumber
+	mov	bx, ax
+	mov	al, gs:g_usedItemSlotNumber
+	sub	ah, ah
+	add	bx, ax
+	mov	al, gs:party.inventory.itemNo[bx]
+	cmp	ax, [bp+itemNumber]
+	jnz	short l_setToZero
+	mov	ax, 1
+	jmp	short l_return
+l_setToZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifHasItem endp
+
+; Attributes: bp-based frame
+mfunc_packInventory proc	far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	al, gs:g_userSlotNumber
+	sub	ah, ah
+	mov	gs:g_inventoryPackTarget, ax
+	mov	al, gs:g_usedItemSlotNumber
+	mov	gs:g_inventoryPackStart, ax
+	call	inven_pack
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_packInventory endp
+
+; Attributes: bp-based frame
+
+mfunc_addMonster proc far
+
+	monsterIndex= word ptr	-4
+	slotNumber= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+monsterIndex], ax
+
+	call	party_findEmptySlot
+	mov	[bp+slotNumber], ax
+	cmp	ax, 7
+	jge	short l_setReturnValue
+
+	mov	ax, monStruSize
+	imul	[bp+monsterIndex]
+	mov	bx, ax
+	lea	ax, monsterBuf[bx]
+	mov	dx, seg	seg023
+	push	dx
+	push	ax
+	push	[bp+slotNumber]
+	call	_sp_convertMonToSummon
+	add	sp, 6
+	mov	byte ptr g_printPartyFlag,	0
+
+l_setReturnValue:
+	cmp	[bp+slotNumber], 7
+	jge	short l_returnZero
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_addMonster endp
+
+; Attributes: bp-based frame
+mfunc_ifMonsterInParty proc	far
+
+	rval= word ptr	-4
+	slotNumber= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	mov	[bp+rval], 0
+	mov	[bp+slotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	gs:party.class[si], class_monster
+	jnz	short l_next
+	lea	ax, party._name[si]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr vm_strcmp
+	add	sp, 8
+	or	ax, ax
+	jz	short l_next
+	mov	[bp+rval], 1
+	jmp	short l_skipString
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_skipString:
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	cmp	byte ptr fs:[bx], 0FFh
+	jnz	short l_skipString
+
+	mov	al, byte ptr [bp+slotNumber]
+	mov	gs:g_userSlotNumber, al
+	push	[bp+rval]
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	mapvm_if
+	add	sp, 6
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifMonsterInParty endp
+
+; Attributes: bp-based frame
+
+mfunc_clearPrintOffset proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	call	text_clear
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	mfunc_printOffset
+	add	sp, 4
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_clearPrintOffset endp
+
+; Attributes: bp-based frame
+
+mfunc_ifIsNight	proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	cmp	gs:isNight, 1
+	sbb	ax, ax
+	neg	ax
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifIsNight	endp
+
+; Attributes: bp-based frame
+
+mfunc_removeMonster proc far
+
+	arg_0= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	al, gs:g_userSlotNumber
+	sub	ah, ah
+	push	ax
+	call	party_pack
+	add	sp, 2
+	mov	byte ptr g_printPartyFlag,	0
+	mov	ax, word ptr [bp+arg_0]
+	mov	dx, word ptr [bp+arg_0+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_removeMonster endp
+
+; Attributes: bp-based frame
+;
+; This function searches the party to see if a particular
+; chronomancer quest flag bit is set. If the quest flag bit
+; is set, then the rval local variable is set to 1. Otherwise, the
+; rval variable is set to 0
+;
+; The bug is caused by the call to quest_partyHasFlagSet. That function
+; performs the same function as this one. In fact, this entire function
+; could be replaced with:
+;
+;	push	bp
+	mov	bp, sp
+;	lfs	bx, [bp+dataP]
+;	mov	al, fs:[bx]
+;	sub	ah, ah
+;	push	ax
+;	push	cs
+	call	near ptr quest_partyHasFlagSet
+	add	sp, 2
+;	push	ax
+;	push	word ptr [bp+dataP+2]
+;	push	word ptr [bp+dataP]
+;	mov	sp, bp
+	pop	bp
+;
+; quest_partyHasFlagSet is called with either a 0 or 1 when it SHOULD be called
+; by the questData byte from the level.
+;
+; I've replaced the call to this function in the vm_functionList list with a call to
+; mfunc_notImplemented. From my decompiling of the levels, this opcode (3d) is never
+; called so it should be safe to do this.
+
+mfunc_buggedIfQuestFlagSet proc far
+
+	questByteNumber= word ptr	-8
+	questMaskIndex= word ptr	-6
+	rval= word ptr	-4
+	slotNumber= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	lfs	bx, [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	and	ax, 7
+	mov	[bp+questMaskIndex], ax
+
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	cl, 3
+	shr	ax, cl
+	mov	[bp+questByteNumber], ax
+
+	mov	[bp+rval], 0
+	mov	[bp+slotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+questByteNumber]
+	mov	al, gs:party.chronoQuest[bx]
+	sub	ah, ah
+	mov	bx, [bp+questMaskIndex]
+	mov	cl, byteMaskList[bx]
+	sub	ch, ch
+	test	ax, cx
+	jz	short l_next
+	mov	[bp+rval], 1
+	jmp	short l_return
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
+	push	[bp+rval]
+	push	cs
+	call	near ptr quest_partyHasFlagSet
+	add	sp, 2
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_buggedIfQuestFlagSet endp
+
+; This function	returns	1 if there is a	character
+; in the party that has	the bit	set in chronoQuest
+; that matches the passed in quest mask.
+; Attributes: bp-based frame
+quest_partyHasFlagSet proc	far
+
+	questMaskIndex=	word ptr -8
+	rval= word ptr -6
+	slotNumber=	word ptr -4
+	questByteNumber= word ptr	-2
+	questData= word	ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+
+	mov	ax, [bp+questData]
+	and	ax, 7
+	mov	[bp+questMaskIndex], ax
+	mov	ax, [bp+questData]
+	mov	cl, 3
+	sar	ax, cl
+	mov	[bp+questByteNumber], ax
+	mov	[bp+rval], 0
+	mov	[bp+slotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short l_next
+	cmp	gs:party.class[si], class_monster
+	jnb	short l_next
+	mov	bx, [bp+questByteNumber]
+	add	bx, si
+	mov	al, gs:party.chronoQuest[bx]
+	sub	ah, ah
+	mov	bx, [bp+questMaskIndex]
+	mov	cl, byteMaskList[bx]
+	sub	ch, ch
+	test	ax, cx
+	jz	short l_next
+	mov	[bp+rval], 1
+	jmp	short l_return
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
+	mov	ax, [bp+rval]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+quest_partyHasFlagSet endp
+
+; Attributes: bp-based frame
+
+mfunc_ifQuestFlagNotSet proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	push	cs
+	call	near ptr quest_partyNotHasFlagSet
+	add	sp, 2
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifQuestFlagNotSet endp
+
+; This function	returns	one if there is	a character
+; in the party that does NOT have the quest mask
+; set.
+; Attributes: bp-based frame
+
+quest_partyNotHasFlagSet proc far
+
+	questMaskIndex= word ptr	-8
+	rval= word ptr -6
+	slotNumber=	word ptr -4
+	questByteNumber= word ptr	-2
+	questData= word	ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+
+	mov	ax, [bp+questData]
+	and	ax, 7
+	mov	[bp+questMaskIndex], ax
+
+	mov	ax, [bp+questData]
+	mov	cl, 3
+	sar	ax, cl
+	mov	[bp+questByteNumber], ax
+
+	mov	[bp+rval], 0
+	mov	[bp+slotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short l_next
+	cmp	gs:party.class[si], class_monster
+	jnb	short l_next
+	mov	bx, [bp+questByteNumber]
+	add	bx, si
+	mov	al, gs:party.chronoQuest[bx]
+	sub	ah, ah
+	mov	bx, [bp+questMaskIndex]
+	mov	cl, byteMaskList[bx]
+	sub	ch, ch
+	test	ax, cx
+	jnz	short l_next
+	mov	[bp+rval], 1
+	jmp	short l_return
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
+	mov	ax, [bp+rval]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+quest_partyNotHasFlagSet endp
+
+; Attributes: bp-based frame
+
+mfunc_setQuestFlag	proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	push	cs
+	call	near ptr quest_setFlag
+	add	sp, 2
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setQuestFlag	endp
+
+; Attributes: bp-based frame
+quest_setFlag proc	far
+
+	questMaskIndex= word ptr	-6
+	slotNumber=	word ptr -4
+	questByteNumber= word ptr	-2
+	questData= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	si
+
+	mov	ax, [bp+questData]
+	and	ax, 7
+	mov	[bp+questMaskIndex], ax
+
+	mov	ax, [bp+questData]
+	mov	cl, 3
+	sar	ax, cl
+	mov	[bp+questByteNumber], ax
+
+	mov	[bp+slotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	gs:party.class[si], class_monster
+	jnb	short l_next
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short l_next
+	mov	bx, [bp+questMaskIndex]
+	mov	al, byteMaskList[bx]
+	mov	bx, [bp+questByteNumber]
+	add	bx, si
+	or	gs:party.chronoQuest[bx], al
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+quest_setFlag endp
+
+; Attributes: bp-based frame
+
+mfunc_clearQuestFlag proc far
+
+	questMaskIndex= word ptr	-8
+	rval= word ptr	-6
+	questByteNumber= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+
+	lfs	bx, [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	and	ax, 7
+	mov	[bp+questMaskIndex], ax
+
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	cl, 3
+	shr	ax, cl
+	mov	[bp+questByteNumber], ax
+
+	mov	[bp+rval], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+rval]
+	mov	si, ax
+	cmp	gs:party.class[si], class_monster
+	jnb	short l_next
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short l_next
+	mov	bx, [bp+questMaskIndex]
+	mov	al, flagMaskList[bx]
+	mov	bx, [bp+questByteNumber]
+	add	bx, si
+	and	gs:party.chronoQuest[bx], al
+
+l_next:
+	inc	[bp+rval]
+	cmp	[bp+rval], 7
+	jl	short l_loop
+
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_clearQuestFlag endp
+
+; Attributes: bp-based frame
+
+mfunc_partyUnderLevel proc far
+
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	push	ax
+	call	vm_partyUnderLevel
+	add	sp, 2
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_partyUnderLevel endp
+
+; This function	returns	0 if there is a	character
+; in the party whose level is less than	the passed
+; in level. If there is	not it returns 1.
+; Attributes: bp-based frame
+
+vm_partyUnderLevel proc far
+
+	rval= word ptr -4
+	slotNumber= word ptr -2
+	level= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	mov	[bp+rval], 1
+	mov	[bp+slotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short l_next
+	mov	ax, [bp+level]
+	cmp	gs:party.level[si], ax
+	jnb	short l_next
+	mov	[bp+rval], 0
+	jmp	short l_return
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
+	mov	ax, [bp+rval]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+vm_partyUnderLevel endp
+
+; Attributes: bp-based frame
+
+mfunc_ifWildFace proc far
+
+	sqN= word ptr	-6
+	mapFace= word ptr	-4
+	desiredFace= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	si
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+desiredFace], ax
+
+	mov	si, g_direction
+	shl	si, 1
+	mov	ax, sq_north
+	sub	ax, dirDeltaN[si]
+	mov	[bp+sqN], ax
+
+	mov	ax, dirDeltaE[si]
+	add	ax, sq_east
+
+	push	[bp+sqN]
+	push	ax
+	call	wild_getSquare
+	add	sp, 4
+	and	ax, 0Fh
+	mov	[bp+mapFace], ax
+
+	mov	ax, [bp+desiredFace]
+	cmp	[bp+mapFace], ax
+	jnz	short l_setToZero
+	mov	ax, 1
+	jmp	short l_return
+l_setToZero:
+	sub	ax, ax
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifWildFace endp
+
+; Attributes: bp-based frame
+
+mfunc_setWildFace proc far
+
+	newFace= word ptr	-6
+	sqE= word ptr	-4
+	sqN= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	si
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+newFace], ax
+
+	mov	si, g_direction
+	shl	si, 1
+	mov	ax, sq_north
+	sub	ax, dirDeltaN[si]
+	mov	[bp+sqN], ax
+
+	mov	ax, dirDeltaE[si]
+	add	ax, sq_east
+	mov	[bp+sqE], ax
+
+	cmp	gs:wildWrapFlag, 0
+	jz	short l_skipWrap
+	mov	al, gs:mapHeight
+	sub	ah, ah
+	push	ax
+	push	[bp+sqN]
+	call	wrapNumber
+	add	sp, 4
+	mov	[bp+sqN], ax
+	mov	al, gs:mapWidth
+	sub	ah, ah
+	push	ax
+	push	[bp+sqE]
+	call	wrapNumber
+	add	sp, 4
+	mov	[bp+sqE], ax
+
+l_skipWrap:
+	cmp	[bp+sqN], 0
+	jl	short l_return
+	mov	al, gs:mapHeight
+	sub	ah, ah
+	cmp	ax, [bp+sqN]
+	jb	short l_return
+	cmp	[bp+sqE], 0
+	jl	short l_return
+	mov	al, gs:mapWidth
+	cmp	ax, [bp+sqE]
+	jb	short l_return
+	mov	bx, [bp+sqN]
+	shl	bx, 1
+	shl	bx, 1
+	lfs	bx, gs:rowOffset[bx]
+	mov	si, [bp+sqE]
+	mov	al, byte ptr [bp+newFace]
+	mov	fs:[bx+si], al
+l_return:
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_setWildFace endp
+
+; Attributes: bp-based frame
+
+mfunc_ifIsClass	proc far
+
+	desiredClass= word ptr	-2
+	dataP= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+desiredClass], ax
+
+	mov	ax, charSize
+	imul	gs:g_userSlotNumber
+	mov	bx, ax
+	mov	al, gs:party.class[bx]
+	sub	ah, ah
+	cmp	ax, [bp+desiredClass]
+	jnz	short l_setToZero
+	mov	ax, 1
+	jmp	short l_return
+
+l_setToZero:
+	sub	ax, ax
+
+l_return:
+	push	ax
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mapvm_if
+	add	sp, 6
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_ifIsClass	endp
+
+; Attributes: bp-based frame
+;
+; DWORD var_102 & 104
+
+mfunc_printOffset proc far
+
+	var_104= word ptr -104h
+	var_102= word ptr -102h
+	stringBuffer= word ptr -100h
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 104h
+	call	someStackOperation
+
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	map_getDataOffsetP
+	add	sp, 4
+	mov	[bp+var_104], ax
+	mov	[bp+var_102], dx
+	add	[bp+dataP], 2
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	push	dx
+	push	[bp+var_104]
+	call	_mfunc_getString
+	add	sp, 8
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_printOffset endp
+
+; Attributes: bp-based frame
+
+mfunc_clearTeleport proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0FEh
+	push	ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	push	cs
+	call	near ptr mfunc_teleport
+	add	sp, 4
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_clearTeleport endp
+
+; Attributes: bp-based frame
+;
+; This function executes the level code based on the current square
+; the party is on.
+;
+; There are some special values that affect function execution:
+;   A sqN value of 7Fh executes the function regardless of the current sq_north value
+;   A sqN value of FFh executes the function regardless of the current sq_north value iff
+;     the vm_execute function is called as the result of a spell being cast. (spellFlag != 0)
+;   A sqE value of FFh executes the function regardless of the current sq_east value
+
+vm_execute proc far
+
+	dataP= dword ptr -0Ch
+	opcode=	word ptr -8
+	functionCount= word	ptr -6
+	sqN= word ptr -4
+	sqE=	word ptr -2
+	squareListP=	dword ptr  6
+	spellFlag= word	ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ch
+	call	someStackOperation
+
+	push	word ptr [bp+squareListP+2]
+	push	word ptr [bp+squareListP]
+	call	map_getDataOffsetP
+	add	sp, 4
+	mov	word ptr [bp+squareListP], ax
+	mov	word ptr [bp+squareListP+2],	dx
+
+	lfs	bx, [bp+squareListP]
+	inc	word ptr [bp+squareListP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+functionCount],	ax
+	mov	gs:mapRval, 0
+
+l_loop:
+	mov	ax, [bp+functionCount]
+	dec	[bp+functionCount]
+	or	ax, ax
+	jz	l_returnRval
+
+	lfs	bx, [bp+squareListP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+sqN], ax
+
+	; Remove the high bit from the sqN value if a spell is cast. This is used
+	; to convert values of FFh to 7Fh to pass the check at l_compareNorthCoordinate
+	;
+	cmp	[bp+spellFlag],	0
+	jz	short l_compareNorthCoordinate
+	xor	byte ptr [bp+sqN], 80h
+
+l_compareNorthCoordinate:
+	mov	al, fs:[bx+1]
+	sub	ah, ah
+	mov	[bp+sqE], ax
+
+	cmp	[bp+sqN], 7Fh 			; A sqN value of 7Fh always succeeds
+	jz	short l_compareEastCoordinate	
+	mov	ax, [bp+sqN]
+	cmp	sq_north, ax
+	jnz	l_next
+
+l_compareEastCoordinate:
+	cmp	[bp+sqE], 0FFh			; A sqE value of FFh always succeeds
+	jz	short l_getCodeAddress
+	mov	ax, [bp+sqE]
+	cmp	sq_east, ax
+	jnz	l_next
+
+l_getCodeAddress:
+	mov	ax, word ptr [bp+squareListP]
+	mov	dx, word ptr [bp+squareListP+2]
+	add	ax, 2
+	push	dx
+	push	ax
+	call	map_getDataOffsetP
+	add	sp, 4
+	mov	word ptr [bp+dataP], ax
+	mov	word ptr [bp+dataP+2], dx
+
+l_getOpcode:
+	lfs	bx, [bp+dataP]
+	inc	word ptr [bp+dataP]
+	mov	al, fs:[bx]
+	sub	ah, ah
+	mov	[bp+opcode], ax
+	cmp	ax, 0FFh
+	jnz	short l_verifyOpcode
+	mov	gs:breakAfterFunc, 0
+	jmp	short l_checkReturn
+
+l_verifyOpcode:
+	mov	ax, [bp+opcode]
+	and	ax, 80h
+	mov	gs:breakAfterFunc, ax
+	and	[bp+opcode], 7Fh
+	cmp	[bp+opcode], 46h
+	jbe	short l_executeOpcode
+	mov	ax, offset s_badOpcode
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	short l_return
+
+l_executeOpcode:
+	mov	bx, [bp+opcode]
+	shl	bx, 1
+	shl	bx, 1
+	mov	ax, word ptr vm_functionList[bx]
+	mov	dx, word ptr (vm_functionList+2)[bx]
+	mov	word ptr gs:g_currentVmFunction, ax
+	mov	word ptr gs:g_currentVmFunction+2, dx
+	push	word ptr [bp+dataP+2]
+	push	word ptr [bp+dataP]
+	call	gs:g_currentVmFunction
+	add	sp, 4
+	mov	word ptr [bp+dataP], ax
+	mov	word ptr [bp+dataP+2], dx
+
+l_checkReturn:
+	cmp	gs:breakAfterFunc, 0
+	jnz	l_getOpcode
+
+	cmp	buildingRvalMaybe, 0
+	jz	short l_next
+	mov	ax, gs:mapRval
+	jmp	short l_return
+
+l_next:
+	add	word ptr [bp+squareListP], 4
+	jmp	l_loop
+
+l_returnRval:
+	mov	ax, gs:mapRval
+	jmp	short $+2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+vm_execute endp
+
+; Attributes: bp-based frame
+
+mfunc_notImplemented proc far
+
+	dataP= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, offset s_notImplemented
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	mov	ax, word ptr [bp+dataP]
+	mov	dx, word ptr [bp+dataP+2]
+	mov	sp, bp
+	pop	bp
+	retf
+mfunc_notImplemented endp
+
+
+seg007 ends
+
 ; Segment type:	Pure code
 seg008 segment byte public 'CODE' use16
 	assume cs:seg008
@@ -14037,7 +17677,7 @@ loc_1B215:
 	or	ax, ax
 	jz	short loc_1B28E
 loc_1B227:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jz	short partyWon
 	mov	ax, offset aDoYouWishToCon
 	push	ds
@@ -14881,7 +18521,7 @@ loc_1B9C4:
 	mov	word ptr [bp+var_106+2], dx
 	jmp	loc_1BA3B
 loc_1BA2F:
-	mov	ax, offset s_period
+	mov	ax, offset s_periodNlNl
 	push	ds
 	push	ax
 	push	word ptr [bp+var_106+2]
@@ -15609,7 +19249,7 @@ loc_1C04B:
 	jmp	short loc_1C0B3
 
 loc_1C0A7:
-	mov	ax, offset s_period
+	mov	ax, offset s_periodNlNl
 	push	ds
 	push	ax
 	push	word ptr [bp+var_10C+2]
@@ -15724,7 +19364,7 @@ str_startsWithVowel proc far
 	mov	ax, 2
 	call	someStackOperation
 	push	[bp+arg_0]
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 	mov	[bp+arg_0], ax
 	mov	[bp+var_2], 0
@@ -16353,7 +19993,7 @@ bat_getOpponents proc far
 	call	near ptr bat_convertSongToCombat
 	add	sp, 4
 loc_1C7D3:
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jz	short loc_1C7EC
 	sub	ax, ax
 	push	ax
@@ -16362,30 +20002,30 @@ loc_1C7D3:
 	add	sp, 2
 	jmp	loc_1C992
 loc_1C7EC:
-	cmp	gs:byte_42458, 0
+	cmp	gs:g_nonRandomBattleFlag, 0
 	jnz	short loc_1C81D
 loc_1C7F8:
 	call	random
 	and	al, 3
-	mov	byte_4EEC9, al
+	mov	g_monsterGroupCount, al
 	cmp	al, levelNoMaybe
 	jbe	short loc_1C814
 	jmp	short loc_1C7F8
 loc_1C814:
-	inc	byte_4EEC9
+	inc	g_monsterGroupCount
 loc_1C81D:
 	mov	[bp+var_4], 0
 	jmp	short loc_1C827
 loc_1C824:
 	inc	[bp+var_4]
 loc_1C827:
-	mov	al, byte_4EEC9
+	mov	al, g_monsterGroupCount
 	sub	ah, ah
 	cmp	ax, [bp+var_4]
 	ja	short loc_1C839
 	jmp	loc_1C978
 loc_1C839:
-	cmp	gs:byte_42458, ah
+	cmp	gs:g_nonRandomBattleFlag, ah
 	jz	short loc_1C889
 	getMonP	[bp+var_4], si
 	mov	al, byte ptr gs:monGroups._name[si]
@@ -16488,9 +20128,9 @@ loc_1C92C:
 loc_1C975:
 	jmp	loc_1C824
 loc_1C978:
-	cmp	byte_4EEC9, 4
+	cmp	g_monsterGroupCount, 4
 	jnb	short loc_1C992
-	mov	al, byte_4EEC9
+	mov	al, g_monsterGroupCount
 	sub	ah, ah
 	push	ax
 	push	cs
@@ -17965,7 +21605,7 @@ bat_getPartyOptions proc far
 	mov	ax, 138h
 	call	someStackOperation
 	push	si
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jz	short loc_1D720
 	jmp	loc_1D7BE
 loc_1D720:
@@ -18284,7 +21924,7 @@ bat_getCharOptions proc	far
 	mov	bp, sp
 	xor	ax, ax
 	call	someStackOperation
-	cmp	partyAttackFlag, 0
+	cmp	g_partyAttackFlag, 0
 	jnz	short loc_1DA49
 	test	gs:monGroups.groupSize,	1Fh
 	jz	short loc_1DA49
@@ -19601,13 +23241,13 @@ partyDied proc far
 	add	sp, 4
 	wait4IO
 	sub	al, al
-	mov	gs:byte_42458, al
-	mov	partyAttackFlag, al
+	mov	gs:g_nonRandomBattleFlag, al
+	mov	g_partyAttackFlag, al
 	sub	ah, ah
 	mov	currentLocationMaybe, ax
 	mov	sq_north, 0Bh
 	mov	sq_east, 0Fh
-	mov	dirFacing, 0
+	mov	g_direction, 0
 	mov	ax, 1
 	jmp	short $+2
 	mov	sp, bp
@@ -19652,7 +23292,7 @@ l_askForCaster:
 	mov	ax, offset s_whoWillCast
 	push	ds
 	push	ax
-	call	printString
+	call	printStringWClear
 	add	sp, 4
 	call	readSlotNumber
 	mov	[bp+castSlotNumber], ax
@@ -20718,7 +24358,7 @@ loc_206A1:
 	mov	word ptr [bp+outputStringP+2], dx
 	jmp	short loc_207D2
 loc_207A7:
-	mov	ax, offset s_period
+	mov	ax, offset s_periodNlNl
 	push	ds
 	push	ax
 	push	word ptr [bp+outputStringP+2]
@@ -20869,7 +24509,7 @@ l_loop:
 	sub	ah, ah
 	push	ax
 	mov	ax, [bp+_sq_north]
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
@@ -20879,7 +24519,7 @@ l_loop:
 	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	mov	ax, dirDeltaE[bx]
 	add	ax, [bp+_sq_east]
@@ -21606,7 +25246,7 @@ sp_teleport proc far
 	call	near ptr printSpellFizzled
 	jmp	l_return
 loc_20FCB:
-	mov	word_4EE66, 0
+	mov	g_sameSquareFlag, 0
 	mov	[bp+var_A], 0
 	mov	[bp+counter], 0
 	jmp	short loc_20FE5
@@ -22183,7 +25823,7 @@ sp_areaEnchant proc far
 	mov	al, spellEffectFlags[bx]
 	mov	detectDuration, al
 	mov	al, spellExtraFlags[bx]
-	mov	detectType, al
+	mov	g_detectType, al
 	mov	ax, icon_areaEnchant
 	push	ax
 	call	icon_activate
@@ -22282,7 +25922,7 @@ sp_phaseDoor proc far
 	call	dun_getWalls
 	add	sp, 4
 	mov	[bp+var_2], ax
-	mov	ax, dirFacing
+	mov	ax, g_direction
 	dec	ax
 	push	ax
 	push	[bp+var_2]
@@ -22316,11 +25956,11 @@ loc_21671:
 	add	ax, cx
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
-	test	byte ptr dirFacing, 2
+	test	byte ptr g_direction, 2
 	jz	short loc_216C8
 	inc	word ptr [bp+var_6]
 loc_216C8:
-	test	byte ptr dirFacing, 1
+	test	byte ptr g_direction, 1
 	jz	short loc_216D9
 	lfs	bx, [bp+var_6]
 	and	byte ptr fs:[bx], 0F0h
@@ -22479,7 +26119,7 @@ sp_scrySight proc far
 	add	sp, 8
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (dirStringList+2)[bx]
@@ -24251,7 +27891,7 @@ spell_cast proc	far
 	cmp	[bp+itemUsedFlag], 0
 	jnz	short l_notMapSpell
 
-	; Spell is from an item. Pass the spell through map_execute to
+	; Spell is from an item. Pass the spell through vm_execute to
 	; see if it triggers a map function.
 	mov	ax, [bp+spellNo]
 	mov	g_curSpellNumber, ax
@@ -24259,7 +27899,7 @@ spell_cast proc	far
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	call	map_execute
+	call	vm_execute
 	add	sp, 6
 	or	ax, ax
 	jnz	l_return
@@ -25108,7 +28748,1548 @@ song_endNoncombatEffect	endp
 seg011 ends
 
 include seg012.asm
-include seg013.asm
+
+; Segment type: Pure code
+seg013 segment byte public 'CODE' use16
+        assume cs:seg013
+;org 4
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+; Attributes: bp-based frame
+
+dunsq_battleCheck proc far
+
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	call	random
+	and	ax, 80h
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jz	short loc_24DA7
+	inc	byte_4EECC
+
+	; Add code to mask the encounter out
+	mov	ax, 7Fh
+	push	ax
+	mov	ax, 2
+	push	ax
+	push	sq_east
+	push	sq_north
+	call	dun_maskSquare
+	add	sp, 8
+
+loc_24DA7:
+	mov	ax, [bp+var_2]
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_battleCheck endp
+
+
+; Attributes: bp-based frame
+
+dunsq_doTrap proc far
+
+	var_10C= word ptr -10Ch
+	var_10A= word ptr -10Ah
+	var_108= word ptr -108h
+	var_106= word ptr -106h
+	var_104= word ptr -104h
+	var_102= word ptr -102h
+	stringBuffer= word ptr -100h
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 10Ch
+	call	someStackOperation
+	push	si
+
+	push	cs
+	call	near ptr trap_levitationCheck
+	mov	[bp+var_102], ax
+	or	ax, ax
+	jz	l_return
+
+loc_24DCB:
+	call	random
+	and	ax, 3
+	mov	[bp+var_10A], ax
+	cmp	ax, 3
+	jz	short loc_24DCB
+
+	mov	al, levelNoMaybe
+	sub	ah, ah
+	and	ax, 7
+	shl	ax, 1
+	shl	ax, 1
+	or	ax, [bp+var_10A]
+	mov	gs:trapIndex, ax
+	mov	ax, offset s_hitTrap
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	mov	bx, gs:trapIndex
+	mov	al, g_trapIndexByLevel[bx]
+	cbw
+	mov	bx, ax
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (trapTypeString+2)[bx]
+	push	word ptr trapTypeString[bx]
+	push	dx
+	push	[bp+var_106]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	bx, gs:trapIndex
+	mov	al, byte_4B258[bx]
+	cbw
+	push	ax
+	call	dice_doYDX
+	add	sp, 2
+	mov	[bp+var_10C], ax
+
+	mov	si, gs:trapIndex
+	shl	si, 1
+	mov	al, trapSaveList._low[si]
+	mov	gs:monGroups.breathSaveLo, al
+	mov	al, trapSaveList._high[si]
+	mov	gs:monGroups.breathSaveHi, al
+
+	mov	[bp+var_108], 0
+loc_24E97:
+	push	[bp+var_10C]
+	push	[bp+var_108]
+	call	trap_doDamage
+	add	sp, 4
+	inc	[bp+var_108]
+	cmp	[bp+var_108], 7
+	jl	short loc_24E97
+
+l_return:
+	mov	byte ptr g_printPartyFlag, 0
+	sub	ax, ax
+	push	ax
+	push	sq_east
+	push	sq_north
+	call	spGeo_removeTrap
+	add	sp, 6
+	mov	ax, [bp+var_102]
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_doTrap endp
+
+; Attributes: bp-based frame
+
+trap_doDamage proc far
+
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+arg_0]
+	mov	si, ax
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short l_return
+	test	gs:party.status[si], stat_dead
+	jnz	short l_return
+	mov	al, byte ptr [bp+arg_0]
+	mov	gs:bat_curTarget, al
+	mov	bx, gs:trapIndex
+	mov	al, trapSpecialAttackValue[bx]
+	and	ax, 7Fh
+	mov	gs:specialAttackVal, ax
+	mov	ax, [bp+arg_2]
+	mov	gs:damageAmount, ax
+	sub	ax, ax
+	push	ax
+	mov	ax, 80h
+	push	ax
+	call	savingThrowCheck
+	add	sp, 4
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jz	short l_return
+	mov	ax, 1
+	mov	[bp+var_2], ax
+	sar	gs:damageAmount, 1
+	push	[bp+arg_0]
+	call	bat_doHPDamage
+	add	sp, 2
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+trap_doDamage endp
+
+
+; Attributes: bp-based frame
+
+trap_levitationCheck proc far
+	push	bp
+	mov	bp, sp
+
+	cmp	levitationDuration, 0
+	jz	short l_returnOne
+
+	call	random
+	and	al, 3
+	mov	cx, ax
+	cmp	cl, 1
+	sbb	ax, ax
+	neg	ax
+	jmp	short l_return
+l_returnOne:
+	mov	ax, 1
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+trap_levitationCheck endp
+
+; Attributes: bp-based frame
+
+dunsq_doDarkness proc far
+	push	bp
+	mov	bp, sp
+
+	cmp	lightDuration, 0
+	jz	short l_checkLightSong
+	sub	ax, ax
+	push	ax
+	call	icon_deactivate
+	add	sp, 2
+l_checkLightSong:
+	mov	lightDistance, 0
+	cmp	gs:g_currentSongPlusOne, 0
+	jz	short l_return
+	cmp	gs:g_currentSong, 5
+	jnz	short l_return
+	call	endNoncombatSong
+
+l_return:
+	mov	ax, offset s_darkness
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	sub	ax, ax
+
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_doDarkness endp
+
+; Attributes: bp-based frame
+
+dunsq_doSpinner	proc far
+
+	slotNumber= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	mov	ax, itemEff_noSpin
+	push	ax
+	push	[bp+slotNumber]
+	call	hasEffectEquipped
+	add	sp, 4
+	or	ax, ax
+	jz	short l_returnOne
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	l_loop
+
+	call	random
+	and	ax, 3
+	mov	g_direction, ax
+	sub	ax, ax
+	jmp	short l_return
+
+l_returnOne:
+	mov	ax, 1
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_doSpinner	endp
+
+; Attributes: bp-based frame
+
+dunsq_antiMagic	proc far
+
+	l_effectIndex= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	inc	gs:sq_antiMagicFlag
+
+	; Change to 1 to skip over lightDuration
+	mov	[bp+l_effectIndex], 1
+l_loop:
+	mov	bx, [bp+l_effectIndex]
+	cmp	lightDuration[bx], 0
+	jz	short l_next
+	push	[bp+l_effectIndex]
+	call	icon_deactivate
+	add	sp, 2
+
+l_next:
+	inc	[bp+l_effectIndex]
+	cmp	[bp+l_effectIndex], 5
+	jl	short l_loop
+
+
+	mov	byte ptr g_printPartyFlag, 0
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_antiMagic	endp
+
+; Attributes: bp-based frame
+
+dunsq_drainHp proc far
+
+	slotNumber= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	di
+	push	si
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	test	gs:party.status[si], stat_dead	or stat_stoned
+	jnz	short l_next
+	mov	al, levelNoMaybe
+	sub	ah, ah
+	mov	di, ax
+	cmp	gs:party.currentHP[si], di
+	jbe	short l_killCharacter
+	sub	gs:party.currentHP[si], di
+	jmp	short l_next
+l_killCharacter:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	gs:party.currentHP[si], 0
+	or	gs:party.status[si], stat_dead
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+	call	party_getLastSlot
+	cmp	ax, 7
+	jle	short l_return
+	mov	buildingRvalMaybe, 5
+l_return:
+	mov	byte ptr g_printPartyFlag, 0
+	sub	ax, ax
+
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_drainHp endp
+
+party_regenHp	proc far
+	push		cx
+	xor		cx, cx
+
+l_loop:
+	mov	ax, charSize
+	imul	cx
+	mov	bx, ax
+	test		gs:party.status[si], stat_dead or stat_stoned
+	jnz		l_next
+	mov		al, levelNoMaybe
+	sub		ah, ah
+	add		gs:party.currentHP[bx], ax
+	mov		ax, gs:party.maxHP[bx]
+	cmp		party.currentHP[bx], ax
+	jbe		l_next
+	mov		gs:party.currentHP[bx], ax
+
+l_next:
+	inc		cx
+	cmp		cx, 7
+	jl		l_loop
+
+	pop		cx
+	retf
+party_regenHp	endp
+
+; Attributes: bp-based frame
+dunsq_somethingOdd proc	far
+	push	bp
+	mov	bp, sp
+	sub	al, al
+	mov	g_detectType, al
+	mov	gs:gl_detectSecretDoorFlag, al
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_somethingOdd endp
+
+; Attributes: bp-based frame
+
+dunsq_doSilence	proc far
+	push	bp
+	mov	bp, sp
+
+	cmp	gs:g_currentSongPlusOne, 0
+	jz	short l_return
+	mov	ax, offset s_soundOfSilence
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	endNoncombatSong
+l_return:
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_doSilence	endp
+
+
+; Attributes: bp-based frame
+
+dunsq_regenSppt	proc far
+	push	bp
+	mov	bp, sp
+	inc	gs:regenSpptSq
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_regenSppt	endp
+
+; Attributes: bp-based frame
+
+dunsq_drainSppt	proc far
+
+	slotNumber= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	call	random
+	and	ax, 3
+	mov	cl, levelNoMaybe
+	sub	ch, ch
+	add	ax, cx
+	mov	cx, ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.currentSppt[bx], cx
+	jbe	short l_zeroSppt
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	sub	gs:party.currentSppt[bx], cx
+	jmp	short l_next
+
+l_zeroSppt:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	gs:party.currentSppt[bx], 0
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+	mov	byte ptr g_printPartyFlag,	0
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_drainSppt	endp
+
+; Attributes: bp-based frame
+
+dunsq_monHostile proc far
+
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+var_2], 0
+l_checkEffectLoop:
+	mov	ax, itemEff_calmMonster
+	push	ax
+	push	[bp+var_2]
+	call	hasEffectEquipped
+	add	sp, 4
+	or	ax, ax
+	jz	short l_returnOne
+	inc	[bp+var_2]
+	cmp	[bp+var_2], 7
+	jl	short l_checkEffectLoop
+
+	mov	[bp+var_2], 0
+l_makeHostileLoop:
+	mov	ax, charSize
+	imul	[bp+var_2]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+
+	; FIXED - Was jz. This activated the square when there were no monsters
+	; in the party.
+	jnz	short l_makeHostileNext
+
+	call	random
+	test	al, 3
+	jnz	short l_makeHostileNext
+	mov	ax, charSize
+	imul	[bp+var_2]
+	mov	bx, ax
+	mov	gs:party.hostileFlag[bx], 1
+	mov	byte_4EECC, 1
+
+l_makeHostileNext:
+	inc	[bp+var_2]
+	cmp	[bp+var_2], 7
+	jl	short l_makeHostileLoop
+
+l_returnOne:
+	mov	ax, 1
+l_return:
+	mov	ax, 7Fh
+	push	ax
+	mov	ax, 3
+	push	ax
+	push	sq_east
+	push	sq_north
+	call	dun_maskSquare
+	add	sp, 8
+
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_monHostile endp
+
+; Attributes: bp-based frame
+
+dunsq_doStuck proc far
+	push	bp
+	mov	bp, sp
+	call	random
+	and	al, 3
+	mov	gs:stuckFlag, al
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_doStuck endp
+
+; Attributes: bp-based frame
+
+dunsq_regenHP proc far
+	push	bp
+	mov	bp, sp
+	inc	gs:sqRegenHPFlag
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_regenHP endp
+
+; Attributes: bp-based frame
+
+dunsq_explosion proc far
+	push	bp
+	mov	bp, sp
+	cmp	lightDuration, 0
+	jz	short l_return
+	mov	ax, offset s_explosion
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	push	cs
+	call	near ptr dunsq_drainHp
+l_return:
+	mov	ax, 1
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_explosion endp
+
+; Attributes: bp-based frame
+
+dunsq_portalAbove proc far
+	push	bp
+	mov	bp, sp
+	mov	ax, offset s_portalAbove
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_portalAbove endp
+
+; Attributes: bp-based frame
+
+dunsq_portalBelow proc far
+	push	bp
+	mov	bp, sp
+	mov	ax, offset s_portalBelow
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	sp, bp
+	pop	bp
+	retf
+dunsq_portalBelow endp
+
+
+; Attributes: bp-based frame
+
+dun_doSpecialSquare proc far
+
+	counter= word ptr -6
+	squareDataP= dword ptr -4
+	rowBuf=	dword ptr  6
+	sqEast=	word ptr  0Ah
+	sqNorth= word ptr  0Ch
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	si
+
+	sub	al, al
+	mov	gs:sqRegenHPFlag, al
+	mov	gs:stuckFlag, al
+	mov	gs:sq_antiMagicFlag, al
+	mov	gs:regenSpptSq,	al
+	mov	byte_4EECC, al
+	mov	bx, [bp+sqNorth]
+	shl	bx, 1
+	shl	bx, 1
+	lfs	si, [bp+rowBuf]
+	mov	ax, fs:[bx+si]
+	mov	dx, fs:[bx+si+2]
+	mov	cx, [bp+sqEast]
+	mov	bx, cx
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, bx
+	add	ax, cx
+	add	ax, 2
+	mov	word ptr [bp+squareDataP], ax
+	mov	word ptr [bp+squareDataP+2], dx
+
+	mov	[bp+counter], 0
+l_loop:
+	mov	bx, [bp+counter]
+	mov	bl, specialSquareByteIndexList[bx]
+	sub	bh, bh
+	lfs	si, [bp+squareDataP]
+	mov	al, fs:[bx+si]
+	sub	ah, ah
+	mov	bx, [bp+counter]
+	mov	cl, specialSquareMaskList[bx]
+	sub	ch, ch
+	test	ax, cx
+	jz	short l_next
+	shl	bx, 1
+	shl	bx, 1
+	call	specialSquareFunctionList[bx]
+
+l_next:
+	inc	[bp+counter]
+	cmp	[bp+counter], 10h
+	jl	short l_loop
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+dun_doSpecialSquare endp
+
+; Attributes: bp-based frame
+
+brilhasti_doBonus proc far
+
+	slotNumber= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr brilhasti_checkQuest
+	add	sp, 2
+	or	ax, ax
+	jz	short l_next
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.class[bx]
+
+	or	al, al
+	jz	short l_nonMagicUser
+
+	cmp	al, 5
+	jnb	short l_nonMagicUser
+
+	push	[bp+slotNumber]
+	call	brilhasti_levelMagicUser
+	add	sp, 2
+	jmp	short l_next
+
+l_nonMagicUser:
+	mov	ax, 34
+	push	ax
+	push	[bp+slotNumber]
+	call	getLevelXp
+	add	sp, 4
+	mov	cx, ax
+	mov	bx, dx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	word ptr gs:party.experience[si], cx
+	mov	word ptr gs:(party.experience+2)[si], bx
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+brilhasti_doBonus endp
+
+; Attributes: bp-based frame
+
+brilhasti_checkQuest proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	test	gs:(party.chronoQuest+1)[bx], 1
+	jnz	short l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+	jnb	short l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.level[bx], 35
+	jnb	short l_returnZero
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+brilhasti_checkQuest endp
+
+; Attributes: bp-based frame
+
+brilhasti_levelMagicUser proc far
+
+	spellIndex= word ptr	-2
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	[bp+spellIndex], 0
+l_loop:
+	push	[bp+spellIndex]
+	push	[bp+slotNumber]
+	call	mage_learnSpell
+	add	sp, 4
+	inc	[bp+spellIndex]
+	cmp	[bp+spellIndex], 74
+	jl	short l_loop
+
+loc_254C9:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	gs:party.class[si], class_archmage
+	sub	ax, ax
+	mov	word ptr gs:(party.experience+2)[si], ax
+	mov	word ptr gs:party.experience[si], ax
+	mov	ax, 14h
+	push	ax
+	lea	ax, party.strength[si]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	cs
+	call	near ptr brilhasti_setAttributes
+	add	sp, 6
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.maxHP[bx], 375
+	jnb	short l_setSppt
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	gs:party.maxHP[bx], 375
+
+l_setSppt:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.maxSppt[bx], 350
+	jnb	short l_return
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	gs:party.maxSppt[bx], 350
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+brilhasti_levelMagicUser endp
+
+; Attributes: bp-based frame
+
+brilhasti_setAttributes proc far
+
+	attributeIndex= word ptr	-2
+	attributeP= dword ptr  6
+	attributeValue= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	[bp+attributeIndex], 0
+l_loop:
+	mov	bx, [bp+attributeIndex]
+	lfs	si, [bp+attributeP]
+	mov	al, fs:[bx+si]
+	cbw
+	cmp	ax, [bp+attributeValue]
+	jge	short l_next
+	mov	al, byte ptr [bp+attributeValue]
+	mov	fs:[bx+si], al
+l_next:
+	inc	[bp+attributeIndex]
+	cmp	[bp+attributeIndex], 5
+	jl	short l_loop
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+brilhasti_setAttributes endp
+
+; Attributes: bp-based frame
+geomancer_convert proc	far
+
+	slotNumber=	word ptr  6
+
+	push	bp
+	mov	bp, sp
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	gs:party.class[si], class_geomancer
+	sub	ax, ax
+	mov	word ptr gs:(party.experience+2)[si], ax
+	mov	word ptr gs:party.experience[si], ax
+	mov	gs:party.level[si], 1
+	mov	gs:party.maxLevel[si],	1
+	mov	gs:party.currentSppt[si], 25
+	mov	gs:party.maxSppt[si], 25
+	mov	ax, 0Ch
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr geomancer_convertEquipment
+	add	sp, 4
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	gs:party.numAttacks[bx], 0
+	mov	ax, 106
+	push	ax
+	push	[bp+slotNumber]
+	call	mage_learnSpell
+	add	sp, 4
+	mov	ax, 107
+	push	ax
+	push	[bp+slotNumber]
+	call	mage_learnSpell
+	add	sp, 4
+	mov	ax, 108
+	push	ax
+	push	[bp+slotNumber]
+	call	mage_learnSpell
+	add	sp, 4
+	mov	byte ptr g_printPartyFlag,	0
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+geomancer_convert endp
+
+; Attributes: bp-based frame
+
+geomancer_convertEquipment proc far
+
+	inventorySlotNumber= word ptr	-4
+	newEquipableFlags= word ptr	-2
+	slotNumber= word ptr	 6
+	classNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	mov	[bp+inventorySlotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	add	si, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemNo[si]
+	sub	ah, ah
+	mov	bx, ax
+	mov	al, itemEquipMask[bx]
+	mov	bx, [bp+classNumber]
+	mov	cl, classEquipMask[bx]
+	sub	ch, ch
+	test	ax, cx
+	jz	short l_setUnequipable
+	sub	ax, ax
+	jmp	short l_setItemFlags
+l_setUnequipable:
+	mov	ax, 2
+l_setItemFlags:
+	mov	[bp+newEquipableFlags], ax
+	mov	al, gs:party.inventory.itemFlags[si]
+	and	al, 0FCh
+	or	al, byte ptr [bp+newEquipableFlags]
+	mov	gs:party.inventory.itemFlags[si], al
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], 24h	
+	jl	short l_loop
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+geomancer_convertEquipment endp
+
+; Attributes: bp-based frame
+
+dun_detectSquares proc far
+
+	aheadFlags= word ptr -6
+	detectIndex= word ptr	-2
+	sqE= word ptr  6
+	sqN= word ptr  8
+	direction= word ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	si
+
+	; Return if detect spell not active
+	cmp	detectDuration, 0
+	jz	l_return
+
+	; Return if current square and direction are the same as
+	; the last time this function was run.
+	;
+	mov	al, gs:g_lastDetectSqE
+	sub	ah, ah
+	cmp	ax, [bp+sqE]
+	jnz	short loc_256DB
+	mov	al, gs:g_lastDetectSqN
+	cmp	ax, [bp+sqN]
+	jnz	short loc_256DB
+	mov	al, gs:g_lastDetectDirection
+	cmp	ax, [bp+direction]
+	jz	l_return
+
+loc_256DB:
+	; Set the last detection variables
+	mov	al, byte ptr [bp+sqE]
+	mov	gs:g_lastDetectSqE, al
+	mov	al, byte ptr [bp+sqN]
+	mov	gs:g_lastDetectSqN, al
+	mov	al, byte ptr [bp+direction]
+	mov	gs:g_lastDetectDirection, al
+
+	lea	ax, [bp+aheadFlags]
+	push	ss
+	push	ax
+	push	[bp+sqN]
+	push	[bp+sqE]
+	push	cs
+	call	near ptr detect_getSquares
+	add	sp, 8
+	mov	bl, g_detectType
+	sub	bh, bh
+	mov	al, detectByteStartList[bx]
+	cbw
+	mov	[bp+detectIndex], ax
+
+l_loop:
+	mov	bx, [bp+detectIndex]
+	mov	al, detectByte[bx]
+	sub	ah, ah
+	cmp	ax, 0FFh
+	jge	short l_return
+	mov	si, ax
+	mov	al, byte ptr [bp+si+aheadFlags]
+	cbw
+	mov	cl, detectMask[bx]
+	sub	ch, ch
+	test	ax, cx
+	jz	short l_next
+
+	mov	bx, [bp+detectIndex]
+	mov	al, detectMsgIndex[bx]
+	cbw
+	mov	bx, ax
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (detectMessages+2)[bx]
+	push	word ptr detectMessages[bx]
+	call	printString
+	add	sp, 4
+l_next:
+	inc	[bp+detectIndex]
+	jmp	short l_loop
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+dun_detectSquares endp
+
+; This function	returns	a list of the square flags
+; for the three	squares	ahead.
+; Attributes: bp-based frame
+
+detect_getSquares proc far
+
+	sqFlagP= dword ptr -8
+	counter= word ptr -4
+	deltaSq= word ptr -2
+	sqE= word ptr  6
+	sqN= word ptr  8
+	rSqList= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+
+	mov	[bp+deltaSq], 0
+l_zeroRvalLoop:
+	mov	bx, [bp+deltaSq]
+	lfs	si, [bp+rSqList]
+	mov	byte ptr fs:[bx+si], 0
+	inc	[bp+deltaSq]
+	cmp	[bp+deltaSq], 3
+	jl	short l_zeroRvalLoop
+
+	mov	[bp+deltaSq], 0
+l_outerLoop:
+	mov	si, g_direction
+	shl	si, 1
+	mov	ax, dirDeltaE[si]
+	add	[bp+sqE], ax
+	mov	al, g_dunWidth
+	sub	ah, ah
+	push	ax
+	push	[bp+sqE]
+	call	wrapNumber
+	add	sp, 4
+	mov	[bp+sqE], ax
+	mov	ax, dirDeltaN[si]
+	sub	[bp+sqN], ax
+	mov	al, g_dunHeight
+	sub	ah, ah
+	push	ax
+	push	[bp+sqN]
+	call	wrapNumber
+	add	sp, 4
+	mov	[bp+sqN], ax
+	mov	bx, [bp+sqN]
+	shl	bx, 1
+	shl	bx, 1
+	mov	ax, word ptr gs:rowOffset[bx]
+	mov	dx, word ptr gs:(rowOffset+2)[bx]
+	mov	cx, [bp+sqE]
+	mov	bx, cx
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, bx
+	add	ax, cx
+	add	ax, 2
+	mov	word ptr [bp+sqFlagP], ax
+	mov	word ptr [bp+sqFlagP+2], dx
+
+	mov	[bp+counter], 0
+l_copyBytesLoop:
+	mov	bx, [bp+counter]
+	lfs	si, [bp+sqFlagP]
+	mov	al, fs:[bx+si]
+	lfs	si, [bp+rSqList]
+	or	fs:[bx+si], al
+	inc	[bp+counter]
+	cmp	[bp+counter], 3
+	jl	short l_copyBytesLoop
+
+	inc	[bp+deltaSq]
+	cmp	[bp+deltaSq], 3
+	jl	l_outerLoop
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+detect_getSquares endp
+
+; Attributes: bp-based frame
+
+dun_ascendPortal proc far
+
+	var_4= dword ptr -4
+	sqE= word ptr	 6
+	sqN= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	bx, [bp+sqN]
+	shl	bx, 1
+	shl	bx, 1
+	mov	ax, word ptr gs:rowOffset[bx]
+	mov	dx, word ptr gs:(rowOffset+2)[bx]
+	mov	cx, [bp+sqE]
+	mov	bx, cx
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, bx
+	add	ax, cx
+	add	ax, 2
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], dx
+	lfs	bx, [bp+var_4]
+	test	byte ptr fs:[bx], 40h		; 40h == portal above
+	jz	short l_return
+	cmp	levitationDuration, 0
+	jz	short l_return
+	test	levFlags, 10h
+	jz	short loc_25878
+	push	cs
+	call	near ptr portal_incrementLevel
+	jmp	short l_return
+loc_25878:
+	push	cs
+	call	near ptr portal_decrementLevel
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+dun_ascendPortal endp
+
+; Attributes: bp-based frame
+
+dun_descendPortal proc far
+
+	var_4= dword ptr -4
+	sqE= word ptr	 6
+	sqN= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	mov	bx, [bp+sqN]
+	shl	bx, 1
+	shl	bx, 1
+	mov	ax, word ptr gs:rowOffset[bx]
+	mov	dx, word ptr gs:(rowOffset+2)[bx]
+	mov	cx, [bp+sqE]
+	mov	bx, cx
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, bx
+	add	ax, cx
+	add	ax, 2
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], dx
+	lfs	bx, [bp+var_4]
+	test	byte ptr fs:[bx], 20h			; 20h == portal below
+	jz	short loc_258E5
+	cmp	levitationDuration, 0
+	jnz	short loc_258CF
+	call	dunsq_drainHp
+loc_258CF:
+	test	levFlags, 10h
+	jz	short loc_258E1
+	call	portal_decrementLevel
+	jmp	short loc_258E5
+loc_258E1:
+	call	portal_incrementLevel
+loc_258E5:
+	mov	sp, bp
+	pop	bp
+	retf
+dun_descendPortal endp
+
+; Attributes: bp-based frame
+
+portal_decrementLevel proc far
+	push	bp
+	mov	bp, sp
+	dec	dunLevelNum
+	jns	short l_changeLevel
+	call	dun_setExitLocation
+	jmp	short l_return
+l_changeLevel:
+	call	dun_changeLevels
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+portal_decrementLevel endp
+
+; Attributes: bp-based frame
+
+portal_incrementLevel proc far
+	push	bp
+	mov	bp, sp
+	inc	dunLevelNum
+	call	dun_changeLevels
+	mov	sp, bp
+	pop	bp
+	retf
+portal_incrementLevel endp
+
+; Attributes: bp-based frame
+
+wanderer_join proc far
+
+	emptySlotNumber= word ptr	-2
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	call	party_findEmptySlot
+	mov	[bp+emptySlotNumber], ax
+
+	cmp	ax, 7					; no empty slot number?
+	jl	short loc_25963
+	call	dropPartyMember
+	or	ax, ax
+	jz	short l_returnZero			; return if not dropping
+	call	party_findEmptySlot
+	mov	[bp+emptySlotNumber], ax
+	mov	byte ptr g_printPartyFlag, 0
+
+loc_25963:
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	push	[bp+emptySlotNumber]
+	call	_sp_convertMonToSummon
+	add	sp, 6
+	mov	byte ptr g_printPartyFlag, 0
+	mov	ax, 1
+	jmp	short l_return
+l_returnZero:
+	sub	ax, ax
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+wanderer_join endp
+
+; Attributes: bp-based frame
+wanderer_fight proc	far
+	push	bp
+	mov	bp, sp
+	mov	g_monsterGroupCount, 1
+	mov	gs:g_nonRandomBattleFlag, 1
+	mov	byte_4EECC, 1
+	mov	ax, 1
+	mov	sp, bp
+	pop	bp
+	retf
+wanderer_fight endp
+
+; Attributes: bp-based frame
+wanderer_leave proc	far
+	push	bp
+	mov	bp, sp
+	mov	ax, 1
+	mov	sp, bp
+	pop	bp
+	retf
+wanderer_leave endp
+
+; Attributes: bp-based frame
+
+dun_wanderingCreature proc far
+
+	pluralizedNameP=	dword ptr -46h
+	loopCounter=	word ptr -42h
+	pluralizedName=	word ptr -40h
+	monsterBufferP=	dword ptr -30h
+	unmaskedName=	word ptr -2Ch
+	validOptionCharacters=	word ptr -1Ch
+	inKey=	word ptr -16h
+	validOptionMouse=	word ptr -14h
+	optionList= word ptr	-8
+	monsterIndex= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 46h
+	call	someStackOperation
+	push	si
+
+l_selectMonsterRetry:
+	mov	ax, 17h
+	push	ax
+	sub	ax, ax
+	push	ax
+	call	randomBetweenXandY
+	add	sp, 4			; Pick a random monster to wander
+	mov	[bp+monsterIndex], ax
+	mov	ax, monStruSize
+	imul	[bp+monsterIndex]
+	add	ax, offset monsterBuf
+	mov	word ptr [bp+monsterBufferP], ax
+	mov	word ptr [bp+monsterBufferP+2],	seg seg023
+	lfs	bx, [bp+monsterBufferP]			; Retry if
+	test	fs:[bx+mon_t.flags], mon_noSummon	;	monster can't be summoned
+	jnz	short l_selectMonsterRetry		; or
+	cmp	byte ptr fs:[bx], 0			; 	no monster at that index
+	jz	short l_selectMonsterRetry
+
+	; Draw monster image
+	mov	al, fs:[bx+mon_t.picIndex]
+	sub	ah, ah
+	push	ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+
+	; Set title with properly pluralized name
+	lea	ax, [bp+unmaskedName]
+	push	ss
+	push	ax
+	push	word ptr [bp+monsterBufferP+2]
+	push	word ptr [bp+monsterBufferP]
+	call	unmaskString
+	add	sp, 8
+	sub	ax, ax
+	push	ax
+	lea	ax, [bp+pluralizedName]
+	push	ss
+	push	ax
+	lea	ax, [bp+unmaskedName]
+	push	ss
+	push	ax
+	call	str_pluralize
+	add	sp, 0Ah
+	mov	word ptr [bp+pluralizedNameP], ax
+	mov	word ptr [bp+pluralizedNameP+2], dx
+	lfs	bx, [bp+pluralizedNameP]
+	mov	byte ptr fs:[bx], 0
+	lea	ax, [bp+pluralizedName]
+	push	ss
+	push	ax
+	call	setTitle
+	add	sp, 4
+
+	mov	gs:monGroups.groupSize,	1
+	mov	al, byte ptr [bp+monsterIndex]
+	mov	byte ptr gs:monGroups._name, al
+
+	mov	[bp+loopCounter], 0
+l_setOptionListLoop:
+	mov	si, [bp+loopCounter]
+	mov	byte ptr [bp+si+optionList],	1
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 5
+	jl	short l_setOptionListLoop
+
+l_ioLoop:
+	call	text_clear
+	lea	ax, [bp+validOptionMouse]
+	push	ss
+	push	ax
+	lea	ax, [bp+validOptionCharacters]
+	push	ss
+	push	ax
+	lea	ax, [bp+optionList]
+	push	ss
+	push	ax
+	mov	ax, offset s_wandererText
+	push	ds
+	push	ax
+	call	printVarString
+	add	sp, 10h
+	mov	[bp+loopCounter], 0
+	push	ax
+	call	getKey
+	add	sp, 2
+	mov	[bp+inKey], ax
+	cmp	ax, dosKeys_ESC
+	jz	short l_return
+
+loc_25AC1:
+	mov	si, [bp+loopCounter]
+	cmp	byte ptr [bp+si+validOptionCharacters], 0
+	jz	short l_ioLoop
+	mov	al, byte ptr [bp+si+validOptionCharacters]
+	cbw
+	cmp	ax, [bp+inKey]
+	jz	short l_callWandererFunction
+	shl	si, 1
+	mov	ax, [bp+inKey]
+	cmp	[bp+si+validOptionMouse],	ax
+	jnz	short l_optionCheckNext
+
+l_callWandererFunction:
+	push	word ptr [bp+monsterBufferP+2]
+	push	word ptr [bp+monsterBufferP]
+	mov	bx, [bp+loopCounter]
+	shl	bx, 1
+	shl	bx, 1
+	call	g_wandererFunctionTable[bx]
+	add	sp, 4
+	or	ax, ax
+	jz	short l_return
+	call	text_clear
+	jmp	short l_return
+
+l_optionCheckNext:
+	inc	[bp+loopCounter]
+	jmp	short loc_25AC1
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+dun_wanderingCreature endp
+
+
+seg013 ends
 
 ; Segment type: Pure code
 seg014 segment byte public 'CODE' use16
@@ -25739,7 +30920,7 @@ loc_2600B:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	mapstrcmp
+	call	vm_strcmp
 	add	sp, 8
 	or	ax, ax
 	jnz	l_returnValue
@@ -26188,8 +31369,1692 @@ configureBT3 endp
 
 seg016 ends
 
-include seg017.asm
-include seg018.asm
+
+
+; Segment type: Pure code
+seg017 segment word public 'CODE' use16
+        assume cs:seg017
+;org 3
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+; Attributes: bp-based frame
+
+transferCharacter proc far
+
+	inKey= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+l_entry:
+	mov	ax, offset s_transferVersionPrompt
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	ax, 3Ch	
+	push	ax
+	call	getKey
+	add	sp, 2
+	mov	[bp+inKey], ax
+	cmp	ax, 110h
+	jl	short loc_2641A
+	cmp	ax, 112h
+	jg	short loc_2641A
+	sub	[bp+inKey], 0DFh 
+loc_2641A:
+	mov	ax, [bp+inKey]
+	cmp	ax, dosKeys_ESC
+	jz	short l_return
+	cmp	ax, '1'	
+	jz	short l_bt1
+	cmp	ax, '2'	
+	jz	short l_bt2
+	cmp	ax, '3'	
+	jz	short l_bt3
+	cmp	ax, 'E'	
+	jz	short l_return
+	cmp	ax, 113h
+	jz	short l_return
+	jmp	short l_entry
+
+l_bt3:
+	push	cs
+	call	near ptr getTransferCharacters
+	add	sp, 4
+	jmp	short l_entry
+
+l_bt2:
+	mov	ax, 1
+	push	ax
+	push	cs
+	call	near ptr importCharacter
+	jmp	short l_entry
+
+l_bt1:
+	sub	ax, ax
+	push	ax
+	push	cs
+	call	near ptr importCharacter
+	jmp	short l_entry
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+transferCharacter endp
+
+; DWORD - 1C4 & 1C6, 17E & 180, 24 & 26
+; Attributes: bp-based frame
+
+getTransferCharacters proc far
+
+	var_1CA= dword ptr -1CAh
+	var_1C6= word ptr -1C6h
+	var_1C4= word ptr -1C4h
+	var_1C2= word ptr -1C2h
+	var_1C0= word ptr -1C0h
+	var_1BC= word ptr -1BCh
+	var_1BA= dword ptr -1BAh
+	var_1B6= word ptr -1B6h
+	var_1B4= word ptr -1B4h
+	fd= word ptr -182h
+	var_180= word ptr -180h
+	var_17E= word ptr -17Eh
+	var_17C= word ptr -17Ch
+	var_17A= dword ptr -17Ah
+	var_26=	word ptr -26h
+	var_24=	word ptr -24h
+	var_22=	word ptr -22h
+	var_20=	word ptr -20h
+	var_1E=	word ptr -1Eh
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 1CAh
+	call	someStackOperation
+	push	si
+
+	mov	ax, 9000
+	push	ax
+	call	_mallocMaybe
+	add	sp, 2
+	mov	[bp+var_1C6], ax
+	mov	[bp+var_1C4], dx
+
+	mov	ax, 500h
+	push	ax
+	call	_mallocMaybe
+	add	sp, 2
+	mov	[bp+var_180], ax
+	mov	[bp+var_17E], dx
+
+loc_2649C:
+	mov	ax, offset s_diskToTransferFrom
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	lea	ax, [bp+var_1B4]
+	mov	[bp+var_26], ax
+	mov	[bp+var_24], ss
+	mov	ax, 18h
+	push	ax
+	lea	ax, [bp+var_1E]
+	push	ss
+	push	ax
+	call	readString
+	add	sp, 6
+	or	ax, ax
+	jz	short loc_264E1
+	lea	ax, [bp+var_1E]
+	push	ss
+	push	ax
+	push	[bp+var_24]
+	push	[bp+var_26]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_26], ax
+	mov	[bp+var_24], dx
+
+loc_264E1:
+	mov	ax, offset s_thievesInf
+	push	ds
+	push	ax
+	push	[bp+var_24]
+	push	[bp+var_26]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_26], ax
+	mov	[bp+var_24], dx
+
+	sub	ax, ax
+	push	ax
+	lea	ax, [bp+var_1B4]
+	push	ss
+	push	ax
+	call	open
+	add	sp, 6
+	mov	[bp+fd], ax
+	inc	ax
+	jnz	short loc_2653C
+	mov	ax, offset s_noCharactersFoundOn
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+
+	lea	ax, [bp+var_1B4]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	loc_2649C
+
+loc_2653C:
+	mov	ax, [bp+var_1C6]
+	mov	dx, [bp+var_1C4]
+	mov	word ptr [bp+var_1BA], ax
+	mov	word ptr [bp+var_1BA+2], dx
+
+	mov	[bp+var_1C2], 0
+loc_26554:
+	mov	ax, charSize
+	imul	[bp+var_1C2]
+	mov	bx, ax
+	lfs	si, [bp+var_1BA]
+	mov	byte ptr fs:[bx+si], 0
+	inc	[bp+var_1C2]
+	cmp	[bp+var_1C2], 75
+	jl	short loc_26554
+
+	mov	ax, 9000
+	push	ax
+	push	[bp+var_1C4]
+	push	[bp+var_1C6]
+	push	[bp+fd]
+	call	read
+	add	sp, 8
+
+	push	[bp+fd]
+	call	close
+	add	sp, 2
+
+	lea	ax, [bp+var_1E]
+	push	ss
+	push	ax
+	lea	ax, [bp+var_1B4]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_26], ax
+	mov	[bp+var_24], dx
+
+	mov	ax, offset s_partiesInf
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_26]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_26], ax
+	mov	[bp+var_24], dx
+
+	mov	ax, [bp+var_180]
+	mov	dx, [bp+var_17E]
+	mov	word ptr [bp+var_1BA], ax
+	mov	word ptr [bp+var_1BA+2], dx
+
+	mov	[bp+var_1C2], 0
+loc_265DE:
+	mov	bx, [bp+var_1C2]
+	mov	cl, 7
+	shl	bx, cl
+	lfs	si, [bp+var_1BA]
+	mov	byte ptr fs:[bx+si], 0
+	inc	[bp+var_1C2]
+	cmp	[bp+var_1C2], 0Ah
+	jl	short loc_265DE
+
+	sub	ax, ax
+	push	ax
+	lea	ax, [bp+var_1B4]
+	push	ss
+	push	ax
+	call	open
+	add	sp, 6
+	mov	[bp+fd], ax
+	inc	ax
+	jnz	short loc_2663C
+	mov	ax, offset s_noPartiesFoundOn
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	lea	ax, [bp+var_1B4]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	short loc_26654
+
+loc_2663C:
+	mov	ax, 500h
+	push	ax
+	push	[bp+var_17E]
+	push	[bp+var_180]
+	push	[bp+fd]
+	call	read
+	add	sp, 8
+
+loc_26654:
+	mov	[bp+var_1C2], 0
+	mov	[bp+var_1C0], 0
+loc_2665A:
+	cmp	[bp+var_1C0], 10
+	jge	l_partyLimitReached
+	mov	si, [bp+var_1C2]
+	shl	si, 1
+	shl	si, 1
+	mov	ax, [bp+var_1C2]
+	mov	cl, 7
+	shl	ax, cl
+	add	ax, [bp+var_180]
+	mov	dx, [bp+var_17E]
+	mov	word ptr [bp+si+var_17A], ax
+	mov	word ptr [bp+si+var_17A+2], dx
+	mov	si, [bp+var_1C2]
+	inc	[bp+var_1C2]
+	inc	[bp+var_1C0]
+	shl	si, 1
+	shl	si, 1
+	lfs	bx, [bp+si+var_17A]
+	cmp	byte ptr fs:[bx], 0
+	jnz	short loc_2665A
+
+l_partyLimitReached:
+	dec	[bp+var_1C2]
+	mov	ax, [bp+var_1C2]
+	mov	[bp+var_1BC], ax
+	mov	[bp+var_1C0], 0
+loc_2669C:
+	cmp	[bp+var_1C0], 75
+	jge	l_charLimitReached
+
+	mov	ax, [bp+var_1C2]
+	sub	ax, [bp+var_1BC]
+	mov	cx, charSize
+	imul	cx
+	add	ax, [bp+var_1C6]
+	mov	dx, [bp+var_1C4]
+	mov	si, [bp+var_1C2]
+	shl	si, 1
+	shl	si, 1
+	mov	word ptr [bp+si+var_17A], ax
+	mov	word ptr [bp+si+var_17A+2], dx
+	mov	si, [bp+var_1C2]
+	inc	[bp+var_1C2]
+	inc	[bp+var_1C0]
+	shl	si, 1
+	shl	si, 1
+	lfs	bx, [bp+si+var_17A]
+	cmp	byte ptr fs:[bx], 0
+	jnz	short loc_2669C
+l_charLimitReached:
+	dec	[bp+var_1C2]
+
+l_askWhoTransfers:
+	push	[bp+var_1C2]
+	lea	ax, [bp+var_17A]
+	push	ss
+	push	ax
+	mov	ax, offset s_whoShallTransfer
+	push	ds
+	push	ax
+	call	text_scrollingWindow
+	add	sp, 0Ah
+	mov	[bp+var_1C0], ax
+	or	ax, ax
+	jge	short loc_2671D
+	push	[bp+var_1C4]
+	push	[bp+var_1C6]
+	call	_freeMaybe
+	add	sp, 4
+	push	[bp+var_17E]
+	push	[bp+var_180]
+	call	_freeMaybe
+	add	sp, 4
+	jmp	l_return
+loc_2671D:
+	mov	ax, [bp+var_1BC]
+	cmp	[bp+var_1C0], ax
+	jge	l_transferCharacter
+
+l_transferParty:
+	mov	si, [bp+var_1C0]
+	shl	si, 1
+	shl	si, 1
+	mov	ax, word ptr [bp+si+var_17A]
+	mov	dx, word ptr [bp+si+var_17A+2]
+	mov	[bp+var_22], ax
+	mov	[bp+var_20], dx
+
+	mov	[bp+var_17C], 0
+loc_26748:
+	mov	ax, [bp+var_17C]
+	mov	cl, 4
+	shl	ax, cl
+	add	ax, [bp+var_22]
+	mov	dx, [bp+var_20]
+	add	ax, 10h
+	mov	word ptr [bp+var_1CA], ax
+	mov	word ptr [bp+var_1CA+2], dx
+	lfs	bx, [bp+var_1CA]
+	cmp	byte ptr fs:[bx], 0
+	jz	l_askWhoTransfers
+	push	[bp+var_1C4]
+	push	[bp+var_1C6]
+	push	dx
+	push	ax
+	push	cs
+	call	near ptr transfer_findName
+	add	sp, 8
+	mov	[bp+var_1B6], ax
+	cmp	[bp+var_1B6], 0
+	jl	short loc_267AE
+
+	mov	ax, charSize
+	imul	[bp+var_1B6]
+	add	ax, [bp+var_1C6]
+	mov	dx, [bp+var_1C4]
+	push	dx
+	push	ax
+	push	cs
+	call	near ptr transfer_bt3Character
+	add	sp, 4
+
+loc_267AE:
+	inc	[bp+var_17C]
+	cmp	[bp+var_17C], 7
+	jl	short loc_26748
+	jmp	l_askWhoTransfers
+
+l_transferCharacter:
+	mov	si, [bp+var_1C0]
+	shl	si, 1
+	shl	si, 1
+	push	word ptr [bp+si+var_17A+2]
+	push	word ptr [bp+si+var_17A]
+	push	cs
+	call	near ptr transfer_bt3Character
+	add	sp, 4
+	jmp	l_askWhoTransfers
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+getTransferCharacters endp
+
+; DWORD - arg_0 & arg_2, arg_4 & arg_6
+;
+; Only used when attempting to transfer a party. Since a party
+; definition can have names that don't exist in the thieves.inf
+; file, this function searches the thieves.inf for the given
+; name.
+;
+; Attributes: bp-based frame
+
+transfer_findName proc far
+
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+	arg_4= word ptr	 0Ah
+	arg_6= word ptr	 0Ch
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	[bp+var_2], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+var_2]
+	add	ax, [bp+arg_4]
+	mov	dx, [bp+arg_6]
+	push	dx
+	push	ax
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	call	strcmp
+	add	sp, 8
+	or	ax, ax
+	jz	short l_returnValue
+	inc	[bp+var_2]
+	cmp	[bp+var_2], 75
+	jge	short l_returnFailed
+	jmp	short l_loop
+
+l_returnValue:
+	mov	ax, [bp+var_2]
+	jmp	short l_return
+
+l_returnFailed:
+	mov	ax, 0FFFFh
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+transfer_findName endp
+
+; Attributes: bp-based frame
+
+transfer_bt3Character proc far
+
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	call	roster_nameExists
+	add	sp, 4
+	mov	[bp+var_4], ax
+	or	ax, ax
+	jge	short loc_26868
+	call	roster_countCharacters
+	mov	[bp+var_2], ax
+	mov	ax, charSize
+	imul	[bp+var_2]
+	mov	bx, ax
+	lea	ax, g_rosterCharacterBuffer[bx]
+	mov	dx, seg	seg022
+	push	dx
+	push	ax
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	call	copyCharacterBuf
+	add	sp, 8
+	jmp	short loc_26881
+loc_26868:
+	mov	ax, offset s_characterAlreadyExists
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+loc_26881:
+	mov	sp, bp
+	pop	bp
+	retf
+transfer_bt3Character endp
+
+; Attributes: bp-based frame
+
+importCharacter	proc far
+
+	var_1F0= dword ptr -1F0h
+	var_1EC= word ptr -1ECh
+	var_1EA= word ptr -1EAh
+	var_1E8= word ptr -1E8h
+	var_1E6= word ptr -1E6h
+	var_1E0= word ptr -1E0h
+	var_1C2= word ptr -1C2h
+	var_1AE= word ptr -1AEh
+	var_17C= word ptr -17Ch
+	var_178= word ptr -178h
+	var_176= word ptr -176h
+	var_24=	word ptr -24h
+	var_22=	word ptr -22h
+	var_20=	word ptr -20h
+	var_1E=	word ptr -1Eh
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 1F0h
+	call	someStackOperation
+	push	si
+
+	mov	ax, 2BF2h
+	push	ax
+	call	_mallocMaybe
+	add	sp, 2
+	mov	[bp+var_1EC], ax
+	mov	[bp+var_1EA], dx
+	mov	word ptr [bp+var_1F0], ax
+	mov	word ptr [bp+var_1F0+2], dx
+loc_268AD:
+	mov	ax, offset s_diskToTransferFrom
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	lea	ax, [bp+var_1AE]
+	mov	[bp+var_24], ax
+	mov	[bp+var_22], ss
+	mov	ax, 18h
+	push	ax
+	lea	ax, [bp+var_1E]
+	push	ss
+	push	ax
+	call	readString
+	add	sp, 6
+	or	ax, ax
+	jz	short loc_268F2
+	lea	ax, [bp+var_1E]
+	push	ss
+	push	ax
+	push	[bp+var_22]
+	push	[bp+var_24]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_24], ax
+	mov	[bp+var_22], dx
+loc_268F2:
+	mov	bx, [bp+arg_0]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (oldCharFilters+2)[bx]
+	push	word ptr oldCharFilters[bx]
+	push	[bp+var_22]
+	push	[bp+var_24]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_24], ax
+	mov	[bp+var_22], dx
+	lea	ax, [bp+var_1E0]
+	push	ss
+	push	ax
+	lea	ax, [bp+var_1AE]
+	push	ss
+	push	ax
+	call	findFirstFile
+	add	sp, 8
+	or	ax, ax
+	jnz	short loc_26965
+
+	mov	ax, offset s_noCharactersFoundOn
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	lea	ax, [bp+var_1AE]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	sub	ax, ax
+	push	ax
+	call	getKey
+	add	sp, 2
+	mov	[bp+var_20], ax
+	cmp	ax, dosKeys_ESC
+	jz	l_return
+	jmp	loc_268AD
+
+loc_26965:
+	mov	[bp+var_1E8], 0
+loc_2696B:
+	lea	ax, [bp+var_1E]
+	push	ss
+	push	ax
+	lea	ax, [bp+var_1AE]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_24], ax
+	mov	[bp+var_22], dx
+	lea	ax, [bp+var_1C2]
+	push	ss
+	push	ax
+	push	dx
+	push	[bp+var_24]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_24], ax
+	mov	[bp+var_22], dx
+	sub	ax, ax
+	push	ax
+	lea	ax, [bp+var_1AE]
+	push	ss
+	push	ax
+	call	open
+	add	sp, 6
+	mov	[bp+var_17C], ax
+	inc	ax
+	jz	short loc_26A01
+	mov	ax, 81h	
+	push	ax
+	push	word ptr [bp+var_1F0+2]
+	push	word ptr [bp+var_1F0]
+	push	[bp+var_17C]
+	call	read
+	add	sp, 8
+	lfs	bx, [bp+var_1F0]
+	cmp	byte ptr fs:[bx+10h], 1
+	jnz	short loc_269F5
+	mov	si, [bp+var_1E8]
+	inc	[bp+var_1E8]
+	shl	si, 1
+	shl	si, 1
+	mov	ax, bx
+	mov	dx, fs
+	mov	[bp+si+var_178], ax
+	mov	[bp+si+var_176], dx
+	add	word ptr [bp+var_1F0], 96h 
+loc_269F5:
+	push	[bp+var_17C]
+	call	close
+	add	sp, 2
+loc_26A01:
+	call	sub_27C4A
+	or	ax, ax
+	jnz	loc_2696B
+
+loc_26A0D:
+	push	[bp+var_1E8]
+	lea	ax, [bp+var_178]
+	push	ss
+	push	ax
+	mov	ax, offset s_whoShallTransfer
+	push	ds
+	push	ax
+	call	text_scrollingWindow
+	add	sp, 0Ah
+	mov	[bp+var_1E6], ax
+	or	ax, ax
+	jge	short loc_26A3E
+	push	[bp+var_1EA]
+	push	[bp+var_1EC]
+	call	_freeMaybe
+	add	sp, 4
+	jmp	short l_return
+loc_26A3E:
+	cmp	[bp+arg_0], 0
+	jz	short loc_26A5D
+	mov	si, [bp+var_1E6]
+	shl	si, 1
+	shl	si, 1
+	push	[bp+si+var_176]
+	push	[bp+si+var_178]
+	push	cs
+	push	cs
+	call	near ptr transfer_bt2Character
+	add	sp, 4
+	add	sp, 4
+	jmp	short loc_26A74
+loc_26A5D:
+	mov	si, [bp+var_1E6]
+	shl	si, 1
+	shl	si, 1
+	push	[bp+si+var_176]
+	push	[bp+si+var_178]
+	push	cs
+	call	near ptr transfer_bt1Character
+	add	sp, 4
+loc_26A74:
+	mov	ax, offset newCharBuffer
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	cs
+	call	near ptr transfer_bt3Character
+	add	sp, 4
+	jmp	short loc_26A0D
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+importCharacter	endp
+
+; Attributes: bp-based frame
+
+convertSpellLevel proc far
+
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+	spLevel= word ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	cmp	[bp+spLevel], 0
+	jz	short l_return
+	mov	bx, [bp+arg_0]
+	mov	al, mageSpellIndex[bx]
+	sub	ah, ah
+	mov	[bp+var_2], ax
+	cmp	ax, 0FFh
+	jz	short l_return
+	mov	[bp+var_4], 0
+loc_26AB8:
+	mov	ax, [bp+spLevel]
+	cmp	[bp+var_4], ax
+	jge	short l_return
+	push	[bp+var_2]
+	push	[bp+var_4]
+	mov	ax, 7
+	push	ax
+	call	mage_learnSpellLevel
+	add	sp, 6
+	inc	[bp+var_4]
+	jmp	short loc_26AB8
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+convertSpellLevel endp
+
+; Attributes: bp-based frame
+
+transfer_bt2Character proc far
+
+	var_8= byte ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+
+	mov	ax, 78h	
+	push	ax
+	sub	ax, ax
+	push	ax
+	mov	ax, offset newCharBuffer
+	mov	dx, seg seg027
+	push	dx
+	push	ax
+	call	memset
+	add	sp, 8
+
+	mov	[bp+var_4], 0
+l_copyName:
+	mov	bx, [bp+var_4]
+	lfs	si, [bp+arg_0]
+	mov	al, fs:[bx+si]
+	mov	[bp+var_8], al
+	or	al, al
+	jz	short l_copyStats
+	mov	byte ptr gs:newCharBuffer._name[bx], al
+	inc	[bp+var_4]
+	jmp	short l_copyName
+
+l_copyStats:
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.strength]
+	mov	gs:newCharBuffer.strength, al
+	mov	al, fs:[bx+bii_char_t.intelligence]
+	mov	gs:newCharBuffer.intelligence, al
+	mov	al, fs:[bx+bii_char_t.dexterity]
+	mov	gs:newCharBuffer.dexterity, al
+	mov	al, fs:[bx+bii_char_t.constitution]
+	mov	gs:newCharBuffer.constitution, al
+	mov	al, fs:[bx+bii_char_t.luck]
+	mov	gs:newCharBuffer.luck, al
+	mov	ax, word ptr fs:[bx+bii_char_t.experience]
+	mov	dx, fs:[bx+45h]
+	mov	word ptr gs:newCharBuffer.experience, ax
+	mov	word ptr gs:newCharBuffer.experience+2,	dx
+	mov	ax, word ptr fs:[bx+bii_char_t.gold]
+	mov	dx, fs:[bx+49h]
+	mov	word ptr gs:newCharBuffer.gold,	ax
+	mov	word ptr gs:newCharBuffer.gold+2, dx
+	mov	al, fs:[bx+bii_char_t.level]
+	sub	al, 35
+	sbb	cl, cl
+	and	al, cl
+	add	al, 35
+	sub	ah, ah
+	mov	gs:newCharBuffer.level,	ax
+	mov	gs:newCharBuffer.maxLevel, ax
+	mov	ax, fs:[bx+bii_char_t.maxHp]
+	mov	gs:newCharBuffer.currentHP, ax
+	mov	ax, fs:[bx+bii_char_t.maxHp]
+	mov	gs:newCharBuffer.maxHP,	ax
+	mov	ax, fs:[bx+bii_char_t.maxSppt]
+	mov	gs:newCharBuffer.currentSppt, ax
+	mov	ax, fs:[bx+bii_char_t.currentSppt]
+	mov	gs:newCharBuffer.maxSppt, ax
+	mov	bl, fs:[bx+bii_char_t.class]
+	sub	bh, bh
+	mov	al, bii_classMap[bx]
+	mov	gs:newCharBuffer.class,	al
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.race]
+	mov	gs:newCharBuffer.race, al
+	call	getCharacterGender
+	and	al, 1
+	mov	gs:newCharBuffer.gender, al
+	mov	bl, gs:newCharBuffer.class
+	sub	bh, bh
+	shl	bx, 1
+	sub	ah, ah
+	add	bx, ax
+	mov	al, g_classPictureNumber[bx]
+	mov	gs:newCharBuffer.picIndex, al
+	mov	gs:newCharBuffer.status, ah
+
+	mov	[bp+var_6], 0
+	mov	[bp+var_4], 0
+l_copyInventory:
+	mov	si, [bp+var_4]
+	shl	si, 1
+	lfs	bx, [bp+arg_0]
+	mov	bl, byte ptr fs:[bx+si+bii_char_t.inventory]
+	sub	bh, bh
+	mov	al, bii_inventoryMap[bx]
+	cbw
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jz	short loc_26CE6
+	mov	al, byte ptr [bp+var_2]
+	mov	bx, [bp+var_6]
+	mov	gs:newCharBuffer.inventory.itemNo[bx], al
+	mov	bx, [bp+var_2]
+	mov	al, g_itemBaseCount[bx]
+	mov	bx, [bp+var_6]
+	mov	gs:newCharBuffer.inventory.itemCount[bx], al
+	mov	bl, gs:newCharBuffer.class
+	sub	bh, bh
+	mov	al, classEquipMask[bx]
+	sub	ah, ah
+	mov	bx, [bp+var_2]
+	mov	cl, itemEquipMask[bx]
+	sub	ch, ch
+	test	ax, cx
+	jnz	short loc_26CE2
+	mov	bx, [bp+var_6]
+	mov	gs:newCharBuffer.inventory.itemFlags[bx], 2
+loc_26CE2:
+	add	[bp+var_6], 3
+loc_26CE6:
+	inc	[bp+var_4]
+	cmp	[bp+var_4], 8
+	jl	l_copyInventory
+
+loc_26CE9:
+	mov	al, gs:newCharBuffer.class
+	sub	ah, ah
+	or	ax, ax
+	jz	short loc_26D25
+	cmp	ax, class_rogue
+	jz	short loc_26CF5
+	cmp	ax, class_bard
+	jz	short loc_26D0E
+	cmp	ax, class_paladin
+	jz	short loc_26D25
+	cmp	ax, class_hunter
+	jz	short loc_26D36
+	cmp	ax, class_monk
+	jz	short loc_26D25
+	jmp	short loc_26D68
+
+loc_26CF5:
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.field_52]
+	mov	gs:newCharBuffer.specAbil, al
+	mov	gs:newCharBuffer.specAbil+1, al
+	mov	gs:newCharBuffer.specAbil+2, al
+	jmp	short loc_26D68
+
+loc_26D0E:
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.songsLeft]
+	mov	gs:newCharBuffer.specAbil, al
+	mov	gs:newCharBuffer.specAbil+1, 0FCh 
+	jmp	short loc_26D68
+
+loc_26D25:
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.numAttacks]
+	mov	gs:newCharBuffer.numAttacks, al
+	jmp	short loc_26D68
+
+loc_26D36:
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.field_55]
+	mov	gs:newCharBuffer.specAbil, al
+
+loc_26D68:
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.wizdLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 1
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.sorcLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 2
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.conjLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 3
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.magiLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 4
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bii_char_t.archLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 0Ah
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+transfer_bt2Character endp
+
+
+; Attributes: bp-based frame
+
+transfer_bt1Character proc far
+
+	var_8= byte ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+
+	mov	ax, 78h	
+	push	ax
+	sub	ax, ax
+	push	ax
+	mov	ax, offset newCharBuffer
+	mov	dx, seg seg027
+	push	dx
+	push	ax
+	call	memset
+	add	sp, 8
+	mov	[bp+var_4], 0
+
+l_copyName:
+	mov	bx, [bp+var_4]
+	lfs	si, [bp+arg_0]
+	mov	al, fs:[bx+si]
+	mov	[bp+var_8], al
+	or	al, al
+	jz	short l_copyStats
+	mov	byte ptr gs:newCharBuffer._name[bx], al
+	inc	[bp+var_4]
+	jmp	short l_copyName
+
+l_copyStats:
+	lfs	bx, [bp+arg_0]
+	mov	al, byte ptr fs:[bx+bi_char_t.strength]
+	mov	gs:newCharBuffer.strength, al
+	mov	al, byte ptr fs:[bx+bi_char_t.intelligence]
+	mov	gs:newCharBuffer.intelligence, al
+	mov	al, byte ptr fs:[bx+bi_char_t.dexterity]
+	mov	gs:newCharBuffer.dexterity, al
+	mov	al, byte ptr fs:[bx+bi_char_t.constitution]
+	mov	gs:newCharBuffer.constitution, al
+	mov	al, byte ptr fs:[bx+bi_char_t.luck]
+	mov	gs:newCharBuffer.luck, al
+	mov	ax, word ptr fs:[bx+bi_char_t.experience]
+	mov	dx, fs:[bx+47h]
+	mov	word ptr gs:newCharBuffer.experience, ax
+	mov	word ptr gs:newCharBuffer.experience+2,	dx
+	mov	ax, word ptr fs:[bx+bi_char_t.gold]
+	mov	dx, fs:[bx+4Bh]
+	mov	word ptr gs:newCharBuffer.gold,	ax
+	mov	word ptr gs:newCharBuffer.gold+2, dx
+	mov	ax, fs:[bx+bi_char_t.level]
+	sub	al, 35
+	sbb	cl, cl
+	and	al, cl
+	add	al, 35
+	mov	gs:newCharBuffer.level,	ax
+	mov	gs:newCharBuffer.maxLevel, ax
+	mov	ax, fs:[bx+bi_char_t.maxHP]
+	mov	gs:newCharBuffer.currentHP, ax
+	mov	ax, fs:[bx+bi_char_t.maxHP]
+	mov	gs:newCharBuffer.maxHP,	ax
+	mov	ax, fs:[bx+bi_char_t.currentSppt]
+	mov	gs:newCharBuffer.currentSppt, ax
+	mov	ax, fs:[bx+bi_char_t.maxSppt]
+	mov	gs:newCharBuffer.maxSppt, ax
+	mov	bx, fs:[bx+bi_char_t.class]
+	mov	al, bii_classMap[bx]
+	mov	gs:newCharBuffer.class,	al
+	lfs	bx, [bp+arg_0]
+	mov	al, byte ptr fs:[bx+bi_char_t.race]
+	mov	gs:newCharBuffer.race, al
+	call	getCharacterGender
+	and	al, 1
+	mov	gs:newCharBuffer.gender, al
+	mov	bl, gs:newCharBuffer.class
+	sub	bh, bh
+	shl	bx, 1
+	sub	ah, ah
+	add	bx, ax
+	mov	al, g_classPictureNumber[bx]
+	mov	gs:newCharBuffer.picIndex, al
+	mov	gs:newCharBuffer.status, ah
+	mov	[bp+var_6], 0
+	mov	[bp+var_4], 0
+	jmp	short loc_26F55
+loc_26F52:
+loc_26F55:
+	mov	si, [bp+var_4]
+	shl	si, 1
+	lfs	bx, [bp+arg_0]
+	mov	bl, byte ptr fs:[bx+si+bi_char_t.inventory]
+	sub	bh, bh
+	mov	al, bi_inventoryMap[bx]
+	cbw
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jz	short loc_26FD1
+	mov	al, byte ptr [bp+var_2]
+	mov	bx, [bp+var_6]
+	mov	gs:newCharBuffer.inventory.itemNo[bx], al
+	mov	bx, [bp+var_2]
+	mov	al, g_itemBaseCount[bx]
+	mov	bx, [bp+var_6]
+	mov	gs:newCharBuffer.inventory.itemCount[bx], al
+	mov	bl, gs:newCharBuffer.class
+	sub	bh, bh
+	mov	al, classEquipMask[bx]
+	sub	ah, ah
+	mov	bx, [bp+var_2]
+	mov	cl, itemEquipMask[bx]
+	sub	ch, ch
+	test	ax, cx
+	jnz	short loc_26FCD
+	mov	bx, [bp+var_6]
+	mov	gs:newCharBuffer.inventory.itemFlags[bx], 2
+loc_26FCD:
+	add	[bp+var_6], 3
+loc_26FD1:
+	inc	[bp+var_4]
+	cmp	[bp+var_4], 8
+	jl	loc_26F52
+
+	mov	al, gs:newCharBuffer.class
+	sub	ah, ah
+	or	ax, ax
+	jz	short loc_27010
+	cmp	ax, class_rogue
+	jz	short loc_26FE0
+	cmp	ax, class_bard
+	jz	short loc_26FF9
+	cmp	ax, class_paladin
+	jz	short loc_27010
+	cmp	ax, class_hunter
+	jz	short loc_27021
+	cmp	ax, class_monk
+	jz	short loc_27010
+	jmp	short loc_27053
+
+loc_26FE0:
+	lfs	bx, [bp+arg_0]
+	mov	al, byte ptr fs:[bx+bi_char_t.field_55]
+	mov	gs:newCharBuffer.specAbil, al
+	mov	gs:newCharBuffer.specAbil+1, al
+	mov	gs:newCharBuffer.specAbil+2, al
+	jmp	short loc_27053
+
+loc_26FF9:
+	lfs	bx, [bp+arg_0]
+	mov	al, byte ptr fs:[bx+bi_char_t.songsLeft]
+	mov	gs:newCharBuffer.specAbil, al
+	mov	gs:newCharBuffer.specAbil+1, 0FCh
+	jmp	short loc_27053
+
+loc_27010:
+	lfs	bx, [bp+arg_0]
+	mov	al, byte ptr fs:[bx+bi_char_t.numAttacks]
+	mov	gs:newCharBuffer.numAttacks, al
+	jmp	short loc_27053
+
+loc_27021:
+	lfs	bx, [bp+arg_0]
+	mov	al, byte ptr fs:[bx+bi_char_t.field_5B]
+	mov	gs:newCharBuffer.specAbil, al
+
+loc_27053:
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bi_char_t.wizdLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 1
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bi_char_t.sorcLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 2
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bi_char_t.conjLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 3
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+	lfs	bx, [bp+arg_0]
+	mov	al, fs:[bx+bi_char_t.magiLevel]
+	sub	ah, ah
+	push	ax
+	mov	ax, 4
+	push	ax
+	push	cs
+	call	near ptr convertSpellLevel
+	add	sp, 4
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+transfer_bt1Character endp
+
+
+seg017 ends
+
+; Segment type: Pure code
+seg018 segment byte public 'CODE' use16
+        assume cs:seg018
+;org 0Ch
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+; DWORD - var_130 & var_132
+;
+; Attributes: bp-based frame
+
+copyProtection proc	far
+
+	var_14C= word ptr -14Ch
+	var_14A= word ptr -14Ah
+	var_136= word ptr -136h
+	random16_3= word ptr -134h
+	var_132= word ptr -132h
+	var_130= word ptr -130h
+	var_12E= word ptr -12Eh
+	var_12C= word ptr -12Ch
+	var_12A= word ptr -12Ah
+	random16_1= word ptr -2Ah
+	var_28=	word ptr -28h
+	var_26=	word ptr -26h
+	var_24=	word ptr -24h
+	random16_2= word ptr -22h
+	var_20=	word ptr -20h
+	var_1E=	word ptr -1Eh
+	var_A= word ptr	-0Ah
+	random16_4= word ptr -6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 14Ch
+	call	someStackOperation
+	push	si
+
+	call	random
+	and	ax, 0Fh
+	mov	[bp+random16_1], ax
+	call	random
+	and	ax, 0Fh
+	mov	[bp+random16_2], ax
+	call	random
+	and	ax, 0Fh
+	mov	[bp+random16_3], ax
+
+	call	random
+	and	ax, 0Fh
+	mov	[bp+random16_4], ax
+	mov	bx, ax
+	mov	al, byte_4CA18[bx]
+	sub	ah, ah
+	mov	[bp+var_A], ax			; var_A = byte_4CA18[random16_4]
+	mov	cl, 4
+	shr	ax, cl
+	mov	[bp+var_136], ax		; var_136 = var_A >> 4
+
+	mov	al, byte ptr [bp+random16_4]
+	xor	al, byte ptr [bp+random16_1]
+	test	al, 1				; if ((random16_1 ^ random16_4) & 1)
+	jz	short loc_2712B
+	mov	ax, [bp+var_A]
+	and	ax, 7
+	shl	ax, 1
+	mov	cx, [bp+random16_2]
+	and	cx, 1
+	or	ax, cx				
+	mov	[bp+var_12E], ax		;   var_12E = ((var_A & 7) << 1) | (random16_2 & 1))
+
+	mov	bx, ax
+	mov	al, byte_4CA28[bx]
+	sub	ah, ah
+	add	ax, [bp+random16_1]
+	sub	ax, [bp+var_136]
+	and	ax, 0Fh
+	mov	[bp+random16_2], ax		;   random16_2 = (byte_4CA28[var_12E] + random16_1 - var_136) & 0Fh
+						; endif
+loc_2712B:
+	mov	ax, [bp+var_A]
+	and	ax, 7
+	shl	ax, 1
+	mov	[bp+var_12E], ax		; var_12E = ((var_A & 7) << 1)
+
+	mov	ax, [bp+random16_2]
+	sub	ax, [bp+random16_1]
+	add	ax, [bp+var_136]
+	and	ax, 0Fh
+	mov	[bp+var_12C], ax		; var_12C = (random16_2 - random16_1 + var_136) & 0Fh
+
+	mov	bx, [bp+var_12E]
+	mov	al, byte_4CA28[bx]
+	sub	ah, ah
+	cmp	ax, [bp+var_12C]
+	jz	short loc_27162			; if (byte_4CA28[var_12E] == var_12C) var_26 = 1
+	mov	al, byte_4CA28[bx + 1]
+	cmp	ax, [bp+var_12C]		; if (byte_4CA28[var_12E+1] == var_12C) var_26 = 1
+	jnz	short loc_27167			; else var_26 = 0
+loc_27162:
+	mov	ax, 1
+	jmp	short loc_27169
+loc_27167:
+	sub	ax, ax
+loc_27169:
+	mov	[bp+var_26], ax
+	or	ax, ax
+	jz	short loc_2717F			; if var_26 != 0
+	mov	ax, [bp+random16_3]
+	sub	ax, [bp+random16_1]
+	mov	cl, 4
+	shl	ax, cl
+	or	al, 8
+	jmp	short loc_27189			;   var_4 = ((random16_3 - random16_1) << 4) | 8
+
+loc_2717F:					; else
+	mov	ax, [bp+random16_2]
+	sub	ax, [bp+random16_1]
+	mov	cl, 4
+	shl	ax, cl				;   var_4 = (random16_2 - random16_1) << 4
+
+loc_27189:
+	mov	[bp+var_4], ax
+	mov	al, byte ptr [bp+var_4]
+	add	al, byte ptr [bp+var_A]
+	sub	ah, ah
+	mov	[bp+var_2], ax			; var_2 = var_4 + var_A
+
+	mov	ah, byte ptr [bp+var_2]
+	sub	al, al
+	add	ax, [bp+var_2]
+	mov	[bp+var_24], ax			; var_24 = (var_2 & 0F0h) + var_2
+
+	mov	[bp+var_28], 0Fh		; var_28 = 0Fh
+loc_271A9:					; do {
+	mov	ax, [bp+var_24]
+	and	ax, 1
+	mov	[bp+var_4], ax			;   var_4 = var_24 & 1
+	shr	[bp+var_24], 1			;   var_24 >> 1
+	or	ax, ax				;   if var_4 != 0
+	jz	short loc_271C6			;     var_24 += 0B400
+	add	byte ptr [bp+var_24+1],	0B4h
+loc_271C6:
+	dec	[bp+var_28]			; } while (--var_28 > 0)
+	cmp	[bp+var_28], 0
+	jg	short loc_271A9
+
+loc_271C8:
+	mov	al, byte ptr [bp+var_24+1]
+	sub	ah, ah
+	mov	[bp+var_14C], ax
+	mov	ax, [bp+var_2]
+	and	ax, 7
+	mov	si, ax
+	shr	si, 1
+	mov	al, byte_4CA38[si]
+	sub	ah, ah
+	and	[bp+var_14C], ax
+	mov	ax, si
+	xor	al, 3
+	mov	[bp+var_20], ax
+
+
+	; Zero 20 bytes of var_1E
+	mov	[bp+var_28], 0
+loc_271F3:
+	mov	si, [bp+var_28]
+	mov	byte ptr [bp+si+var_1E], 0
+	inc	[bp+var_28]
+	cmp	[bp+var_28], 20
+	jl	short loc_271F3
+
+	mov	[bp+var_28], 0
+
+	mov	ax, [bp+var_14C]
+	mov	cl, 7
+	shr	ax, cl
+	push	ax
+	push	cs
+	call	near ptr cp_toDigit
+	add	sp, 2
+	mov	si, [bp+var_28]
+	inc	[bp+var_28]
+	mov	byte ptr [bp+si+var_1E], al			; var_1E[0] = ((var_14C >> 7) & 7) | 0x30
+
+	mov	ax, [bp+var_14C]
+	mov	cl, 4
+	shr	ax, cl
+	push	ax
+	push	cs
+	call	near ptr cp_toDigit
+	add	sp, 2
+	mov	si, [bp+var_28]
+	inc	[bp+var_28]
+	mov	byte ptr [bp+si+var_1E], al			; var_1E[1] = ((var_14C >> 4) & 7) | 0x30
+
+	mov	ax, [bp+var_14C]
+	shr	ax, 1
+	push	ax
+	push	cs
+	call	near ptr cp_toDigit
+	add	sp, 2
+	mov	si, [bp+var_28]
+	inc	[bp+var_28]
+	mov	byte ptr [bp+si+var_1E], al			; var_1E[2] = ((var_14C >> 1) & 7) | 0x30
+
+	mov	ax, [bp+var_24]
+	mov	cl, 6
+	shr	ax, cl
+	push	ax
+	push	cs
+	call	near ptr cp_toDigit
+	add	sp, 2
+	mov	si, [bp+var_28]
+	inc	[bp+var_28]
+	mov	byte ptr [bp+si+var_1E], al			; var_1E[3] = ((var_24 >> 6) & 7) | 0x30
+
+	mov	ax, [bp+var_24]
+	mov	cl, 3
+	shr	ax, cl
+	push	ax
+	push	cs
+	call	near ptr cp_toDigit
+	add	sp, 2
+	mov	si, [bp+var_28]
+	inc	[bp+var_28]
+	mov	byte ptr [bp+si+var_1E], al			; var_1E[4] = ((var_24 >> 3) & 7 | 0x30
+
+	push	[bp+var_24]
+	push	cs
+	call	near ptr cp_toDigit
+	add	sp, 2
+	mov	si, [bp+var_28]
+	inc	[bp+var_28]
+	mov	byte ptr [bp+si+var_1E], al			; var_1E[5] = (var_24 & 7) | 0x30
+
+	mov	ax, offset s_copyProtectIntro
+	push	ds
+	push	ax
+	lea	ax, [bp+var_12A]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	mov	bx, [bp+random16_1]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_cpLocationOne+2)[bx]
+	push	word ptr g_cpLocationOne[bx]
+	push	dx
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	mov	ax, offset s_commaSpace
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_132]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	mov	bx, [bp+random16_2]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_cpLocationTwo+2)[bx]
+	push	word ptr g_cpLocationTwo[bx]
+	push	dx
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	mov	ax, offset s_commaSpace
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_132]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	mov	bx, [bp+random16_3]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_cpLocationThree+2)[bx]
+	push	word ptr g_cpLocationThree[bx]
+	push	dx
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	mov	ax, offset s_commaAnd
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_132]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	mov	bx, [bp+random16_4]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_cpLocationFour+2)[bx]
+	push	word ptr g_cpLocationFour[bx]
+	push	dx
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+	mov	ax, offset s_period
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_132]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_132], ax
+	mov	[bp+var_130], dx
+
+	lea	ax, [bp+var_12A]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 10h
+	push	ax
+	lea	ax, [bp+var_14A]
+	push	ss
+	push	ax
+	call	readString
+	add	sp, 6
+
+	push	[bp+var_20]
+	lea	ax, [bp+var_1E]
+	push	ss
+	push	ax
+	lea	ax, [bp+var_14A]
+	push	ss
+	push	ax
+	push	cs
+	call	near ptr cp_compareStrings
+	add	sp, 0Ah
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+copyProtection endp
+
+; Attributes: bp-based frame
+
+cp_toDigit proc far
+
+	inValue= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+
+	mov	ax, [bp+inValue]
+	and	ax, 7
+	or	al, 30h
+	mov	sp, bp
+	pop	bp
+	retf
+cp_toDigit endp
+
+; Attributes: bp-based frame
+
+cp_compareStrings proc far
+
+	var_2= word ptr	-2
+	arg_0= dword ptr  6
+	arg_4= dword ptr  0Ah
+	arg_8= word ptr	 0Eh
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	ax, [bp+arg_8]
+	mov	[bp+var_2], ax
+l_loop:
+	lfs	bx, [bp+arg_0]
+	inc	word ptr [bp+arg_0]
+	mov	al, fs:[bx]
+	mov	bx, [bp+var_2]
+	lfs	si, [bp+arg_4]
+	cmp	fs:[bx+si], al
+;	jnz	short l_returnFail		; Uncomment to enable copy protection
+	inc	[bp+var_2]
+	cmp	[bp+var_2], 7
+	jl	short l_loop
+	jmp	short l_returnSuccess
+
+l_returnFail:
+	sub	ax, ax
+	jmp	short l_return
+
+l_returnSuccess:
+	mov	ax, 1
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+cp_compareStrings endp
+
+
+
+seg018 ends
+
 include seg019.asm
 include seg020.asm
 include seg021.asm

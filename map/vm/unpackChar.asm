@@ -41,7 +41,7 @@ l_loalphabetChar:
 	mov	_str_capFlag, 0
 l_returnCapital:
 	push	ax
-	CALL(_str_capitalize)
+	CALL(toUpper)
 l_return:
 	FUNC_EXIT
 	retf

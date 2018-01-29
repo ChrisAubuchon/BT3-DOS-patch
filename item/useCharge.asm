@@ -35,9 +35,9 @@ loc_11EBC:
 	mov	cx, ax
 	shl	ax, 1
 	add	ax, cx
-	mov	gs:word_42416, ax
+	mov	gs:g_inventoryPackStart, ax
 	mov	ax, [bp+userSlotNumber]
-	mov	gs:word_4244C, ax
+	mov	gs:g_inventoryPackTarget, ax
 	CALL(inven_pack)
 	mov	al, gs:g_currentSinger
 	sub	ah, ah

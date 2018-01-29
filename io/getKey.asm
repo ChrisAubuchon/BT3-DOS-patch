@@ -44,7 +44,7 @@ l_skipMouseClick:
 	mov	al, byte ptr [bp+inputKey]
 	sub	ah, ah
 	push	ax
-	CALL(_str_capitalize)
+	CALL(toUpper)
 	jmp	short l_return
 loc_14EB9:
 	mov	ax, [bp+inputKey]

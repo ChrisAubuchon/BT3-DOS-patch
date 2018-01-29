@@ -10,7 +10,7 @@ spell_cast proc	far
 	cmp	[bp+itemUsedFlag], 0
 	jnz	short l_notMapSpell
 
-	; Spell is from an item. Pass the spell through map_execute to
+	; Spell is from an item. Pass the spell through vm_execute to
 	; see if it triggers a map function.
 	mov	ax, [bp+spellNo]
 	mov	g_curSpellNumber, ax
@@ -18,7 +18,7 @@ spell_cast proc	far
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	CALL(map_execute)
+	CALL(vm_execute)
 	or	ax, ax
 	jnz	l_return
 

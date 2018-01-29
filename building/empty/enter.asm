@@ -7,7 +7,7 @@ empty_enter proc	far
 	test	al, 3
 	jnz	short l_noBattle
 
-	mov	partyAttackFlag, 0
+	mov	g_partyAttackFlag, 0
 	CALL(bat_init)
 
 l_noBattle:

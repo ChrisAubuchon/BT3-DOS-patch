@@ -7,8 +7,7 @@ _main proc far
 	arg_4= word ptr	 0Ah
 	arg_27=	word ptr  2Dh
 
-	FUNC_ENTER
-	CHKSTK(6)
+	FUNC_ENTER(6)
 
 	mov	ax, 55h
 	push	ax

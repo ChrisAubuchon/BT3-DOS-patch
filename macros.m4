@@ -22,6 +22,10 @@ define(`PUSH', `push	$1')
 #
 define(`STACKVAR', `[bp+$1]')dnl
 
+# SEGMENT(segmentName)
+#
+define(`SEGMENT', `seg $1')
+
 # CHARINDEX(scratchRegister, multiplier, [destination])
 #
 define(`CHARINDEX', `mov	$1, charSize
@@ -34,12 +38,6 @@ define(`MONINDEX', `mov	$1, monStruSize
 	imul	$2
 ifelse(`$3', `', `dnl', `	mov	$3, ax')')dnl
 
-# PUSHE
-define(`PUSHE', `foreachq(`x', `$@', `push	x
-	')')dnl
-#define(`PUSHE', `forloop(`x', `1', `$#', `ifelse(`x', `1', `dnl', `
-#	')push	``$x''')')
-
 # PUSH_IMM(value)
 #
 define(`PUSH_IMM', `ifelse(`$1', `', `errprint(`No value passed to PUSH_IMM')', `mov	ax, $1
@@ -48,7 +46,8 @@ define(`PUSH_IMM', `ifelse(`$1', `', `errprint(`No value passed to PUSH_IMM')', 
 # PUSH_OFFSET(offset)
 #
 define(`PUSH_OFFSET', `mov	ax, offset $1
-	push	ds
+ifelse(`$2', `', `	push	ds', `	mov	dx, $2
+	push	dx')
 	push	ax')dnl
 
 # PUSH_STACK_PTR(var)

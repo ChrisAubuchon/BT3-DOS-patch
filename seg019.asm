@@ -1419,11 +1419,11 @@ sub_27E05 endp
 dungeon_getWallInDirection proc far
 
 	walls= word ptr	 6
-	_dirFacing= word ptr  8
+	direction= word ptr  8
 
 	push	bp
 	mov	bp, sp
-	mov	ax, [bp+_dirFacing]
+	mov	ax, [bp+direction]
 	and	al, 3
 	mov	cl, 2
 	shl	ax, cl
@@ -7033,7 +7033,7 @@ align 2
 ; Attributes: bp-based frame
 ; Attributes: bp-based frame
 
-_str_capitalize	proc far
+toUpper	proc far
 arg_0= word ptr	 6
 	push	bp
 	mov	bp, sp
@@ -7048,7 +7048,7 @@ loc_2A9A8:
 loc_2A9AA:
 	pop	bp
 	retf
-_str_capitalize	endp
+toUpper	endp
 
 ; Attributes: bp-based frame
 

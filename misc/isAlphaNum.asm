@@ -8,7 +8,7 @@ isAlphaNum proc	far
 	mov	al, [bp+arg_0]
 	cbw
 	push	ax
-	CALL(_str_capitalize)
+	CALL(toUpper)
 	mov	[bp+arg_0], al
 	cmp	al, 'A'
 	jl	short loc_15414

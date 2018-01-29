@@ -868,9 +868,9 @@ bat_end	proc far
 	call	someStackOperation
 	push	si
 	sub	al, al
-	mov	gs:byte_42458, al
+	mov	gs:g_nonRandomBattleFlag, al
 	mov	byte_4EECC, al
-	mov	partyAttackFlag, al
+	mov	g_partyAttackFlag, al
 	mov	[bp+var_2], 0
 	jmp	short loc_1F1A5
 loc_1F1A2:
@@ -1079,7 +1079,7 @@ loc_1F3E9:
 	sub	ch, ch
 	test	ax, cx
 	jz	short loc_1F3C8
-	mov	al, byte_464B8[bx]
+	mov	al, g_itemBaseCount[bx]
 	mov	[bp+var_10A], ax
 	cmp	ax, 1
 	jz	short loc_1F43A
@@ -1762,7 +1762,7 @@ loc_1FB4F:
 	mov	al, fs:[bx+si]
 	cbw
 	push	ax
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 	mov	bx, [bp+var_2]
 	lfs	si, [bp+arg_0]
@@ -1771,7 +1771,7 @@ loc_1FB4F:
 	cbw
 	push	ax
 	mov	si, cx
-	call	_str_capitalize
+	call	toUpper
 	add	sp, 2
 	cmp	ax, si
 	jz	short loc_1FB7E

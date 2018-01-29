@@ -17,7 +17,7 @@ noncombatCast proc far
 	jmp	short l_checkCaster
 l_askForCaster:
 	PUSH_OFFSET(s_whoWillCast)
-	PRINTSTRING(4)
+	PRINTSTRING(true)
 	CALL(readSlotNumber)
 	mov	[bp+castSlotNumber], ax
 l_checkCaster:

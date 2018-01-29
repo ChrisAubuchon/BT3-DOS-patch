@@ -14,7 +14,8 @@ text_castSpell proc far
 	PUSH_OFFSET(s_spellToCast)
 	PRINTSTRING
 
-	PUSH_IMM(4)
+	mov	ax, 4
+	push	ax
 	PUSH_STACK_ADDRESS(_instr)
 	CALL(readString)
 
@@ -33,7 +34,7 @@ l_toupper_start:
 	mov	al, ss:[si+bx]
 	sub	ah, ah
 	push	ax
-	CALL(_str_capitalize)
+	CALL(toUpper)
 
 	mov	bx, [bp+counter]
 	mov	ss:[si+bx], al

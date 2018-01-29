@@ -208,7 +208,7 @@ loc_12BC6:
 	and	di, 0FFh
 	mov	bx, si
 	shl	bx, 1
-	mov	al, byte_42F8C[bx+di]
+	mov	al, g_classPictureNumber[bx+di]
 	mov	gs:newCharBuffer.picIndex, al
 	mov	ax, si
 	jmp	short loc_12C3B

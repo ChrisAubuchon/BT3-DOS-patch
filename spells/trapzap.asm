@@ -20,7 +20,7 @@ l_loop:
 	sub	ah, ah
 	push	ax
 	mov	ax, [bp+_sq_north]
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
@@ -29,7 +29,7 @@ l_loop:
 	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	mov	ax, dirDeltaE[bx]
 	add	ax, [bp+_sq_east]

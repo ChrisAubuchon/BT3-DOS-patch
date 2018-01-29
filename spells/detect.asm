@@ -10,7 +10,7 @@ sp_areaEnchant proc far
 	mov	al, spellEffectFlags[bx]
 	mov	detectDuration, al
 	mov	al, spellExtraFlags[bx]
-	mov	detectType, al
+	mov	g_detectType, al
 	mov	ax, icon_areaEnchant
 	push	ax
 	CALL(icon_activate)

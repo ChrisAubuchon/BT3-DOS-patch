@@ -16,7 +16,7 @@ item_doSpell proc far
 	add	ax, cx
 	mov	gs:g_usedItemSlotNumber, al
 	mov	al, byte ptr [bp+userSlotNumber]
-	mov	gs:byte_42288, al
+	mov	gs:g_userSlotNumber, al
 	mov	al, [bp+targetSlotNumber]
 	mov	gs:bat_curTarget, al
 	sub	ax, ax

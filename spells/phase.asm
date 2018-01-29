@@ -18,7 +18,7 @@ sp_phaseDoor proc far
 	push	sq_east
 	CALL(dun_getWalls)
 	mov	[bp+var_2], ax
-	mov	ax, dirFacing
+	mov	ax, g_direction
 	dec	ax
 	push	ax
 	push	[bp+var_2]
@@ -50,11 +50,11 @@ loc_21671:
 	add	ax, cx
 	mov	word ptr [bp+var_6], ax
 	mov	word ptr [bp+var_6+2], dx
-	test	byte ptr dirFacing, 2
+	test	byte ptr g_direction, 2
 	jz	short loc_216C8
 	inc	word ptr [bp+var_6]
 loc_216C8:
-	test	byte ptr dirFacing, 1
+	test	byte ptr g_direction, 1
 	jz	short loc_216D9
 	lfs	bx, [bp+var_6]
 	and	byte ptr fs:[bx], 0F0h

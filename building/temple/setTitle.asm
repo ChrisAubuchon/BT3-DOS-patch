@@ -10,7 +10,7 @@ temple_setTitle	proc far
 	FUNC_ENTER(8)
 	push	si
 
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]

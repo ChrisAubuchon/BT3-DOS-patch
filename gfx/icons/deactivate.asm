@@ -28,7 +28,7 @@ l_light:
 	jmp	short l_return
 
 l_detect:
-	mov	detectType, 0
+	mov	g_detectType, 0
 	jmp	short l_return
 
 l_shield:

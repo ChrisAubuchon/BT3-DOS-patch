@@ -171,8 +171,18 @@ s_whatIs		db 'What is ',0
 align 2
 s_newName	db 27h,'s new name?',0
 align 2
-byte_42F8C	db 33, 48, 54, 79, 54, 79, 54, 79, 54, 79, 33; 0
-		db 48, 33, 48, 33, 48, 33, 48, 33, 48, 54, 79; 11
+; Class bigpic index. The pictures are in male, female pairs
+g_classPictureNumber	db 33, 48
+			db 54, 79
+			db 54, 79
+			db 54, 79
+			db 54, 79
+			db 33, 48
+			db 33, 48
+			db 33, 48
+			db 33, 48
+			db 33, 48
+			db 54, 79
 baseAttributes	startingAttrBase <10, 6,	8, 8, 5, 10, 6, 8, 8,	5>
 		startingAttrBase <8, 9,	9, 6, 6, 8, 9, 9, 6, 6>
 		startingAttrBase <12, 6, 7, 10,	3, 12, 6, 7, 10, 3>
@@ -1775,7 +1785,7 @@ wineskinString	dd aWater	       ; 0
 		dd aWaterOfLife		; 2
 		dd aDragonBlood		; 3
 		dd aMoltenTar		; 4
-byte_464B8	db 0FFh, 1, 1, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh, 0FFh; 0
+g_itemBaseCount	db 0FFh, 1, 1, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh, 0FFh; 0
 		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 10
 		db 0FFh, 1, 18h, 0FFh, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh;	20
 		db 32h,	50h, 0FFh, 0FFh, 0FFh, 1, 1, 0FFh, 1, 1; 30
@@ -2202,90 +2212,89 @@ itemCharFlags	db ' ', '|', '^', '?', 0, 0; 0 ; This is a list of characters used
 			
 off_46C1A	dd item_trade, item_discard, item_equip, item_unequip, item_identify;	0
 s_escToContinue	db 'ESC to continue',0
-aThereAreStairs	db 'There are stairs here, going /up\down\. ',0Ah
+s_thereAreStairs	db 'There are stairs here, going /up\down\. ',0Ah
 		db 'Do you wish to take them?',0
 align 2
-aWhoWantsToGetT	db 'Who wants to get the ',0
+s_whoWantsToGetThe	db 'Who wants to get the ',0
 align 2
-aCanTCarryAny_0	db ' can',27h,'t carry any more items.',0
-align 2
-aGotThe		db ' got the ',0
-aYouDonTHaveEno	db 'You don',27h,'t have enough gold',0
-aZounds		db 'Zounds',0
-aD		db '%d',0
-aBadOpcode	db 'bad opcode',0
-off_46CFC	dd mfunc_downStairs ;	0
+s_gotThe		db ' got the ',0
+s_youDontHaveEnoughGold	db 'You don',27h,'t have enough gold',0
+s_zounds		db 'Zounds',0
+s_percentD		db '%d',0
+s_badOpcode	db 'bad opcode',0
+vm_functionList	dd mfunc_downStairs ;	0
 		dd mfunc_upStairs	; 1
-		dd sub_1942B		; 2
+		dd mfunc_utility		; 2
 		dd mfunc_teleport	; 3
 		dd mfunc_battle		; 4
 		dd mfunc_clearPrintString ; 5
-		dd mfunc_ffcode		; 6
+		dd mfunc_clearSpecial		; 6
 		dd mfunc_drawBigpic	; 7
 		dd mfunc_setTitle	; 8
-		dd mfunc_getChMaybe	; 9
-		dd mfunc_text_clear ; a
+		dd mfunc_waitForIo	; 9
+		dd mfunc_clearText ; a
 		dd mfunc_ifFlag		; b
 		dd mfunc_ifNotFlag	; c
-		dd sub_19855		; d
+		dd mfunc_makeDoor		; d
 		dd mfunc_setFlag	; e
 		dd mfunc_clearFlag	; f
 		dd mfunc_ifCurSpellEQ	; 10
 		dd mfunc_setMapRval	; 11
 		dd mfunc_printString	; 12
 		dd mfunc_doNothing	; 13
-		dd mfunc_ifChHasItemF	; 14
+		dd mfunc_ifLiquid	; 14
 		dd mfunc_getItem	; 15
-		dd mfunc_ifHasItem	; 16
-		dd mfunc_ifNotHasItem	; 17
-		dd mfunc_ifW4ee66	; 18
+		dd mfunc_ifPartyHasItem	; 16
+		dd mfunc_ifPartyNotHasItem	; 17
+		dd mfunc_ifSameSquare	; 18
 		dd mfunc_ifYesNo	; 19
 		dd mfunc_goto		; 1a
 		dd mfunc_battleNoCry	; 1b
-		dd mfunc_zero4ee66	; 1c
+		dd mfunc_setSameSquareFlag	; 1c
 		dd mfunc_turnAround	; 1d
 		dd mfunc_removeItem	; 1e
-		dd mfunc_incRegister	; 1f
-		dd mfunc_decRegister	; 20
-		dd mfunc_ifRegNotZero	; 21
-		dd mfunc_ifRegister	; 22
-		dd mfunc_drainHP	; 23
+		dd mfunc_incrementRegister	; 1f
+		dd mfunc_decrementRegister	; 20
+		dd mfunc_ifRegisterClear	; 21
+		dd mfunc_ifRegisterSet	; 22
+		dd mfunc_drainHp	; 23
 		dd mfunc_ifInBox	; 24
-		dd mfunc_invANDc3	; 25
-		dd mfunc_addToInv	; 26
-		dd mfunc_subFromInv	; 27
+		dd mfunc_setLiquid	; 25
+		dd mfunc_addToContainer	; 26
+		dd mfunc_subtractFromContainer	; 27
 		dd mfunc_addToRegister	; 28
-		dd mfunc_subFromRegister ; 29
-		dd mfunc_setDirFacing	; 2a
-		dd mfunc_getStrFromUser	; 2b
-		dd mfunc_ifStrEq	; 2c
-		dd mfunc_setRegFromBuf	; 2d
+		dd mfunc_subtractFromRegister ; 29
+		dd mfunc_setDirection	; 2a
+		dd mfunc_readString	; 2b
+		dd mfunc_ifStringEquals	; 2c
+		dd mfunc_parseNumber	; 2d
 		dd mfunc_getCharacter	; 2e
 		dd mfunc_ifGiveGold	; 2f
-		dd sub_1A5C0		; 30
-		dd mfunc_ifRegLT	; 31
-		dd mfunc_ifRegEQ	; 32
-		dd mfunc_ifRegGE	; 33
+		dd mfunc_addGold		; 30
+		dd mfunc_ifRegisterLt	; 31
+		dd mfunc_ifRegisterEq	; 32
+		dd mfunc_ifRegisterGe	; 33
 		dd mfunc_learnSpell	; 34
 		dd mfunc_setRegister	; 35
-		dd mfunc_chHasItemNo	; 36
-		dd mfunc_packInvMaybe	; 37
-		dd mfunc_addMonToParty	; 38
-		dd mfunc_ifMonInParty	; 39
-		dd mfunc_clrPrtStrOffset ; 3a
+		dd mfunc_ifHasItem	; 36
+		dd mfunc_packInventory	; 37
+		dd mfunc_addMonster	; 38
+		dd mfunc_ifMonsterInParty	; 39
+		dd mfunc_clearPrintOffset ; 3a
 		dd mfunc_ifIsNight	; 3b
-		dd mfunc_rmMonFromParty	; 3c
-		dd sub_1A9C8		; 3d
-		dd sub_1AAD5		; 3e
-		dd mfunc_setChronQuestFlag ; 3f
-		dd sub_1AC20		; 40
-		dd sub_1AC9E		; 41
-		dd mfunc_isWildSqFlagSet ; 42
-		dd mfunc_wildSetSqFlag	; 43
+		dd mfunc_removeMonster	; 3c
+;		dd mfunc_buggedIfQuestFlagSet		; 3d
+		dd mfunc_notImplemented		; 3d
+		dd mfunc_ifQuestFlagNotSet		; 3e
+		dd mfunc_setQuestFlag ; 3f
+		dd mfunc_clearQuestFlag		; 40
+		dd mfunc_partyUnderLevel		; 41
+		dd mfunc_ifWildFace ; 42
+		dd mfunc_setWildFace	; 43
 		dd mfunc_ifIsClass	; 44
-		dd mfunc_printStrAtOffset ; 45
-		dd mfunc_clrAndTeleport	; 46
-aThisFunctionIs	db 'this function is not implemented',0
+		dd mfunc_printOffset ; 45
+		dd mfunc_clearTeleport	; 46
+s_notImplemented	db 'this function is not implemented',0
 align 2
 aKilling	db ', killing ',0
 aPoisoning	db ', poisoning ',0
@@ -2329,7 +2338,7 @@ breathAttack	breathAtt_t <0, 0, 0, 0, 0, 41h, 1>; 0
 aYouStillFace	db 'You still face ',0
 aDoYouWishToCon	db 'Do you wish to continue?',0Ah,0
 aButMisses	db ', but misses!',0Ah,0Ah,0
-s_period	db '.', 0Ah, 0Ah,0
+s_periodNlNl	db '.', 0Ah, 0Ah,0
 s_exclBlankLine		db '!',0Ah, 0Ah,0
 aJumpsIntoTheShadows	db ' jumps into the shadows, ',0
 aAndSucceeds	db 'and succeeds!',0Ah,0Ah,0
@@ -3547,31 +3556,31 @@ aYourSpellsWave	db 'Your spells waver...',0
 aSomethingAhead	db 'Something ahead...',0
 aOdd___		db 'Odd...',0
 aAwfullyQuietAh	db 'Awfully quiet ahead...',0
-aStoneBlock	db 'stone block!',0
-aTripwire	db 'tripwire!',0
-aPit		db 'pit!',0
-aSpikedPit	db 'spiked pit!',0
-aPoisonGasCloud	db 'poison gas cloud!',0
-aPunjiStakes	db 'punji stakes!',0
-aCrossbowBolts	db 'crossbow bolts!',0
-aShockWave_0	db 'shock wave!',0
-aAcidBath	db 'acid bath!',0
-aMindZap	db 'mind zap!',0
-aPoisonSpray	db 'poison spray!',0
-aPoisonSpikedPi	db 'poison spiked pit!',0
-aMageZap	db 'mage zap!',0
-aDecapitator	db 'decapitator!',0
-aTimedWarstrike	db 'timed warstrike!',0
-aShockSphere_0	db 'shock sphere!',0
-aCrushingWalls	db 'crushing walls!',0
-aRollingBall	db 'rolling ball!',0
-aBasiliskSnar_0	db 'basilisk snare!',0
-aWitherStrike	db 'wither strike!',0
-aSledgehammer	db 'sledgehammer!',0
-aEarthquake	db 'earthquake!',0
-aDeathstrikeEXCL	db 'deathstrike!',0
-aBonkers	db 'bonkers!',0
-aAWanderingCreatureOff	db 'A wandering creature offers to join your party. You can:'
+s_stoneBlockTrap	db 'stone block!',0
+s_tripwireTrap	db 'tripwire!',0
+s_pitTrap		db 'pit!',0
+s_spikedPitTrap	db 'spiked pit!',0
+s_poisonGasTrap	db 'poison gas cloud!',0
+s_punjiStakeTrap	db 'punji stakes!',0
+s_crossbowTrap	db 'crossbow bolts!',0
+s_shockwaveTrap	db 'shock wave!',0
+s_acidBathTrap	db 'acid bath!',0
+s_mindZapTrap	db 'mind zap!',0
+s_poisonSprayTrap	db 'poison spray!',0
+s_poisonSpikedPitTrap	db 'poison spiked pit!',0
+s_mageZapTrap	db 'mage zap!',0
+s_decapitatorTrap	db 'decapitator!',0
+s_timedWarstrikeTrap	db 'timed warstrike!',0
+s_shockSphereTrap	db 'shock sphere!',0
+s_crushingWallsTrap	db 'crushing walls!',0
+s_rollingBallTrap	db 'rolling ball!',0
+s_basiliskSnareTrap	db 'basilisk snare!',0
+s_witherStrikeTrap	db 'wither strike!',0
+s_sledgehammerTrap	db 'sledgehammer!',0
+s_earthquakeTrap	db 'earthquake!',0
+s_deathstrikeTrap	db 'deathstrike!',0
+s_bonkersTrap	db 'bonkers!',0
+s_wandererText	db 'A wandering creature offers to join your party. You can:'
 		db 0Ah,0Ah
 		db '@Allow it to join',0Ah
 		db '@Fight it',0Ah
@@ -3586,13 +3595,13 @@ victoryMessageList	dd s_victoryMessage_1	; 0
 		dd s_victoryMessage_4	; 3
 		dd s_victoryMessage_5	; 4
 align 2
-aAnExplosion	db 0Ah,'An explosion!',0
+s_explosion	db 0Ah,'An explosion!',0
 align 2
-aDarkness	db 0Ah,'Darkness!',0
+s_darkness	db 0Ah,'Darkness!',0
 align 2
-aThereIsAPortAbove	db 0Ah,'There is a portal above you.',0
-aThereIsAPortBelow	db 0Ah,'There is a portal below.',0
-aTheSoundOfSile	db 0Ah,'The sound of silence...',0
+s_portalAbove	db 0Ah,'There is a portal above you.',0
+s_portalBelow	db 0Ah,'There is a portal below.',0
+s_soundOfSilence	db 0Ah,'The sound of silence...',0
 align 2
 detectMessages	dd aATrapIsNear	       ; 0
 		dd aThereAreStai_0	; 1
@@ -3602,16 +3611,16 @@ detectMessages	dd aATrapIsNear	       ; 0
 		dd aSomethingAhead	; 5
 		dd aOdd___		; 6
 		dd aAwfullyQuietAh	; 7
-aTrapYouVeHitA	db 'TRAP! You',27h,'ve hit a ',0
-trapTypeString	dd aStoneBlock, aTripwire, aPit, aSpikedPit; 0
-		dd aPoisonGasCloud, aPunjiStakes, aCrossbowBolts; 4
-		dd aShockWave_0, aAcidBath, aMindZap, aPoisonSpray; 7
-		dd aPoisonSpikedPi, aMageZap, aDecapitator; 11
-		dd aTimedWarstrike, aShockSphere_0, aCrushingWalls; 14
-		dd aRollingBall, aBasiliskSnar_0, aWitherStrike; 17
-		dd aSledgehammer, aEarthquake, aDeathstrikeEXCL; 20
-		dd aBonkers		; 23
-byte_4B238	db 0, 0, 0, 0	   ; 0
+s_hitTrap	db 'TRAP! You',27h,'ve hit a ',0
+trapTypeString	dd s_stoneBlockTrap, s_tripwireTrap, s_pitTrap
+		dd s_spikedPitTrap, s_poisonGasTrap, s_punjiStakeTrap
+		dd s_crossbowTrap, s_shockwaveTrap, s_acidBathTrap
+		dd s_mindZapTrap, s_poisonSprayTrap, s_poisonSpikedPitTrap
+		dd s_mageZapTrap, s_decapitatorTrap,  s_timedWarstrikeTrap
+		dd s_shockSphereTrap, s_crushingWallsTrap, s_rollingBallTrap
+		dd s_basiliskSnareTrap, s_witherStrikeTrap, s_sledgehammerTrap
+		dd s_earthquakeTrap, s_deathstrikeTrap, s_bonkersTrap
+trapSpecialAttackValue	db 0, 0, 0, 0	   ; 0
 		db 0, 1, 0, 0		; 4
 		db 0, 0, 0, 0		; 8
 		db 3, 1, 1, 0		; 12
@@ -3620,14 +3629,17 @@ byte_4B238	db 0, 0, 0, 0	   ; 0
 		db 6, 4, 0, 0		; 24
 		db 0, 7, 4, 0		; 28
 byte_4B258	db 20h dup(0)
-byte_4B278	db 0, 1, 2, 0	   ; 0
-		db 3, 4, 5, 0		; 4
-		db 6, 7, 8, 0		; 8
-		db 9, 10, 11, 0		; 12
-		db 12, 13, 14, 0	; 16
-		db 15, 16, 17, 0	; 20
-		db 18, 19, 20, 0	; 24
-		db 21, 22, 23, 0	; 28
+
+; Trap indices by (dungeon level & 7). 0-3 = dungeon level 1, 4-7 = 2, etc
+;
+g_trapIndexByLevel	db 0, 1, 2, 0	   ; 0
+			db 3, 4, 5, 0		; 4
+			db 6, 7, 8, 0		; 8
+			db 9, 10, 11, 0		; 12
+			db 12, 13, 14, 0	; 16
+			db 15, 16, 17, 0	; 20
+			db 18, 19, 20, 0	; 24
+			db 21, 22, 23, 0	; 28
 trapSaveList	trapSave_t < 0Fh, 0Fh	>
 		trapSave_t < 0Eh, 0	>
 		trapSave_t < 13h, 13h	>
@@ -3644,7 +3656,8 @@ trapSaveList	trapSave_t < 0Fh, 0Fh	>
 		trapSave_t < 2Ah, 0	>
 		trapSave_t < 2Bh, 2Eh	>
 		trapSave_t < 2Bh, 0	>
-byte_4B2B8	db 0, 2, 4, 0	   ; 0
+detectByteStartList	db 0, 2, 4, 0		; This array has the starting index into the detectByte
+						; array for the detect spell type
 detectByte	db 0, 0FFh, 0, 0FFh	   ; 0 ; This array holds the flag byte	to detect certain
 		db 0, 0, 0, 1		; 4 ; types of squares
 		db 1, 1, 1, 1		; 8
@@ -3657,27 +3670,27 @@ detectMsgIndex	db 0, 0, 1, 0	       ; 0
 		db 0, 1, 2, 3		; 4
 		db 4, 5, 6, 7		; 8
 		db 5, 0			; 12
-off_4B2E6	dd dunsq_battleCheck,	dunsq_doTrap, dunsq_doDarkness;	0
-		dd dunsq_doSpinner, dunsq_antiMagic, dunsq_drainHP; 3
+specialSquareFunctionList	dd dunsq_battleCheck,	dunsq_doTrap, dunsq_doDarkness;	0
+		dd dunsq_doSpinner, dunsq_antiMagic, dunsq_drainHp; 3
 		dd dunsq_somethingOdd, dunsq_doSilence,	dunsq_regenSppt; 6
 		dd dunsq_drainSppt, dunsq_monHostile, dunsq_doStuck; 9
-		dd dunsq_regenHP, dunsq_doExplosion, dunsq_portalAbove; 12
+		dd dunsq_regenHP, dunsq_explosion, dunsq_portalAbove; 12
 		dd dunsq_portalBelow
-byte_4B326	db 0, 0, 0		   ; 0
+specialSquareByteIndexList	db 0, 0, 0		   ; 0
 		db 1, 1, 1		; 3
 		db 1, 1, 1		; 6
 		db 1, 1, 2		; 9
 		db 2, 2, 0		; 12
 		db 0			; 15
-byte_4B336	db 80h, 10h, 8	   ; 0
+specialSquareMaskList	db 80h, 10h, 8	   ; 0
 		db 1, 2, 4		; 3
 		db 8, 10h, 20h		; 6
 		db 40h,	80h, 80h	; 9
 		db 40h,	10h, 40h	; 12
 		db 20h			; 15
-off_4B346	dd dun_randomMonJoin
-		dd dun_randomMonFight
-		dd dun_randomMonLeave
+g_wandererFunctionTable	dd wanderer_join
+		dd wanderer_fight
+		dd wanderer_leave
 aDragonDragonWh	db 'Dragon, dragon,',0Ah
 		db 'Why do you lair?',0Ah
 		db 'Unfurl your wings, Take to the air!',0Ah
@@ -4494,13 +4507,13 @@ s_soundOption3 db 0Ah,'3) Internal IBM speaker.',0
 s_soundOption4	db 0Ah,'4) Tandy.',0
 s_soundOption5		db 0Ah,'5) PS/1',0
 s_soundPrompt db 0Ah,0Ah,'Please enter the appropriate number for your system type:',0
-aDiskToTransfer	db 'Disk to transfer characters from?',0
-aWhoShallTransfer?	db 'Who shall transfer?',0
-aThisCharacterAlready	db 'This character already exists',0
-aNoCharactersFoundOn	db 'No characters found on',0
+s_diskToTransferFrom	db 'Disk to transfer characters from?',0
+s_whoShallTransfer	db 'Who shall transfer?',0
+s_characterAlreadyExists	db 'This character already exists',0
+s_noCharactersFoundOn	db 'No characters found on',0
 		db    0
-aNoPartiesFoundOn	db 'No parties found on',0
-aTransferCharac	db 'Transfer characters from:',0Ah
+s_noPartiesFoundOn	db 'No parties found on',0
+s_transferVersionPrompt	db 'Transfer characters from:',0Ah
 		db '1) Bards I',0Ah
 		db '2) Bards II',0Ah
 		db '3) Bards III',0Ah
@@ -4533,9 +4546,9 @@ bii_inventoryMap db 0, 1, 2, 3,	4, 5, 6, 7, 8, 9; 0
 		db 0, 0, 0, 0, 0, 0, 0,	0; 120
 bii_classMap	db 0, 7, 5, 6, 8, 9, 3, 4,	2, 1, 0Ah; 0
 		db 0Dh,	0Eh		; 11
-a_tpw		db '*.tpw',0
-a_tw		db '*.tw',0
-oldCharFilters	dd a_tpw, a_tw	       ; 0
+s_tpw		db '*.tpw',0
+s_tw		db '*.tw',0
+oldCharFilters	dd s_tpw, s_tw	       ; 0
 aAcorns		db 'Acorns',0
 aArrowsOfLife	db 'Arrows of Life',0
 aMalefia	db 'Malefia',0
@@ -4582,14 +4595,14 @@ aTunnels	db 'Tunnels',0
 aWorkshop	db 'Workshop',0
 aWizardSGuild	db 'Wizard',27h,'s Guild',0
 align 2
-aToTraverseTime	db 'To traverse time and space, you must first recite the alignment value of ',0
-aAnd_0		db ', and ',0
+s_copyProtectIntro	db 'To traverse time and space, you must first recite the alignment value of ',0
+s_commaAnd		db ', and ',0
 align 2
-asc_4C8DA	db ', ',0
+s_commaSpace	db ', ',0
 align 2
-a__0		db '.',0
+s_period		db '.',0
 aYouHaveFailedT	db 'You have failed to recite the proper alignment pattern!',0
-off_4C918	dd aArefolia, aAcorns ; 0
+g_cpLocationFour	dd aArefolia, aAcorns ; 0
 		dd aArrowsOfLife, aCrystalKey; 2
 		dd aCrownOfTruth, aStrifespear; 4
 		dd aRainbowRose, aCrystalLens; 6
@@ -4597,7 +4610,7 @@ off_4C918	dd aArefolia, aAcorns ; 0
 		dd aShadowDoor, aShadowLock; 10
 		dd aWineskin,	aNightspear; 12
 		dd aHammerOfWrath, aWandOfPower; 14
-off_4C958	dd aMalefia, aValarian  ; 0
+g_cpLocationOne	dd aMalefia, aValarian  ; 0
 		dd aLanatir, s_alliria	; 2
 		dd aFerofist, aSceadu	; 4
 		dd aWerra, aTarjan	; 6
@@ -4605,7 +4618,7 @@ off_4C958	dd aMalefia, aValarian  ; 0
 		dd aArboria, aGelidia	; 10
 		dd aLucencia, aKinestia	; 12
 		dd aTenebrosia,	aTarmitia; 14
-off_4C998	dd aCieraBrannia, aCelariaBree; 0
+g_cpLocationTwo	dd aCieraBrannia, aCelariaBree; 0
 		dd aBlackScar, aDarkCopse; 2
 		dd aNowhere, aFesteringPit; 4
 		dd aSacredGrove, aIceKeep; 6
@@ -4613,7 +4626,7 @@ off_4C998	dd aCieraBrannia, aCelariaBree; 0
 		dd aColdPeak, aCrystalSpring; 10
 		dd aOldDwarfMine, aShadowRock; 12
 		dd aSulphurSprings, aWarriorsVale; 14
-off_4C9D8	dd aBrilhasti, s_urmech  ; 0
+g_cpLocationThree	dd aBrilhasti, s_urmech  ; 0
 		dd aTslotha, aCyanis	; 2
 		dd aTheOldMan, aHawkslayer; 4
 		dd s_scrapwood, s_bardsHall; 6
@@ -4622,32 +4635,32 @@ off_4C9D8	dd aBrilhasti, s_urmech  ; 0
 		dd aCatacombs, aTunnels	; 12
 		dd aWorkshop, aWizardSGuild; 14
 byte_4CA18	db 0, 4		   ; 0
-		db 12h,	17h		; 2
-		db 25h,	31h		; 4
-		db 33h,	46h		; 6
-		db 54h,	62h		; 8
-		db 66h,	70h		; 10
-		db 83h,	85h		; 12
-		db 91h,	97h		; 14
-byte_4CA28	db 0Dh
-byte_4CA29	db 7
-		db    0
-		db    2
-		db    6
-		db    9
-		db  0Fh
-		db    3
-		db    5
-		db  0Ch
-		db  0Ah
-		db    1
-		db  0Eh
-		db    8
-		db    4
-		db  0Bh
+		db 18,	23		; 2
+		db 37,	49		; 4
+		db 51,	70		; 6
+		db 84,	98		; 8
+		db 102,	112		; 10
+		db 131,	133		; 12
+		db 145,	151		; 14
+byte_4CA28	db 0Dh			; 0
+		db 7			; 1
+		db    0			; 2
+		db    2			; 3
+		db    6			; 4
+		db    9			; 5
+		db  0Fh			; 6
+		db    3			; 7
+		db    5			; 8
+		db  0Ch			; 9
+		db  0Ah			; 10
+		db    1			; 11
+		db  0Eh			; 12
+		db    8			; 13
+		db    4			; 14
+		db  0Bh			; 15
 byte_4CA38	db 1
 		db  0Fh
-		db  7Fh	; 
+		db  7Fh
 		db 0FFh
 		db    0
 		db    0
@@ -4721,10 +4734,10 @@ dunLevelIndex	dw 0
 dunLevelNum	dw 0
 sq_north	dw 0
 sq_east		dw 0
-dirFacing	dw 0
+g_direction	dw 0
 inDungeonMaybe	dw 0
 buildingRvalMaybe dw 0
-word_4EE66	dw 0
+g_sameSquareFlag	dw 0
 g_curSpellNumber	dw 0
 g_gameProgressFlags	db 7 dup(0)     ; 0
 byte_4EE71	db 0
@@ -4736,7 +4749,7 @@ byte_4EE71	db 0
 		db    0
 		db    0
 		db    0
-_mfunc_regs	dw 20h dup(0)	    ; 0
+g_vm_registers	dw 20h dup(0)	    ; 0
 g_currentHour	db 0
 lightDistance	db 0
 g_songDuration	db 0
@@ -4745,13 +4758,13 @@ compassDuration		db 0
 detectDuration		db 0
 shieldDuration		db 0
 levitationDuration	db 0
-detectType		db 0
+g_detectType		db 0
 levelNoMaybe	db 0
 levFlags	db 0
 g_dunWidth	db 0
 g_dunHeight	db 0
-byte_4EEC9	db 0
-partyAttackFlag	db 0
+g_monsterGroupCount	db 0
+g_partyAttackFlag	db 0
 shieldAcBonus	db 0
 byte_4EECC	db 0
 minimapWallBitmasks db	0FFh,	0,	0,	0,	0,	0,	0,	0	; 0

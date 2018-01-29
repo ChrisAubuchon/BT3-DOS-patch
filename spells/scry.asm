@@ -35,7 +35,7 @@ sp_scrySight proc far
 	STRCAT
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
-	mov	bx, dirFacing
+	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (dirStringList+2)[bx]

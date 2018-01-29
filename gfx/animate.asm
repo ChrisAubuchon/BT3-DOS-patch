@@ -7,7 +7,7 @@ gfx_animate proc far
 	FUNC_ENTER(2)
 	push	si
 
-	mov	al, byte ptr dirFacing
+	mov	al, byte ptr g_direction
 	mov	iconCurrentCell[1], al
 
 	cmp	gs:byte_422A0, 0

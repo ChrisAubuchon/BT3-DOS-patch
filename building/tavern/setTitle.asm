@@ -10,7 +10,7 @@ tav_setTitle proc far
 	push	si
 
 	mov	[bp+tavernIndex], 4
-	mov	si, dirFacing
+	mov	si, g_direction
 	shl	si, 1
 	mov	ax, sq_north
 	sub	ax, dirDeltaN[si]

@@ -449,7 +449,7 @@ loc_206A1:
 	SAVE_PTR_STACK(dx,ax,outputStringP)
 	jmp	short loc_207D2
 loc_207A7:
-	PUSH_OFFSET(s_period)
+	PUSH_OFFSET(s_periodNlNl)
 	PUSH_STACK_PTR(outputStringP)
 	STRCAT(outputStringP)
 	jmp	short loc_207D2

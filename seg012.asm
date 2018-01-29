@@ -1962,7 +1962,7 @@ sub_24126 proc far
 	call	someStackOperation
 	mov	ax, 0Ch
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	cmp	ax, 1
 	sbb	cx, cx
@@ -2022,19 +2022,19 @@ chron_questBrilhasti proc far
 	call	someStackOperation
 	mov	ax, 35
 	push	ax
-	call	_partyCharUnderLevel
+	call	vm_partyUnderLevel
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_24250
 	mov	ax, quest_brilhastDone
 	push	ax
-	call	chron_questFlagSet
+	call	quest_partyHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_24250
 	mov	ax, quest_brilhastActive
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_241F9
@@ -2069,7 +2069,7 @@ loc_241F9:
 	add	sp, 4
 	mov	ax, quest_brilhastActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 1
 	jmp	short loc_2426C
@@ -2077,11 +2077,11 @@ loc_241F9:
 loc_24250:
 	mov	ax, quest_brilhastActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, quest_brilhastDone
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	sub	ax, ax
 	jmp	short $+2
@@ -2100,7 +2100,7 @@ chron_questValarian proc far
 	call	someStackOperation
 	sub	ax, ax
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_2428C
@@ -2108,7 +2108,7 @@ chron_questValarian proc far
 loc_2428C:
 	mov	ax, quest_valarianDone
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_2429F
@@ -2116,7 +2116,7 @@ loc_2428C:
 loc_2429F:
 	mov	ax, quest_brilhastDone
 	push	ax
-	call	chron_questFlagSet
+	call	quest_partyHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_242B2
@@ -2165,15 +2165,15 @@ loc_242B2:
 	add	sp, 4
 	mov	ax, quest_brilhastActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, quest_brilhastDone
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	sub	ax, ax
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 1
 	jmp	short loc_2434B
@@ -2195,7 +2195,7 @@ chron_questLanatir proc	far
 	call	someStackOperation
 	mov	ax, 2
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_2436C
@@ -2203,7 +2203,7 @@ chron_questLanatir proc	far
 loc_2436C:
 	mov	ax, quest_lanatirDone
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_2437F
@@ -2211,7 +2211,7 @@ loc_2436C:
 loc_2437F:
 	mov	ax, 7Bh	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_24392
@@ -2219,17 +2219,17 @@ loc_2437F:
 loc_24392:
 	mov	ax, 7Ch	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_2441C
 	mov	ax, 7Bh	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, 7Ch	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, offset aTheOldManTakes
 	push	ds
@@ -2259,11 +2259,11 @@ loc_24392:
 	add	sp, 4
 	mov	ax, quest_lanatirActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	sub	ax, ax
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 1
 	jmp	short loc_24420
@@ -2285,7 +2285,7 @@ chron_questAlliria proc	far
 	call	someStackOperation
 	mov	ax, quest_alliriaDone
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_24441
@@ -2293,7 +2293,7 @@ chron_questAlliria proc	far
 loc_24441:
 	mov	ax, quest_alliriaActive
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_24454
@@ -2301,23 +2301,23 @@ loc_24441:
 loc_24454:
 	mov	ax, 73h	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_244E2
 	mov	ax, 74h	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_244E2
 	mov	ax, 73h	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, 74h	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, offset aTheOldManAppea
 	push	ds
@@ -2342,11 +2342,11 @@ loc_24454:
 	add	sp, 4
 	mov	ax, quest_lanatirActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, quest_alliriaActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 1
 	jmp	short loc_244E6
@@ -2369,7 +2369,7 @@ chron_questFerofist proc far
 	call	someStackOperation
 	mov	ax, quest_ferofistDone
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_24507
@@ -2377,7 +2377,7 @@ chron_questFerofist proc far
 loc_24507:
 	mov	ax, quest_ferofistActive
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_2451A
@@ -2385,7 +2385,7 @@ loc_24507:
 loc_2451A:
 	mov	ax, 87h	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_2452D
@@ -2393,17 +2393,17 @@ loc_2451A:
 loc_2452D:
 	mov	ax, 88h	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_245B8
 	mov	ax, 87h	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, 88h	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, offset aTheOldManSLook
 	push	ds
@@ -2433,11 +2433,11 @@ loc_2452D:
 	add	sp, 4
 	mov	ax, quest_ferofistActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, quest_alliriaActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 1
 	jmp	short loc_245BC
@@ -2460,7 +2460,7 @@ chron_questSceadu proc far
 	call	someStackOperation
 	mov	ax, quest_sceaduActive
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_245DD
@@ -2468,7 +2468,7 @@ chron_questSceadu proc far
 loc_245DD:
 	mov	ax, quest_sceaduDone
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_245F0
@@ -2476,7 +2476,7 @@ loc_245DD:
 loc_245F0:
 	mov	ax, 98h	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_24603
@@ -2484,17 +2484,17 @@ loc_245F0:
 loc_24603:
 	mov	ax, 99h	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_2468E
 	mov	ax, 98h	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, 99h	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, offset aTheOldManSEyes
 	push	ds
@@ -2524,11 +2524,11 @@ loc_24603:
 	add	sp, 4
 	mov	ax, quest_ferofistActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, quest_sceaduActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 1
 	jmp	short loc_24692
@@ -2551,7 +2551,7 @@ chron_questWerra proc far
 	call	someStackOperation
 	mov	ax, quest_werraDone
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_246B3
@@ -2559,7 +2559,7 @@ chron_questWerra proc far
 loc_246B3:
 	mov	ax, quest_werraActive
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_246C6
@@ -2567,7 +2567,7 @@ loc_246B3:
 loc_246C6:
 	mov	ax, 9Ch	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_246D9
@@ -2575,17 +2575,17 @@ loc_246C6:
 loc_246D9:
 	mov	ax, 9Dh	
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_24764
 	mov	ax, 9Ch	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, 9Dh	
 	push	ax
-	call	_removeItem
+	call	vm_removeItem
 	add	sp, 2
 	mov	ax, offset aNoTheOldManCri
 	push	ds
@@ -2615,11 +2615,11 @@ loc_246D9:
 	add	sp, 4
 	mov	ax, quest_werraActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, quest_sceaduActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 1
 	jmp	short loc_24768
@@ -2652,13 +2652,13 @@ chron_questTarjan proc far
 	add	sp, 4
 	mov	ax, quest_tarjanDone
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_247A8
 	mov	ax, quest_tarjanActive
 	push	ax
-	call	chron_questFlagNotSet
+	call	quest_partyNotHasFlagSet
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_247AD
@@ -2674,7 +2674,7 @@ loc_247AD:
 	add	sp, 4
 	mov	ax, 0A0h 
 	push	ax
-	call	sub_19D2A
+	call	vm_findItem
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_247D1
@@ -2718,11 +2718,11 @@ loc_247D1:
 	add	sp, 4
 	mov	ax, quest_werraActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, quest_tarjanActive
 	push	ax
-	call	chron_setQuestFlag
+	call	quest_setFlag
 	add	sp, 2
 	mov	ax, 0FFh
 	push	ax

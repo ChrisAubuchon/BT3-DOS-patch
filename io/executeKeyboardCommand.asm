@@ -63,7 +63,7 @@ l_pauseGame:
 	jmp	l_success
 
 l_partyAttack:
-	mov	partyAttackFlag, 1
+	mov	g_partyAttackFlag, 1
 	jmp	l_fail
 
 l_useItem:

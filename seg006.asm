@@ -275,9 +275,9 @@ l_hasEffectEquipped_do:
 	mov		[bp+rval], 1
 	mov		ax, [bp+var_4]
 	dec		ax
-	mov		gs:word_42416, ax
+	mov		gs:g_inventoryPackStart, ax
 	mov		ax, [bp+playerNo]
-	mov		gs:word_4244C, ax
+	mov		gs:g_inventoryPackTarget, ax
 	getCharP	[bp+playerNo], bx
 	add		bx, [bp+var_4]
 	mov		al, gs:party.acBase[bx]
@@ -308,7 +308,7 @@ inven_pack proc	far
 	mov	ax, 2
 	call	someStackOperation
 	push	si
-	mov	ax, gs:word_42416
+	mov	ax, gs:g_inventoryPackStart
 	mov	[bp+var_2], ax
 	jmp	short loc_17EAA
 loc_17EA7:
@@ -316,7 +316,7 @@ loc_17EA7:
 loc_17EAA:
 	cmp	[bp+var_2], 33
 	jge	short loc_17ED1
-	getCharP	gs:word_4244C, si
+	getCharP	gs:g_inventoryPackTarget, si
 	add	si, [bp+var_2]
 	mov	al, gs:(party.inventory.itemFlags+3)[si]
 	mov	gs:party.inventory.itemFlags[si], al
@@ -329,7 +329,7 @@ loc_17ED8:
 loc_17EDB:
 	cmp	[bp+var_2], 36
 	jge	short loc_17EFE
-	getCharP	gs:word_4244C, bx
+	getCharP	gs:g_inventoryPackTarget, bx
 	add	bx, [bp+var_2]
 	mov	gs:party.inventory.itemFlags[bx], 0
 	jmp	short loc_17ED8
@@ -927,9 +927,9 @@ item_discard proc far
 	mov	cx, ax
 	shl	ax, 1
 	add	ax, cx
-	mov	gs:word_42416, ax
+	mov	gs:g_inventoryPackStart, ax
 	mov	ax, [bp+arg_0]
-	mov	gs:word_4244C, ax
+	mov	gs:g_inventoryPackTarget, ax
 	push	cs
 	call	near ptr inven_pack
 	mov	sp, bp
@@ -1496,7 +1496,7 @@ loc_18968:
 	jmp	short loc_18A16
 loc_189F6:
 	mov	bx, [bp+var_A]
-	cmp	byte_464B8[bx],	1
+	cmp	g_itemBaseCount[bx],	1
 	jz	short loc_18A16
 	push	[bp+var_8]
 	push	word ptr [bp+arg_2+2]
