@@ -1,4 +1,3 @@
-include(`foreachq4.m4')dnl
 divert(`-1')
 include(`functionTable.m4')
 
@@ -74,7 +73,7 @@ define(`IOWAIT', `mov	ax, 4000h
 
 # PRINTSTRING([clear])
 #
-define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear)', `CALL(printString)')')
+define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear)', `ifelse(`$1', `wait', `CALL(printStringWithWait)', `CALL(printString)')')')
 
 # DELAY([count]
 #
