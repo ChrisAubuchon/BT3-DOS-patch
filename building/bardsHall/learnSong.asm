@@ -33,7 +33,7 @@ bards_learnSong	proc far
 	CALL(itoa)
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
-	PUSH_OFFSET(s_bardInGold)
+	PUSH_OFFSET(s_inGoldWhoWillPay)
 	push	dx
 	push	[bp+var_4]
 	STRCAT
