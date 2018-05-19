@@ -25,7 +25,7 @@ l_inventoryLoop:
 	mov	gs:g_inventoryPackStart, ax
 	mov	ax, [bp+slotNumber]
 	mov	gs:g_inventoryPackTarget, ax
-	CALL(inven_pack)
+	CALL(inventory_pack)
 	jmp	short l_characterLoopNext
 
 l_inventoryLoopNext:

@@ -48,10 +48,10 @@ l_sanctuary:
 loc_1CF7E:
 	mov	al, 0Fh
 loc_1CF80:
-	mov	gs:songACBonus,	al
+	mov	gs:g_songAcBonus,	al
 	or	al, al
 	jnz	short loc_1CF91
-	inc	gs:songACBonus
+	inc	gs:g_songAcBonus
 loc_1CF91:
 	jmp	short l_return
 

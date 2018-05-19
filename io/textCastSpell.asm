@@ -70,7 +70,7 @@ l_spellNotFound:
 l_spellFound:
 	push	[bp+counter]
 	push	[bp+arg_0]
-	CALL(mage_hasLearnedSpell)
+	CALL(character_learnedSpell)
 	or	ax, ax
 	jz	l_notLearned
 	

@@ -14,8 +14,7 @@ l_retry:
 	mov	[bp+fd], ax
 	cmp	ax, 0FFFFh
 	jnz	l_asdf
-	PUSH_OFFSET(s_insertDisk)
-	PRINTSTRING
+	PRINTOFFSET(s_insertDisk)
 	push	dseg_0
 	push	disk1
 	PRINTSTRING

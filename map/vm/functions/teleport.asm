@@ -34,15 +34,15 @@ mfunc_teleport proc far
 
 	cmp	ax, 80h
 	jb	short loc_19531
-	mov	buildingRvalMaybe, gameState_inWilderness
+	mov	g_mapRval, gameState_inWilderness
 	and	ax, 7Fh
-	mov	currentLocationMaybe, ax
+	mov	g_locationNumber, ax
 	jmp	short loc_19555
 loc_19531:
 	mov	ax, [bp+destinationDungeon]
 	cmp	dunLevelIndex, ax
 	jz	short loc_1954A
-	mov	buildingRvalMaybe, gameState_inDungeon
+	mov	g_mapRval, gameState_inDungeon
 loc_1954A:
 	mov	ax, [bp+destinationDungeon]
 	mov	dunLevelIndex, ax
@@ -52,7 +52,7 @@ loc_19555:
 loc_19557:
 	cmp	[bp+destinationDungeon], 80h
 	jb	short loc_19579
-	mov	buildingRvalMaybe, gameState_inDungeon
+	mov	g_mapRval, gameState_inDungeon
 	mov	ax, [bp+destinationDungeon]
 	and	ax, 7Fh
 	mov	dunLevelIndex, ax
@@ -60,12 +60,12 @@ loc_19557:
 
 loc_19579:
 	mov	ax, [bp+destinationDungeon]
-	cmp	currentLocationMaybe, ax
+	cmp	g_locationNumber, ax
 	jz	short loc_19592
-	mov	buildingRvalMaybe, gameState_inWilderness
+	mov	g_mapRval, gameState_inWilderness
 loc_19592:
 	mov	ax, [bp+destinationDungeon]
-	mov	currentLocationMaybe, ax
+	mov	g_locationNumber, ax
 
 l_return:
 	mov	ax, word ptr [bp+dataP]

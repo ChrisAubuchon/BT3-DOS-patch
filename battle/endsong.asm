@@ -17,7 +17,7 @@ l_shield:
 	mov	gs:partySpellAcBonus, 0
 	jmp	short l_endAndReturn
 l_sanctuary:
-	mov	gs:songACBonus,	0
+	mov	gs:g_songAcBonus,	0
 l_bringaround:
 	mov	gs:songRegenHP,	0
 	jmp	short l_endAndReturn

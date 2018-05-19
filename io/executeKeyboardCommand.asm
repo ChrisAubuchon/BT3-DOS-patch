@@ -20,7 +20,7 @@ l_notFunctionKeySpell:
 	mov	ax, [bp+arg_0]
 	sub	ax, '1'
 	push	ax
-	CALL(printCharacter)
+	CALL(character_print)
 	jmp	l_success
 	
 l_notPrintCharacter:

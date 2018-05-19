@@ -12,7 +12,7 @@ brilhasti_levelMagicUser proc far
 l_loop:
 	push	[bp+spellIndex]
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	inc	[bp+spellIndex]
 	cmp	[bp+spellIndex], 74
 	jl	short l_loop

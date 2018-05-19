@@ -14,8 +14,8 @@ dun_setExitLocation proc far
 	mov	al, fs:[bx+dun_t.exitSqE]
 	mov	sq_east, ax
 	mov	al, fs:[bx+dun_t.exitLocation]
-	mov	currentLocationMaybe, ax
-	mov	buildingRvalMaybe, 2
+	mov	g_locationNumber, ax
+	mov	g_mapRval, 2
 	FUNC_EXIT
 	retf
 dun_setExitLocation endp

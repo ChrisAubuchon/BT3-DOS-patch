@@ -24,15 +24,15 @@ geomancer_convert proc	far
 	mov	ax, 106
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	mov	ax, 107
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	mov	ax, 108
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	mov	byte ptr g_printPartyFlag,	0
 
 	pop	si

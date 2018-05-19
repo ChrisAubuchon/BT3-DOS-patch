@@ -42,7 +42,7 @@ l_retry:
 	push	[bp+var_2]
 	push	dx
 	push	ax
-	CALL(item_getName)
+	CALL(inventory_getItemName)
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
 	PUSH_STACK_ADDRESS(stringBuffer)
@@ -63,7 +63,7 @@ l_addItem:
 	push	[bp+var_108]
 	push	[bp+var_2]
 	push	[bp+slotNumber]
-	CALL(inven_addItem)
+	CALL(inventory_addItem)
 	or	ax, ax
 	jz	short l_inventoryFull
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
@@ -85,7 +85,7 @@ l_addItem:
 	push	[bp+var_2]
 	push	dx
 	push	ax
-	CALL(item_getName)
+	CALL(inventory_getItemName)
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
 	PUSH_STACK_ADDRESS(stringBuffer)

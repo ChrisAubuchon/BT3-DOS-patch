@@ -10,7 +10,7 @@ mfunc_upStairs proc far
 	jnz	short l_return
 	mov	g_sameSquareFlag, 1
 	CALL(text_clear)
-	mov	al, levFlags
+	mov	al, g_levelFlags
 	and	al, 10h
 	cmp	al, 1
 	sbb	cx, cx
@@ -24,7 +24,7 @@ mfunc_upStairs proc far
 	push	word ptr [bp+dataP+2]
 	push	word ptr [bp+dataP]
 	CALL(mfunc_setSameSquareFlag, near)
-	inc	dunLevelNum
+	inc	g_dunLevelNum
 	CALL(dun_changeLevels, near)
 l_return:
 	mov	ax, word ptr [bp+dataP]

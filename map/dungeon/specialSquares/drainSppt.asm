@@ -10,7 +10,7 @@ dunsq_drainSppt	proc far
 l_loop:
 	CALL(random)
 	and	ax, 3
-	mov	cl, levelNoMaybe
+	mov	cl, g_levelNumber
 	sub	ch, ch
 	add	ax, cx
 	mov	cx, ax

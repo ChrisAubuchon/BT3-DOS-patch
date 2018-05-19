@@ -6,7 +6,7 @@ l_loop:
 	CHARINDEX(ax, cx, bx)
 	test		gs:party.status[si], stat_dead or stat_stoned
 	jnz		l_next
-	mov		al, levelNoMaybe
+	mov		al, g_levelNumber
 	sub		ah, ah
 	add		gs:party.currentHP[bx], ax
 	mov		ax, gs:party.maxHP[bx]

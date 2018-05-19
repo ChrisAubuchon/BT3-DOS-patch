@@ -39,7 +39,7 @@ bat_doBreathAttack proc	far
 l_partyMultiplier:
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	push	gs:party.level[bx]
-	CALL(_returnXor255, near)
+	CALL(lib_maxFF, near)
 	mov	[bp+levelMultiplier], al
 
 l_allFoesCheck:
@@ -217,7 +217,7 @@ loc_203AA:
 	mov	ax, itemEff_breathDefense
 	push	ax
 	push	[bp+target]
-	CALL(hasEffectEquipped)
+	CALL(character_isEffectEquipped)
 	or	ax, ax
 	jl	short loc_20467
 	test	[bp+breathFlags], breath_isBreath

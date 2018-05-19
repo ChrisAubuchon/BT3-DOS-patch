@@ -9,7 +9,7 @@ dun_changeLevels proc far
 
 	mov	word ptr [bp+dungeonDataP], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+dungeonDataP+2], seg seg022
-	mov	si, dunLevelNum
+	mov	si, g_dunLevelNum
 	lfs	bx, [bp+dungeonDataP]
 	mov	al, fs:[bx+si+dun_t.dunLevel]
 	sub	ah, ah
@@ -21,7 +21,7 @@ dun_changeLevels proc far
 	cbw
 	add	sq_east, ax
 	mov	gs:levelChangedFlag, 1
-	mov	buildingRvalMaybe, 4
+	mov	g_mapRval, 4
 
 	pop	si
 	FUNC_EXIT

@@ -16,7 +16,7 @@ party_print proc far
 	cmp	byte ptr g_printPartyFlag,	0
 	jnz	l_return
 
-	CALL(rost_updateParty)
+	CALL(party_update)
 	mov	byte ptr g_printPartyFlag,	1
 	call	far ptr	sub_3E974
 

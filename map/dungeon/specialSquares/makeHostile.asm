@@ -11,7 +11,7 @@ l_checkEffectLoop:
 	mov	ax, itemEff_calmMonster
 	push	ax
 	push	[bp+var_2]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jz	short l_returnOne

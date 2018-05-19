@@ -404,7 +404,6 @@ loc_15D04:
 	jmp	loc_1597F
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 text_scrollingWindow endp

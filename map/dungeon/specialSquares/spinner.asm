@@ -11,7 +11,7 @@ l_loop:
 	mov	ax, itemEff_noSpin
 	push	ax
 	push	[bp+slotNumber]
-	CALL(hasEffectEquipped)
+	CALL(character_isEffectEquipped)
 	or	ax, ax
 	jz	short l_returnOne
 	inc	[bp+slotNumber]

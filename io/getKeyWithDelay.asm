@@ -53,16 +53,16 @@ l_slower:
 	jmp	l_loopEntry
 
 l_printFaster:
-	mov	ax, offset aFaster
+	mov	ax, offset s_faster
 	jmp	l_doPrint
 
 l_printSlower:
-	mov	ax, offset aSlower
+	mov	ax, offset s_slower
 
 l_doPrint:
 	push	ds
 	push	ax
-	func_printString
+	PRINTSTRING
 	jmp	l_loopEntry
 
 l_skipFastCheck:

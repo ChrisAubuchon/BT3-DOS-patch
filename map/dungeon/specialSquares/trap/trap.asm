@@ -25,7 +25,7 @@ loc_24DCB:
 	cmp	ax, 3
 	jz	short loc_24DCB
 
-	mov	al, levelNoMaybe
+	mov	al, g_levelNumber
 	sub	ah, ah
 	and	ax, 7
 	shl	ax, 1

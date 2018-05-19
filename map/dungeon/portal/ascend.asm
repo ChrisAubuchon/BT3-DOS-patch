@@ -27,7 +27,7 @@ dun_ascendPortal proc far
 	jz	short l_return
 	cmp	levitationDuration, 0
 	jz	short l_return
-	test	levFlags, 10h
+	test	g_levelFlags, 10h
 	jz	short loc_25878
 	CALL(portal_incrementLevel, near)
 	jmp	short l_return

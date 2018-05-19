@@ -28,7 +28,7 @@ dun_descendPortal proc far
 	jnz	short loc_258CF
 	CALL(dunsq_drainHp)
 loc_258CF:
-	test	levFlags, 10h
+	test	g_levelFlags, 10h
 	jz	short loc_258E1
 	CALL(portal_decrementLevel)
 	jmp	short loc_258E5

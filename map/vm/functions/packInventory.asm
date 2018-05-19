@@ -9,7 +9,7 @@ mfunc_packInventory proc	far
 	mov	gs:g_inventoryPackTarget, ax
 	mov	al, gs:g_usedItemSlotNumber
 	mov	gs:g_inventoryPackStart, ax
-	call	inven_pack
+	call	inventory_pack
 	mov	ax, word ptr [bp+dataP]
 	mov	dx, word ptr [bp+dataP+2]
 	FUNC_EXIT

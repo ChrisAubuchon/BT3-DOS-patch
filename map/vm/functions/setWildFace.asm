@@ -26,7 +26,7 @@ mfunc_setWildFace proc far
 	add	ax, sq_east
 	mov	[bp+sqE], ax
 
-	cmp	gs:wildWrapFlag, 0
+	cmp	gs:g_wildWrapFlag, 0
 	jz	short l_skipWrap
 	mov	al, gs:mapHeight
 	sub	ah, ah

@@ -2,7 +2,7 @@
 
 portal_incrementLevel proc far
 	FUNC_ENTER
-	inc	dunLevelNum
+	inc	g_dunLevelNum
 	CALL(dun_changeLevels)
 	FUNC_EXIT
 	retf

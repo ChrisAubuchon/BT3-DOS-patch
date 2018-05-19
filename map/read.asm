@@ -87,7 +87,7 @@ loc_173FA:
 	push	[bp+arg_2]
 	push	[bp+memSegment]
 	push	[bp+memOffset]
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 
 	push	[bp+memSegment]
 	push	[bp+memOffset]

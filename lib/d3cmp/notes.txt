@@ -1,0 +1,5 @@
+Registers used in this library
+==============================
+
+di - Current work buffer word
+dl - data word shift value. If less than 8, read another byte

@@ -1,0 +1,1 @@
+word_4D88D has the values that are returned to doDecomp. The value is right shifted once and has 627 subtracted from it.

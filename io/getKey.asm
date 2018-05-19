@@ -4,7 +4,7 @@
 getKey proc far
 
 	inputKey= word ptr	-2
-	arg_0= word ptr	 6
+	mouseLineCount= word ptr	 6
 
 	FUNC_ENTER(2)
 
@@ -16,12 +16,12 @@ l_loopEntry:
 	jz	short l_skipMouseUpdate
 	call	far ptr	sub_3E974
 
-	push	[bp+arg_0]
+	push	[bp+mouseLineCount]
 	CALL(mouse_updateIcon, near)
 	CALL(sub_1766A, near)
 
 l_skipMouseUpdate:
-	push	[bp+arg_0]
+	push	[bp+mouseLineCount]
 	CALL(mouse_getClick, near)
 	mov	[bp+inputKey], ax
 	or	ax, ax

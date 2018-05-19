@@ -8,7 +8,7 @@ bigpic_setBackground	proc far
 
 	FUNC_ENTER(4)
 
-	test	levFlags, 20h
+	test	g_levelFlags, 20h
 	jz	l_inDungeon
 
 	mov	ax, 44h			; Outdoor sky color
@@ -19,7 +19,7 @@ bigpic_setBackground	proc far
 	mov	dx, seg seg021
 	push	dx
 	push	ax
-	CALL(bigpicmemcpy)
+	CALL(bigpic_memcpy)
 	jmp	l_return
 
 l_inDungeon:

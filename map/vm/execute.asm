@@ -122,7 +122,7 @@ l_checkReturn:
 	cmp	gs:breakAfterFunc, 0
 	jnz	l_getOpcode
 
-	cmp	buildingRvalMaybe, 0
+	cmp	g_mapRval, 0
 	jz	short l_next
 	mov	ax, gs:mapRval
 	jmp	short l_return

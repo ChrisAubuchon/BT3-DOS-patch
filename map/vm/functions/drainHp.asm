@@ -43,7 +43,7 @@ l_next:
 	CALL(party_getLastSlot)
 	cmp	ax, 7
 	jle	short l_return
-	mov	buildingRvalMaybe, gameState_partyDied
+	mov	g_mapRval, gameState_partyDied
 
 l_return:
 	mov	byte ptr g_printPartyFlag,	0

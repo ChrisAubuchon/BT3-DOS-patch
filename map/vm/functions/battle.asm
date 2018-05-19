@@ -43,7 +43,7 @@ l_doBattle:
 	CALL(bat_init)
 	or	ax, ax
 	jz	short l_battleOver
-	mov	buildingRvalMaybe, gameState_partyDied
+	mov	g_mapRval, gameState_partyDied
 	mov	gs:breakAfterFunc, 0
 	mov	ax, word ptr [bp+dataP]
 	mov	dx, word ptr [bp+dataP+2]

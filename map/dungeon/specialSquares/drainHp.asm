@@ -13,7 +13,7 @@ l_loop:
 	CHARINDEX(ax, STACKVAR(slotNumber), si)
 	test	gs:party.status[si], stat_dead	or stat_stoned
 	jnz	short l_next
-	mov	al, levelNoMaybe
+	mov	al, g_levelNumber
 	sub	ah, ah
 	mov	di, ax
 	cmp	gs:party.currentHP[si], di
@@ -32,7 +32,7 @@ l_next:
 	CALL(party_getLastSlot)
 	cmp	ax, 7
 	jle	short l_return
-	mov	buildingRvalMaybe, 5
+	mov	g_mapRval, 5
 l_return:
 	mov	byte ptr g_printPartyFlag, 0
 	sub	ax, ax

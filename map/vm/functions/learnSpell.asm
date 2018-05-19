@@ -12,7 +12,7 @@ mfunc_learnSpell proc far
 	push	ax
 	mov	al, gs:g_userSlotNumber
 	push	ax
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	mov	ax, word ptr [bp+dataP]
 	mov	dx, word ptr [bp+dataP+2]
 	FUNC_EXIT

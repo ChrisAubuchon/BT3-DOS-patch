@@ -132,7 +132,6 @@ loc_1207F:
 	jmp	l_nullOrAt
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 printVarString endp

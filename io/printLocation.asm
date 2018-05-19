@@ -25,7 +25,7 @@ printLocation proc far
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 
-	cmp	currentLocationMaybe, 0
+	cmp	g_locationNumber, 0
 	jnz	short l_skipThe
 
 	PUSH_OFFSET(s_the)
@@ -48,7 +48,7 @@ l_skipThe:
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 
-	mov	bx, currentLocationMaybe
+	mov	bx, g_locationNumber
 	mov	al, byte_428A6[bx]
 	cbw
 	mov	cx, sq_north
@@ -105,7 +105,7 @@ loc_12170:
 	mov	[bp+var_108], dx
 
 loc_121CD:
-	mov	bx, currentLocationMaybe
+	mov	bx, g_locationNumber
 	mov	al, byte_428B0[bx]
 	cbw
 	mov	cx, sq_east
@@ -158,7 +158,7 @@ loc_1222D:
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 loc_1228A:
-	mov	bx, currentLocationMaybe
+	mov	bx, g_locationNumber
 	mov	al, byte_428BA[bx]
 	cbw
 	mov	[bp+var_110], ax

@@ -115,7 +115,7 @@ loc_1726A:
 	push	gs:bigpicCellData_off
 	push	[bp+var_C]
 	push	[bp+var_E]
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 	push	[bp+var_C]
 	push	[bp+var_E]
 	CALL(_freeMaybe)
