@@ -89,7 +89,7 @@ l_setAttackCount:
 	jmp	l_increaseRandomAttribute
 
 rogueLevelUp:
-	CALL(rnd_1d8)
+	CALL(random_1d8)
 	mov	cx, ax
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	al, gs:party.dexterity[bx]
@@ -109,9 +109,9 @@ rogueLevelUp:
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	gs:party.specAbil[bx],	cl
 
-	; Adding rnd_1d8 to bonusVar looks wrong. Doing it this way,
+	; Adding random_1d8 to bonusVar looks wrong. Doing it this way,
 	; specAbil+1 gets bonusVar+1d8 and specAbil+2 gets bonusVar+1d8+1d8.
-	CALL(rnd_1d8)
+	CALL(random_1d8)
 	add	[bp+bonusVar], ax
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	al, gs:(party.specAbil+1)[bx]
@@ -123,7 +123,7 @@ rogueLevelUp:
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	gs:(party.specAbil+1)[bx], cl
 
-	CALL(rnd_1d8)
+	CALL(random_1d8)
 	add	[bp+bonusVar], ax
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	al, gs:(party.specAbil+2)[bx]
@@ -145,7 +145,7 @@ bardLevelUp:
 	jmp	l_increaseRandomAttribute
 
 hunterLevelUp:
-	CALL(rnd_1d8)
+	CALL(random_1d8)
 	mov	cx, ax
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	al, gs:party.dexterity[bx]

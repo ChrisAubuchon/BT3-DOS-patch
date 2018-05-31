@@ -11,7 +11,7 @@ empty_enter proc	far
 	CALL(bat_init)
 
 l_noBattle:
-	cmp	currentLocationMaybe, 1
+	cmp	g_locationNumber, 1
 	jnz	short loc_14956
 	mov	ax, 50
 	jmp	short loc_14959

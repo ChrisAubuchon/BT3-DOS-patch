@@ -29,7 +29,7 @@ l_notActive:
 	jl	short l_durationSpellLoopEntry
 
 	mov	gs:gl_detectSecretDoorFlag, 0
-	mov	gs:songACBonus,	0
+	mov	gs:g_songAcBonus,	0
 	CALL(readRosterFiles, near)
 	CALL(roster_writeParty, near)
 	PUSH_OFFSET(s_ruinTitle)
@@ -64,7 +64,7 @@ l_mainIoLoopEntry:
 	mov	ax, [bp+currentKey]
 	sub	ax, '1'
 	push	ax
-	CALL(printCharacter)
+	CALL(character_print)
 	sub	ax, ax
 	push	ax
 	CALL(bigpic_drawPictureNumber)
@@ -93,9 +93,9 @@ l_executeCampFunction:
 	shl	bx, 1
 	shl	bx, 1
 	call	g_campActionFunctions[bx]
-	cmp	buildingRvalMaybe, 0
+	cmp	g_mapRval, 0
 	jz	short loc_135A2
-	mov	ax, buildingRvalMaybe
+	mov	ax, g_mapRval
 	jmp	short loc_135AA
 loc_135A2:
 	inc	[bp+loopCounter]

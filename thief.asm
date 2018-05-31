@@ -250,7 +250,7 @@ loc_101E6:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
@@ -298,7 +298,7 @@ loc_10266:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
@@ -465,7 +465,7 @@ loc_1043E:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
@@ -489,11 +489,11 @@ loc_1043E:
 	mov	gs:bigpicCellData_off, ax
 	mov	gs:bigpicCellData_seg, dx
 	push	cs
-	call	near ptr sub_116CC
+	call	near ptr map_resetLocation
 	call	restoreGame
-	push	buildingRvalMaybe
+	push	g_mapRval
 	push	cs
-	call	near ptr sub_10560
+	call	near ptr gameLoop
 	add	sp, 2
 	push	cs
 	call	near ptr cleanupAndExit
@@ -502,13 +502,12 @@ loc_1043E:
 	retf
 _main endp
 
-
 ; Attributes: bp-based frame
+;
 
 cleanupAndExit proc far
-	var_6= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	musicBufferP= word ptr	-4
+	loopCounter= word ptr	-2
 
 	push	bp
 	mov	bp, sp
@@ -518,34 +517,34 @@ cleanupAndExit proc far
 	call	sub_2800B
 	sub	ax, ax
 	push	ax
-	call	far ptr	vid_setMode
+	call	far ptr vid_setMode
 	add	sp, 2
-	mov	[bp+var_2], 0
-	jmp	short loc_1051D
-loc_1051A:
-	inc	[bp+var_2]
-loc_1051D:
-	cmp	[bp+var_2], 8
-	jge	short loc_10550
-	mov	bx, [bp+var_2]
+
+	mov	[bp+loopCounter], 0
+l_freeMusicLoop:
+	mov	bx, [bp+loopCounter]
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr gs:musicBufs._offset[bx]
 	mov	dx, gs:musicBufs._segment[bx]
-	mov	[bp+var_6], ax
-	mov	[bp+var_4], dx
+	mov	[bp+musicBufferP], ax
 	or	ax, dx
-	jz	short loc_1054E
+	jz	short l_freeMusicLoopNext
+
 	push	dx
-	push	[bp+var_6]
+	push	[bp+musicBufferP]
 	call	_freeMaybe
 	add	sp, 4
-loc_1054E:
-	jmp	short loc_1051A
+
+l_freeMusicLoopNext:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 8
+	jl	short l_freeMusicLoop
+
 loc_10550:
 	mov	ax, 1
 	push	ax
-	call	far ptr	sub_28424
+	call	far ptr sub_28424
 	add	sp, 2
 	mov	sp, bp
 	pop	bp
@@ -554,78 +553,82 @@ cleanupAndExit endp
 
 ; Attributes: bp-based frame
 
-sub_10560 proc far
-	arg_0= word ptr	 6
+gameLoop proc far
+	currentState= word ptr	 6
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	call	far ptr j_nullsub_3
-loc_1056F:
-	cmp	[bp+arg_0], 0FFh
-	jz	short loc_105DE
-	mov	buildingRvalMaybe, 0
-	mov	ax, [bp+arg_0]
-	jmp	short loc_105C6
-loc_10586:
+
+l_loop:
+	cmp	[bp+currentState], 0FFh		; 0FFh - Exit game
+	jz	short l_return
+
+	mov	g_mapRval, 0
+	mov	ax, [bp+currentState]
+
+	cmp	ax, gameState_inCamp
+	jz	short l_enterCamp
+
+	cmp	ax, gameState_inWilderness
+	jz	short l_enterWild
+
+	cmp	ax, gameState_inDungeon
+	jz	short l_enterDungeon
+
+	cmp	ax, gameState_partyDied
+	jz	short l_party_died
+
+	jmp	short l_return
+
+l_enterCamp:
 	call	camp_enter
-	mov	[bp+arg_0], ax
-	jmp	short loc_105DC
-loc_10590:
+	mov	[bp+currentState], ax
+	jmp	short l_loop
+
+l_enterWild:
 	push	cs
-	call	near ptr wildMainLoop
-	mov	[bp+arg_0], ax
-	jmp	short loc_105DC
-loc_10599:
+	call	near ptr wild_main
+	mov	[bp+currentState], ax
+	jmp	short l_loop
+
+l_enterDungeon:
 	mov	inDungeonMaybe, 1
 	push	cs
-	call	near ptr dunMainLoop
-	mov	[bp+arg_0], ax
+	call	near ptr dun_main
+	mov	[bp+currentState], ax
 	mov	inDungeonMaybe, 0
-	jmp	short loc_105DC
-loc_105B8:
-	call	partyDied
-	mov	[bp+arg_0], ax
-	jmp	short loc_105DC
-loc_105C2:
-	jmp	short loc_105DE
-	jmp	short loc_105DC
-loc_105C6:
-	cmp	ax, gameState_inCamp
-	jz	short loc_10586
-	cmp	ax, gameState_inWilderness
-	jz	short loc_10590
-	cmp	ax, gameState_inDungeon
-	jz	short loc_10599
-	cmp	ax, gameState_partyDied
-	jz	short loc_105B8
-	jmp	short loc_105C2
-loc_105DC:
-	jmp	short loc_1056F
-loc_105DE:
+	jmp	short l_loop
+
+l_party_died:
+	call	party_died
+	mov	[bp+currentState], ax
+	jmp	short l_loop
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-sub_10560 endp
+gameLoop endp
 
 ; Attributes: bp-based frame
 
-dunMainLoop proc far
+dun_main proc far
 
-	var_26=	dword ptr -26h
-	var_22=	word ptr -22h
+	var_26=	dword ptr -24h
 	var_20=	word ptr -20h
-	var_1E=	word ptr -1Eh
+	dungeonName=	word ptr -1Eh
 	var_E= word ptr	-0Eh
 	var_C= word ptr	-0Ch
 	var_A= word ptr	-0Ah
 	var_8= word ptr	-8
-	var_6= word ptr	-6
+	inKey= word ptr	-6
 	levP= dword ptr	-4
 
-	func_enter
-	_chkstk		26h
+	push	bp
+	mov	bp, sp
+	mov	ax, 24h
+	call	someStackOperation
 	push	si
 
 	mov	word ptr [bp+levP], offset g_rosterCharacterBuffer
@@ -640,6 +643,7 @@ dunMainLoop proc far
 	push	ax
 	call	map_read
 	add	sp, 6
+
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.levFlags]
 	sub	ah, ah
@@ -647,10 +651,10 @@ dunMainLoop proc far
 	shr	ax, cl
 	and	ax, 3
 	add	ax, 3
-	mov	[bp+var_22], ax
 	push	ax
 	call	map_readGraphics
 	add	sp, 2
+
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t.monIndex]
 	sub	ah, ah
@@ -658,9 +662,13 @@ dunMainLoop proc far
 	call	map_readMonsters
 	add	sp, 2
 
-	push_ss_string	var_1E
-	push_ptr_stack	levP
-	std_call	unmaskString, 8
+	lea	ax, [bp+dungeonName]
+	push	ss
+	push	ax
+	push	word ptr [bp+levP+2]
+	push	word ptr [bp+levP]
+	call	unmaskString
+	add	sp, 8
 
 	lfs	bx, [bp+levP]
 	mov	al, fs:[bx+dun_t._width]
@@ -669,13 +677,14 @@ dunMainLoop proc far
 	mov	g_dunHeight, al
 	mov	al, fs:[bx+dun_t.levelNum]
 	sub	ah, ah
-	mov	dunLevelNum,	ax
+	mov	g_dunLevelNum,	ax
 	mov	al, fs:[bx+dun_t.levFlags]
-	mov	levFlags, al
+	mov	g_levelFlags, al
 	and	al, 7
-	mov	levelNoMaybe, al
+	mov	g_levelNumber, al
+
 	cmp	gs:levelChangedFlag, 0
-	jz	short loc_dunMainLoop_skipDeltaSQEN
+	jz	short l_skipDeltaSQEN
 
 	; Add deltaSqN and deltaSqE to sq_north and sq_east
 	mov	al, fs:[bx+dun_t.deltaSqN]
@@ -686,7 +695,7 @@ dunMainLoop proc far
 	sub	sq_east, ax
 	mov	gs:levelChangedFlag, 0
 
-loc_dunMainLoop_skipDeltaSQEN:
+l_skipDeltaSQEN:
 	mov	ax, bx
 	mov	dx, word ptr [bp+levP+2]
 	add	ax, 24h	
@@ -696,9 +705,9 @@ loc_dunMainLoop_skipDeltaSQEN:
 	mov	dl, g_dunHeight
 	sub	dh, dh
 
-loc_dunMainLoop_popRowLoop_enter:
+l_popRowLoop_enter:
 	cmp	dx, [bp+var_C]
-	jbe	short loc_dunMainLoop_popRowLoop_exit
+	jbe	short l_popRowLoop_exit
 	mov	ax, [bp+var_C]
 	shl	ax, 1
 	add	ax, gs:mapDataOff
@@ -718,42 +727,42 @@ loc_dunMainLoop_popRowLoop_enter:
 	mov	word ptr gs:rowOffset[bx], ax
 	mov	word ptr gs:(rowOffset+2)[bx], seg seg022
 	inc	[bp+var_C]
-	jmp	short loc_dunMainLoop_popRowLoop_enter
+	jmp	short l_popRowLoop_enter
 
-loc_dunMainLoop_popRowLoop_exit::
+l_popRowLoop_exit::
 	mov	ax, word ptr [bp+levP]
 	mov	dx, word ptr [bp+levP+2]
 	add	ax, 22h	
 	mov	gs:mapDataOff, ax
 	mov	gs:mapDataSeg, dx
 
-loc_dunMainLoop_wander_check:
+l_wander_check:
 	call	random
 	test	al, 0FCh
-	jnz	short loc_dunMainLoop_battleCheck
+	jnz	short l_battleCheck
 	call	dun_wanderingCreature
 
-loc_dunMainLoop_battleCheck:
+l_battleCheck:
 	cmp	g_partyAttackFlag, 0
-	jnz	short loc_dunMainLoop_doBattle
+	jnz	short l_doBattle
+
 	cmp	byte_4EECC, 0
-	jnz	short loc_dunMainLoop_doBattle
+	jnz	short l_doBattle
+
 	call	random
 	test	al, 3Fh
 	jnz	short loc_107BE
+
 	cmp	gs:byte_42296, 0FFh
 	jz	short loc_107BE
+
 	cmp	gs:songAntiMonster, 0
 	jnz	short loc_107BE
 
-loc_dunMainLoop_doBattle:
+l_doBattle:
 	call	bat_init
 	or	ax, ax
-	jz	short loc_107B9
-	mov	ax, 5
-	jmp	loc_dunMainLoop_exit
-
-loc_107B9:
+	jnz	l_returnPartyDied
 	call	text_clear
 
 loc_107BE:
@@ -761,13 +770,15 @@ loc_107BE:
 	push	sq_east
 	push	seg027_x
 	push	offset rowOffset
-	std_call	dun_doSpecialSquare, 8
+	call	dun_doSpecialSquare
+	add	sp, 8
 
 	push	seg023_x
 	push	offset graphicsBuf
 	push	sq_north
 	push	sq_east
-	std_call	dun_buildView, 8
+	call	dun_buildView
+	add	sp, 8
 	mov	[bp+var_E], ax
 
 	push	g_direction
@@ -780,73 +791,90 @@ loc_107BE:
 	push	sq_east
 	push	seg027_x
 	push	offset rowOffset
-	std_call	sub_10B3D, 0Eh
+	call	dun_setSquareField4
+	add	sp, 0Eh
 
 	push	g_direction
 	push	sq_north
 	push	sq_east
-	std_call	dun_detectSquares,6
+	call	dun_detectSquares
+	add	sp, 6
 
-	push_ss_string	var_1E
-	std_call	setTitle, 4
+	lea	ax, [bp+dungeonName]
+	push	ss
+	push	ax
+	call	setTitle
+	add	sp, 4
 
 	sub	ax, ax
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	std_call	vm_execute, 6
-loc_10886:
-	cmp	buildingRvalMaybe, 0
-	jz	short loc_10899
-	mov	ax, buildingRvalMaybe
-	jmp	loc_dunMainLoop_exit
-loc_10899:
+	call	vm_execute
+	add	sp, 6
+
+l_ioLoop:
+	cmp	g_mapRval, 0
+	jnz	l_returnMapValue
+
 	mov	ax, 0A000h
 	push	ax
 	call	getKey
 	add	sp, 2
-	mov	[bp+var_6], ax
+	mov	[bp+inKey], ax
+
 	push	ax
-	std_call	executeKeyboardCommand, 2
+	call	executeKeyboardCommand
+	add	sp, 2
 	mov	[bp+var_20], ax
+
 	or	ax, ax
 	jz	short loc_1090B
+
 	mov	byte ptr g_printPartyFlag,	0
-	cmp	buildingRvalMaybe, 0
-	jnz	loc_dunMainLoop_return_bldg_rval
+
+	cmp	g_mapRval, 0
+	jnz	l_returnMapValue
+
 loc_108D5:
 	push	seg023_x
 	mov	ax, offset graphicsBuf
 	push	ax
 	push	sq_north
 	push	sq_east
-	std_call	dun_buildView, 8
+	call	dun_buildView
+	add	sp, 8
 	mov	[bp+var_E], ax
-	push_ss_string	var_1E
-	std_call	setTitle, 4
+
+	lea	ax, [bp+dungeonName]
+	push	ss
+	push	ax
+	call	setTitle
+	add	sp, 4
 	call	text_clear
+
 loc_1090B:
 	cmp	[bp+var_20], 0
-	jnz	short loc_10886
-	mov	ax, [bp+var_6]
+	jnz	short l_ioLoop
+	mov	ax, [bp+inKey]
 
-loc_dunMainLoop_key_Q:
+l_checkQuitKey:
 	cmp	ax, 'Q'
-	jnz	loc_dunMainLoop_key_split
+	jnz	l_checkKeySplit
 
 	call	quitGame
 	or	ax, ax
-	jz	loc_dunMainLoop_buildingRvalMaybe_check
+	jz	l_checkMapValue
 
-	mov	ax, 0FFh
-	jmp	loc_dunMainLoop_exit
+	mov	ax, gameState_quit
+	jmp	l_return
 
-loc_dunMainLoop_key_split:
-	jg	short loc_dunMainLoop_key_W
+l_checkKeySplit:
+	jg	short l_checkDescendKey
 
-loc_dunMainLoop_key_qmark:
+l_checkMinimapKey:
 	cmp	ax, '?'
-	jnz	loc_dunMainLoop_key_E
+	jnz	l_checkAscendKey
 
 	mov	al, g_dunHeight
 	sub	ah, ah
@@ -857,42 +885,47 @@ loc_dunMainLoop_key_qmark:
 	push	sq_east
 	push	seg027_x
 	push	offset rowOffset
-	std_call	minimap_show, 0Ch
-	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+	call	minimap_show
+	add	sp, 0Ch
+	jmp	l_checkMapValue
 
-loc_dunMainLoop_key_E:
+l_checkAscendKey:
 	cmp	ax, 'E'
-	jnz	loc_dunMainLoop_key_K
+	jnz	l_checkKickKey
 
 	push	sq_north
 	push	sq_east
-	std_call	dun_ascendPortal, 4
-	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+	call	dun_ascendPortal
+	add	sp, 4
+	jmp	l_checkMapValue
 
-loc_dunMainLoop_key_K:
+l_checkKickKey:
 	cmp	ax, 'K'
-	jnz	loc_dunMainLoop_buildingRvalMaybe_check
-	jmp	loc_dunMainLoop_go_forward
+	jnz	l_checkMapValue
+	jmp	l_moveForward
 	
-loc_dunMainLoop_key_W:
+l_checkDescendKey:
 	cmp	ax, 'W'
-	jnz	loc_dunMainLoop_key_upArrow
+	jnz	l_checkForwardKey
 
 	push	sq_north
 	push	sq_east
-	std_call	dun_descendPortal, 4
-	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+	call	dun_descendPortal
+	add	sp, 4
+	jmp	l_checkMapValue
 
-loc_dunMainLoop_key_upArrow:
+l_checkForwardKey:
 	cmp	ax, dosKeys_upArrow
-	jnz	loc_dunMainLoop_key_leftArrow
+	jnz	l_checkLeftArrowKey
 	
-loc_dunMainLoop_go_forward:
+l_moveForward:
 	push_imm	1
 	push	[bp+var_E]
-	std_call	dun_goForwardCheck, 4
+	call	dun_canAdvance
+	add	sp, 4
 	or	ax, ax
-	jz	loc_dunMainLoop_buildingRvalMaybe_check
+	jz	l_checkMapValue
+
 	call	text_clear
 	mov	si, g_direction
 	shl	si, 1
@@ -907,36 +940,38 @@ loc_dunMainLoop_go_forward:
 	sub	ah, ah
 	push	ax
 	push	[bp+var_8]
-	std_call	wrapNumber, 4
+	call	wrapNumber
+	add	sp, 4
 
 	mov	sq_north, ax
 	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_A]
-	std_call	wrapNumber ,4
+	call	wrapNumber
+	add	sp, 4
 	mov	sq_east, ax
 	mov	gs:wallIsPhased, 0
-	jmp	loc_dunMainLoop_buildingRvalMaybe_check
+	jmp	l_checkMapValue
 
-loc_dunMainLoop_key_leftArrow:
+l_checkLeftArrowKey:
 	cmp	ax, dosKeys_leftArrow
-	jnz	loc_dunMainLoop_key_rightArrow
+	jnz	l_checkRightArrowKey
 	mov	bx, 3
-	jmp	loc_dunMainLoop_incDirFacing
+	jmp	l_incDirFacing
 
-loc_dunMainLoop_key_rightArrow:
+l_checkRightArrowKey:
 	cmp	ax, dosKeys_rightArrow
-	jnz	loc_dunMainLoop_key_downArrow
+	jnz	l_checkDownArrowKey
 	mov	bx, 1
-	jmp	loc_dunMainLoop_incDirFacing
+	jmp	l_incDirFacing
 
-loc_dunMainLoop_key_downArrow:
+l_checkDownArrowKey:
 	cmp	ax, dosKeys_downArrow
-	jnz	loc_dunMainLoop_buildingRvalMaybe_check
+	jnz	l_checkMapValue
 	mov	bx, 2
 
-loc_dunMainLoop_incDirFacing:
+l_incDirFacing:
 	mov	ax, g_direction
 	add	ax, bx
 	and	ax, 3
@@ -944,23 +979,27 @@ loc_dunMainLoop_incDirFacing:
 	mov	gs:wallIsPhased, 0
 	call	text_clear
 
-loc_dunMainLoop_buildingRvalMaybe_check:
-	cmp	buildingRvalMaybe, 0
-	jz	loc_dunMainLoop_wander_check
+l_checkMapValue:
+	cmp	g_mapRval, 0
+	jz	l_wander_check
 
-loc_dunMainLoop_return_bldg_rval:
-	mov	ax, buildingRvalMaybe
+l_returnMapValue:
+	mov	ax, g_mapRval
+	jmp	short l_return
 
-loc_dunMainLoop_exit:
+l_returnPartyDied:
+	mov	ax, gameState_partyDied
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-dunMainLoop endp
+dun_main endp
 
 ; Attributes: bp-based frame
 
-sub_10B3D proc far
+dun_setSquareField4 proc far
 
 	var_6= word ptr	-6
 	var_4= word ptr	-4
@@ -977,19 +1016,23 @@ sub_10B3D proc far
 	mov	ax, 6
 	call	someStackOperation
 	push	si
+
+	; sqE * 5
 	mov	bx, [bp+sqE]
 	mov	ax, bx
 	shl	bx, 1
 	shl	bx, 1
 	add	bx, ax
-	mov	ax, bx
+	mov	ax, bx				; ax = sqE * 5
+
 	mov	bx, [bp+sqN]
 	shl	bx, 1
-	shl	bx, 1
+	shl	bx, 1				; bx = sqN * 4
 	lfs	si, [bp+rowBuf]
 	lfs	si, fs:[bx+si]
 	mov	bx, ax
 	or	byte ptr fs:[bx+si+4], 9
+
 	mov	[bp+var_6], 0
 	jmp	short loc_10B74
 loc_10B71:
@@ -1030,16 +1073,17 @@ loc_10BBC:
 	call	near ptr wrapNumber
 	add	sp, 4
 	mov	[bp+sqE], ax
+
 	push	[bp+_height]
 	mov	ax, [bp+sqN]
 	mov	bx, [bp+direction]
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
-	push	cs
-	call	near ptr wrapNumber
+	call	wrapNumber
 	add	sp, 4
 	mov	[bp+sqN], ax
+
 	mov	bx, [bp+sqE]
 	mov	ax, bx
 	shl	bx, 1
@@ -1054,31 +1098,35 @@ loc_10BBC:
 	mov	bx, ax
 	or	byte ptr fs:[bx+si+4], 1
 	jmp	loc_10B71
+
 loc_10C1E:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-sub_10B3D endp
+dun_setSquareField4 endp
 
 ; Attributes: bp-based frame
 
-dun_goForwardCheck proc far
+dun_canAdvance proc far
 
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	func_enter
+	push	bp
+	mov	bp, sp
 
 	cmp	gs:stuckFlag, 0
-	jz	short loc_dun_goForwardCheck_not_stuck
+	jz	short l_notStuck
 	call	text_clear
+	mov	ax, offset s_stuckEllipsis
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	jmp	l_returnZero
 
-	push_ds_string	aStuckElipsis
-	func_printString
-	jmp	loc_dun_goForwardCheck_return_zero
-
-loc_dun_goForwardCheck_not_stuck:
+l_notStuck:
 	mov	ax, [bp+arg_0]
 	mov	cl, 4
 	shr	ax, cl
@@ -1088,42 +1136,41 @@ loc_dun_goForwardCheck_not_stuck:
 	sub	ah, ah
 
 	or	ax, ax
-	jz	loc_dun_goForwardCheck_success
+	jz	l_success
 
-loc_dun_goForwardCheck_not_zero:
 	cmp	ax, 1
-	jb	loc_dun_goForwardCheck_return_zero
+	jb	l_returnZero
 
 	cmp	ax, 2
-	jg	loc_dun_goForwardCheck_return_zero
+	jg	l_returnZero
 
 	cmp	[bp+arg_2], 0
-	jz	loc_dun_goForwardCheck_return_zero
+	jz	l_returnZero
 
-loc_dun_goForwardCheck_success:
+l_success:
 	mov	g_sameSquareFlag, 0
 	call	text_clear
 	mov	ax, 1
-	jmp	loc_dun_goForwardCheck_exit
+	jmp	l_return
 	
-loc_dun_goForwardCheck_return_zero:
+l_returnZero:
 	xor	ax, ax
 
-loc_dun_goForwardCheck_exit:
-	func_exit
+l_return:
+	mov	sp, bp
+	pop	bp
 	retf
-dun_goForwardCheck endp
+dun_canAdvance endp
 
 ; Attributes: bp-based frame
 
-wildMainLoop proc far
+wild_main proc far
 
-	var_4A=	dword ptr -4Ah
-	var_46=	word ptr -46h
-	var_44=	word ptr -44h
+	var_4A=	dword ptr -48h
+	inKey=	word ptr -44h
 	levelName= word	ptr -42h
 	square=	word ptr -32h
-	var_30=	dword ptr -30h
+	levelP=	dword ptr -30h
 	var_2C=	word ptr -2Ch
 	var_2A=	word ptr -2Ah
 	var_28=	word ptr -28h
@@ -1134,62 +1181,68 @@ wildMainLoop proc far
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 4Ah	
+	mov	ax, 48h
 	call	someStackOperation
 	push	si
-	mov	word ptr [bp+var_30], offset g_rosterCharacterBuffer
-	mov	word ptr [bp+var_30+2],	seg seg022
+
+	mov	word ptr [bp+levelP], offset g_rosterCharacterBuffer
+	mov	word ptr [bp+levelP+2],	seg seg022
+
 	call	far ptr j_nullsub_3
+
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	push	currentLocationMaybe
+	push	g_locationNumber
 	call	map_read
 	add	sp, 6
-	lfs	bx, [bp+var_30]
+
+	lfs	bx, [bp+levelP]
 	mov	al, fs:[bx+map_t.levFlags]
 	sub	ah, ah
 	mov	cl, 6
 	shr	ax, cl
 	and	ax, 3
-	mov	[bp+var_46], ax
 	push	ax
 	call	map_readGraphics
 	add	sp, 2
-	lfs	bx, [bp+var_30]
+
+	lfs	bx, [bp+levelP]
 	mov	al, fs:[bx+map_t.monsterIndex]
 	sub	ah, ah
 	push	ax
 	call	map_readMonsters
 	add	sp, 2
+
 	lea	ax, [bp+levelName]
 	push	ss
 	push	ax
-	push	word ptr [bp+var_30+2]
-	push	word ptr [bp+var_30]
+	push	word ptr [bp+levelP+2]
+	push	word ptr [bp+levelP]
 	call	unmaskString
 	add	sp, 8
-	lfs	bx, [bp+var_30]
+
+	lfs	bx, [bp+levelP]
 	mov	al, fs:[bx+map_t.levFlags]
 	and	al, 7
-	mov	levelNoMaybe, al
+	mov	g_levelNumber, al
 	mov	al, fs:[bx+map_t._width]
 	mov	gs:mapWidth, al
 	mov	al, fs:[bx+map_t._height]
 	mov	gs:mapHeight, al
 	mov	al, fs:[bx+map_t.wrapFlag]
 	and	al, 2
-	mov	gs:wildWrapFlag, al
+	mov	gs:g_wildWrapFlag, al
 	mov	gs:mapDataOff, map_t.rowOffset
 	mov	gs:mapDataSeg, seg seg022
 	mov	[bp+var_2C], 0
 	mov	dl, mapHeight
 	sub	dh, dh
 
-loc_wildMainLoop_rowPopLoop_start:
+l_rowPopLoop_start:
 	cmp	dx, [bp+var_2C]
-	jbe	short loc_wildMainLoop_rowPopLoop_exit
+	jbe	short l_rowPopLoop_exit
 	mov	ax, [bp+var_2C]
 	shl	ax, 1
 	add	ax, gs:mapDataOff
@@ -1209,101 +1262,115 @@ loc_wildMainLoop_rowPopLoop_start:
 	mov	word ptr gs:rowOffset[bx], ax
 	mov	word ptr gs:(rowOffset+2)[bx], seg seg022
 	inc	[bp+var_2C]
-	jmp	short loc_wildMainLoop_rowPopLoop_start
+	jmp	short l_rowPopLoop_start
 
-loc_wildMainLoop_rowPopLoop_exit:
+l_rowPopLoop_exit:
 	mov	gs:mapDataOff, map_t.dataOffset
 	mov	gs:mapDataSeg, seg seg022
 
-loc_wildMainLoop_loopStart:
+l_loopStart:
 	cmp	g_partyAttackFlag, 0
-	jnz	short loc_wildMainLoop_battleCheck
-	lfs	bx, [bp+var_30]
+	jnz	short l_battleCheck
+
+	lfs	bx, [bp+levelP]
 	test	byte ptr fs:[bx+12h], 1
-	jz	short loc_wildMainLoop_mapExecute
+	jz	short l_mapExecute
+
 	call	random
 	test	al, 1Fh
-	jnz	short loc_wildMainLoop_mapExecute
-	cmp	gs:songAntiMonster, 0
-	jnz	short loc_wildMainLoop_mapExecute
+	jnz	short l_mapExecute
 
-loc_wildMainLoop_battleCheck:
+	cmp	gs:songAntiMonster, 0
+	jnz	short l_mapExecute
+
+l_battleCheck:
 	call	bat_init
 	or	ax, ax
-	jz	short loc_10E17
-	mov	ax, 5
-	jmp	loc_wildMainLoop_exit
-
-loc_10E17:
+	jnz	l_returnPartyDied
 	call	text_clear
 
-loc_wildMainLoop_mapExecute:
+l_mapExecute:
 	sub	ax, ax
 	push	ax
 	push	gs:mapDataSeg
 	push	gs:mapDataOff
-	std_call	vm_execute, 6
+	call	vm_execute
+	add	sp, 6
 
 loc_10E48:
-	cmp	buildingRvalMaybe, 0
-	jnz	loc_wildMainLoop_return_bldg_rval
+	cmp	g_mapRval, 0
+	jnz	l_returnMapValue
 
 loc_10E5B:
-	push_ss_string	levelName
-	std_call	setTitle, 4
+	lea	ax, [bp+levelName]
+	push	ss
+	push	ax
+	call	setTitle
+	add	sp, 4
 
 	push	sq_north
 	push	sq_east
-	std_call	 bigpic_buildViewMaybe, 4
+	call	wild_buildView
+	add	sp, 4
 	mov	[bp+square], ax
 
 	mov	ax, 0A000h
 	push	ax
-	std_call	getKey, 2
+	call	getKey
+	add	sp, 2
 	mov	[bp+var_2], ax
 
 	push	ax
-	std_call	executeKeyboardCommand, 2
-	mov	[bp+var_44], ax
+	call	executeKeyboardCommand
+	add	sp, 2
+	mov	[bp+inKey], ax
 	or	ax, ax
 	jz	short loc_10EEE
+
 	mov	byte ptr g_printPartyFlag, 0
-	cmp	buildingRvalMaybe, 0
-	jnz	loc_wildMainLoop_return_bldg_rval
+	cmp	g_mapRval, 0
+	jnz	l_returnMapValue
 
 loc_10EC0:
 	push	sq_north
 	push	sq_east
-	std_call	bigpic_buildViewMaybe, 4
+	call	wild_buildView
+	add	sp, 4
 	mov	[bp+square], ax
 
-	push_ss_string levelName
-	std_call	setTitle, 4
+	lea	ax, [bp+levelName]
+	push	ss
+	push	ax
+	call	setTitle
+	add	sp, 4
 	call	text_clear
 
 loc_10EEE:
-	cmp	[bp+var_44], 0
+	cmp	[bp+inKey], 0
 	jnz	loc_10E48
 
 	mov	ax, [bp+var_2]
 
-loc_wildMainLoop_key_upArrow:
+l_key_upArrow:
 	cmp	ax, dosKeys_upArrow
-	jnz	loc_wildMainLoop_key_split
+	jnz	l_key_split
 
-loc_wildMainLoop_goForward:
+l_goForward:
 	push	[bp+square]
-	std_call	map_enterBuilding, 2
+	call	wild_enterBuilding
+	add	sp, 2
 	or	ax, ax
-	jz	loc_wildMainLoop_exitBuilding
-	cmp	buildingRvalMaybe, 0
-	jnz	loc_wildMainLoop_return_bldg_rval
+	jz	l_noBuilding
 
-loc_wildMainLoop_exitBuilding:
+	cmp	g_mapRval, 0
+	jnz	l_returnMapValue
+
+l_noBuilding:
 	push	[bp+square]
-	std_call	wild_goForwardCheck, 2
+	call	wild_canAdvance
+	add	sp, 2
 	or	ax, ax
-	jz	loc_wildMainLoop_loopStart
+	jz	l_loopStart
 
 	call	text_clear
 	mov	si, g_direction
@@ -1315,172 +1382,192 @@ loc_wildMainLoop_exitBuilding:
 	add	ax, dirDeltaE[si]
 	mov	[bp+var_2A], ax
 
-	test	wildWrapFlag, 2
-	jz	loc_wildMainLoop_forward_nowrap
+	test	g_wildWrapFlag, 2
+	jz	l_forwardNoWrap
 
 	mov	al, mapHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+var_8]
-	std_call	wrapNumber, 4
+	call	wrapNumber
+	add	sp, 4
 	mov	sq_north, ax
 
 	mov	al, mapWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_2A]
-	std_call	wrapNumber, 4
+	call	wrapNumber
+	add	sp, 4
 	mov	sq_east, ax
-	jmp	loc_wildMainLoop_loopStart
+	jmp	l_loopStart
 
-loc_wildMainLoop_forward_nowrap:
+l_forwardNoWrap:
 	cmp	[bp+var_8], 0
-	jl	loc_wildMainLoop_loopStart
+	jl	l_loopStart
 
 	mov	al, mapHeight
 	sub	ah, ah
 	cmp	ax, [bp+var_8]
-	jbe	loc_wildMainLoop_loopStart
+	jbe	l_loopStart
 
 	cmp	[bp+var_2A], 0
-	jl	loc_wildMainLoop_loopStart
+	jl	l_loopStart
 
 	mov	al, mapWidth
 	cmp	ax, [bp+var_2A]
-	jbe	loc_wildMainLoop_loopStart
+	jbe	l_loopStart
 
 	mov	ax, [bp+var_8]
 	mov	sq_north, ax
 	mov	ax, [bp+var_2A]
 	mov	sq_east, ax
-	jmp	loc_wildMainLoop_loopStart
+	jmp	l_loopStart
 
-loc_wildMainLoop_key_split:
-	jg	loc_wildMainLoop_key_center
+l_key_split:
+	jg	l_checkCenterKey
 
-loc_wildMainLoop_key_qmark:
+l_checkLocationKey:
 	cmp	ax, '?'
-	jnz	loc_wildMainLoop_key_K
+	jnz	l_checkKickKey
 
 	call	printLocation
-	jmp	loc_wildMainLoop_loopStart
+	jmp	l_loopStart
 
-loc_wildMainLoop_key_K:
+l_checkKickKey:
 	cmp	ax, 'K'
-	jz	loc_wildMainLoop_goForward
+	jz	l_goForward
 
-loc_wildMainLoop_key_Q:
+l_checkQuitKey:
 	cmp	ax, 'Q'
-	jnz	loc_wildMainLoop_loopStart
+	jnz	l_loopStart
 
 	call	quitGame
 	or	ax, ax
-	jz	loc_wildMainLoop_loopStart
-	mov	ax, 0FFh
-	jmp	loc_wildMainLoop_exit
+	jz	l_loopStart
+	mov	ax, gameState_quit
+	jmp	l_return
 
-loc_wildMainLoop_key_center:
-	cmp	ax, 4C00h
-	jz	loc_wildMainLoop_goForward
+l_checkCenterKey:
+	cmp	ax, dosKeys_center
+	jz	l_goForward
 
-loc_wildMainLoop_key_leftArrow:
+l_checkLeftArrowKey:
 	cmp	ax, dosKeys_leftArrow
-	jnz	loc_wildMainLoop_key_rightArrow
+	jnz	l_checkRightArrowKey
 	mov	bx, 3
-	jmp	loc_wildMainLoop_incDirFacing
+	jmp	l_incDirFacing
 
-loc_wildMainLoop_key_rightArrow:
+l_checkRightArrowKey:
 	cmp	ax, dosKeys_rightArrow
-	jnz	loc_wildMainLoop_key_downArrow
+	jnz	l_checkDownArrowKey
 	mov	bx, 1
-	jmp	loc_wildMainLoop_incDirFacing
+	jmp	l_incDirFacing
 
-loc_wildMainLoop_key_downArrow:
+l_checkDownArrowKey:
 	cmp	ax, dosKeys_downArrow
-	jnz	loc_wildMainLoop_loopStart
+	jnz	l_loopStart
 	mov	bx, 2
 
-loc_wildMainLoop_incDirFacing:
+l_incDirFacing:
 	mov	ax, g_direction
 	add	ax, bx
 	and	ax, 3
 	mov	g_direction, ax
 
-	push_ds_string aFacing
-	push_ss_string var_28
+	mov	ax, offset s_facing
+	push	ds
+	push	ax
+	lea	ax, [bp+var_28]
+	push	ss
+	push	ax
 	call	strcat
 	add	sp, 8
 
 	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
-	push_ptr_stringList	dirStringList, bx
+	push	word ptr (dirStringList+2)[bx]
+	push	word ptr (dirStringList)[bx]
 	push	dx
 	push	ax
 	call	strcat
 	add	sp, 8
 
-	push_ss_string	var_28
-	std_call	printStringWClear, 4
-	jmp	loc_wildMainLoop_loopStart
+	lea	ax, [bp+var_28]
+	push	ss
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	jmp	l_loopStart
 
-loc_wildMainLoop_return_bldg_rval:
-	mov	ax, buildingRvalMaybe
+l_returnMapValue:
+	mov	ax, g_mapRval
+	jmp	short l_return
 
-loc_wildMainLoop_exit:
+l_returnPartyDied:
+	mov	ax, gameState_partyDied
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-wildMainLoop endp
+wild_main endp
 
 ; Attributes: bp-based frame
 
-wild_goForwardCheck proc far
+wild_canAdvance proc far
 
 	arg_0= byte ptr	 6
 
-	func_enter
+	push	bp
+	mov	bp, sp
 
 	test	[bp+arg_0], 0F0h
-	jz	loc_wild_goForwardCheck_return_one
+	jz	l_returnOne
 
 	mov	al, [bp+arg_0]
 	and	al, 0F0h
 	cmp	al, 0E0h
-	jz	loc_wild_goForwardCheck_return_zero
+	jz	l_returnZero
+
 	mov	al, [bp+arg_0]
 	and	al, 0F0h
 	cmp	al, 0F0h
-	jz	loc_wild_goForwardCheck_return_one
+	jz	l_returnOne
+
 	mov	al, [bp+arg_0]
 	and	al, 0Fh
 	mov	cx, ax
 	cmp	cl, 1
 	sbb	ax, ax
 	neg	ax
-	jmp	loc_wild_goForwardCheck_exit
+	jmp	l_return
 
-loc_wild_goForwardCheck_return_zero:
+l_returnZero:
 	xor	ax, ax
-	jmp	loc_wild_goForwardCheck_exit
+	jmp	l_return
 
-loc_wild_goForwardCheck_return_one:
+l_returnOne:
 	mov	ax, 1
 
-loc_wild_goForwardCheck_exit:
-	func_exit
+l_return:
+	mov	sp, bp
+	pop	bp
 	retf
 
-wild_goForwardCheck endp
+wild_canAdvance endp
 
 ; Attributes: bp-based frame
 
-map_enterBuilding proc far
+wild_enterBuilding proc far
 
 	square=	word ptr  6
 
-	func_enter
+	push	bp
+	mov	bp, sp
+
 	mov	ax, [bp+square]
 	mov	cl, 4
 	sar	ax, cl
@@ -1488,108 +1575,117 @@ map_enterBuilding proc far
 
 	sub	ax, 1
 	cmp	ax, 8
-	ja	loc_map_enterBuilding_return_zero
+	ja	l_returnZero
 	add	ax, ax
 	xchg	ax, bx
-	jmp	cs:off_111EF[bx]
-off_111EF dw offset l_camp ; 0x10
-dw offset l_tavern	; 0x20
-dw offset l_temple	; 0x30
-dw offset l_normalBuilding ; 0x40
-dw offset loc_map_enterBuilding_return_zero	; 0x50
-dw offset l_storageBuilding ; 0x60
-dw offset l_reviewBoard	; 0x70
-dw offset l_hallOfWizards	; 0x80
-dw offset l_bards		; 0x90
+	jmp	cs:buildingOffsets[bx]
+
+buildingOffsets dw offset l_camp ; 0x10
+		dw offset l_tavern	; 0x20
+		dw offset l_temple	; 0x30
+		dw offset l_normalBuilding ; 0x40
+		dw offset l_returnZero	; 0x50
+		dw offset l_storageBuilding ; 0x60
+		dw offset l_reviewBoard	; 0x70
+		dw offset l_hallOfWizards	; 0x80
+		dw offset l_bards		; 0x90
 
 l_camp:
 	call	camp_enter
-	jmp	loc_map_enterBuilding_turn_around
+	jmp	l_turnAround
+
 l_tavern:
-	call	tav_enter
-	jmp	loc_map_enterBuilding_turn_around
+	call	tavern_enter
+	jmp	l_turnAround
+
 l_temple:
 	call	temple_enter
-	jmp	loc_map_enterBuilding_turn_around
+	jmp	l_turnAround
+
 l_normalBuilding:
 	call	empty_enter
-	jmp	loc_map_enterBuilding_turn_around
+	jmp	l_turnAround
+
 l_storageBuilding:
 	call	storage_enter
-	jmp	loc_map_enterBuilding_turn_around
+	jmp	l_turnAround
+
 l_reviewBoard:
-	call	rev_enter
-	jmp	loc_map_enterBuilding_turn_around
+	call	review_enter
+	jmp	l_turnAround
+
 l_hallOfWizards:
-	call	enterHallOfWizards
-	jmp	loc_map_enterBuilding_turn_around
+	call	wizardHall_enter
+	jmp	l_turnAround
+
 l_bards:
 	call	bards_enter
-	jmp	loc_map_enterBuilding_turn_around
+	jmp	l_turnAround
 
-loc_map_enterBuilding_return_zero:
+l_returnZero:
 	sub	ax, ax
-	jmp	short loc_map_enterBuilding_exit
+	jmp	short l_return
 
-loc_map_enterBuilding_turn_around:
-	mov	buildingRvalMaybe, ax
+l_turnAround:
+	mov	g_mapRval, ax
 	call	map_turnAround
 	mov	ax, 1
 
-loc_map_enterBuilding_exit:
-	func_exit
+l_return:
+	mov	sp, bp
+	pop	bp
 	retf
-map_enterBuilding endp
+wild_enterBuilding endp
+
 
 ; Attributes: bp-based frame
+;
 
-bigpic_buildViewMaybe proc far
+wild_buildView proc far
 
-	var_3E=	dword ptr -3Eh
-	var_3A=	word ptr -3Ah
-	var_38=	word ptr -38h
-	counter= word ptr -36h
-	deltaNorth= word ptr -34h
-	viewMaybe= byte	ptr -32h
-	var_22=	byte ptr -22h
-	deltaEast= word	ptr -1Ch
-	gbuf= word ptr -1Ah
-	gseg= word ptr -18h
-	var_2= word ptr	-2
+	viewStructP=	dword ptr -3Ch
+	directionDeltaP=	dword ptr -38h
+	counter= word ptr -34h
+	deltaNorth= word ptr -32h
+	squareList= byte	ptr -30h
+	var_22=	byte ptr -20h
+	deltaEast= word	ptr -1Ah
+	graphicsBufferP= dword ptr -18h
 	sqEast=	word ptr  6
 	sqNorth= word ptr  8
 
-	func_enter
-	_chkstk		3Eh
+	push	bp
+	mov	bp, sp
+	mov	ax, 3Ch
+	call	someStackOperation
 	push	si
-	mov	[bp+gbuf], offset graphicsBuf
-	mov	[bp+gseg], seg seg023
+
+	mov	word ptr [bp+graphicsBufferP], offset graphicsBuf
+	mov	word ptr [bp+graphicsBufferP+2], seg seg023
 	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
-	mov	ax, word ptr off_44268[bx]
-	mov	dx, word ptr (off_44268+2)[bx]
-	mov	[bp+var_3A], ax
-	mov	[bp+var_38], dx
+	mov	ax, word ptr g_wild_deltaList[bx]
+	mov	dx, word ptr (g_wild_deltaList+2)[bx]
+	mov	word ptr [bp+directionDeltaP], ax
+	mov	word ptr [bp+directionDeltaP+2], dx
+
 	mov	[bp+counter], 20
-	jmp	short loc_11246
-loc_11243:
-	dec	[bp+counter]
-loc_11246:
-	cmp	[bp+counter], 0
-	jl	short loc_11288
+l_getSquaresLoop:
 	mov	ax, [bp+counter]
 	shl	ax, 1
-	add	ax, [bp+var_3A]
-	mov	dx, [bp+var_38]
-	mov	word ptr [bp+var_3E], ax
-	mov	word ptr [bp+var_3E+2],	dx
-	lfs	bx, [bp+var_3E]
-	mov	al, fs:[bx]
+	add	ax, word ptr [bp+directionDeltaP]
+	mov	dx, word ptr [bp+directionDeltaP+2]
+
+	mov	word ptr [bp+viewStructP], ax
+	mov	word ptr [bp+viewStructP+2],	dx
+	lfs	bx, [bp+viewStructP]
+	mov	al, fs:[bx+viewStruct.deltaEast]
 	cbw
 	add	ax, [bp+sqEast]
 	mov	[bp+deltaEast],	ax
-	mov	al, fs:[bx+1]
+
+	mov	al, fs:[bx+viewStruct.deltaNorth]
 	cbw
 	add	ax, [bp+sqNorth]
 	mov	[bp+deltaNorth], ax
@@ -1599,9 +1695,11 @@ loc_11246:
 	call	near ptr wild_getSquare
 	add	sp, 4
 	mov	si, [bp+counter]
-	mov	[bp+si+viewMaybe], al
-	jmp	short loc_11243
-loc_11288:
+	mov	[bp+si+squareList], al
+	dec	[bp+counter]
+	cmp	[bp+counter], 0
+	jge	short l_getSquaresLoop
+
 	mov	ax, 44h
 	push	ax
 	mov	ax, 0BBBBh
@@ -1610,78 +1708,75 @@ loc_11288:
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	call	bigpicmemcpy
+	call	bigpic_memcpy
 	add	sp, 8
+
 	mov	[bp+counter], 0
-	jmp	short loc_112AA
-loc_112A7:
-	inc	[bp+counter]
-loc_112AA:
-	cmp	[bp+counter], 17
-	jge	short loc_112EB
+l_drawTopologyLoop:
 	mov	bx, [bp+counter]
-	mov	al, byte_44332[bx]
+	mov	al, g_wild_viewSquareIndexList[bx]
 	cbw
 	mov	si, ax
-	mov	al, [bp+si+viewMaybe]
+	mov	al, [bp+si+squareList]
 	sub	ah, ah
 	and	ax, 0Fh
-	mov	[bp+var_2], ax
 	or	ax, ax
-	jz	short loc_112E9
-	push	[bp+gseg]
-	push	[bp+gbuf]
+	jz	short l_drawTopologyNext
+
+	push	[bp+graphicsBufferP+2]
+	push	[bp+graphicsBufferP]
 	dec	ax
 	push	ax
-	mov	al, byte_4464A[bx]
+	mov	al, g_wild_squareTopologyIndex[bx]
 	cbw
 	push	ax
 	call	bigpic_drawTopology
 	add	sp, 8
-loc_112E9:
-	jmp	short loc_112A7
-loc_112EB:
+
+l_drawTopologyNext:
+	inc	[bp+counter]
+	cmp	[bp+counter], 17
+	jl	short l_drawTopologyLoop
+
 	mov	gs:byte_422A0, 0
 	cmp	gs:isNight, 0
-	jz	short loc_11311
+	jz	short l_return
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
 	call	bigpic_makeNight
 	add	sp, 4
-loc_11311:
+
+l_return:
 	push	gs:bigpicCellData_seg
 	push	gs:bigpicCellData_off
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	call	far ptr	vid_drawBigpic
+	call	far ptr vid_drawBigpic
 	add	sp, 8
 	mov	al, [bp+var_22]
 	sub	ah, ah
-	jmp	short $+2
+
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bigpic_buildViewMaybe endp
+wild_buildView endp
 
 ; Attributes: bp-based frame
 
 dun_buildView proc far
 
-	var_5C=	dword ptr -5Ch
-	deltaP=	dword ptr -58h
-	var_54=	word ptr -54h
-	counter= word ptr -52h
-	var_50=	word ptr -50h
-	deltaSqN= word ptr -4Eh
-	var_4C=	word ptr -4Ch
-	var_1E=	word ptr -1Eh
-	deltaSqE= word ptr -8
-	var_2= word ptr	-2
+	viewStructP=	dword ptr -56h
+	directionDeltaP=	dword ptr -52h
+	counter= word ptr -4Eh
+	deltaSqN= word ptr -4Ch
+	squareList=	word ptr -4Ah
+	var_1E=	word ptr -1Ch
+	deltaSqE= word ptr -6
 	sqE= word ptr  6
 	sqN= word ptr  8
 	gbufOff= word ptr  0Ah
@@ -1689,30 +1784,27 @@ dun_buildView proc far
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 5Ch	
+	mov	ax, 56h
 	call	someStackOperation
 	push	si
+
 	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
-	mov	ax, word ptr off_44474[bx]
-	mov	dx, word ptr (off_44474+2)[bx]
-	mov	word ptr [bp+deltaP], ax
-	mov	word ptr [bp+deltaP+2],	dx
+	mov	ax, word ptr g_dun_deltaList[bx]
+	mov	dx, word ptr (g_dun_deltaList+2)[bx]
+	mov	word ptr [bp+directionDeltaP], ax
+	mov	word ptr [bp+directionDeltaP+2],	dx
+
 	mov	[bp+counter], 24
-	jmp	short loc_11372
-loc_1136F:
-	dec	[bp+counter]
-loc_11372:
-	cmp	[bp+counter], 0
-	jl	short loc_113CB
+l_getSquaresLoop:
 	mov	ax, [bp+counter]
 	shl	ax, 1
-	add	ax, word ptr [bp+deltaP]
-	mov	dx, word ptr [bp+deltaP+2]
-	mov	word ptr [bp+var_5C], ax
-	mov	word ptr [bp+var_5C+2],	dx
-	lfs	bx, [bp+var_5C]
+	add	ax, word ptr [bp+directionDeltaP]
+	mov	dx, word ptr [bp+directionDeltaP+2]
+	mov	word ptr [bp+viewStructP], ax
+	mov	word ptr [bp+viewStructP+2],	dx
+	lfs	bx, [bp+viewStructP]
 	mov	al, fs:[bx+viewStruct.deltaEast]
 	cbw
 	add	ax, [bp+sqE]
@@ -1726,26 +1818,24 @@ loc_11372:
 	push	cs
 	call	near ptr dun_getWalls
 	add	sp, 4
-	mov	[bp+var_50], ax
+
 	push	g_direction
 	push	ax
 	call	dungeon_getWallInDirection
 	add	sp, 4
+
 	mov	si, [bp+counter]
 	shl	si, 1
-	mov	[bp+si+var_4C],	ax
-	jmp	short loc_1136F
-loc_113CB:
-	mov	[bp+counter], 33
-	jmp	short loc_113D5
-loc_113D2:
+	mov	[bp+si+squareList], ax
 	dec	[bp+counter]
-loc_113D5:
-	cmp	[bp+counter], 18h
-	jle	short loc_11426
+	cmp	[bp+counter], 0
+	jge	short l_getSquaresLoop
+
+	mov	[bp+counter], 33
+loc_113D2:
 	mov	si, [bp+counter]
 	shl	si, 1
-	lfs	bx, [bp+deltaP]
+	lfs	bx, [bp+directionDeltaP]
 	mov	al, fs:[bx+si]
 	cbw
 	add	ax, [bp+sqE]
@@ -1754,6 +1844,7 @@ loc_113D5:
 	cbw
 	add	ax, [bp+sqN]
 	mov	[bp+deltaSqN], ax
+
 	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
@@ -1768,9 +1859,11 @@ loc_113D5:
 	push	cs
 	call	near ptr sub_1156E
 	add	sp, 0Ch
-	mov	[bp+si+var_4C],	ax
-	jmp	short loc_113D2
-loc_11426:
+	mov	[bp+si+squareList], ax
+	dec	[bp+counter]
+	cmp	[bp+counter], 24
+	jg	short loc_113D2
+
 	push	[bp+gbufSeg]
 	push	[bp+gbufOff]
 	call	bigpic_setBackground
@@ -1779,7 +1872,7 @@ loc_11426:
 	jz	short loc_11444
 	and	byte ptr [bp+var_1E], 0Fh
 loc_11444:
-	test	levFlags, 20h
+	test	g_levelFlags, 20h
 	jz	loc_dun_buildView_inDungeon
 
 	mov	ax, 4
@@ -1806,16 +1899,13 @@ loc_11462:
 	cbw
 	mov	si, ax
 	shl	si, 1
-	mov	ax, [bp+si+var_4C]
-	mov	[bp+var_50], ax
+	mov	ax, [bp+si+squareList]
 	mov	cl, byte_44554[bx]
 	sar	ax, cl
 	and	ax, 0Fh
-	mov	[bp+var_54], ax
 	mov	bx, ax
 	mov	al, byte_44484[bx]
 	cbw
-	mov	[bp+var_2], ax
 	or	ax, ax
 	jz	short loc_114C2
 	push	[bp+gbufSeg]
@@ -1835,15 +1925,15 @@ loc_114C4:
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	call	far ptr	vid_drawBigpic
+	call	far ptr vid_drawBigpic
 	add	sp, 8
 	mov	ax, [bp+var_1E]
-	jmp	short $+2
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 dun_buildView endp
+
 
 ; Attributes: bp-based frame
 
@@ -1892,7 +1982,7 @@ dun_getWalls proc far
 	mov	cl, fs:[bx]
 	sub	ch, ch
 	add	ax, cx
-	jmp	short $+2
+
 	mov	sp, bp
 	pop	bp
 	retf
@@ -1902,52 +1992,51 @@ dun_getWalls endp
 
 sub_1156E proc far
 
-	var_2= word ptr	-2
-	arg_0= dword ptr  6
-	arg_4= word ptr	 0Ah
-	arg_6= word ptr	 0Ch
-	arg_8= word ptr	 0Eh
-	arg_A= word ptr	 10h
+	rowOffsetP= dword ptr  6
+	sqE= word ptr	 0Ah
+	sqN= word ptr	 0Ch
+	dunWidth= word ptr	 0Eh
+	dunHeight= word ptr	 10h
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
 	push	si
-	push	[bp+arg_8]
-	push	[bp+arg_4]
+
+	push	[bp+dunWidth]
+	push	[bp+sqE]
 	push	cs
 	call	near ptr wrapNumber
 	add	sp, 4
-	mov	[bp+arg_4], ax
-	push	[bp+arg_A]
-	push	[bp+arg_6]
+	mov	[bp+sqE], ax
+
+	push	[bp+dunHeight]
+	push	[bp+sqN]
 	push	cs
 	call	near ptr wrapNumber
 	add	sp, 4
-	mov	[bp+arg_6], ax
-	mov	bx, [bp+arg_4]
+	mov	[bp+sqN], ax
+
+	mov	bx, [bp+sqE]
 	mov	ax, bx
 	shl	bx, 1
 	shl	bx, 1
 	add	bx, ax
-	mov	ax, bx
-	mov	bx, [bp+arg_6]
+	mov	ax, bx			; ax = sqE * 5
+	mov	bx, [bp+sqN]
 	shl	bx, 1
-	shl	bx, 1
-	lfs	si, [bp+arg_0]
-	lfs	si, fs:[bx+si]
+	shl	bx, 1			; bx = sqN * 4
+	lfs	si, [bp+rowOffsetP]	; fs:si = sqN row pointer
+	lfs	si, fs:[bx+si]		; fs:si = sqN row
 	mov	bx, ax
-	mov	al, fs:[bx+si+2]
+	mov	al, fs:[bx+si+2]	; al = flags for (sqN, sqE)
 	sub	ah, ah
-	mov	[bp+var_2], ax
 	mov	bx, ax
 	mov	cl, 5
 	shr	bx, cl
 	and	bx, 3
 	mov	al, byte_42716[bx]
 	cbw
-	jmp	short $+2
+
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -1967,11 +2056,11 @@ wild_getSquare proc far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
-	cmp	gs:wildWrapFlag, 0
-	jz	short loc_1161D
+
+	cmp	gs:g_wildWrapFlag, 0
+	jz	short l_noWrap
+
 	mov	al, gs:mapWidth
 	sub	ah, ah
 	push	ax
@@ -1980,6 +2069,7 @@ wild_getSquare proc far
 	call	near ptr wrapNumber
 	add	sp, 4
 	mov	[bp+sqEast], ax
+
 	mov	al, gs:mapHeight
 	sub	ah, ah
 	push	ax
@@ -1989,21 +2079,24 @@ wild_getSquare proc far
 	add	sp, 4
 	mov	[bp+sqNorth], ax
 	jmp	short loc_11649
-loc_1161D:
+
+l_noWrap:
 	cmp	[bp+sqEast], 0
-	jl	short loc_11645
+	jl	short l_returnZero
 	mov	al, gs:mapWidth
 	sub	ah, ah
 	cmp	ax, [bp+sqEast]
-	jbe	short loc_11645
+	jbe	short l_returnZero
 	cmp	[bp+sqNorth], 0
-	jl	short loc_11645
+	jl	short l_returnZero
 	mov	al, gs:mapHeight
 	cmp	ax, [bp+sqNorth]
 	ja	short loc_11649
-loc_11645:
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short loc_11663
+	jmp	short l_return
+
 loc_11649:
 	mov	bx, [bp+sqNorth]
 	shl	bx, 1
@@ -2012,15 +2105,15 @@ loc_11649:
 	mov	si, [bp+sqEast]
 	mov	al, fs:[bx+si]
 	sub	ah, ah
-	jmp	short $+2
-loc_11663:
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 wild_getSquare endp
 
-; This function	returns	arg_0 modd to be between
+; This function	returns	arg_0 mod to be between
 ; 0 and	arg_2. This handles negative numbers
 ; intuitively.
 ; Attributes: bp-based frame
@@ -2031,9 +2124,8 @@ wrapNumber proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
+
 loc_11673:
 	cmp	[bp+arg_0], 0
 	jge	short loc_11682
@@ -2041,17 +2133,18 @@ loc_11673:
 	cbw
 	add	[bp+arg_0], ax
 	jmp	short loc_11673
+
 loc_11682:
 	mov	al, [bp+arg_2]
 	cbw
 	mov	si, ax
 	cmp	[bp+arg_0], si
-	jl	short loc_11692
+	jl	short l_return
 	sub	[bp+arg_0], si
 	jmp	short loc_11682
-loc_11692:
+
+l_return:
 	mov	ax, [bp+arg_0]
-	jmp	short $+2
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -2067,9 +2160,8 @@ map_getDataOffsetP proc	far
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
+
 	lfs	bx, [bp+memBuf]
 	mov	bl, fs:[bx]
 	sub	bh, bh
@@ -2080,48 +2172,25 @@ map_getDataOffsetP proc	far
 	shl	si, cl
 	lea	ax, g_rosterCharacterBuffer[bx+si]
 	mov	dx, seg	seg022
-	jmp	short $+2
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 map_getDataOffsetP endp
 
-; Attributes: bp-based frame
-
-sub_116CC proc far
+; Reset location variables to initial state (in camp)
+;
+map_resetLocation proc far
 	push	bp
 	mov	bp, sp
 	mov	sq_north, 0Bh
 	mov	sq_east, 0Fh
 	mov	g_direction, 0
-	mov	currentLocationMaybe, 0
+	mov	g_locationNumber, 0
 	mov	sp, bp
 	pop	bp
 	retf
-sub_116CC endp
-
-
-sub_11706 proc far
-	push	bp
-	mov	bp, sp
-	mov	bx, [bp+8]
-	shl	bx, 1
-	shl	bx, 1
-	mov	ax, word ptr gs:rowOffset[bx]
-	mov	dx, word ptr gs:(rowOffset+2)[bx]
-	mov	cx, [bp+6]
-	mov	bx, cx
-	shl	cx, 1
-	shl	cx, 1
-	add	cx, bx
-	add	ax, cx
-	add	ax, 2
-	jmp	short $+2
-	mov	sp, bp
-	pop	bp
-	retf
-sub_11706 endp
+map_resetLocation endp
 
 
 seg000 ends
@@ -2131,7 +2200,6 @@ seg001 segment word public 'CODE' use16
         assume cs:seg001
 ;org 0Bh
         assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
-algn_1173B:
 align 2
 
 ; Attributes: bp-based frame
@@ -2221,7 +2289,7 @@ l_spellNotFound:
 l_spellFound:
 	push	[bp+counter]
 	push	[bp+arg_0]
-	call	mage_hasLearnedSpell
+	call	character_learnedSpell
 	add	sp, 4
 	or	ax, ax
 	jz	l_notLearned
@@ -2276,7 +2344,7 @@ l_notFunctionKeySpell:
 	mov	ax, [bp+arg_0]
 	sub	ax, '1'
 	push	ax
-	call	printCharacter
+	call	character_print
 	add	sp, 2
 	jmp	l_success
 	
@@ -2328,6 +2396,10 @@ l_partyAttack:
 	mov	g_partyAttackFlag, 1
 	jmp	l_fail
 
+l_battle:
+	call	bat_init
+	jmp	l_fail
+
 l_useItem:
 	call	useItem
 	jmp	l_success
@@ -2346,7 +2418,8 @@ l_keySwitch:
 keyJumpTable	dw offset l_singBardSong 
 		dw offset l_castSpell	
 		dw offset l_dropMember	
-		dw offset l_fail	
+;		dw offset l_fail	
+		dw offset l_battle
 		dw offset l_fail	
 		dw offset l_fail	
 		dw offset l_printHelp	
@@ -2714,7 +2787,7 @@ loc_11B2A:
 loc_11B3B:
 	mov	ax, 2
 loc_11B3E:
-	mov	buildingRvalMaybe, ax
+	mov	g_mapRval, ax
 	mov	ax, 2
 	push	ax
 	mov	ax, offset s_gameSav
@@ -2735,7 +2808,7 @@ loc_11B3E:
 	push	ax
 	call	getKey
 	add	sp, 2
-	mov	buildingRvalMaybe, 0
+	mov	g_mapRval, 0
 	jmp	short l_return
 
 l_doSave:
@@ -2756,7 +2829,7 @@ l_doSave:
 	add	sp, 8
 
 	mov	ax, offset byte_4EECC
-	mov	cx, offset currentLocationMaybe
+	mov	cx, offset g_locationNumber
 	mov	bx, seg	dseg
 	sub	ax, cx
 	push	ax
@@ -2785,7 +2858,7 @@ l_doSave:
 loc_11BEF:
 	sub	ax, ax
 loc_11BF1:
-	mov	buildingRvalMaybe, ax
+	mov	g_mapRval, ax
 l_return:
 	mov	sp, bp
 	pop	bp
@@ -2804,7 +2877,7 @@ restoreGame proc far
 	mov	ax, 4
 	call	someStackOperation
 
-	mov	buildingRvalMaybe, 1
+	mov	g_mapRval, 1
 	mov	ax, offset s_confirmRestore
 	push	ds
 	push	ax
@@ -2832,7 +2905,7 @@ restoreGame proc far
 	add	sp, 8
 
 	mov	ax, offset byte_4EECC
-	mov	cx, offset currentLocationMaybe
+	mov	cx, offset g_locationNumber
 	mov	bx, seg	dseg
 	sub	ax, cx
 	push	ax
@@ -2924,7 +2997,7 @@ useItem	proc far
 	push	ss
 	push	ax
 	push	[bp+userSlotNumber]
-	call	sub_188E8
+	call	inventory_getItemList
 	add	sp, 0Ah
 
 	or	ax, ax
@@ -2946,7 +3019,7 @@ loc_11D4B:
 
 	push	[bp+itemSlotNumber]
 	push	[bp+userSlotNumber]
-	call	item_canBeUsed
+	call	inventory_canBeUsed
 	add	sp, 4
 	or	ax, ax
 	jz	short l_powerless
@@ -2961,7 +3034,7 @@ loc_11D4B:
 	push	ds
 	push	ax
 	push	[bp+targetSlotNumber]
-	call	getTarget
+	call	bat_charGetActionTarget
 	add	sp, 6
 	mov	[bp+targetSlotNumber], ax
 	or	ax, ax
@@ -3087,7 +3160,7 @@ loc_11EBC:
 	mov	gs:g_inventoryPackStart, ax
 	mov	ax, [bp+userSlotNumber]
 	mov	gs:g_inventoryPackTarget, ax
-	call	inven_pack
+	call	inventory_pack
 	mov	al, gs:g_currentSinger
 	sub	ah, ah
 	cmp	ax, [bp+userSlotNumber]
@@ -3099,7 +3172,7 @@ loc_11EBC:
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+userSlotNumber]
-	call	inven_hasTypeEquipped
+	call	character_hasTypeEquipped
 	add	sp, 4
 	or	ax, ax
 	jnz	short l_return
@@ -3316,7 +3389,7 @@ printLocation proc far
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 
-	cmp	currentLocationMaybe, 0
+	cmp	g_locationNumber, 0
 	jnz	short l_skipThe
 
 	mov	ax, offset s_the
@@ -3348,7 +3421,7 @@ l_skipThe:
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 
-	mov	bx, currentLocationMaybe
+	mov	bx, g_locationNumber
 	mov	al, byte_428A6[bx]
 	cbw
 	mov	cx, sq_north
@@ -3415,7 +3488,7 @@ loc_12170:
 	mov	[bp+var_108], dx
 
 loc_121CD:
-	mov	bx, currentLocationMaybe
+	mov	bx, g_locationNumber
 	mov	al, byte_428B0[bx]
 	cbw
 	mov	cx, sq_east
@@ -3478,7 +3551,7 @@ loc_1222D:
 	mov	[bp+var_10A], ax
 	mov	[bp+var_108], dx
 loc_1228A:
-	mov	bx, currentLocationMaybe
+	mov	bx, g_locationNumber
 	mov	al, byte_428BA[bx]
 	cbw
 	mov	[bp+var_110], ax
@@ -4432,8 +4505,8 @@ loc_12AD8:
 	mov	bx, [bp+counter]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (classString+2)[bx]
-	push	word ptr classString[bx]
+	push	word ptr (g_classString+2)[bx]
+	push	word ptr g_classString[bx]
 	push	[bp+var_EA]
 	push	cs
 	call	near ptr printListItem
@@ -4669,7 +4742,8 @@ camp_createMember endp
 ; Attributes: bp-based frame
 getCharacterGender proc	far
 
-	func_enter
+	push	bp
+	mov	bp, sp
 
 loc_loop_start:
 	mov	ax, offset s_genderOptions
@@ -5408,7 +5482,7 @@ camp_saveAndExit proc far
 	add	sp, 2
 	cmp	ax, 0Dh
 	jnz	short loc_13412
-	mov	buildingRvalMaybe, 0FFh
+	mov	g_mapRval, 0FFh
 	push	cs
 	call	near ptr roster_countCharacters
 	push	ax
@@ -5452,9 +5526,9 @@ camp_exit	proc far
 
 	mov	g_currentHour, 6
 	sub	al, al
-	mov	levelNoMaybe, al
+	mov	g_levelNumber, al
 	mov	gs:isNight, al
-	mov	buildingRvalMaybe, 2
+	mov	g_mapRval, 2
 
 	mov	sp, bp
 	pop	bp
@@ -5496,7 +5570,7 @@ l_notActive:
 	jl	short l_durationSpellLoopEntry
 
 	mov	gs:gl_detectSecretDoorFlag, 0
-	mov	gs:songACBonus,	0
+	mov	gs:g_songAcBonus,	0
 	push	cs
 	call	near ptr readRosterFiles
 	push	cs
@@ -5552,7 +5626,7 @@ l_mainIoLoopEntry:
 	mov	ax, [bp+currentKey]
 	sub	ax, '1'
 	push	ax
-	call	printCharacter
+	call	character_print
 	add	sp, 2
 	sub	ax, ax
 	push	ax
@@ -5586,9 +5660,9 @@ l_executeCampFunction:
 	shl	bx, 1
 	shl	bx, 1
 	call	g_campActionFunctions[bx]
-	cmp	buildingRvalMaybe, 0
+	cmp	g_mapRval, 0
 	jz	short loc_135A2
-	mov	ax, buildingRvalMaybe
+	mov	ax, g_mapRval
 	jmp	short loc_135AA
 loc_135A2:
 	inc	[bp+loopCounter]
@@ -6202,7 +6276,7 @@ party_isSlotActive endp
 
 ; Attributes: bp-based frame
 
-tav_enter proc far
+tavern_enter proc far
 
 	loopCounter= word ptr -6
 	lastCharNo= word ptr -4
@@ -6297,7 +6371,7 @@ l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-tav_enter endp
+tavern_enter endp
 
 ; Attributes: bp-based frame
 
@@ -6695,7 +6769,7 @@ loc_13DF6:
 	mov	ax, 76h	
 	push	ax
 	push	[bp+partySlotNumber]
-	call	inven_addItem
+	call	inventory_addItem
 	add	sp, 8
 	or	ax, ax
 	jz	short loc_13E22
@@ -6811,7 +6885,7 @@ l_loopEntry:
 
 	mov	al, tavCoords.location[si]
 	cbw
-	cmp	ax, currentLocationMaybe
+	cmp	ax, g_locationNumber
 	jnz	short l_loopIncrement
 
 	mov	ax, cx
@@ -7530,7 +7604,7 @@ l_loopEntry:
 	jnz	short l_loopIncrement
 
 	mov	al, templeLoc.location[si]
-	cmp	ax, currentLocationMaybe
+	cmp	ax, g_locationNumber
 	jnz	short l_loopIncrement
 
 	mov	ax, [bp+loopCounter]
@@ -7679,7 +7753,7 @@ l_revertAgeStatus:
 	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
-	call	_doAgeStatus
+	call	character_applyAgeStatus
 	add	sp, 0Ah
 	jmp	short l_return
 
@@ -7951,7 +8025,7 @@ empty_enter proc	far
 	call	bat_init
 
 l_noBattle:
-	cmp	currentLocationMaybe, 1
+	cmp	g_locationNumber, 1
 	jnz	short loc_14956
 	mov	ax, 50
 	jmp	short loc_14959
@@ -8020,7 +8094,7 @@ l_return:
 	push	cs
 	call	near ptr writeInventoryStf
 	call	text_clear
-	mov	buildingRvalMaybe, 2
+	mov	g_mapRval, 2
 	sub	ax, ax
 
 	mov	sp, bp
@@ -8129,7 +8203,7 @@ loc_14A05:
 	mov	al, strg_inventory[si]
 	push	ax
 	push	[bp+arg_0]
-	call	inven_addItem
+	call	inventory_addItem
 	add	sp, 8
 	or	ax, ax
 	jz	short l_allFull
@@ -8316,8 +8390,8 @@ l_loopHead:
 	mov	bx, [bp+itemNumber]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (itemStr+2)[bx]
-	push	word ptr itemStr[bx]
+	push	word ptr (g_itemStringList+2)[bx]
+	push	word ptr g_itemStringList[bx]
 	push	word ptr [bp+itemList+2]
 	push	word ptr [bp+itemList]
 	call	strcat
@@ -8591,7 +8665,7 @@ getYesNo endp
 getKey proc far
 
 	inputKey= word ptr	-2
-	arg_0= word ptr	 6
+	mouseLineCount= word ptr	 6
 
 	push	bp
 	mov	bp, sp
@@ -8607,7 +8681,7 @@ l_loopEntry:
 	jz	short l_skipMouseUpdate
 	call	far ptr	sub_3E974
 
-	push	[bp+arg_0]
+	push	[bp+mouseLineCount]
 	push	cs
 	call	near ptr mouse_updateIcon
 	add	sp, 2
@@ -8615,7 +8689,7 @@ l_loopEntry:
 	call	near ptr sub_1766A
 
 l_skipMouseUpdate:
-	push	[bp+arg_0]
+	push	[bp+mouseLineCount]
 	push	cs
 	call	near ptr mouse_getClick
 	add	sp, 2
@@ -9058,7 +9132,7 @@ loc_15256:
 
 	cmp	gs:advanceTimeFlag, 0
 	jnz	short loc_15296
-	call	bat_doPoisonEffect
+	call	bat_partyApplyPoison
 loc_15296:
 	cmp	gs:advanceTimeFlag, 0
 	jz	short loc_152A5
@@ -9113,12 +9187,12 @@ loc_15356:
 	cmp	gs:regenSpptSq,	0
 	jz	short loc_15378
 loc_15362:
-	call	regenSppt
+	call	party_applySpptRegen
 	cmp	gs:songRegenSppt, 0
 	jz	short loc_15378
-	call	regenSppt
+	call	party_applySpptRegen
 loc_15378:
-	call	doEquipmentEffect
+	call	party_applyEquipmentEffects
 	cmp	gs:sqRegenHPFlag, 0
 	jz	loc_doRealtimeEvents_label_1
 	call	party_regenHp
@@ -9356,16 +9430,17 @@ l_slower:
 	jmp	l_loopEntry
 
 l_printFaster:
-	mov	ax, offset aFaster
+	mov	ax, offset s_faster
 	jmp	l_doPrint
 
 l_printSlower:
-	mov	ax, offset aSlower
+	mov	ax, offset s_slower
 
 l_doPrint:
 	push	ds
 	push	ax
-	func_printString
+	call	printString
+	add	sp, 4
 	jmp	l_loopEntry
 
 l_skipFastCheck:
@@ -11747,7 +11822,7 @@ loc_167BC:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 
 	mov	ax, offset g_rosterCharacterBuffer
@@ -11901,7 +11976,7 @@ loc_1694C:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
@@ -11918,8 +11993,8 @@ loc_1694C:
 	push	[bp+var_25E]
 	call	_freeMaybe
 	add	sp, 4
-	call	sub_116CC
-	mov	buildingRvalMaybe, 1
+	call	map_resetLocation
+	mov	g_mapRval, 1
 
 	pop	si
 	mov	sp, bp
@@ -12088,7 +12163,7 @@ party_print proc far
 	cmp	byte ptr g_printPartyFlag,	0
 	jnz	l_return
 
-	call	rost_updateParty
+	call	party_update
 	mov	byte ptr g_printPartyFlag,	1
 	call	far ptr	sub_3E974
 
@@ -12924,7 +12999,7 @@ loc_1726A:
 	push	gs:bigpicCellData_off
 	push	[bp+var_C]
 	push	[bp+var_E]
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 	push	[bp+var_C]
 	push	[bp+var_E]
@@ -13100,7 +13175,7 @@ loc_173FA:
 	push	[bp+arg_2]
 	push	[bp+memSegment]
 	push	[bp+memOffset]
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 
 	push	[bp+memSegment]
@@ -13429,18 +13504,17 @@ bigpic_drawTopology proc far
 
 	headerSize= word ptr -1Eh
 	height=	word ptr -1Ch
-	_offset= dword ptr -1Ah
-	gbufOff= word ptr -12h
-	gbufSeg= word ptr -10h
+	tileOffset= dword ptr -1Ah
+	gfxSourceBufferP= dword ptr -12h
 	row= word ptr -0Eh
 	column=	word ptr -0Ch
 	var_A= word ptr	-0Ah
-	var_8= word ptr	-8
-	var_6= word ptr	-6
-	var_2= word ptr	-2
+	tileIndexNumber= word ptr	-8
+	quadrantWidth= word ptr	-6
+	srcSkip= word ptr	-2
 	quadrant= word ptr  6
 	sq= word ptr  8
-	gbuf= dword ptr	 0Ah
+	gfxSourceBuffer= dword ptr	 0Ah		; GFX source address
 
 	push	bp
 	mov	bp, sp
@@ -13450,113 +13524,125 @@ bigpic_drawTopology proc far
 	push	si
 
 	cmp	inDungeonMaybe, 0
-	jz	short loc_17756
+	jz	short l_notInDungeon
 	mov	ax, 10h
-	jmp	short loc_17759
-loc_17756:
+	jmp	short l_setHeaderSize
+
+l_notInDungeon:
 	mov	ax, 14h
-loc_17759:
+
+l_setHeaderSize:
 	mov	[bp+headerSize], ax
 
+	; Set column
 	mov	si, [bp+quadrant]
 	shl	si, 1
-	mov	al, byte ptr bigpicQuadrantCoords.column[si]
+	mov	al, byte ptr g_tile_quadrantCoordinates.column[si]
 	cbw
 	mov	[bp+column], ax
 
-	mov	al, bigpicQuadrantCoords.row[si]
+	; Set row
+	mov	al, g_tile_quadrantCoordinates.row[si]
 	cbw
 	mov	[bp+row], ax
 
 	mov	bx, [bp+quadrant]
-	mov	al, byte_44278[bx]
+	mov	al, g_tile_quadrantWidthList[bx]
 	cbw
-	mov	[bp+var_6], ax
+	mov	[bp+quadrantWidth], ax
 
-	mov	al, byte_442F4[bx]
+	mov	al, g_tile_quadrantAspectOffsetList[bx]
 	cbw
 	mov	cx, [bp+sq]
 	shl	cx, 1
 	shl	cx, 1
 	add	ax, cx
-	mov	[bp+var_8], ax
+	mov	[bp+tileIndexNumber], ax
 
 	mov	ax, [bp+headerSize]
-	cmp	[bp+var_8], ax
-	jge	loc_1786B
+	cmp	[bp+tileIndexNumber], ax
+	jge	l_return
+
 loc_177A8:
-	mov	di, [bp+var_8]
-	lfs	bx, [bp+gbuf]
+	mov	di, [bp+tileIndexNumber]
+	lfs	bx, [bp+gfxSourceBuffer]
 	mov	ah, fs:[bx+di+1]
 	sub	al, al
 	mov	bx, di
-	mov	di, word ptr [bp+gbuf]
+	mov	di, word ptr [bp+gfxSourceBuffer]
 	mov	cl, fs:[bx+di]
 	sub	ch, ch
 	add	ax, cx
 	add	ax, di
 	mov	dx, fs
 	add	ax, 9
-	mov	word ptr [bp+_offset], ax
-	mov	word ptr [bp+_offset+2], dx
-	lfs	bx, [bp+_offset]
-	inc	word ptr [bp+_offset]
+	mov	word ptr [bp+tileOffset], ax
+	mov	word ptr [bp+tileOffset+2], dx
+	lfs	bx, [bp+tileOffset]
+	inc	word ptr [bp+tileOffset]
 	mov	al, fs:[bx]
 	cbw
-	mov	[bp+var_2], ax
-	mov	bx, word ptr [bp+_offset]
-	inc	word ptr [bp+_offset]
+	mov	[bp+srcSkip], ax
+
+	mov	bx, word ptr [bp+tileOffset]
+	inc	word ptr [bp+tileOffset]
 	mov	al, fs:[bx]
 	cbw
 	mov	[bp+height], ax
-	mov	ax, word ptr [bp+_offset]
+
+	mov	ax, word ptr [bp+tileOffset]
 	add	ax, 2
-	mov	[bp+gbufOff], ax
-	mov	[bp+gbufSeg], dx
+	mov	word ptr [bp+gfxSourceBufferP], ax
+	mov	word ptr [bp+gfxSourceBufferP+2], dx
 	cmp	[bp+column], 0
 	jge	short loc_17813
 	mov	ax, [bp+column]
-	sub	[bp+gbufOff], ax
-	mov	ax, [bp+var_6]
+	sub	word ptr [bp+gfxSourceBufferP], ax
+	mov	ax, [bp+quadrantWidth]
 	add	ax, [bp+column]
 	jns	short loc_17809
 	sub	ax, ax
+
 loc_17809:
 	mov	[bp+var_A], ax
 	mov	[bp+column], 0
 	jmp	short loc_1782F
+
 loc_17813:
 	mov	ax, [bp+column]
-	add	ax, [bp+var_6]
+	add	ax, [bp+quadrantWidth]
 	cmp	ax, 56
 	jle	short loc_17829
 	mov	ax, 55
 	sub	ax, [bp+column]
 	mov	[bp+var_A], ax
 	jmp	short loc_1782F
+
 loc_17829:
-	mov	ax, [bp+var_6]
+	mov	ax, [bp+quadrantWidth]
 	mov	[bp+var_A], ax
+
 loc_1782F:
-	cmp	[bp+var_2], 0
-	jz	short loc_1786B
+	cmp	[bp+srcSkip], 0
+	jz	short l_return
 	mov	bx, [bp+quadrant]
-	mov	al, byte_444D8[bx]
+	mov	al, g_quadrantRightFlagList[bx]
 	cbw
-	push	ax
-	mov	al, byte_442B6[bx]
+	push	ax					; rightFlag
+	mov	al, g_tile_quadrantScaleFactor[bx]
 	cbw
 	push	ax
 	push	[bp+height]
-	push	[bp+var_2]
+	push	[bp+srcSkip]
 	push	[bp+var_A]
 	push	[bp+row]
 	push	[bp+column]
-	push	[bp+gbufSeg]
-	push	[bp+gbufOff]
+	push	word ptr [bp+gfxSourceBufferP+2]
+	push	word ptr [bp+gfxSourceBufferP]
 	call	_bigpic_copyTopoElem
 	add	sp, 12h
-loc_1786B:
+
+l_return:
 	pop	si
 	pop	di
 	mov	sp, bp
@@ -13577,7 +13663,7 @@ bigpic_setBackground	proc far
 	mov	ax, 4
 	call	someStackOperation
 
-	test	levFlags, 20h
+	test	g_levelFlags, 20h
 	jz	l_inDungeon
 
 	mov	ax, 44h			; Outdoor sky color
@@ -13588,7 +13674,7 @@ bigpic_setBackground	proc far
 	mov	dx, seg seg021
 	push	dx
 	push	ax
-	call	bigpicmemcpy
+	call	bigpic_memcpy
 	add	sp, 8
 	jmp	l_return
 
@@ -13929,7 +14015,2583 @@ icon_draw endp
 
 seg005 ends
 
-include seg006.asm
+; Segment type: Pure code
+seg006 segment word public 'CODE' use16
+        assume cs:seg006
+;org 9
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+; Attributes: bp-based frame
+
+party_update proc far
+
+	slotNumber=	word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	byte ptr gs:party._name[bx], 0
+	jz	short l_next
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_update
+	add	sp, 2
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+	mov	sp, bp
+	pop	bp
+	retf
+party_update endp
+
+; Attributes: bp-based frame
+
+character_update proc far
+
+	songAcBonus= word ptr	-4
+	acValue= word ptr	-2
+	slotNumber=	word ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	test	gs:party.status[bx], stat_dead	or stat_stoned
+	jz	short l_skipResurrect
+
+	mov	ax, itemEff_resurrect
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_isEffectEquipped
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_skipResurrect
+
+	push	cs
+	call	near ptr inventory_pack
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	and	gs:party.status[bx], stat_poisoned or stat_old	or stat_paralyzed or stat_possessed or stat_nuts or stat_unknown
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	ax, gs:party.maxHP[si]
+	mov	gs:party.currentHP[si], ax
+
+l_skipResurrect:
+	cmp	gs:songHalfDamage, 0
+	jz	short l_noSongAcBonus
+
+	mov	al, gs:g_currentSinger
+	sub	ah, ah
+	cmp	ax, [bp+slotNumber]
+	jnz	short l_noSongAcBonus
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.level[bx], 60
+	jbe	short l_notMaxLevelSinger
+	mov	ax, 0Fh
+	jmp	short l_setSongAcBonus
+
+l_notMaxLevelSinger:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, gs:party.level[bx]
+	shr	ax, 1
+	shr	ax, 1
+
+l_setSongAcBonus:
+	mov	[bp+songAcBonus], ax
+	jmp	short l_songBonusExit
+
+l_noSongAcBonus:
+	mov	[bp+songAcBonus], 0
+
+l_songBonusExit:
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_getEquipmentAcBonus
+	add	sp, 2
+	mov	si, ax
+
+	push	[bp+slotNumber]
+	call	character_getDexterityAcBonus
+	add	sp, 2
+	mov	cx, ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.acBase[bx]
+	sub	ah, ah
+	mov	bx, [bp+slotNumber]
+	mov	dl, gs:byte_42444[bx]
+	sub	dh, dh
+	add	ax, dx
+	add	ax, cx
+	add	ax, si
+	add	ax, [bp+songAcBonus]
+	mov	[bp+acValue], ax
+
+	mov	ax, charSize
+	imul	bx
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monk
+	jnz	short l_notMonk
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, gs:party.level[bx]
+	sub	ax, 0FFh
+	sbb	cx, cx
+	and	ax, cx
+	add	ax, 0FFh
+	add	[bp+acValue], ax
+
+l_notMonk:
+	mov	al, shieldAcBonus
+	sub	ah, ah
+	mov	cl, gs:partySpellAcBonus
+	sub	ch, ch
+	add	ax, cx
+	mov	cl, gs:g_songAcBonus
+	add	ax, cx
+	mov	cl, gs:g_charFreezeAcPenalty
+	sub	ax, cx
+	or	ax, ax
+	jle	short l_checkMaxAc
+	add	[bp+acValue], ax
+
+l_checkMaxAc:
+	mov	al, byte ptr [bp+acValue]
+	cmp	ax, 60
+	jle	l_setValues
+	mov	ax, 60
+
+l_setValues:
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	gs:party.ac[bx], cl
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.currentHP[bx], 0
+	jnz	short l_return
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	or	gs:party.status[bx], stat_dead
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+character_update endp
+
+; Attributes: bp-based frame
+character_getDexterityAcBonus proc	far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.dexterity[bx]
+	sub	ah, ah
+	sub	ax, 14
+	or	ax, ax
+	jle	short l_returnZero
+
+	mov	bx, ax
+	mov	al, g_acDexterityBonus[bx]
+	sub	ah, ah
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_getDexterityAcBonus endp
+
+; Attributes: bp-based frame
+
+character_getEquipmentAcBonus proc far
+
+	inventorySlotNumber= word ptr	-4
+	acBonus= word ptr	-2
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	[bp+acBonus], 0
+	mov	[bp+inventorySlotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	and	al, 3
+	cmp	al, 1
+	jnz	short l_next
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	bl, gs:party.inventory.itemNo[bx]
+	sub	bh, bh
+	mov	al, item_acBonWeapDam[bx]
+	sub	ah, ah
+	and	ax, 0Fh
+	add	[bp+acBonus], ax
+
+l_next:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], 36
+	jl	short l_loop
+
+	mov	ax, [bp+acBonus]
+	mov	sp, bp
+	pop	bp
+	retf
+character_getEquipmentAcBonus endp
+
+; Attributes: bp-based frame
+;
+; Return:
+;   0 - has effect and is equipped
+;   1 - has effect and not equipped
+;  -1 - does not have effect
+;
+
+character_isEffectEquipped proc far
+
+	rval= word ptr -4
+	inventorySlotNumber= word ptr	-2
+	slotNumber= word ptr  6
+	effectNumber= word ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	[bp+rval], 0FFFFh
+	cmp	byte ptr gs:party._name[bx], 0
+	jz	short l_return
+
+	mov	[bp+inventorySlotNumber], 1
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sub	ah, ah
+	mov	bx, ax
+	mov	al, itemEffectList[bx]
+	and	ax, 0Fh
+	cmp	ax, [bp+effectNumber]
+	jnz	l_next
+
+	; Effect found. Determine if the item is equipped or not.
+	;
+	mov	[bp+rval], 1
+	mov	ax, [bp+inventorySlotNumber]
+	dec	ax
+	mov	gs:g_inventoryPackStart, ax
+	mov	ax, [bp+slotNumber]
+	mov	gs:g_inventoryPackTarget, ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.acBase[bx]
+	and	al, 3
+	cmp	al, 1
+	jnz	short l_next
+
+	sub	ax, ax
+	mov	[bp+rval], ax
+	jmp	short l_return
+
+l_next:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], 24h
+	jl	l_loop
+
+l_return:
+	mov	ax, [bp+rval]
+	mov	sp, bp
+	pop	bp
+	retf
+character_isEffectEquipped endp
+
+; Attributes: bp-based frame
+
+inventory_pack proc	far
+	inventorySlotNumber= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	ax, gs:g_inventoryPackStart
+	mov	[bp+inventorySlotNumber], ax
+l_packLoop:
+	mov	ax, charSize
+	imul	gs:g_inventoryPackTarget
+	mov	si, ax
+	add	si, [bp+inventorySlotNumber]
+	mov	al, gs:(party.inventory.itemFlags+3)[si]
+	mov	gs:party.inventory.itemFlags[si], al
+	inc	[bp+inventorySlotNumber]
+	cmp	[bp+inventorySlotNumber], 33
+	jl	short l_packLoop
+
+	mov	[bp+inventorySlotNumber], 33
+l_clearLoop:
+	mov	ax, charSize
+	imul	gs:g_inventoryPackTarget
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	gs:party.inventory.itemFlags[bx], 0
+	inc	[bp+inventorySlotNumber]
+	cmp	[bp+inventorySlotNumber], 36
+	jl	short l_clearLoop
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_pack endp
+
+; Attributes: bp-based frame
+
+inventory_addItem proc far
+
+	inventorySlotNumber= word ptr	-4
+	itemEquipFlag= word ptr	-2
+	slotNumber=	word ptr  6
+	itemNumber= word ptr	 8
+	itemFlags= byte ptr	 0Ah
+	itemCount= byte ptr	 0Ch
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	byte ptr gs:party._name[bx], 0
+	jz	l_returnZero
+
+	mov	[bp+inventorySlotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	cmp	gs:party.inventory.itemNo[bx],	0
+	jz	short l_foundEmptySlot
+
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], 36
+	jl	short l_loop
+	jmp	l_returnZero
+
+l_foundEmptySlot:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.class[bx]
+	sub	bh, bh
+	mov	al, classEquipMask[bx]
+	sub	ah, ah
+	mov	bx, [bp+itemNumber]
+	mov	cl, itemEquipMask[bx]
+	sub	ch, ch
+	test	ax, cx
+	jz	short l_setUnequippable
+
+	sub	ax, ax
+	jmp	short l_setFlags
+
+l_setUnequippable:
+	mov	ax, itemFlag_unequipable
+
+l_setFlags:
+	mov	[bp+itemEquipFlag], ax
+	mov	al, [bp+itemFlags]
+	or	al, byte ptr [bp+itemEquipFlag]
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	gs:party.inventory.itemFlags[bx], cl
+
+	mov	al, byte ptr [bp+itemNumber]
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	gs:party.inventory.itemNo[bx],	cl
+
+	mov	al, [bp+itemCount]
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	gs:party.inventory.itemCount[bx], cl
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_addItem endp
+
+; This function	returns	1 if the item can be
+; used.
+; Attributes: bp-based frame
+
+inventory_canBeUsed proc far
+
+	itemNumber= word ptr	-2
+	slotNumber=	word ptr  6
+	inventorySlotNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	mov	al, gs:party.inventory.itemFlags[bx]
+	and	al, 3
+	cmp	al, 2
+	jz	short l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+	mov	[bp+itemNumber], ax
+	mov	bx, ax
+	mov	al, itemSpellNo[bx]
+	mov	g_curSpellNumber, ax
+	cmp	ax, 0FFh
+	jz	short l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	cmp	gs:party.inventory.itemCount[bx], 0
+	jz	short l_returnZero
+
+	mov	bx, [bp+itemNumber]
+	cmp	itemTypeList[bx], itType_quiver
+	jnz	short l_returnOne
+
+	mov	ax, itType_bow
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_itemTypeCanBeUsed
+	add	sp, 4
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+	jmp	short l_return
+
+l_returnOne:
+	mov	ax, 1
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_canBeUsed endp
+
+; Attributes: bp-based frame
+
+character_hasTypeEquipped proc far
+
+	inventorySlotNumber= word ptr -2
+	slotNumber= word ptr  6
+	itemType= word ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+inventorySlotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+	mov	bx, ax
+	mov	al, itemTypeList[bx]
+	and	ax, 0Fh
+	cmp	ax, [bp+itemType]
+	jnz	short l_next
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	and	al, 3
+	cmp	al, itemFlag_equipped
+	jz	short l_returnOne
+
+l_next:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], inventorySize
+	jl	short l_loop
+
+l_returnZero:
+	sub	ax, ax
+	jmp	short l_return
+
+l_returnOne:
+	mov	ax, 1
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_hasTypeEquipped endp
+
+; Attributes: bp-based frame
+
+character_itemTypeCanBeUsed proc far
+
+	inventorySlotNumber= word ptr -2
+	slotNumber= word ptr  6
+	itemType= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+inventorySlotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+	mov	bx, ax
+	mov	al, itemTypeList[bx]
+	and	ax, 0Fh
+
+	cmp	ax, [bp+itemType]
+	jnz	short l_next
+
+	cmp	[bp+itemType], itType_weapon
+	jnz	short l_returnOne
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	and	al, 3
+	cmp	al, itemFlag_equipped
+	jz	short l_returnOne
+
+l_next:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], inventorySize
+	jge	short l_returnZero
+	jmp	short l_loop
+	
+
+l_returnOne:
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_itemTypeCanBeUsed endp
+
+; This function	returns	the slot number	of an equipped
+; item that matches the	type requested
+; Attributes: bp-based frame
+
+character_getTypeEquippedSlot proc far
+
+	itemNumber= word ptr	-4
+	inventorySlotNumber= word ptr -2
+	slotNumber= word ptr  6
+	itemType= word ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	[bp+inventorySlotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+	mov	[bp+itemNumber], ax
+	mov	bx, ax
+	mov	al, itemTypeList[bx]
+	and	ax, 0Fh
+	cmp	ax, [bp+itemType]
+	jnz	short l_next
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	and	al, 3
+	cmp	al, itemFlag_equipped
+	jnz	short l_next
+
+	mov	ax, [bp+itemNumber]
+	jmp	short l_return
+
+l_next:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], inventorySize
+	jl	short l_loop
+
+l_returnFail:
+	mov	ax, 0FFFFh
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_getTypeEquippedSlot endp
+
+; Attributes: bp-based frame
+
+character_print proc far
+
+	lineCount= word ptr	-8
+	inKey= word ptr	-6
+	mouseMask= word ptr	-4
+	lastSlot= word ptr	-2
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+
+	call	party_findEmptySlot
+	mov	[bp+lastSlot], ax
+	cmp	[bp+slotNumber], ax
+	jge	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.picIndex[bx]
+	sub	ah, ah
+	push	ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	setTitle
+	add	sp, 4
+
+l_statLoop:
+	push	[bp+lastSlot]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_printStats
+	add	sp, 2
+
+	mov	[bp+mouseMask], 0
+	mov	al, gs:txt_numLines
+	sub	ah, ah
+	sub	ax, 2
+	mov	[bp+lineCount], ax
+
+l_setMouseMask:
+	mov	al, gs:txt_numLines
+	sub	ah, ah
+	cmp	ax, [bp+lineCount]
+	jb	short l_getKey
+
+	mov	bx, [bp+lineCount]
+	shl	bx, 1
+	mov	ax, bitMask16bit[bx]
+	or	[bp+mouseMask], ax
+	inc	[bp+lineCount]
+	jmp	short l_setMouseMask
+
+l_getKey:
+	push	[bp+mouseMask]
+	call	getKey
+	add	sp, 2
+	mov	[bp+inKey], ax
+	cmp	ax, 'P'	
+	jz	short l_poolGold
+	mov	al, gs:txt_numLines
+	sub	ah, ah
+	add	ax, 10Ch
+	cmp	ax, [bp+inKey]
+	jnz	short l_checkTradeGold
+
+l_poolGold:
+	push	[bp+lastSlot]
+	push	[bp+slotNumber]
+	call	doPoolGold
+	add	sp, 4
+	jmp	short l_checkEscape
+
+l_checkTradeGold:
+	cmp	[bp+inKey], 'T'
+	jz	short l_tradeGold
+	mov	al, gs:txt_numLines
+	sub	ah, ah
+	add	ax, 10Dh
+	cmp	ax, [bp+inKey]
+	jnz	short l_checkEscape
+
+l_tradeGold:
+	push	[bp+lastSlot]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_getGoldTradee
+	add	sp, 4
+
+l_checkEscape:
+	cmp	[bp+inKey], dosKeys_ESC
+	jz	short l_printInventory
+	mov	al, gs:txt_numLines
+	sub	ah, ah
+	add	ax, 10Eh
+	cmp	ax, [bp+inKey]
+	jnz	l_statLoop
+
+l_printInventory:
+	call	text_clear
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+	jnb	short l_printSpecialAbilities
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr inventory_print
+	add	sp, 2
+
+l_printSpecialAbilities:
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_hasSpecialAbilities
+	add	sp, 4
+	or	ax, ax
+	jz	short l_return
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_printAbilities
+	add	sp, 2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_print endp
+
+; Attributes: bp-based frame
+
+inventory_appendCharges proc far
+
+	stringBuffer= dword ptr  6
+	itemCount= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	mov	byte ptr fs:[bx], ' '
+
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	mov	byte ptr fs:[bx], '#'
+
+	mov	ax, 2
+	push	ax
+	mov	ax, [bp+itemCount]
+	cwd
+	push	dx
+	push	ax
+	push	word ptr [bp+stringBuffer+2]
+	push	word ptr [bp+stringBuffer]
+	call	itoa
+	add	sp, 0Ah
+
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_appendCharges endp
+
+; Attributes: bp-based frame
+;
+; DWORD - var_42 & var_44
+;
+inventory_trade proc	far
+
+	tradeeSlotNumber=	word ptr -4Ch
+	var_4C=	word ptr -4Ah
+	var_4A=	word ptr -48h
+	var_46=	word ptr -46h
+	var_44=	word ptr -44h
+	var_42=	word ptr -42h
+	stringBuffer=	word ptr -40h
+	slotNumber= word ptr	 6
+	inventorySlotNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4Ch
+	call	someStackOperation
+
+	mov	ax, offset s_whoDoes
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_44], ax
+	mov	[bp+var_42], dx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	[bp+var_42]
+	push	[bp+var_44]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_44], ax
+	mov	[bp+var_42], dx
+	mov	ax, offset s_wantToGiveItTo
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_44]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_44], ax
+	mov	[bp+var_42], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+tradeeSlotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+loc_183BD:
+	mov	ax, [bp+inventorySlotNumber]
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	mov	[bp+var_4A], ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+var_4A]
+	mov	al, gs:[bx+62h]
+	sub	ah, ah
+	and	ax, 0FCh
+	mov	[bp+var_46], ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+var_4A]
+	mov	al, gs:[bx+63h]
+	sub	ah, ah
+	mov	[bp+var_4C], ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+var_4A]
+	mov	al, gs:[bx+64h]
+	sub	ah, ah
+
+	push	ax
+	push	[bp+var_46]
+	push	[bp+var_4C]
+	push	[bp+tradeeSlotNumber]
+	push	cs
+	call	near ptr inventory_addItem
+	add	sp, 8
+	or	ax, ax
+	jz	short l_noRoom
+
+	push	[bp+inventorySlotNumber]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr inventory_discard
+	add	sp, 4
+	jmp	short l_return
+
+l_noRoom:
+	mov	ax, offset s_allFull
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_trade endp
+
+; Attributes: bp-based frame
+
+inventory_discard proc far
+
+	slotNumber= word ptr	 6
+	inventorySlotNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, [bp+inventorySlotNumber]
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	mov	gs:g_inventoryPackStart, ax
+	mov	ax, [bp+slotNumber]
+	mov	gs:g_inventoryPackTarget, ax
+	call	inventory_pack
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_discard endp
+
+; Attributes: bp-based frame
+
+inventory_equip proc	far
+	itemType= word ptr -4
+	loopCounter= word ptr -2
+	slotNumber= word ptr  6
+	inventorySlotNumber=	word ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+
+	mov	bx, ax
+	mov	al, itemTypeList[bx]
+	and	ax, 0Fh
+	mov	[bp+itemType], ax
+	or	ax, ax
+	jz	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	and	gs:party.inventory.itemFlags[bx], 0FCh
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	or	gs:party.inventory.itemFlags[bx], itemFlag_equipped
+
+	mov	[bp+loopCounter], 0
+
+l_unequipLoop:
+	mov	ax, [bp+inventorySlotNumber]
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	cmp	ax, [bp+loopCounter]
+	jz	short l_unequipNext
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+loopCounter]
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+	mov	bx, ax
+	mov	al, itemTypeList[bx]
+	and	ax, 0Fh
+	cmp	ax, [bp+itemType]
+	jnz	short l_unequipNext
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+loopCounter]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	and	al, 3
+	cmp	al, 2
+	jz	short l_unequipNext
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+loopCounter]
+	and	gs:party.inventory.itemFlags[bx], 0FCh
+
+l_unequipNext:
+	add	[bp+loopCounter], 3
+	cmp	[bp+loopCounter], 36
+	jl	short l_unequipLoop
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_equip endp
+
+; Attributes: bp-based frame
+
+inventory_unequip proc far
+
+	slotNumber= word ptr	 6
+	inventorySlotNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	and	gs:party.inventory.itemFlags[bx], 0FCh
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+	mov	bx, ax
+	mov	al, itemTypeList[bx]
+	and	al, 0Fh
+	cmp	al, itType_instrument
+	jnz	short l_return
+
+	push	[bp+slotNumber]
+	call	song_stopPlaying
+	add	sp, 2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_unequip endp
+
+; Attributes: bp-based frame
+
+inventory_identify proc far
+
+	inventoryIndex=	word ptr -46h
+	stringBuffer=	word ptr -44h
+	stringBufferP= dword ptr -4
+	slotNumber= word ptr	 6
+	inventorySlotNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 46h
+	call	someStackOperation
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	test	gs:party.status[bx], 1Ch
+	jnz	l_return
+
+loc_185D7:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	mov	ax, [bp+inventorySlotNumber]
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	mov	[bp+inventoryIndex], ax
+
+	call	random
+	mov	cx, ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:(party.specAbil+1)[bx], cl
+	jbe	short loc_18634
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventoryIndex]
+	and	gs:party.inventory.itemFlags[bx], 3Fh
+	jmp	short loc_18645
+
+loc_18634:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventoryIndex]
+	or	gs:party.inventory.itemFlags[bx], 40h
+
+loc_18645:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventoryIndex]
+	cmp	gs:party.inventory.itemFlags[bx], 80h
+	jb	short loc_1865D
+	mov	ax, 1
+	jmp	short loc_1865F
+loc_1865D:
+	sub	ax, ax
+loc_1865F:
+	push	ax
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	mov	ax, offset s_triesToIdentify
+	push	ds
+	push	ax
+	call	str_pluralize
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	lfs	bx, [bp+stringBufferP]
+	mov	byte ptr fs:[bx], 0
+
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_identify endp
+
+; Attributes: bp-based frame
+
+inventory_print proc far
+
+	containerNumber= word ptr -114h
+	inventoryListBuffer= word ptr -112h
+	inventoryActionNumber=	word ptr -52h
+	inventoryCount=	word ptr -50h
+	mouseLineCount=	word ptr -4Eh
+	inventoryListP=	word ptr -4Ch
+	inventorySlotNumber=	word ptr -1Ch
+	optionCharacters=	word ptr -1Ah
+	inventorySlotOptions=	word ptr -14h
+	inKey= word ptr	-0Eh
+	optionMouse= word ptr	-0Ch
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 114h
+	call	someStackOperation
+	push	si
+
+l_inventoryLoop:
+	lea	ax, [bp+inventoryListP]
+	push	ss
+	push	ax
+	lea	ax, [bp+inventoryListBuffer]
+	push	ss
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr inventory_getItemList
+	add	sp, 0Ah
+	mov	[bp+inventoryCount], ax
+	or	ax, ax
+	jnz	short l_hasInventory
+
+	mov	ax, offset s_pocketsAreEmpty
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	l_return
+
+l_hasInventory:
+	push	[bp+inventoryCount]
+	lea	ax, [bp+inventoryListP]
+	push	ss
+	push	ax
+	mov	ax, offset s_inventory
+	push	ds
+	push	ax
+	call	text_scrollingWindow
+	add	sp, 0Ah
+	mov	[bp+inventorySlotNumber], ax
+
+	call	text_clear
+	cmp	[bp+inventorySlotNumber], 0
+	jl	l_return
+
+	push	[bp+inventorySlotNumber]
+	push	[bp+slotNumber]
+	lea	ax, [bp+inventorySlotOptions]
+	push	ss
+	push	ax
+	push	cs
+	call	near ptr inventory_getOptions
+	add	sp, 4
+	call	text_clear
+	lea	ax, [bp+optionMouse]
+	push	ss
+	push	ax
+	lea	ax, [bp+optionCharacters]
+	push	ss
+	push	ax
+	lea	ax, [bp+inventorySlotOptions]
+	push	ss
+	push	ax
+	mov	ax, offset s_inventoryVarString
+	push	ds
+	push	ax
+	call	printVarString
+	add	sp, 10h
+	mov	[bp+mouseLineCount], ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	cmp	gs:party.inventory.itemNo[bx],	76h 
+	jz	short l_isContainer
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, cx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	cmp	gs:party.inventory.itemNo[bx],	7Dh 
+	jnz	short l_inputLoop
+
+l_isContainer:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sub	ah, ah
+	shr	ax, 1
+	shr	ax, 1
+	and	ax, 0Fh
+	mov	[bp+containerNumber], ax
+	mov	ax, offset s_itsFilledWith
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	bx, [bp+containerNumber]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (wineskinString+2)[bx]
+	push	word ptr wineskinString[bx]
+	call	printString
+	add	sp, 4
+
+l_inputLoop:
+	push	[bp+mouseLineCount]
+	call	getKey
+	add	sp, 2
+	mov	[bp+inKey], ax
+	cmp	ax, dosKeys_ESC
+	jz	l_inventoryLoop
+
+	mov	[bp+inventoryActionNumber], 0
+l_actionLoop:
+	mov	si, [bp+inventoryActionNumber]
+	cmp	byte ptr [bp+si+optionCharacters], 0
+	jz	short l_inputLoop
+
+	mov	al, byte ptr [bp+si+optionCharacters]
+	cbw
+	cmp	ax, [bp+inKey]
+	jz	short l_performAction
+
+	shl	si, 1
+	mov	ax, [bp+inKey]
+	cmp	[bp+si+optionMouse], ax
+	jnz	short l_actionLoopNext
+
+l_performAction:
+	call	text_clear
+	push	[bp+inventorySlotNumber]
+	push	[bp+slotNumber]
+	mov	bx, [bp+inventoryActionNumber]
+	shl	bx, 1
+	shl	bx, 1
+	call	g_inventoryActionFunctions[bx]
+	add	sp, 4
+	mov	byte ptr g_printPartyFlag,	0
+	call	party_print
+	jmp	l_inventoryLoop
+
+l_actionLoopNext:
+	inc	[bp+inventoryActionNumber]
+	jmp	short l_actionLoop
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_print endp
+
+; Populate optionList with 1s for inventory actions
+;
+; 0 - Trade
+; 1 - Discard
+; 2 - Equip
+; 3 - Unequip
+; 4 - Identify
+;
+; Attributes: bp-based frame
+
+inventory_getOptions proc far
+
+	loopCounter= word ptr	-4
+	savedItemFlags= word ptr	-2
+	optionList= dword ptr  6
+	slotNumber= word ptr	 0Ah
+	inventorySlotNumber= word ptr	 0Ch
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, [bp+inventorySlotNumber]
+	mov	cx, bx
+	shl	bx, 1
+	add	bx, cx
+	add	bx, ax
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sub	ah, ah
+	mov	[bp+savedItemFlags], ax
+	mov	al, byte ptr [bp+savedItemFlags]
+	and	al, 3
+	cmp	al, 1
+	jnz	short l_setUnequipFalse
+	mov	al, 1
+	jmp	short l_setUnequip
+l_setUnequipFalse:
+	sub	al, al
+l_setUnequip:
+	lfs	bx, [bp+optionList]
+	mov	fs:[bx+3], al
+
+	; This loop sets: trade, discard and equip
+	; to 0 if unequip is set above
+	;
+	mov	[bp+loopCounter], 0
+l_loop:
+	lfs	bx, [bp+optionList]
+	cmp	byte ptr fs:[bx+3], 1
+	sbb	ax, ax
+	neg	ax
+	mov	bx, [bp+loopCounter]
+	mov	si, word ptr [bp+optionList]
+	mov	fs:[bx+si], al
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 3
+	jl	short l_loop
+
+	lfs	bx, [bp+optionList]
+	mov	byte ptr fs:[bx+4], 0		; Initialze identify to false
+
+	lfs	bx, [bp+optionList]
+	cmp	byte ptr fs:[bx], 0
+	jz	short l_return
+
+	; Set Equip to false if item is unequippable
+	mov	al, byte ptr [bp+savedItemFlags]
+	and	al, 3
+	cmp	al, 2
+	jnz	short l_setIdentify
+	mov	byte ptr fs:[bx+2], 0
+
+l_setIdentify:
+	mov	al, byte ptr [bp+savedItemFlags]
+	and	al, 0C0h
+	cmp	al, 80h
+	jnz	short l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_rogue
+
+	jnz	short l_return
+	lfs	bx, [bp+optionList]
+	mov	byte ptr fs:[bx+4], 1
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_getOptions endp
+
+; Attributes: bp-based frame
+
+inventory_getItemList proc far
+
+	itemNumber= word ptr	-0Ah
+	inventoryCount= word ptr	-8
+	inventoryLength= word ptr	-6
+	inventorySlotNumber= word ptr	-4
+	savedItemFlags= word ptr	-2
+	slotNumber= word ptr	 6
+	listBuffer= dword ptr  8
+	listBufferP= dword ptr  0Ch
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ah
+	call	someStackOperation
+	push	si
+
+	mov	[bp+inventoryLength], 0
+	mov	[bp+inventorySlotNumber], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	cmp	gs:party.inventory.itemNo[bx],	0
+	jz	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sub	ah, ah
+	mov	[bp+savedItemFlags], ax
+
+	mov	bx, [bp+inventoryLength]
+	inc	[bp+inventoryLength]
+	shl	bx, 1
+	shl	bx, 1
+	lfs	si, [bp+listBufferP]
+	mov	ax, word ptr [bp+listBuffer]
+	mov	dx, word ptr [bp+listBuffer+2]
+	mov	fs:[bx+si], ax
+	mov	fs:[bx+si+2], dx
+	cmp	[bp+savedItemFlags], itemFlag_unidentified
+	jl	short l_itemIdentified
+
+	test	byte ptr [bp+savedItemFlags], 3
+	jnz	short l_itemIdentified
+
+	; Set flags to 3 which is '?' for unidentified
+	mov	[bp+savedItemFlags], 3
+
+l_itemIdentified:
+	lfs	bx, [bp+listBuffer]
+	inc	word ptr [bp+listBuffer]
+	mov	si, [bp+savedItemFlags]
+	and	si, 3
+	mov	al, g_itemFlagCharacters[si]
+	mov	fs:[bx], al
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemNo[bx]
+	sub	ah, ah
+	mov	[bp+itemNumber], ax
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemFlags[bx]
+	sub	ah, ah
+	push	ax
+	push	[bp+itemNumber]
+	push	word ptr [bp+listBuffer+2]
+	push	word ptr [bp+listBuffer]
+	push	cs
+	call	near ptr inventory_getItemName
+	add	sp, 8
+	mov	word ptr [bp+listBuffer], ax
+	mov	word ptr [bp+listBuffer+2], dx
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+inventorySlotNumber]
+	mov	al, gs:party.inventory.itemCount[bx]
+	sub	ah, ah
+	mov	[bp+inventoryCount], ax
+	cmp	ax, 0FFh
+	jz	short l_terminateString
+	cmp	ax, 1
+	jz	short l_addCharge
+	push	ax
+	push	word ptr [bp+listBuffer+2]
+	push	word ptr [bp+listBuffer]
+	push	cs
+	call	near ptr inventory_appendCharges
+	add	sp, 6
+	mov	word ptr [bp+listBuffer], ax
+	mov	word ptr [bp+listBuffer+2], dx
+	jmp	short l_terminateString
+
+l_addCharge:
+	mov	bx, [bp+itemNumber]
+	cmp	g_itemBaseCount[bx],	1
+	jz	short l_terminateString
+	push	[bp+inventoryCount]
+	push	word ptr [bp+listBuffer+2]
+	push	word ptr [bp+listBuffer]
+	push	cs
+	call	near ptr inventory_appendCharges
+	add	sp, 6
+	mov	word ptr [bp+listBuffer], ax
+	mov	word ptr [bp+listBuffer+2], dx
+
+l_terminateString:
+	lfs	bx, [bp+listBuffer]
+	inc	word ptr [bp+listBuffer]
+	mov	byte ptr fs:[bx], 0
+
+l_next:
+	add	[bp+inventorySlotNumber], 3
+	cmp	[bp+inventorySlotNumber], inventorySize
+	jl	l_loop
+
+l_return:
+	mov	ax, [bp+inventoryLength]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_getItemList endp
+
+; Attributes: bp-based frame
+;
+; DWORD - arg_0 & arg_2
+
+inventory_getItemName proc far
+
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+	itemNumber=	word ptr  0Ah
+	itemFlags= byte	ptr  0Ch
+
+	push	bp
+	mov	bp, sp
+
+	test	[bp+itemFlags],	itemFlag_unidentified
+	jz	short l_identifiedItem
+
+	mov	bx, [bp+itemNumber]
+	mov	al, itemTypeList[bx]
+	sub	ah, ah
+	and	ax, 0Fh
+	mov	bx, ax
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_itemGenericStringList+2)[bx]
+	push	word ptr g_itemGenericStringList[bx]
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	call	strcat
+	add	sp, 8
+	jmp	short l_return
+
+l_identifiedItem:
+	mov	bx, [bp+itemNumber]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_itemStringList+2)[bx]
+	push	word ptr g_itemStringList[bx]
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	call	strcat
+	add	sp, 8
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+inventory_getItemName endp
+
+; Attributes: bp-based frame
+
+character_printStats proc far
+
+	stringBuffer=	word ptr -0DAh
+	loopCounter=	word ptr -26h
+	attributeList=	word ptr -24h
+	stringBufferP=	dword ptr -1Ah
+	attributeP=	dword ptr -16h
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0DAh
+	call	someStackOperation
+	push	si
+
+	call	text_clear
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, 1
+	cmp	gs:party.class[bx], class_illusion
+	jnz	short l_setArticle
+	sub	ax, ax
+
+l_setArticle:
+	push	ax
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	mov	ax, offset s_isAn
+	push	ds
+	push	ax
+	call	str_pluralize
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	lfs	bx, [bp+stringBufferP]
+	mov	byte ptr fs:[bx], ' '
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+	jnb	l_skipCharacterDescription
+
+	mov	ax, offset s_level
+	push	ds
+	push	ax
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	mov	ax, 3
+	push	ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	sub	ax, ax
+	push	ax
+	push	gs:party.level[bx]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	itoa
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], ' '
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.gender[bx]
+	sub	bh, bh
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (s_genderString+2)[bx]
+	push	word ptr s_genderString[bx]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], ' '
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.race[bx]
+	sub	bh, bh
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_raceString+2)[bx]
+	push	word ptr g_raceString[bx]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], ' '
+
+l_skipCharacterDescription:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.class[bx]
+	sub	bh, bh
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_classString+2)[bx]
+	push	word ptr g_classString[bx]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+	jnb	short l_skipAttributes
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	add	ax, offset party.strength
+	mov	word ptr [bp+attributeP], ax
+	mov	word ptr [bp+attributeP+2],	seg seg027
+
+	mov	[bp+loopCounter], 0
+l_attributeLoop:
+	mov	bx, [bp+loopCounter]
+	lfs	si, [bp+attributeP]
+	mov	al, fs:[bx+si]
+	sub	ah, ah
+	mov	si, bx
+	shl	si, 1
+	mov	[bp+si+attributeList],	ax
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 5
+	jl	short l_attributeLoop
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, gs:party.currentHP[bx]
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], 0Ah
+
+	mov	ax, 5
+	push	ax
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	lea	ax, [bp+attributeList]
+	push	ss
+	push	ax
+	push	cs
+	call	near ptr getAttributeString
+	add	sp, 0Ah
+
+l_skipAttributes:
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+	jnb	short l_skipExperience
+
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	sub	ax, ax
+	push	ax
+	push	gs:party.maxSppt[bx]
+	mov	ax, offset s_spellPoints
+	push	ds
+	push	ax
+	push	cs
+	call	near ptr printNumberAndString
+	add	sp, 0Ch
+
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	push	word ptr gs:(party.experience+2)[bx]
+	push	word ptr gs:party.experience[bx]
+	mov	ax, offset s_expr
+	push	ds
+	push	ax
+	push	cs
+	call	near ptr printNumberAndString
+	add	sp, 0Ch
+
+l_skipExperience:
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	push	word ptr gs:(party.gold+2)[bx]
+	push	word ptr gs:party.gold[bx]
+	mov	ax, offset s_gold
+	push	ds
+	push	ax
+	push	cs
+	call	near ptr printNumberAndString
+	add	sp, 0Ch
+
+	mov	ax, offset s_poolGold
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, offset s_escToContinue
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+character_printStats endp
+
+; Attributes: bp-based frame
+;
+; DWORD - arg_0 & arg_2, arg_8 & arg_A
+
+printNumberAndString proc far
+
+	stringBufferP= dword ptr -4
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+	arg_4= word ptr	 0Ah
+	arg_6= word ptr	 0Ch
+	arg_8= word ptr	 0Eh
+	arg_A= word ptr	 10h
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	push	[bp+arg_A]
+	push	[bp+arg_8]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	sub	ax, ax
+	push	ax
+	push	[bp+arg_6]
+	push	[bp+arg_4]
+	push	dx
+	push	word ptr [bp+stringBufferP]
+	call	itoa
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	lfs	bx, [bp+stringBufferP]
+	mov	byte ptr fs:[bx], 0
+	push	[bp+arg_A]
+	push	[bp+arg_8]
+	call	printString
+	add	sp, 4
+
+	mov	sp, bp
+	pop	bp
+	retf
+printNumberAndString endp
+
+; Attributes: bp-based frame
+getAttributeString proc	far
+
+	loopCounter= word ptr	-8
+	attributeValue= word ptr	-6
+	attributeStringP= dword ptr -4
+	attributeList= dword ptr  6
+	stringBuffer= dword ptr  0Ah
+	attributeCount= word ptr	 0Eh
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+
+	mov	ax, offset s_attributeAbbreviations
+	mov	word ptr [bp+attributeStringP], ax
+	mov	word ptr [bp+attributeStringP+2], ds
+	mov	[bp+loopCounter], 0
+
+l_loop:
+	mov	ax, [bp+attributeCount]
+	cmp	[bp+loopCounter], ax
+	jge	l_return
+
+	lfs	bx, [bp+attributeStringP]
+	inc	word ptr [bp+attributeStringP]
+	mov	al, fs:[bx]
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	mov	fs:[bx], al
+
+	lfs	bx, [bp+attributeStringP]
+	inc	word ptr [bp+attributeStringP]
+	mov	al, fs:[bx]
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	mov	fs:[bx], al
+
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	mov	byte ptr fs:[bx], ':'
+
+	lfs	bx, [bp+attributeList]
+	add	word ptr [bp+attributeList], 2
+	mov	ax, fs:[bx]
+	mov	[bp+attributeValue], ax
+	cmp	ax, 99	
+	jle	short l_maxNinetyNine
+	mov	[bp+attributeValue], 99
+
+l_maxNinetyNine:
+	cmp	[bp+attributeValue], 10
+	jge	short l_skipOneDigitCheck
+
+	; Add a space for one digit numbers
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	mov	byte ptr fs:[bx], ' ' 
+
+l_skipOneDigitCheck:
+	mov	ax, 2
+	push	ax
+	mov	ax, [bp+attributeValue]
+	cwd
+	push	dx
+	push	ax
+	push	word ptr [bp+stringBuffer+2]
+	push	word ptr [bp+stringBuffer]
+	call	itoa
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBuffer], ax
+	mov	word ptr [bp+stringBuffer+2], dx
+
+	lfs	bx, [bp+stringBuffer]
+	inc	word ptr [bp+stringBuffer]
+	mov	byte ptr fs:[bx], ' '
+	inc	[bp+loopCounter]
+	jmp	l_loop
+
+l_return:
+	lfs	bx, [bp+stringBuffer]
+	mov	byte ptr fs:[bx], 0
+	mov	sp, bp
+	pop	bp
+	retf
+getAttributeString endp
+
+; Attributes: bp-based frame
+;
+; DWORD - var_4 & var_6
+
+character_getGoldTradee proc far
+
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	tradeeSlotNumber= word ptr	-2
+	slotNumber= word ptr	 6
+	lastSlotNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	si
+
+	call	text_clear
+	mov	ax, offset s_tradeGoldToWhom
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+tradeeSlotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+	mov	ax, [bp+lastSlotNumber]
+	cmp	[bp+tradeeSlotNumber], ax
+	jg	l_return
+
+	call	text_clear
+	mov	ax, offset s_howMuchGoldToTrade
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	call	readGold
+	mov	[bp+var_6], ax
+	mov	[bp+var_4], dx
+	or	dx, ax
+	jz	short l_return
+
+	push	[bp+var_4]
+	push	[bp+var_6]
+	push	[bp+slotNumber]
+	call	character_removeGold
+	add	sp, 6
+	or	ax, ax
+	jnz	short l_enoughGold
+
+	call	text_clear
+	mov	ax, offset s_notEnoughGold
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	jmp	short l_return
+
+l_enoughGold:
+	mov	ax, [bp+var_6]
+	mov	dx, [bp+var_4]
+	mov	cx, ax
+	mov	bx, dx
+	mov	ax, charSize
+	imul	[bp+tradeeSlotNumber]
+	mov	si, ax
+	add	word ptr gs:party.gold[si], cx
+	adc	word ptr gs:(party.gold+2)[si], bx
+	call	text_clear
+	mov	ax, offset s_done
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+character_getGoldTradee endp
+
+; Attributes: bp-based frame
+; 
+; DWORD - var_204 & var_206
+
+character_printAbilities proc	far
+
+	var_206= word ptr -204h
+	var_204= word ptr -202h
+	knownSpellCount= word ptr	-4
+	currentSpellNumber= word ptr	-2
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 206h
+	call	someStackOperation
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:[bx+5Bh]
+	sub	ah, ah
+
+	cmp	ax, class_rogue
+	jz	l_printRogue
+
+	cmp	ax, class_bard
+	jz	l_printBard
+
+	cmp	ax, class_hunter
+	jz	l_printHunter
+
+	jmp	l_printSpells
+
+l_printRogue:
+	mov	ax, offset s_rogueAbilities
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.specAbil[bx]
+	sub	ah, ah
+	push	ax
+	mov	ax, offset s_disarmTraps
+	push	ds
+	push	ax
+	call	printThiefAbilValues
+	add	sp, 6
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:(party.specAbil+1)[bx]
+	sub	ah, ah
+	push	ax
+	mov	ax, offset s_identifyChest
+	push	ds
+	push	ax
+	call	printThiefAbilValues
+	add	sp, 6
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:(party.specAbil+1)[bx]
+	sub	ah, ah
+	push	ax
+	mov	ax, offset s_identifyItem
+	push	ds
+	push	ax
+	call	printThiefAbilValues
+	add	sp, 6
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:(party.specAbil+2)[bx]
+	sub	ah, ah
+	push	ax
+	mov	ax, offset s_hideInShadows
+	push	ds
+	push	ax
+	call	printThiefAbilValues
+	add	sp, 6
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:(party.specAbil+2)[bx]
+	sub	ah, ah
+	push	ax
+	mov	ax, offset s_criticalHit
+	push	ds
+	push	ax
+	call	printThiefAbilValues
+	add	sp, 6
+
+	jmp	l_waitAndReturn
+
+l_printBard:
+	mov	ax, offset s_bardAbilities
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.specAbil[bx]
+	sub	ah, ah
+	push	ax
+	mov	ax, offset s_tunesLeft
+	push	ds
+	push	ax
+	call	printStringAndThreeDigits
+	add	sp, 6
+	jmp	l_waitAndReturn
+
+l_printHunter:
+	mov	ax, offset s_hunterAbilities
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.specAbil[bx]
+	sub	ah, ah
+	push	ax
+	mov	ax, offset s_criticalHit
+	push	ds
+	push	ax
+	call	printThiefAbilValues
+	add	sp, 6
+	jmp	l_waitAndReturn
+
+l_printSpells:
+	mov	[bp+knownSpellCount], 0
+	mov	[bp+currentSpellNumber], 0
+
+l_loop:
+	push	[bp+currentSpellNumber]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jz	short l_loopNext
+	mov	bx, [bp+currentSpellNumber]
+	mov	cl, 3
+	shl	bx, cl
+	mov	ax, word ptr spellString.fullName[bx]
+	mov	dx, word ptr (spellString.fullName+2)[bx]
+	mov	si, [bp+knownSpellCount]
+	inc	[bp+knownSpellCount]
+	shl	si, 1
+	shl	si, 1
+	mov	[bp+si+var_206], ax
+	mov	[bp+si+var_204], dx
+
+l_loopNext:
+	inc	[bp+currentSpellNumber]
+	cmp	[bp+currentSpellNumber], c_spellCount
+	jl	short l_loop
+
+loc_190A5:
+	cmp	[bp+knownSpellCount], 0
+	jz	short loc_190C6
+	push	[bp+knownSpellCount]
+	lea	ax, [bp+var_206]
+	push	ss
+	push	ax
+	mov	ax, offset s_knownSpells
+	push	ds
+	push	ax
+	call	text_scrollingWindow
+	add	sp, 0Ah
+	jmp	l_return
+
+loc_190C6:
+	mov	ax, offset s_dontKnowAnySpells
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+
+l_waitAndReturn:
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+character_printAbilities endp
+
+; Attributes: bp-based frame
+
+character_learnedSpell proc far
+
+	slotNumber=	word ptr  6
+	spellNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, [bp+spellNumber]
+	mov	cl, 3
+	sar	ax, cl
+	add	bx, ax
+	mov	al, gs:party.spells[bx]
+	sub	ah, ah
+	mov	bx, [bp+spellNumber]
+	and	bx, 7
+	mov	cl, byteMaskList[bx]
+	sub	ch, ch
+	and	ax, cx
+
+	mov	sp, bp
+	pop	bp
+	retf
+character_learnedSpell endp
+
+; Attributes: bp-based frame
+
+character_learnSpell	proc far
+
+	slotNumber=	word ptr  6
+	spellNumber= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+
+	mov	bx, [bp+spellNumber]
+	and	bx, 7
+	mov	al, byteMaskList[bx]
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, [bp+spellNumber]
+	mov	dx, cx
+	mov	cl, 3
+	sar	ax, cl
+	add	bx, ax
+	or	gs:party.spells[bx], dl
+
+	mov	sp, bp
+	pop	bp
+	retf
+character_learnSpell	endp
+
+; This function	returns	one if the character class
+; has special abilities	that need to be	printed
+;
+; Attributes: bp-based frame
+
+character_hasSpecialAbilities proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+	jnb	short l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.class[bx]
+	sub	ah, ah
+
+	or	ax, ax
+	jz	short l_returnZero
+
+	cmp	ax, class_paladin
+	jz	short l_returnZero
+
+	cmp	ax, class_monk
+	jz	short l_returnZero
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_hasSpecialAbilities endp
+
+
+seg006 ends
 
 ; Segment type: Pure code
 seg007 segment word public 'CODE' use16
@@ -14033,7 +16695,7 @@ dun_changeLevels proc far
 
 	mov	word ptr [bp+dungeonDataP], offset g_rosterCharacterBuffer
 	mov	word ptr [bp+dungeonDataP+2], seg seg022
-	mov	si, dunLevelNum
+	mov	si, g_dunLevelNum
 	lfs	bx, [bp+dungeonDataP]
 	mov	al, fs:[bx+si+dun_t.dunLevel]
 	sub	ah, ah
@@ -14045,7 +16707,7 @@ dun_changeLevels proc far
 	cbw
 	add	sq_east, ax
 	mov	gs:levelChangedFlag, 1
-	mov	buildingRvalMaybe, 4
+	mov	g_mapRval, 4
 
 	pop	si
 	mov	sp, bp
@@ -14072,8 +16734,8 @@ dun_setExitLocation proc far
 	mov	al, fs:[bx+dun_t.exitSqE]
 	mov	sq_east, ax
 	mov	al, fs:[bx+dun_t.exitLocation]
-	mov	currentLocationMaybe, ax
-	mov	buildingRvalMaybe, 2
+	mov	g_locationNumber, ax
+	mov	g_mapRval, 2
 	mov	sp, bp
 	pop	bp
 	retf
@@ -14093,7 +16755,7 @@ mfunc_downStairs proc far
 
 	mov	g_sameSquareFlag, 1
 	call	text_clear
-	mov	al, levFlags
+	mov	al, g_levelFlags
 	sub	ah, ah
 	and	ax, 10h
 	push	ax
@@ -14111,7 +16773,7 @@ mfunc_downStairs proc far
 	push	cs
 	call	near ptr mfunc_setSameSquareFlag
 	add	sp, 4
-	dec	dunLevelNum
+	dec	g_dunLevelNum
 	jns	short l_changeLevel
 
 	push	cs
@@ -14143,7 +16805,7 @@ mfunc_upStairs proc far
 	jnz	short l_return
 	mov	g_sameSquareFlag, 1
 	call	text_clear
-	mov	al, levFlags
+	mov	al, g_levelFlags
 	and	al, 10h
 	cmp	al, 1
 	sbb	cx, cx
@@ -14162,7 +16824,7 @@ mfunc_upStairs proc far
 	push	cs
 	call	near ptr mfunc_setSameSquareFlag
 	add	sp, 4
-	inc	dunLevelNum
+	inc	g_dunLevelNum
 	push	cs
 	call	near ptr dun_changeLevels
 l_return:
@@ -14280,15 +16942,15 @@ mfunc_teleport proc far
 
 	cmp	ax, 80h
 	jb	short loc_19531
-	mov	buildingRvalMaybe, gameState_inWilderness
+	mov	g_mapRval, gameState_inWilderness
 	and	ax, 7Fh
-	mov	currentLocationMaybe, ax
+	mov	g_locationNumber, ax
 	jmp	short loc_19555
 loc_19531:
 	mov	ax, [bp+destinationDungeon]
 	cmp	dunLevelIndex, ax
 	jz	short loc_1954A
-	mov	buildingRvalMaybe, gameState_inDungeon
+	mov	g_mapRval, gameState_inDungeon
 loc_1954A:
 	mov	ax, [bp+destinationDungeon]
 	mov	dunLevelIndex, ax
@@ -14298,7 +16960,7 @@ loc_19555:
 loc_19557:
 	cmp	[bp+destinationDungeon], 80h
 	jb	short loc_19579
-	mov	buildingRvalMaybe, gameState_inDungeon
+	mov	g_mapRval, gameState_inDungeon
 	mov	ax, [bp+destinationDungeon]
 	and	ax, 7Fh
 	mov	dunLevelIndex, ax
@@ -14306,12 +16968,12 @@ loc_19557:
 
 loc_19579:
 	mov	ax, [bp+destinationDungeon]
-	cmp	currentLocationMaybe, ax
+	cmp	g_locationNumber, ax
 	jz	short loc_19592
-	mov	buildingRvalMaybe, gameState_inWilderness
+	mov	g_mapRval, gameState_inWilderness
 loc_19592:
 	mov	ax, [bp+destinationDungeon]
-	mov	currentLocationMaybe, ax
+	mov	g_locationNumber, ax
 
 l_return:
 	mov	ax, word ptr [bp+dataP]
@@ -14377,7 +17039,7 @@ l_doBattle:
 	call	bat_init
 	or	ax, ax
 	jz	short l_battleOver
-	mov	buildingRvalMaybe, gameState_partyDied
+	mov	g_mapRval, gameState_partyDied
 	mov	gs:breakAfterFunc, 0
 	mov	ax, word ptr [bp+dataP]
 	mov	dx, word ptr [bp+dataP+2]
@@ -15045,7 +17707,7 @@ l_retry:
 	push	[bp+var_2]
 	push	dx
 	push	ax
-	call	item_getName
+	call	inventory_getItemName
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -15072,7 +17734,7 @@ l_addItem:
 	push	[bp+var_108]
 	push	[bp+var_2]
 	push	[bp+slotNumber]
-	call	inven_addItem
+	call	inventory_addItem
 	add	sp, 8
 	or	ax, ax
 	jz	short l_inventoryFull
@@ -15103,7 +17765,7 @@ l_addItem:
 	push	[bp+var_2]
 	push	dx
 	push	ax
-	call	item_getName
+	call	inventory_getItemName
 	add	sp, 8
 	mov	[bp+var_10C], ax
 	mov	[bp+var_10A], dx
@@ -15432,7 +18094,7 @@ l_inventoryLoop:
 	mov	gs:g_inventoryPackStart, ax
 	mov	ax, [bp+slotNumber]
 	mov	gs:g_inventoryPackTarget, ax
-	call	inven_pack
+	call	inventory_pack
 	jmp	short l_characterLoopNext
 
 l_inventoryLoopNext:
@@ -15601,7 +18263,7 @@ l_next:
 	call	party_getLastSlot
 	cmp	ax, 7
 	jle	short l_return
-	mov	buildingRvalMaybe, gameState_partyDied
+	mov	g_mapRval, gameState_partyDied
 
 l_return:
 	mov	byte ptr g_printPartyFlag,	0
@@ -16416,7 +19078,7 @@ mfunc_learnSpell proc far
 	push	ax
 	mov	al, gs:g_userSlotNumber
 	push	ax
-	call	mage_learnSpell
+	call	character_learnSpell
 	add	sp, 4
 	mov	ax, word ptr [bp+dataP]
 	mov	dx, word ptr [bp+dataP+2]
@@ -16518,7 +19180,7 @@ mfunc_packInventory proc	far
 	mov	gs:g_inventoryPackTarget, ax
 	mov	al, gs:g_usedItemSlotNumber
 	mov	gs:g_inventoryPackStart, ax
-	call	inven_pack
+	call	inventory_pack
 	mov	ax, word ptr [bp+dataP]
 	mov	dx, word ptr [bp+dataP+2]
 	mov	sp, bp
@@ -17238,7 +19900,7 @@ mfunc_setWildFace proc far
 	add	ax, sq_east
 	mov	[bp+sqE], ax
 
-	cmp	gs:wildWrapFlag, 0
+	cmp	gs:g_wildWrapFlag, 0
 	jz	short l_skipWrap
 	mov	al, gs:mapHeight
 	sub	ah, ah
@@ -17525,7 +20187,7 @@ l_checkReturn:
 	cmp	gs:breakAfterFunc, 0
 	jnz	l_getOpcode
 
-	cmp	buildingRvalMaybe, 0
+	cmp	g_mapRval, 0
 	jz	short l_next
 	mov	ax, gs:mapRval
 	jmp	short l_return
@@ -17571,42 +20233,48 @@ mfunc_notImplemented endp
 
 seg007 ends
 
-; Segment type:	Pure code
+; Segment type: Pure code
 seg008 segment byte public 'CODE' use16
-	assume cs:seg008
+        assume cs:seg008
 ;org 0Ah
-	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:seg027
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
 ; Entry	point for a battle
 ; Attributes: bp-based frame
 
 bat_init proc far
 
 	var_8= word ptr	-8
-	var_6= word ptr	-6
+	currentSinger= word ptr	-6
 	var_4= word ptr	-4
-	var_2= word ptr	-2
+	currentSong= word ptr	-2
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 8
 	call	someStackOperation
+
 	mov	al, gs:g_currentSongPlusOne
 	mov	gs:bat_curSong,	al
 	mov	al, gs:g_currentSong
 	sub	ah, ah
-	mov	[bp+var_2], ax
+	mov	[bp+currentSong], ax
+
 	mov	al, gs:g_currentSinger
-	mov	[bp+var_6], ax
+	mov	[bp+currentSinger], ax
 	call	endNoncombatSong
+
 	push	cs
-	call	near ptr bat_getOpponents
+	call	near ptr bat_setOpponents
+
 	mov	[bp+var_8], 0
 	sub	al, al
 	mov	gs:partyFrozenFlag, al
 	mov	gs:runAwayFlag,	al
-loc_1B13D:
+
+l_roundStart:
 	push	cs
-	call	near ptr bat_sortMonGroupByDist
+	call	near ptr bat_monSortGroups
 	push	cs
 	call	near ptr bat_setBigpic
 	push	[bp+var_8]
@@ -17614,105 +20282,111 @@ loc_1B13D:
 	push	cs
 	call	near ptr bat_printOpponents
 	add	sp, 2
+
 	cmp	gs:partyFrozenFlag, 0
-	jnz	short loc_1B18C
+	jnz	short l_doRound
+
 	push	cs
-	call	near ptr bat_getPartyOptions
+	call	near ptr bat_partyGetActions
 	cmp	gs:runAwayFlag,	0
-	jz	short loc_1B18C
+	jz	short l_doRound
+
 partyRan:
-	push	[bp+var_2]
-	push	[bp+var_6]
+	push	[bp+currentSong]
+	push	[bp+currentSinger]
 	mov	al, gs:bat_curSong
 	sub	ah, ah
 	push	ax
 	call	bat_end
 	add	sp, 6
 	sub	ax, ax
-	jmp	loc_1B291
-loc_1B18C:
+	jmp	l_return
+
+l_doRound:
 	mov	gs:txt_numLines, 0Bh
-	call	bat_doCombatRound
+	call	bat_doRound
 	call	bat_partyDisbelieves
 	cmp	gs:monDisbelieveFlag, 0
-	jnz	short loc_1B1AF
+	jnz	short l_noDisbelieve
 	call	bat_isAMonGroupActive
 	or	ax, ax
-	jz	short loc_1B1AF
+	jz	short l_noDisbelieve
 	call	bat_monDisbelieve
-loc_1B1AF:
-	call	bat_doPoisonEffect
-	call	doEquipmentEffect
+
+l_noDisbelieve:
+	call	bat_partyApplyPoison
+	call	party_applyEquipmentEffects
 	mov	al, gs:songRegenHP
 	sub	ah, ah
 	push	ax
-	call	bat_doHPRegen
+	call	bat_partyApplyHpRegen
 	add	sp, 2
 	mov	al, gs:monDisbelieveFlag
 	sub	ah, ah
 	push	ax
-	call	bat_updatePartyAndMonG
+	call	bat_postRound
 	add	sp, 2
 	push	cs
 	call	near ptr bat_endCombatSong
 	mov	byte ptr g_printPartyFlag,	0
 	call	party_getLastSlot
 	cmp	ax, 7
-	jle	short loc_1B215
-partyDied:
-	push	[bp+var_2]
-	push	[bp+var_6]
+	jle	short l_partyAlive
+
+party_died:
+	push	[bp+currentSong]
+	push	[bp+currentSinger]
 	mov	al, gs:bat_curSong
 	sub	ah, ah
 	push	ax
 	call	bat_end
 	add	sp, 6
 	mov	ax, 1
-	jmp	short loc_1B291
-loc_1B215:
+	jmp	short l_return
+
+l_partyAlive:
 	call	bat_isAMonGroupActive
 	or	ax, ax
-	jz	short loc_1B227
+	jz	short l_noMoreEnemies
 	call	_return_zero
 	or	ax, ax
-	jz	short loc_1B28E
-loc_1B227:
+	jz	l_roundStart
+
+l_noMoreEnemies:
 	cmp	g_partyAttackFlag, 0
 	jz	short partyWon
-	mov	ax, offset aDoYouWishToCon
+	mov	ax, offset s_continueQuestion
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
 	call	getYesNo
 	or	ax, ax
-	jnz	short loc_1B266
-	push	[bp+var_2]
-	push	[bp+var_6]
+	jnz	l_roundStart
+	push	[bp+currentSong]
+	push	[bp+currentSinger]
 	mov	al, gs:bat_curSong
 	sub	ah, ah
 	push	ax
 	call	bat_end
 	add	sp, 6
 	sub	ax, ax
-	jmp	short loc_1B291
-loc_1B266:
-	jmp	short loc_1B28E
+	jmp	short l_return
+
 partyWon:
 	call	bat_getReward
 	mov	[bp+var_4], ax
-	push	[bp+var_2]
-	push	[bp+var_6]
+	push	[bp+currentSong]
+	push	[bp+currentSinger]
 	mov	al, gs:bat_curSong
 	sub	ah, ah
 	push	ax
 	call	bat_end
 	add	sp, 6
 	mov	ax, [bp+var_4]
-	jmp	short loc_1B291
-loc_1B28E:
-	jmp	loc_1B13D
-loc_1B291:
+	jmp	short l_return
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
@@ -17720,7 +20394,7 @@ bat_init endp
 
 ; Attributes: bp-based frame
 
-bat_doCombatRound proc far
+bat_doRound proc far
 
 	charNo=	word ptr -0Ch
 	charPri= word ptr -0Ah
@@ -17732,14 +20406,14 @@ bat_doCombatRound proc far
 	mov	bp, sp
 	mov	ax, 0Ch
 	call	someStackOperation
-	push	cs
-	call	near ptr bat_getAttackPriority
-loc_1B2A4:
+	call	bat_setPriorities
+
+l_loop:
 	lea	ax, [bp+charNo]
 	push	ss
 	push	ax
 	push	cs
-	call	near ptr bat_getHighCharPrio
+	call	near ptr bat_charGetNextPriority
 	add	sp, 4
 	mov	[bp+charPri], ax
 	lea	ax, [bp+groupNo]
@@ -17748,254 +20422,264 @@ loc_1B2A4:
 	lea	ax, [bp+monNo]
 	push	ss
 	push	ax
-	push	cs
-	call	near ptr bat_getHighMonPriority
+	call	bat_monGetNextPriority
 	add	sp, 8
 	mov	[bp+monPri], ax
 
 	cmp	[bp+charPri], 0
-	jnz	short loc_comparePri
+	jnz	short l_comparePriority
 	cmp	[bp+monPri], 0
-	jz	loc_doCombatRoundExit
+	jz	l_return
 
-loc_comparePri:
+l_comparePriority:
 	cmp	[bp+charPri], ax
-	jl	short loc_1B2DE
+	jl	short l_monsterFirst
 	push	[bp+charNo]
 	push	cs
-	call	near ptr bat_doCharAttack
+	call	near ptr bat_charAction
 	add	sp, 2
-	jmp	short loc_1B2EB
-loc_1B2DE:
+	jmp	short l_afterAttack
+
+l_monsterFirst:
 	push	[bp+groupNo]
 	push	[bp+monNo]
-	push	cs
-	call	near ptr bat_doMonAttack
+	call	bat_monAction
 	add	sp, 4
-loc_1B2EB:
+
+l_afterAttack:
 	cmp	gs:g_currentCharPosition, 0
 	jz	short loc_1B2FC
 	call	txt_newLine
+
 loc_1B2FC:
 	call	txt_newLine
 	mov	byte ptr g_printPartyFlag,	0
-	jmp	loc_1B2A4
+	jmp	l_loop
 
-loc_doCombatRoundExit:
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doCombatRound endp
+bat_doRound endp
 
 ; Attributes: bp-based frame
 
-bat_doCharAttack proc far
+bat_charAction proc far
 
-	charNo=	word ptr  6
+	slotNumber=	word ptr  6
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	mov	bx, [bp+charNo]
+
+	mov	bx, [bp+slotNumber]
 	mov	gs:bat_charPriority[bx], 0
-	getCharP	[bp+charNo], bx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	byte ptr gs:party._name[bx], 0
-	jnz	short loc_1B343
-	jmp	loc_1B3FA
-loc_1B343:
-	getCharP	[bp+charNo], bx
+	jz	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	test	gs:party.status[bx], stat_dead	or stat_stoned or stat_paralyzed
-	jz	short loc_1B356
-	jmp	loc_1B3FA
-loc_1B356:
-	getCharP	[bp+charNo], bx
+	jnz	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1B373
-	push	[bp+charNo]
-	push	cs
-	call	near ptr bat_summon_executeAttack
+	jb	short l_actionSwitch
+
+	push	[bp+slotNumber]
+	call	bat_summonAction
 	add	sp, 2
-	jmp	loc_1B3FA
-loc_1B373:
-	mov	bx, [bp+charNo]
-	mov	al, gs:charActionList[bx]
+	jmp	l_return
+
+l_actionSwitch:
+	mov	bx, [bp+slotNumber]
+	mov	al, gs:g_charActionList[bx]
 	sub	ah, ah
-	jmp	short loc_1B3DA
-loc_1B383:
-	mov	bx, [bp+charNo]
+	sub	ax, 1
+	cmp	ax, 7
+	ja	l_return
+	add	ax, ax
+	xchg	ax, bx
+	jmp	cs:off_1B3EA[bx]
+
+off_1B3EA dw offset l_attack		; Attack
+	  dw offset l_return		; Defend
+	  dw offset l_attack		; Party attack
+	  dw offset l_cast		; Cast
+	  dw offset l_use		; Use
+	  dw offset l_hide		; Hide
+	  dw offset l_sing		; Song
+	  dw offset l_possessed		; Possessed action
+
+l_attack:
+	mov	bx, [bp+slotNumber]
 	mov	al, gs:byte_42244[bx]
 	sub	ah, ah
 	push	ax
 	push	bx
 	push	cs
-	call	near ptr bat_doCharMeleeAttack
+	call	near ptr bat_charMelee
 	add	sp, 4
-	jmp	short loc_1B3FA
-loc_1B39C:
-	push	[bp+charNo]
+	jmp	short l_return
+
+l_cast:
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_doCharCastSpell
+	call	near ptr bat_charCast
 	add	sp, 2
-	jmp	short loc_1B3FA
-loc_1B3A8:
-	push	[bp+charNo]
+	jmp	short l_return
+
+l_use:
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_doCharUseItem
+	call	near ptr bat_charUse
 	add	sp, 2
-	jmp	short loc_1B3FA
-loc_1B3B4:
-	push	[bp+charNo]
+	jmp	short l_return
+
+l_hide:
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_hideInShadows
+	call	near ptr bat_charHide
 	add	sp, 2
-	jmp	short loc_1B3FA
-loc_1B3C0:
-	push	[bp+charNo]
+	jmp	short l_return
+
+l_sing:
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_doCharSong
+	call	near ptr bat_charSing
 	add	sp, 2
-	jmp	short loc_1B3FA
-loc_1B3CC:
-	push	[bp+charNo]
+	jmp	short l_return
+
+l_possessed:
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_charMeleeAttack
+	call	near ptr bat_charPossessedAttack
 	add	sp, 2
-loc_1B3D6:
-	jmp	short loc_1B3FA
-	jmp	short loc_1B3FA
-loc_1B3DA:
-	sub	ax, 1
-	cmp	ax, 7
-	ja	short loc_1B3D6
-	add	ax, ax
-	xchg	ax, bx
-	jmp	cs:off_1B3EA[bx]
-off_1B3EA dw offset loc_1B383
-	  dw offset loc_1B3FA
-	  dw offset loc_1B383
-	  dw offset loc_1B39C
-	  dw offset loc_1B3A8
-	  dw offset loc_1B3B4
-	  dw offset loc_1B3C0
-	  dw offset loc_1B3CC
-loc_1B3FA:
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doCharAttack endp
+bat_charAction endp
 
 ; Attributes: bp-based frame
 
-bat_doMonAttack	proc far
+bat_monAction	proc far
 
 	var_6= word ptr	-6
 	var_4= word ptr	-4
 	var_2= word ptr	-2
-	monNo= word ptr	 6
-	groupNo= word ptr  8
+	monsterNumber= word ptr	 6
+	groupNumber= word ptr  8
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
 	push	si
-	mov	bx, [bp+monNo]
+
+	mov	bx, [bp+monsterNumber]
 	mov	cl, 6
 	shl	bx, cl
-	mov	ax, [bp+groupNo]
+	mov	ax, [bp+groupNumber]
 	shl	ax, 1
 	add	bx, ax
 	mov	gs:bat_monPriorityList[bx], 0
 	call	random
 	and	ax, 6
 	mov	[bp+var_6], ax
-	getMonP	[bp+monNo], si
+	mov	ax, monStruSize
+	imul	[bp+monsterNumber]
+	mov	si, ax
 	add	si, [bp+var_6]
 	mov	al, gs:monGroups.attackType._type[si]
 	sub	ah, ah
 	mov	[bp+var_2], ax
 	mov	al, gs:monGroups.attackType.damage[si]
 	mov	[bp+var_4], ax
-
-	; Jump to Tarjan's attack to test
-	;jmp	loc_1B4BD
-
 	cmp	[bp+var_2], 80h
-	jge	short loc_1B468
+	jge	short l_checkMelee
+
 	push	[bp+var_2]
-	push	[bp+groupNo]
-	push	[bp+monNo]
+	push	[bp+groupNumber]
+	push	[bp+monsterNumber]
 	push	cs
-	call	near ptr bat_monCastSpell
+	call	near ptr bat_monCast
 	add	sp, 6
-	jmp	short loc_1B4D6
-loc_1B468:
+	jmp	short l_return
+
+l_checkMelee:
 	mov	ax, [bp+var_2]
 	sub	ax, 0F0h
 	and 	ax, 7Fh
 	mov	[bp+var_6], ax
 	cmp	[bp+var_6], 0Ah
-	jge	short loc_1B494
+	jge	short l_specialAttack
+
 	push	[bp+var_4]
 	push	[bp+var_6]
-	push	[bp+groupNo]
-	push	[bp+monNo]
+	push	[bp+groupNumber]
+	push	[bp+monsterNumber]
 	push	cs
-	call	near ptr bat_doMonMelee
+	call	near ptr bat_monMelee
 	add	sp, 8
-	jmp	short loc_1B4D6
-loc_1B494:
+	jmp	short l_return
+
+l_specialAttack:
 	mov	ax, [bp+var_6]
-	jmp	short loc_1B4C5
-loc_1B499:
-	push	[bp+var_4]
-	push	[bp+groupNo]
-	push	[bp+monNo]
-	push	cs
-	call	near ptr bat_monSummonMon
-	add	sp, 6
-	jmp	short loc_1B4D6
-loc_1B4AB:
-	push	[bp+var_4]
-	push	[bp+groupNo]
-	push	[bp+monNo]
-	push	cs
-	call	near ptr bat_monBreathAttack
-	add	sp, 6
-	jmp	short loc_1B4D6
-loc_1B4BD:
-	push	cs
-	call	near ptr bat_doTarjanAttack
-loc_1B4C1:
-	jmp	short loc_1B4D6
-	jmp	short loc_1B4D6
-loc_1B4C5:
 	cmp	ax, 0Ah
-	jz	short loc_1B499
+	jz	short l_summon
 	cmp	ax, 10h
-	jz	short loc_1B4AB
+	jz	short l_breathAttack
 	cmp	ax, 13h
-	jz	short loc_1B4BD
-	jmp	short loc_1B4C1
-loc_1B4D6:
+	jz	short l_tarjanSpecial
+	jmp	short l_return
+
+l_summon:
+	push	[bp+var_4]
+	push	[bp+groupNumber]
+	push	[bp+monsterNumber]
+	push	cs
+	call	near ptr bat_monSummonHelp
+	add	sp, 6
+	jmp	short l_return
+
+l_breathAttack:
+	push	[bp+var_4]
+	push	[bp+groupNumber]
+	push	[bp+monsterNumber]
+	push	cs
+	call	near ptr bat_monBreathe
+	add	sp, 6
+	jmp	short l_return
+
+l_tarjanSpecial:
+	push	cs
+	call	near ptr bat_monTarjanSpecial
+	jmp	short l_return
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doMonAttack	endp
+bat_monAction	endp
 
 ; Attributes: bp-based frame
 
-bat_monCastSpell proc far
+bat_monCast proc far
 
-	arg_0= word ptr	 6
-	arg_4= word ptr	 0Ah
+	slotNumber= word ptr	 6
+	spellNumber= word ptr	 0Ah
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+
 	mov	ax, 7
 	push	ax
 	push	cs
@@ -18006,54 +20690,26 @@ bat_monCastSpell proc far
 	push	ax
 	mov	ax, 1
 	push	ax
-	push	[bp+arg_4]
-	mov	ax, [bp+arg_0]
+	push	[bp+spellNumber]
+	mov	ax, [bp+slotNumber]
 	or	al, 80h
 	push	ax
 	call	doCastSpell
 	add	sp, 8
-	mov	sp, bp
-	pop	bp
-	retf
-bat_monCastSpell endp
-
-; Attributes: bp-based frame
-
-bat_doTarjanAttack proc far
-
-	counter =	word ptr -2
-
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	mov	[bp+counter], 0
-
-loc_tarLoopEntry:
-	inc	[bp+counter]
-	mov	ax, 15h
-	push	ax
-	mov	ax, 80h
-	push	ax
-	call	far ptr summon_execute
-	add	sp, 4
-
-	cmp	[bp+counter], 0Ah
-	jl	loc_tarLoopEntry
 
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doTarjanAttack endp
+bat_monCast endp
+
 
 ; Attributes: bp-based frame
 
-bat_monSummonMon proc far
+bat_monSummonHelp proc far
 
-	var_104= word ptr -104h
-	var_102= word ptr -102h
-	var_100= word ptr -100h
-	arg_0= word ptr	 6
+	stringBufferP= dword ptr -104h
+	stringBuffer= word ptr -100h
+	slotNumber= word ptr	 6
 	arg_4= word ptr	 0Ah
 
 	push	bp
@@ -18061,109 +20717,121 @@ bat_monSummonMon proc far
 	mov	ax, 104h
 	call	someStackOperation
 	push	si
-	push	[bp+arg_0]
-	lea	ax, [bp+var_100]
+
+	push	[bp+slotNumber]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	push	cs
-	call	near ptr bat_getMonAttackerName
+	call	near ptr bat_monGetName
 	add	sp, 6
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
-	mov	ax, offset aSummonsHelpAnd
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	ax, offset s_summonsHelp
 	push	ds
 	push	ax
 	push	dx
-	push	[bp+var_104]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	call	random
 	sub	ah, ah
 	cmp	ax, [bp+arg_4]
-	jnb	short loc_1B590
-	getMonP	[bp+arg_0], bx
+	jnb	short l_noHelp
+
+	mov	ax, monStruSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	mov	al, gs:monGroups.groupSize[bx]
 	and	al, 1Fh
 	cmp	al, 1Fh
-	jz	short loc_1B590
+	jz	short l_noHelp
+
 	test	gs:disbelieveFlags, disb_nohelp
 	jz	short loc_1B5B0
-loc_1B590:
-	mov	ax, offset aNoneAppears___
+
+l_noHelp:
+	mov	ax, offset s_noneAppears
 	push	ds
 	push	ax
-	push	[bp+var_102]
-	push	[bp+var_104]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
-	jmp	loc_1B63E
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	jmp	l_return
+
 loc_1B5B0:
-	mov	ax, offset aAnotherJoinsTheFray
+	mov	ax, offset s_anotherJoins
 	push	ds
 	push	ax
-	push	[bp+var_102]
-	push	[bp+var_104]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
-	getMonP	[bp+arg_0], si
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	ax, monStruSize
+	imul	[bp+slotNumber]
+	mov	si, ax
 	inc	gs:monGroups.groupSize[si]
 	mov	al, gs:monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
 	push	cs
-	call	near ptr dice_doYDX
+	call	near ptr randomYdX
 	add	sp, 2
 	mov	cx, gs:monGroups.hpBase[si]
 	add	cx, ax
 	mov	bl, gs:monGroups.groupSize[si]
 	and	bx, 1Fh
 	shl	bx, 1
-	mov	ax, [bp+arg_0]
+	mov	ax, [bp+slotNumber]
 	mov	dx, cx
 	mov	cl, 6
 	shl	ax, cl
 	add	bx, ax
 	mov	gs:monHpList[bx], dx
-	getMonP	[bp+arg_0], bx
+	mov	ax, monStruSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	mov	bl, gs:monGroups.groupSize[bx]
 	and	bx, 1Fh
 	shl	bx, 1
-	mov	ax, [bp+arg_0]
+	mov	ax, [bp+slotNumber]
 	shl	ax, cl
 	add	bx, ax
 	mov	gs:bat_monPriorityList[bx], 0
-loc_1B63E:
-	lea	ax, [bp+var_100]
+
+l_return:
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
 	add	sp, 4
+
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_monSummonMon endp
+bat_monSummonHelp endp
 
 ; Attributes: bp-based frame
 
-bat_monBreathAttack proc far
+bat_monBreathe proc far
 
-	var_114= dword ptr -114h
-	var_110= word ptr -110h
-	var_10E= word ptr -10Eh
+	argumentsP= dword ptr -114h
+	loopCounter= word ptr -110h
+	arguments= word ptr -10Eh
 	var_10C= byte ptr -10Ch
 	var_10A= byte ptr -10Ah
 	target=	word ptr -106h
-	var_104= word ptr -104h
-	var_102= word ptr -102h
-	var_100= word ptr -100h
-	arg_0= word ptr	 6
+	stringBufferP= dword ptr -104h
+	stringBuffer= word ptr -100h
+	slotNumber= word ptr	 6
 	arg_4= byte ptr	 0Ah
 
 	push	bp
@@ -18172,72 +20840,75 @@ bat_monBreathAttack proc far
 	call	someStackOperation
 	push	di
 	push	si
-	push	[bp+arg_0]
-	lea	ax, [bp+var_100]
+
+	push	[bp+slotNumber]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	push	cs
-	call	near ptr bat_getMonAttackerName
+	call	near ptr bat_monGetName
 	add	sp, 6
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	mov	ax, 7
 	push	ax
 	push	cs
 	call	near ptr bat_getRandomChar
 	add	sp, 2
 	mov	[bp+target], ax
-	lea	ax, [bp+var_10E]
-	mov	word ptr [bp+var_114], ax
-	mov	word ptr [bp+var_114+2], ss
-	mov	[bp+var_110], 0
-	jmp	short loc_1B69D
-loc_1B699:
-	inc	[bp+var_110]
-loc_1B69D:
-	cmp	[bp+var_110], 7
-	jge	short loc_1B6B5
-	mov	bx, [bp+var_110]
+	lea	ax, [bp+arguments]
+	mov	word ptr [bp+argumentsP], ax
+	mov	word ptr [bp+argumentsP+2], ss
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	mov	bx, [bp+loopCounter]
 	mov	al, byte ptr breathAttack.effectStrIndex[bx]
-	lfs	si, [bp+var_114]
+	lfs	si, [bp+argumentsP]
 	mov	fs:[bx+si], al
-	jmp	short loc_1B699
-loc_1B6B5:
-	getMonP	[bp+arg_0], bx
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jl	short l_loop
+
+	mov	ax, monStruSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	mov	al, gs:monGroups.breathFlag[bx]
 	mov	[bp+var_10C], al
 	sub	ah, ah
 	xor	al, 0Ah
 	push	ax
-	push	[bp+var_102]
-	push	[bp+var_104]
-	mov	ax, offset aFirBreathEs
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	mov	ax, offset s_firesBreathes
 	push	ds
 	push	ax
 	call	str_pluralize
 	add	sp, 0Ah
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
-	lfs	bx, dword ptr [bp+var_104]
-	inc	word ptr [bp+var_104]
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 0
 
 	mov	al, [bp+arg_4]
 	mov	[bp+var_10A], al
 	mov	al, byte ptr [bp+target]
 	mov	gs:bat_curTarget, al
-	lea	ax, [bp+var_100]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
 	add	sp, 4
-	getMonP	[bp+arg_0], bx
+	mov	ax, monStruSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	mov	al, gs:monGroups.breathRange[bx]
 	sub	ah, ah
 	push	ax
 	sub	sp, 8
-	lea	si, [bp+var_10E]
+	lea	si, [bp+arguments]
 	mov	di, sp
 	push	ss
 	pop	es
@@ -18246,30 +20917,30 @@ loc_1B6B5:
 	movsw
 	movsw
 	movsb
-	push	[bp+arg_0]
+	push	[bp+slotNumber]
 	call	bat_doBreathAttack
 	add	sp, 0Ch
+
 	pop	si
 	pop	di
 	mov	sp, bp
 	pop	bp
 	retf
-bat_monBreathAttack endp
+bat_monBreathe endp
 
 ; Attributes: bp-based frame
 
-bat_doMonMelee proc far
+bat_monMelee proc far
 
-	var_122= byte ptr -122h
-	var_120= word ptr -120h
-	var_11E= word ptr -11Eh
-	var_11C= word ptr -11Ch
-	var_11A= word ptr -11Ah
-	var_118= word ptr -118h
-	var_116= word ptr -116h
-	var_106= dword ptr -106h
-	var_102= word ptr -102h
-	var_100= word ptr -100h
+	groupDistance= byte ptr -120h
+	newDistance= word ptr -11Eh
+	amountToAdvance= word ptr -11Ch
+	pluralFlag= word ptr -11Ah
+	loopCounter= word ptr -118h
+	groupName= word ptr -116h
+	stringBufferP= dword ptr -106h
+	currentDistance= word ptr -102h
+	stringBuffer= word ptr -100h
 	monNo= word ptr	 6
 	arg_2= word ptr  8
 	arg_4= word ptr  0Ah
@@ -18277,170 +20948,192 @@ bat_doMonMelee proc far
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 122h
+	mov	ax, 120h
 	call	someStackOperation
 	push	si
-	lea	ax, [bp+var_116]
+
+	lea	ax, [bp+groupName]
 	push	ss
 	push	ax
-	getMonP	[bp+monNo], bx
+	mov	ax, monStruSize
+	imul	[bp+monNo]
+	mov	bx, ax
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	call	unmaskString
 	add	sp, 8
-	lea	ax, [bp+var_100]
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], ss
-	getMonP	[bp+monNo], si
+
+	lea	ax, [bp+stringBuffer]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], ss
+
+	mov	ax, monStruSize
+	imul	[bp+monNo]
+	mov	si, ax
 	mov	al, gs:monGroups.distance[si]
 	and	al, 0Fh
 	cmp	al, 2
-	jnb	short loc_1B792
-	jmp	loc_1B8E8
-loc_1B792:
+	jb	l_inMeleeRange
+
+	; A value of 0C0 in packedGenAc indicates that the source's name
+	; is unique. (e.g. Tarjan)
 	mov	al, gs:monGroups.packedGenAc[si]
 	and	al, 0C0h
-	cmp	al, 0C0h 
-	jnz	short loc_1B7A5
-	mov	[bp+var_11A], 0
-	jmp	short loc_1B818
-loc_1B7A5:
-	getMonP	[bp+monNo], bx
+	cmp	al, 0C0h
+	jnz	short l_addIndefiniteArticle
+
+	mov	[bp+pluralFlag], 0
+	jmp	short l_advance
+
+l_addIndefiniteArticle:
+	mov	ax, monStruSize
+	imul	[bp+monNo]
+	mov	bx, ax
 	mov	al, gs:monGroups.groupSize[bx]
 	and	al, 1Fh
 	cmp	al, 2
-	jnb	short loc_1B7F5
-	mov	[bp+var_11A], 0
-	lfs	bx, [bp+var_106]
-	inc	word ptr [bp+var_106]
+	jnb	short l_pluralAdvance
+	mov	[bp+pluralFlag], 0
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 'A'
-	mov	al, byte ptr [bp+var_116]
+	mov	al, byte ptr [bp+groupName]
 	cbw
 	push	ax
 	push	cs
 	call	near ptr str_startsWithVowel
 	add	sp, 2
 	or	ax, ax
-	jz	short loc_1B7E7
-	lfs	bx, [bp+var_106]
-	inc	word ptr [bp+var_106]
+	jz	short l_startsWithConsonant
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 'n'
-loc_1B7E7:
-	lfs	bx, [bp+var_106]
-	inc	word ptr [bp+var_106]
+
+l_startsWithConsonant:
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], ' '
-	jmp	short loc_1B818
-loc_1B7F5:
-	mov	[bp+var_11A], 1
+	jmp	short l_advance
+
+l_pluralAdvance:
+	mov	[bp+pluralFlag], 1
 	mov	ax, offset s_the
 	push	ds
 	push	ax
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
-loc_1B818:
-	push	[bp+var_11A]
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
-	lea	ax, [bp+var_116]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+l_advance:
+	push	[bp+pluralFlag]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	lea	ax, [bp+groupName]
 	push	ss
 	push	ax
 	call	str_pluralize
 	add	sp, 0Ah
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
-	push	[bp+var_11A]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	push	[bp+pluralFlag]
 	push	dx
 	push	ax
-	mov	ax, offset aAdvanceS
+	mov	ax, offset s_advances
 	push	ds
 	push	ax
 	call	str_pluralize
 	add	sp, 0Ah
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
-	getMonP	[bp+monNo], bx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	ax, monStruSize
+	imul	[bp+monNo]
+	mov	bx, ax
 	mov	al, gs:monGroups.distance[bx]
-	mov	[bp+var_122], al
+	mov	[bp+groupDistance], al
 	sub	ah, ah
 	mov	si, ax
 	mov	cl, 4
 	shr	ax, cl
-	mov	[bp+var_11E], ax
+	mov	[bp+amountToAdvance], ax
 	mov	ax, si
 	and	ax, 0Fh
-	mov	[bp+var_102], ax
-	mov	ax, [bp+var_11E]
-	cmp	[bp+var_102], ax
-	jle	short loc_1B893
-	mov	ax, [bp+var_102]
-	sub	ax, [bp+var_11E]
-	jmp	short loc_1B896
-loc_1B893:
+	mov	[bp+currentDistance], ax
+	mov	ax, [bp+amountToAdvance]
+	cmp	[bp+currentDistance], ax
+	jle	short l_setToMeleeRange
+	mov	ax, [bp+currentDistance]
+	sub	ax, [bp+amountToAdvance]
+	jmp	short l_setDistance
+
+l_setToMeleeRange:
 	mov	ax, 1
-loc_1B896:
-	mov	[bp+var_120], ax
-	mov	al, byte ptr [bp+var_120]
-	mov	cl, [bp+var_122]
+
+l_setDistance:
+	mov	[bp+newDistance], ax
+	mov	al, byte ptr [bp+newDistance]
+	mov	cl, [bp+groupDistance]
 	and	cl, 0F0h
 	add	al, cl
 	mov	cx, ax
-	getMonP	[bp+monNo], bx
+	mov	ax, monStruSize
+	imul	[bp+monNo]
+	mov	bx, ax
 	mov	gs:monGroups.distance[bx], cl
-	mov	[bp+var_118], 0
-	jmp	short loc_1B8C2
-loc_1B8BE:
-	inc	[bp+var_118]
-loc_1B8C2:
-	cmp	[bp+var_118], 20h 
-	jge	short loc_1B8E5
+
+	mov	[bp+loopCounter], 0
+l_clearPriorityLoop:
 	mov	bx, [bp+monNo]
 	mov	cl, 6
 	shl	bx, cl
-	mov	ax, [bp+var_118]
+	mov	ax, [bp+loopCounter]
 	shl	ax, 1
 	add	bx, ax
 	mov	gs:bat_monPriorityList[bx], 0
-	jmp	short loc_1B8BE
-loc_1B8E5:
-	jmp	loc_1BA3B
-loc_1B8E8:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 20h 
+	jl	short l_clearPriorityLoop
+	jmp	l_return
+
+l_inMeleeRange:
 	push	[bp+monNo]
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	push	cs
-	call	near ptr bat_getMonAttackerName
+	call	near ptr bat_monGetName
 	add	sp, 6
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	call	random
 	and	ax, 1
 	mov	cx, ax
-	getMonP	[bp+monNo], bx
+	mov	ax, monStruSize
+	imul	[bp+monNo]
+	mov	bx, ax
 	mov	al, gs:monGroups.flags[bx]
 	sub	ah, ah
 	and	ax, mon_attackStr
 	shl	ax, 1
 	add	ax, cx
-	mov	[bp+var_11C], ax
 	mov	bx, ax
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (monMeleeAttString+2)[bx]
 	push	word ptr monMeleeAttString[bx]
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
-	lfs	bx, [bp+var_106]
-	inc	word ptr [bp+var_106]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], ' '
 	mov	ax, 3
 	push	ax
@@ -18450,13 +21143,13 @@ loc_1B8E8:
 	mov	gs:bat_curTarget, al
 	sub	ah, ah
 	push	ax
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	push	cs
 	call	near ptr bat_getAttackerName
 	add	sp, 6
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
 	; Push the special attack value
 	push	[bp+arg_4]
@@ -18467,45 +21160,46 @@ loc_1B8E8:
 	push	ax
 	push	[bp+monNo]
 	push	cs
-	call	near ptr bat_monHitChar
+	call	near ptr bat_monMeleeRoll
 	add	sp, 8
 	or	ax, ax
-	jnz	short loc_1B9C4
-	mov	ax, offset aButMisses
+	jnz	short l_attackSucceeds
+	mov	ax, offset s_butMisses
 	push	ds
 	push	ax
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
-	jmp	loc_1BA3B
-loc_1B9C4:
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	jmp	l_return
+
+l_attackSucceeds:
 	sub	ax, ax
 	push	ax
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	push	cs
-	call	near ptr bat_printHitDamage
+	call	near ptr bat_charPrintMeleeDamage
 	add	sp, 6
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	push	ax
 	push	cs
-	call	near ptr bat_doHPDamage
+	call	near ptr bat_damageHp
 	add	sp, 2
 	or	ax, ax
-	jz	short loc_1BA2F
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	jz	short l_noKill
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	push	cs
-	call	near ptr bat_getKillString
+	call	near ptr bat_appendSpecialAttackString
 	add	sp, 4
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	mov	ax, 1
 	push	ax
 	mov	ax, 3
@@ -18514,106 +21208,144 @@ loc_1B9C4:
 	sub	ah, ah
 	push	ax
 	push	dx
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP]
 	call	printCharPronoun
 	add	sp, 0Ah
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
-	jmp	loc_1BA3B
-loc_1BA2F:
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	jmp	l_return
+
+l_noKill:
 	mov	ax, offset s_periodNlNl
 	push	ds
 	push	ax
-	push	word ptr [bp+var_106+2]
-	push	word ptr [bp+var_106]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+var_106], ax
-	mov	word ptr [bp+var_106+2], dx
-loc_1BA3B:
-	lfs	bx, [bp+var_106]
-	inc	word ptr [bp+var_106]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+l_return:
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 0
-	lea	ax, [bp+var_100]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	byte ptr g_printPartyFlag,	0
-	delayWithTable
+	call	text_delayWithTable
+
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doMonMelee endp
+bat_monMelee endp
+
 
 ; Attributes: bp-based frame
 
-bat_getMonAttackerName proc far
+bat_monTarjanSpecial proc far
 
-	var_10=	word ptr -10h
-	arg_0= dword ptr  6
-	arg_4= word ptr	 0Ah
+	counter =	word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	[bp+counter], 0
+
+l_loop:
+	inc	[bp+counter]
+	mov	ax, 15h
+	push	ax
+	mov	ax, 80h
+	push	ax
+	call	summon_execute
+	add	sp, 4
+
+	cmp	[bp+counter], 0Ah
+	jl	l_loop
+
+	mov	sp, bp
+	pop	bp
+	retf
+bat_monTarjanSpecial endp
+
+
+; Attributes: bp-based frame
+
+bat_monGetName proc far
+
+	nameBuffer=	word ptr -10h
+	stringBufferP= dword ptr  6
+	slotNumber= word ptr	 0Ah
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 10h
 	call	someStackOperation
-	lea	ax, [bp+var_10]
+
+	lea	ax, [bp+nameBuffer]
 	push	ss
 	push	ax
-	getMonP	[bp+arg_4], bx
+	mov	ax, monStruSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	call	unmaskString
 	add	sp, 8
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
-	mov	byte ptr fs:[bx], 41h
-	mov	al, byte ptr [bp+var_10]
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], 'A'
+	mov	al, byte ptr [bp+nameBuffer]
 	cbw
 	push	ax
 	push	cs
 	call	near ptr str_startsWithVowel
 	add	sp, 2
 	or	ax, ax
-	jz	short loc_1BABD
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+	jz	short l_startsWithConsonant
+
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 'n'
-loc_1BABD:
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+
+l_startsWithConsonant:
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], ' '
 	sub	ax, ax
 	push	ax
-	push	word ptr [bp+arg_0+2]
-	push	word ptr [bp+arg_0]
-	lea	ax, [bp+var_10]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	lea	ax, [bp+nameBuffer]
 	push	ss
 	push	ax
 	call	str_pluralize
 	add	sp, 0Ah
-	mov	word ptr [bp+arg_0], ax
-	mov	word ptr [bp+arg_0+2], dx
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], ' '
-	mov	ax, word ptr [bp+arg_0]
-	mov	dx, word ptr [bp+arg_0+2]
-	jmp	short $+2
+	mov	ax, word ptr [bp+stringBufferP]
+	mov	dx, word ptr [bp+stringBufferP+2]
+
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getMonAttackerName endp
+bat_monGetName endp
 
 ; Attributes: bp-based frame
 
 bat_getRandomChar proc far
 
-	var_4= word ptr	-4
+	currentSlot= word ptr	-4
 	counter= word ptr -2
 	_mask= word ptr	 6
 
@@ -18621,38 +21353,40 @@ bat_getRandomChar proc far
 	mov	bp, sp
 	mov	ax, 4
 	call	someStackOperation
+
 	mov	[bp+counter], 0
-	jmp	short loc_1BB0E
-loc_1BB0B:
-	inc	[bp+counter]
-loc_1BB0E:
-	cmp	[bp+counter], 7
-	jge	short loc_1BB32
+l_loop:
 	call	random
 	and	ax, [bp+_mask]
-	mov	[bp+var_4], ax
+	mov	[bp+currentSlot], ax
 	push	ax
 	push	cs
-	call	near ptr bat_charCanBeAttacked
+	call	near ptr bat_charIsAttackable
 	add	sp, 2
 	or	ax, ax
-	jz	short loc_1BB30
-	mov	ax, [bp+var_4]
-	jmp	short loc_1BB36
-loc_1BB30:
-	jmp	short loc_1BB0B
-loc_1BB32:
+	jz	short l_next
+
+	mov	ax, [bp+currentSlot]
+	jmp	short l_return
+
+l_next:
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short l_loop
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
-loc_1BB36:
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
 bat_getRandomChar endp
 
+
 ; Attributes: bp-based frame
 
-bat_monHitChar proc far
+bat_monMeleeRoll proc far
 
 	var_4= word ptr	-4
 	var_2= word ptr	-2
@@ -18666,15 +21400,16 @@ bat_monHitChar proc far
 	mov	ax, 4
 	call	someStackOperation
 	push	si
+
 	mov	gs:specialAttackVal, 0
 	mov	gs:damageAmount, 0
 	mov	bx, [bp+target]
-	cmp	gs:byte_42280[bx], 0
-	jz	short loc_1BB70
-	sub	ax, ax
-	jmp	loc_1BC04
-loc_1BB70:
-	getCharP	bx, bx
+	cmp	gs:g_characterMeleeDistance[bx], 0
+	jnz	l_returnZero
+
+	mov	ax, charSize
+	imul	bx
+	mov	bx, ax
 	mov	al, gs:party.ac[bx]
 	cbw
 	mov	bx, [bp+monNo]
@@ -18683,10 +21418,13 @@ loc_1BB70:
 	add	ax, cx
 	mov	[bp+var_2], ax
 	cmp	ax, 3Fh
-	jle	short loc_1BB9E
+	jle	short l_underMax
 	mov	[bp+var_2], 3Fh
-loc_1BB9E:
-	getMonP	bx, si
+
+l_underMax:
+	mov	ax, monStruSize
+	imul	bx
+	mov	si, ax
 	mov	al, gs:monGroups.toHitHi[si]
 	sub	ah, ah
 	push	ax
@@ -18702,10 +21440,7 @@ loc_1BB9E:
 	mov	[bp+var_4], cx
 	mov	ax, [bp+var_2]
 	cmp	cx, ax
-	jge	short loc_1BBDC
-	sub	ax, ax
-	jmp	short loc_1BC04
-loc_1BBDC:
+	jl	short l_returnZero
 
 	; Add monster special attack
 	mov	ax, [bp+spAttack]
@@ -18713,7 +21448,7 @@ loc_1BBDC:
 
 	push	[bp+field_17]
 	push	cs
-	call	near ptr dice_doYDX
+	call	near ptr randomYdX
 	add	sp, 2
 	mov	bx, [bp+monNo]
 	mov	cl, gs:monAttackBonus[bx]
@@ -18721,72 +21456,76 @@ loc_1BBDC:
 	add	cx, ax
 	mov	gs:damageAmount, cx
 	mov	ax, 1
-	jmp	short $+2
-loc_1BC04:
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_monHitChar endp
+bat_monMeleeRoll endp
 
 ; Attributes: bp-based frame
 
-bat_charCanBeAttacked proc far
+bat_charIsAttackable proc far
 
-	arg_0= word ptr	 6
+	slotNumber= word ptr	 6
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	cmp	[bp+arg_0], 7
-	jnz	short loc_1BC1D
-	sub	ax, ax
-	jmp	short loc_1BC85
-loc_1BC1D:
-	getCharP	[bp+arg_0], bx
+
+	cmp	[bp+slotNumber], 7
+	jz	l_returnZero
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	byte ptr gs:party._name[bx], 0
-	jnz	short loc_1BC35
-	sub	ax, ax
-	jmp	short loc_1BC85
-loc_1BC35:
-	getCharP	[bp+arg_0], bx
+	jz	l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	gs:party.class[bx], class_illusion
-	jnz	short loc_1BC55
+	jnz	short l_notIllusion
 	cmp	gs:monDisbelieveFlag, 0
-	jnz	short loc_1BC55
-	sub	ax, ax
-	jmp	short loc_1BC85
-loc_1BC55:
-	mov	bx, [bp+arg_0]
-	cmp	gs:byte_42280[bx], 0
-	jz	short loc_1BC68
-	sub	ax, ax
-	jmp	short loc_1BC85
-loc_1BC68:
-	getCharP	bx, bx
+	jz	l_returnZero
+
+l_notIllusion:
+	mov	bx, [bp+slotNumber]
+	cmp	gs:g_characterMeleeDistance[bx], 0
+	jnz	l_returnZero
+
+	mov	ax, charSize
+	imul	bx
+	mov	bx, ax
 	mov	al, gs:party.status[bx]
 	and	al, 0Ch
 	mov	cx, ax
 	cmp	cl, 1
 	sbb	ax, ax
 	neg	ax
-	jmp	short $+2
-loc_1BC85:
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_charCanBeAttacked endp
+bat_charIsAttackable endp
 
 ; Attributes: bp-based frame
-bat_summon_executeAttack proc	far
+bat_summonAction proc	far
 
-	var_C= word ptr	-0Ch
-	attDamage= word	ptr -0Ah
-	var_8= word ptr	-8
+	var_C= word ptr	-0Ah
+	attDamage= word	ptr -8h
 	attType= word ptr -6
-	var_4= dword ptr -4
-	charNo=	word ptr  6
+	slotP= dword ptr -4
+	slotNumber=	word ptr  6
 
 	push	bp
 	mov	bp, sp
@@ -18794,37 +21533,42 @@ bat_summon_executeAttack proc	far
 	call	someStackOperation
 	push	si
 
-	getCharIndex	ax, [bp+charNo]
+	mov	ax, charSize
+	imul	[bp+slotNumber]
 	add	ax, offset party
-	mov	word ptr [bp+var_4], ax
-	mov	word ptr [bp+var_4+2], seg seg027
-	lfs	bx, [bp+var_4]
+	mov	word ptr [bp+slotP], ax
+	mov	word ptr [bp+slotP+2], seg seg027
+
+	lfs	bx, [bp+slotP]
 	cmp	fs:[bx+summonStat_t.class], class_illusion
-	jnz	short loc_1BCBF
+	jnz	short l_notIllusion
+
 	cmp	gs:monDisbelieveFlag, 0
-	jz	short loc_1BCBF
-	jmp	loc_1BD50
-loc_1BCBF:
+	jnz	l_return
+
+l_notIllusion:
 	call	random
 	and	ax, 6
-	mov	[bp+var_8], ax
 	mov	si, ax
-	lfs	bx, [bp+var_4]
+	lfs	bx, [bp+slotP]
 	mov	al, fs:[bx+si+summonStat_t.attacks._type]
 	sub	ah, ah
 	mov	[bp+attType], ax
 	mov	al, fs:[bx+si+summonStat_t.attacks.damage]
 	mov	[bp+attDamage],	ax
+
 	cmp	[bp+attType], 80h
-	jge	short loc_1BCF6
+	jge	short l_meleeCheck
+
 	push	ax
 	push	[bp+attType]
-	push	[bp+charNo]
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_summonCastSpell
+	call	near ptr bat_summonCast
 	add	sp, 6
-	jmp	short loc_1BD50
-loc_1BCF6:
+	jmp	short l_return
+
+l_meleeCheck:
 	mov	ax, [bp+attType]
 	sub	ax, 0F0h
 	and	ax, 7Fh
@@ -18833,256 +21577,267 @@ loc_1BCF6:
 	jge	short loc_1BD1F
 	push	[bp+attDamage]
 	push	[bp+var_C]
-	push	[bp+charNo]
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_summonMeleeAttack
+	call	near ptr bat_summonMelee
 	add	sp, 6
-	jmp	short loc_1BD50
+	jmp	short l_return
+
 loc_1BD1F:
 	mov	ax, [bp+var_C]
-	jmp	short loc_1BD44
-loc_1BD24:
+	cmp	ax, 10h
+	jz	short l_breathe
+	cmp	ax, 11h
+	jz	short l_sing
+	jmp	short l_return
+
+l_breathe:
 	push	[bp+attDamage]
-	push	[bp+charNo]
+	push	[bp+slotNumber]
 	push	cs
 	call	near ptr bat_summonBreathAttack
 	add	sp, 4
-	jmp	short loc_1BD50
-loc_1BD33:
+	jmp	short l_return
+
+l_sing:
 	push	[bp+attDamage]
-	push	[bp+charNo]
+	push	[bp+slotNumber]
 	push	cs
 	call	near ptr bat_doCombatSong
 	add	sp, 4
-loc_1BD40:
-	jmp	short loc_1BD50
-	jmp	short loc_1BD50
-loc_1BD44:
-	cmp	ax, 10h
-	jz	short loc_1BD24
-	cmp	ax, 11h
-	jz	short loc_1BD33
-	jmp	short loc_1BD40
-loc_1BD50:
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_summon_executeAttack endp
+bat_summonAction endp
 
 ; Attributes: bp-based frame
 
-bat_summonCastSpell proc far
+bat_summonCast proc far
 
 	target=	word ptr -6
-	charP= dword ptr -4
-	charNo=	word ptr  6
-	spellNo= word ptr  8
+	slotP= dword ptr -4
+	slotNumber=	word ptr  6
+	spellNumber= word ptr  8
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
-	getCharIndex	ax, [bp+charNo]
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
 	add	ax, offset party
-	mov	word ptr [bp+charP], ax
-	mov	word ptr [bp+charP+2], seg seg027
-	mov	bx, [bp+spellNo]
+	mov	word ptr [bp+slotP], ax
+	mov	word ptr [bp+slotP+2], seg seg027
+	mov	bx, [bp+spellNumber]
 	test	spellCastFlags[bx], 20h
-	jz	short loc_1BD90
+	jz	short l_checkHostile
+
 	mov	ax, 7
 	push	ax
 	push	cs
 	call	near ptr bat_getRandomChar
 	add	sp, 2
 	mov	[bp+target], ax
-	jmp	short loc_1BDB7
-loc_1BD90:
-	lfs	bx, [bp+charP]
+	jmp	short l_doCast
+
+l_checkHostile:
+	lfs	bx, [bp+slotP]
 	cmp	fs:[bx+summonStat_t.hostileFlag], 0
-	jz	short loc_1BDA7
+	jz	short l_targetEnemy
 	mov	ax, 7
 	push	ax
 	push	cs
 	call	near ptr bat_getRandomChar
 	add	sp, 2
-	jmp	short loc_1BDAA
-loc_1BDA7:
-	mov	ax, 80h
-loc_1BDAA:
+	jmp	short l_skipSelfTarget
+
+l_targetEnemy:
+	mov	ax, 80h				; Target is 1st monster group
+
+l_skipSelfTarget:
 	mov	[bp+target], ax
-	mov	ax, [bp+charNo]
+	mov	ax, [bp+slotNumber]
 	cmp	[bp+target], ax
-	jnz	short loc_1BDB7
-	jmp	short loc_1BDD7
-loc_1BDB7:
+	jz	short l_return
+
+l_doCast:
 	mov	al, byte ptr [bp+target]
 	mov	gs:bat_curTarget, al
 	sub	ax, ax
 	push	ax
 	mov	ax, 1
 	push	ax
-	push	[bp+spellNo]
-	push	[bp+charNo]
+	push	[bp+spellNumber]
+	push	[bp+slotNumber]
 	call	doCastSpell
 	add	sp, 8
-loc_1BDD7:
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_summonCastSpell endp
+bat_summonCast endp
 
 ; Attributes: bp-based frame
 
-bat_summonMeleeAttack proc far
+bat_summonMelee proc far
 
-	var_6= word ptr	-6
-	var_4= dword ptr -4
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
-	arg_4= word ptr	 0Ah
+	target= word ptr	-6
+	slotP= dword ptr -4
+	slotNumber= word ptr	 6
+	attackType= word ptr	 8
+	attackDamage= word ptr	 0Ah
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
-	cmp	[bp+arg_0], 4
-	jl	short loc_1BDEE
-	jmp	short loc_1BE3F
-loc_1BDEE:
-	getCharIndex	ax, [bp+arg_0]
+
+	cmp	[bp+slotNumber], 4
+	jge	short l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
 	add	ax, offset party
-	mov	word ptr [bp+var_4], ax
-	mov	word ptr [bp+var_4+2], seg seg027
-	lfs	bx, [bp+var_4]
+	mov	word ptr [bp+slotP], ax
+	mov	word ptr [bp+slotP+2], seg seg027
+
+	lfs	bx, [bp+slotP]
 	cmp	fs:[bx+summonStat_t.hostileFlag], 0
-	jz	short loc_1BE16
+	jz	short l_targetEnemy
+
 	mov	ax, 7
 	push	ax
 	push	cs
 	call	near ptr bat_getRandomChar
 	add	sp, 2
-	jmp	short loc_1BE19
-loc_1BE16:
-	mov	ax, 80h
-loc_1BE19:
-	mov	[bp+var_6], ax
-	mov	ax, [bp+arg_4]
+	jmp	short l_doMelee
+
+l_targetEnemy:
+	mov	ax, 80h				; 1st monster group
+
+l_doMelee:
+	mov	[bp+target], ax
+	mov	ax, [bp+attackDamage]
 	mov	gs:summonMeleeDamage, ax
-	mov	ax, [bp+arg_2]
+	mov	ax, [bp+attackType]
 	mov	gs:summonMeleeType, ax
-	push	[bp+var_6]
-	push	[bp+arg_0]
+	push	[bp+target]
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_doCharMeleeAttack
+	call	near ptr bat_charMelee
 	add	sp, 4
-loc_1BE3F:
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_summonMeleeAttack endp
+bat_summonMelee endp
 
 ; Attributes: bp-based frame
 
 bat_summonBreathAttack proc far
 
-	var_104 = word ptr -118h
-	var_102 = word ptr -116h
-	var_100 = word ptr -114h
-	argP= dword ptr	-14h
-	counter= word ptr -10h
-	argList= byte ptr -0Ch
-	var_A= byte ptr	-0Ah
-	var_8= byte ptr	-8
-	charP= dword ptr -4
-	charNo=	word ptr  6
+	stringBufferP = dword ptr -114h
+	stringBuffer = word ptr -110h
+	argP= dword ptr	-10h
+	counter= word ptr -0Ah
+	argList= byte ptr -8
+	slotP= dword ptr -4
+	slotNumber=	word ptr  6
 	damage=	byte ptr  8
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 118h
+	mov	ax, 114h
 	call	someStackOperation
 	push	di
 	push	si
 
 	; Get the breather's name
-	push	[bp+charNo]
-	lea	ax, [bp+var_100]
+	push	[bp+slotNumber]
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	push	cs
 	call	near ptr bat_getAttackerName
 	add	sp, 6
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
-	getCharIndex	ax, [bp+charNo]
+	mov	ax, charSize
+	imul	[bp+slotNumber]
 	add	ax, offset party
-	mov	word ptr [bp+charP], ax
-	mov	word ptr [bp+charP+2], seg seg027
-	lfs	bx, [bp+charP]
+	mov	word ptr [bp+slotP], ax
+	mov	word ptr [bp+slotP+2], seg seg027
+
+	lfs	bx, [bp+slotP]
 	cmp	fs:[bx+summonStat_t.hostileFlag], 0
-	jz	short loc_1BE78
+	jz	short l_targetEnemy
+
 	mov	ax, 7
 	push	ax
 	push	cs
 	call	near ptr bat_getRandomChar
 	add	sp, 2
-	jmp	short loc_1BE7A
-loc_1BE78:
+	jmp	short l_targetSet
+
+l_targetEnemy:
 	mov	al, 80h
-loc_1BE7A:
+
+l_targetSet:
 	mov	gs:bat_curTarget, al
 	lea	ax, [bp+argList]
 	mov	word ptr [bp+argP], ax
 	mov	word ptr [bp+argP+2], ss
+
 	mov	[bp+counter], 0
-	jmp	short loc_1BE95
-loc_1BE92:
-	inc	[bp+counter]
-loc_1BE95:
-	cmp	[bp+counter], 7
-	jge	short loc_1BEAA
+l_setAttackDataLoop:
 	mov	bx, [bp+counter]
 	mov	al, byte ptr breathAttack.effectStrIndex[bx]
 	lfs	si, [bp+argP]
 	mov	fs:[bx+si], al
-	jmp	short loc_1BE92
-loc_1BEAA:
-	lfs	bx, [bp+charP]
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short l_setAttackDataLoop
+
+	lfs	bx, [bp+slotP]
 	mov	al, fs:[bx+summonStat_t.breathFlag]
-	mov	[bp+var_A], al
 
 	; Add the fire/breath string
 	sub	ah, ah
 	xor	al, 0Ah
 	push	ax
-	push	[bp+var_102]
-	push	[bp+var_104]
-	mov	ax, offset aFirBreathEs
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	mov	ax, offset s_firesBreathes
 	push	ds
 	push	ax
 	call	str_pluralize
 	add	sp, 0Ah
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
 	; NULL terminate the string
-	lfs	bx, dword ptr [bp+var_104]
-	inc	word ptr [bp+var_104]
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 0
 
-	lea	ax, [bp+var_100]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
-	add	sp,4
+	add	sp, 4
 	
 	mov	al, [bp+damage]
-	mov	[bp+var_8], al
-
-	lfs	bx, [bp+charP]
-
+	lfs	bx, [bp+slotP]
 	mov	al, fs:[bx+summonStat_t.breathRange]
 	sub	ah, ah
 	push	ax
@@ -19095,9 +21850,10 @@ loc_1BEAA:
 	movsw
 	movsw
 	movsb
-	push	[bp+charNo]
+	push	[bp+slotNumber]
 	call	bat_doBreathAttack
 	add	sp, 0Ch
+
 	pop	si
 	pop	di
 	mov	sp, bp
@@ -19107,80 +21863,90 @@ bat_summonBreathAttack endp
 
 ; Attributes: bp-based frame
 
-bat_doCharMeleeAttack proc far
+bat_charMelee proc far
 
-	var_10C= dword ptr -10Ch
+	stringBufferP= dword ptr -10Ch
 	var_108= word ptr -108h
-	var_106= word ptr -106h
+	stringBuffer= word ptr -106h
 	var_6= word ptr	-6
 	var_4= dword ptr -4
-	arg_0= word ptr 6
-	arg_2= word ptr 8
+	slotNumber= word ptr 6
+	attackTarget= word ptr 8
 
-	func_enter
-	_chkstk	10Ch
-
+	push	bp
+	mov	bp, sp
+	mov	ax, 10Ch
+	call	someStackOperation
 	push	si
 
-	cmp	[bp+arg_2], 80h
-	jge	short loc_1BF22
+	cmp	[bp+attackTarget], 80h
+	jge	short l_enemyTarget
 
-	getCharP	[bp+arg_2], si
+	mov	ax, charSize
+	imul	[bp+attackTarget]
+	mov	si, ax
 	cmp	gs:party.class[si], class_monster
-	jnz	short loc_1BF0D
+	jnz	short l_targetMember
 	mov	gs:party.hostileFlag[si], 1
 
-loc_1BF0D:
-	getCharP	[bp+arg_2], bx
+l_targetMember:
+	mov	ax, charSize
+	imul	[bp+attackTarget]
+	mov	bx, ax
 	test	gs:party.status[bx], stat_dead	or stat_stoned
-	jz	short loc_1BF20
-	jmp	loc_1C0F0
-
-loc_1BF20:
+	jnz	l_return
 	jmp	short loc_1BF3E
 
-loc_1BF22:
-	mov	ax, [bp+arg_2]
+l_enemyTarget:
+	mov	ax, [bp+attackTarget]
 	and	ax, 3
-	getMonIndex	cx, cx
+	mov	cx, monStruSize
+	imul	cx
 	mov	bx, ax
 	test	gs:monGroups.groupSize[bx], 1Fh
-	jnz	short loc_1BF3E
-	jmp	loc_1C0F0
+	jz	l_return
 
 loc_1BF3E:
-	getCharP	[bp+arg_0], bx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	lea	ax, [bp+var_106]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+var_10C], ax
-	mov	word ptr [bp+var_10C+2], dx
-	lfs	bx, dword ptr [bp+var_10C]
-	inc	word ptr [bp+var_10C]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], ' '
 
-	push_imm	1
-	push	[bp+arg_0]
-
-	std_call	sub_18077, 4
+	mov	ax, 1
+	push	ax
+	push	[bp+slotNumber]
+	call	character_itemTypeCanBeUsed
+	add	sp, 4
 
 	or	ax, ax
 	jz	short loc_1BF8B
+
 	mov	[bp+var_6], 0
 	jmp	short loc_1BFBF
+
 loc_1BF8B:
-	getCharP	[bp+arg_0], si
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
 	cmp	gs:party.class[si], class_monster
 	jb	short loc_1BFBA
 	add	ax, offset party
 
-	save_ptr_stack	seg seg027, ax, var_4
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], seg seg027
 	lfs	bx, [bp+var_4]
 	mov	al, fs:[bx+(character_t.spells+0Ah)]
 	sub	ah, ah
@@ -19196,154 +21962,198 @@ loc_1BFBF:
 	mov	bx, [bp+var_6]
 	shl	bx, 1
 	shl	bx, 1
-	push_ptr_stringList	monMeleeAttString, bx
-	push_ptr_stack		var_10C
+	
+	push	word ptr (monMeleeAttString+2)[bx]
+	push	word ptr monMeleeAttString[bx]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+var_10C], ax
-	mov	word ptr [bp+var_10C+2], dx
-	lfs	bx, dword ptr [bp+var_10C]
-	inc	word ptr [bp+var_10C]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], ' '
 
-	push	[bp+arg_2]
-	push_ptr_stack	var_10C
-	near_call	bat_getAttackerName, 6
-	save_ptr_stack	dx,ax,var_10C
+	push	[bp+attackTarget]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	bat_getAttackerName
+	add	sp, 6
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
-	push	[bp+arg_2]
-	push	[bp+arg_0]
-	near_call	bat_getCharDamage, 4
+	push	[bp+attackTarget]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr bat_charExecuteMeleeAttack
+	add	sp, 4
 	mov	[bp+var_108], ax
 	or	ax, ax
 	jnz	short loc_1C04B
 
-	push_ds_string	aButMisses
-	push_ptr_stack	var_10C
-	std_call	strcat, 8
-	save_ptr_stack	dx,ax,var_10C
-
+	mov	ax, offset s_butMisses
+	push	ds
+	push	ax
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	jmp	short loc_1C0B3
+
 loc_1C04B:
 	push	[bp+var_108]
-	push_ptr_stack	var_10C
-	near_call	bat_printHitDamage, 6
-	save_ptr_stack	dx,ax,var_10C
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	push	cs
+	call	near ptr bat_charPrintMeleeDamage
+	add	sp, 6
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
-	push_var_stack	arg_2
-	near_call	bat_doHPDamage, 2
+	push	[bp+attackTarget]
+	push	cs
+	call	near ptr bat_damageHp
+	add	sp, 2
 	or	ax, ax
 	jz	short loc_1C0A7
 
-	push_ptr_stack	var_10C
-	near_call	bat_getKillString,4
-	save_ptr_stack	dx,ax,var_10C
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	push	cs
+	call	near ptr bat_appendSpecialAttackString
+	add	sp, 4
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
-	push_imm	1
-	push_imm	3
-	push_var_stack	arg_2
-	push_reg	dx
-	push	word ptr [bp+var_10C]
-	std_call	printCharPronoun, 0Ah
-	save_ptr_stack	dx,ax,var_10C
+	mov	ax, 1
+	push	ax
+	mov	ax, 3
+	push	ax
+	push	[bp+attackTarget]
+	push	dx
+	push	word ptr [bp+stringBufferP]
+	call	printCharPronoun
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	jmp	short loc_1C0B3
 
 loc_1C0A7:
 	mov	ax, offset s_periodNlNl
 	push	ds
 	push	ax
-	push	word ptr [bp+var_10C+2]
-	push	word ptr [bp+var_10C]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+var_10C], ax
-	mov	word ptr [bp+var_10C+2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 
 loc_1C0B3:
-	lfs	bx, dword ptr [bp+var_10C]
-	inc	word ptr [bp+var_10C]
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 0
 	mov	byte ptr fs:[bx], 0
-	lea	ax, [bp+var_106]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
-	std_Call	printString, 4
+	call	printString
+	add	sp, 4
 
-	mov	bx, [bp+arg_0]
-	mov	gs:byte_42280[bx], 0
+	mov	bx, [bp+slotNumber]
+	mov	gs:g_characterMeleeDistance[bx], 0
 	mov	byte ptr g_printPartyFlag,	0
 
-	delayWithTable
-loc_1C0F0:
+	call	text_delayWithTable
+
+l_return:
 	pop	si
-	func_exit
+	mov	sp, bp
+	pop	bp
 	retf
-bat_doCharMeleeAttack endp
+bat_charMelee endp
+
 
 ; Attributes: bp-based frame
 
 bat_getAttackerName proc far
 
-	var_10=	word ptr -10h
-	arg_0= dword ptr  6
-	arg_4= word ptr	 0Ah
+	unmaskedName=	word ptr -10h
+	stringBufferP= dword ptr  6
+	slotNumber= word ptr	 0Ah
 
-	func_enter
-	_chkstk	10h
+	push	bp
+	mov	bp, sp
+	mov	ax, 10h
+	call	someStackOperation
 
-	cmp	[bp+arg_4], 80h
-	jge	short loc_1C12E
-	getCharP	[bp+arg_4], bx
+	cmp	[bp+slotNumber], 80h
+	jge	short l_enemyAttacker
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
-	push_reg	dx
-	push_reg	ax
-	push_ptr_stack	arg_0
+	push	dx
+	push	ax
+	push	[bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	word ptr [bp+arg_0], ax
-	mov	word ptr [bp+arg_0+2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	jmp	short l_return
 
-	jmp	short loc_1C19A
-loc_1C12E:
-	and	[bp+arg_4], 3
-	lfs	bx, dword ptr [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+l_enemyAttacker:
+	and	[bp+slotNumber], 3
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 'a'
-	lea	ax, [bp+var_10]
-	push_reg	ss
-	push_reg	ax
-	getMonP	[bp+arg_4], bx
+	lea	ax, [bp+unmaskedName]
+	push	ss
+	push	ax
+	mov	ax, monStruSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
-	push_reg	dx
-	push_reg	ax
-	std_call	unmaskString, 8
-	mov	al, byte ptr [bp+var_10]
+	push	dx
+	push	ax
+	call	unmaskString
+	add	sp, 8
+	mov	al, byte ptr [bp+unmaskedName]
 	cbw
-	push_reg	ax
-	near_call	str_startsWithVowel, 2
+	push	ax
+	call	str_startsWithVowel
+	add	sp, 2
 	or	ax, ax
-	jz	short loc_1C174
-	lfs	bx, dword ptr [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+	jz	short l_singular
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 'n'
-loc_1C174:
-	lfs	bx, dword ptr [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+
+l_singular:
+	lfs	bx, dword ptr [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], ' '
 	sub	ax, ax
 	push	ax
-	push_ptr_stack	arg_0
-	lea	ax, [bp+var_10]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	lea	ax, [bp+unmaskedName]
 	push	ss
 	push	ax
-	std_call	str_pluralize, 0Ah
-	save_ptr_stack	dx,ax,arg_0
-loc_1C19A:
-	mov	ax, word ptr [bp+arg_0]
-	mov	dx, word ptr [bp+arg_0+2]
-	jmp	short $+2
+	call	str_pluralize
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+l_return:
+	mov	ax, word ptr [bp+stringBufferP]
+	mov	dx, word ptr [bp+stringBufferP+2]
+
 	mov	sp, bp
 	pop	bp
 	retf
@@ -19356,37 +22166,39 @@ bat_getAttackerName endp
 
 str_startsWithVowel proc far
 
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	loopCounter= word ptr	-2
+	firstLetter= word ptr	 6
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	push	[bp+arg_0]
+
+	push	[bp+firstLetter]
 	call	toUpper
 	add	sp, 2
-	mov	[bp+arg_0], ax
-	mov	[bp+var_2], 0
-	jmp	short loc_1C1C9
-loc_1C1C6:
-	inc	[bp+var_2]
-loc_1C1C9:
-	cmp	[bp+var_2], 6
-	jge	short loc_1C1E3
-	mov	bx, [bp+var_2]
+	mov	[bp+firstLetter], ax
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	mov	bx, [bp+loopCounter]
 	mov	al, vowelList[bx]
 	cbw
-	cmp	ax, [bp+arg_0]
-	jnz	short loc_1C1E1
-	mov	ax, 1
-	jmp	short loc_1C1E7
-loc_1C1E1:
-	jmp	short loc_1C1C6
-loc_1C1E3:
+	cmp	ax, [bp+firstLetter]
+	jz	short l_returnOne
+
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 6
+	jl	short l_loop
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
-loc_1C1E7:
+	jmp	short l_return
+
+l_returnOne:
+	mov	ax, 1
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
@@ -19394,15 +22206,14 @@ str_startsWithVowel endp
 
 ; Attributes: bp-based frame
 
-bat_doCharCastSpell proc far
+bat_charCast proc far
 
-	charNo=	word ptr  6
+	slotNumber=	word ptr  6
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	mov	bx, [bp+charNo]
+
+	mov	bx, [bp+slotNumber]
 	mov	al, gs:byte_42276[bx]
 	mov	gs:bat_curTarget, al
 	mov	ax, 1
@@ -19414,24 +22225,25 @@ bat_doCharCastSpell proc far
 	push	bx
 	call	doCastSpell
 	add	sp, 8
+
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doCharCastSpell endp
+bat_charCast endp
+
 
 ; Attributes: bp-based frame
 
-bat_doCharUseItem proc far
+bat_charUse proc far
 
-	charNo=	word ptr  6
+	slotNumber=	word ptr  6
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+
 	mov	ax, 1
 	push	ax
-	mov	bx, [bp+charNo]
+	mov	bx, [bp+slotNumber]
 	mov	al, gs:byte_42244[bx]
 	sub	ah, ah
 	push	ax
@@ -19442,80 +22254,89 @@ bat_doCharUseItem proc far
 	push	bx
 	call	item_doSpell
 	add	sp, 0Ah
+
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doCharUseItem endp
+bat_charUse endp
 
 ; Attributes: bp-based frame
 
-bat_hideInShadows proc far
+bat_charHide proc far
 
-	var_108= word ptr -108h
-	var_106= word ptr -106h
-	var_104= word ptr -104h
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	stringBufferP= dword ptr -108h
+	stringBuffer= word ptr -104h
+	tmpBufferP= dword ptr	-4
 	arg_0= word ptr	 6
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 108h
 	call	someStackOperation
-	getCharP	[bp+arg_0], bx
+
+	mov	ax, charSize
+	imul	[bp+arg_0]
+	mov	bx, ax
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	lea	ax, [bp+var_104]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_108], ax
-	mov	[bp+var_106], dx
-	mov	ax, offset aJumpsIntoTheShadows
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	ax, offset s_jumpsIntoShadows
 	push	ds
 	push	ax
 	push	dx
-	push	[bp+var_108]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_108], ax
-	mov	[bp+var_106], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
 	mov	ax, itemEff_alwaysHide
 	push	ax
 	push	[bp+arg_0]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
-	jz	short loc_1C2DE
+	jz	short l_hideSuccess
+
 	call	random
 	mov	cx, ax
-	getCharP	[bp+arg_0], bx
+	mov	ax, charSize
+	imul	[bp+arg_0]
+	mov	bx, ax
 	cmp	gs:(party.specAbil+2)[bx], cl
-	jbe	short loc_1C2F5
-loc_1C2DE:
-	mov	ax, offset aAndSucceeds
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], ds
+	jbe	short l_hideFailed
+
+l_hideSuccess:
+	mov	ax, offset s_andSucceeds
+	mov	word ptr [bp+tmpBufferP], ax
+	mov	word ptr [bp+tmpBufferP+2], ds
 	mov	bx, [bp+arg_0]
-	inc	gs:byte_42280[bx]
-	jmp	short loc_1C30B
-loc_1C2F5:
-	mov	ax, offset aButIsDiscovered
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], ds
+	inc	gs:g_characterMeleeDistance[bx]
+	jmp	short l_return
+
+l_hideFailed:
+	mov	ax, offset s_butIsDiscovered
+	mov	word ptr [bp+tmpBufferP], ax
+	mov	word ptr [bp+tmpBufferP+2], ds
 	mov	bx, [bp+arg_0]
-	mov	gs:byte_42280[bx], 0
-loc_1C30B:
-	push	[bp+var_2]
-	push	[bp+var_4]
-	push	[bp+var_106]
-	push	[bp+var_108]
+	mov	gs:g_characterMeleeDistance[bx], 0
+
+l_return:
+	push	word ptr [bp+tmpBufferP+2]
+	push	word ptr [bp+tmpBufferP]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	lea	ax, [bp+var_104]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
@@ -19523,175 +22344,193 @@ loc_1C30B:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_hideInShadows endp
+bat_charHide endp
 
 ; Attributes: bp-based frame
 
-bat_doCharSong proc far
+bat_charSing proc far
 
-	var_108= word ptr -108h
-	var_106= word ptr -106h
-	var_102= word ptr -102h
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	stringBufferP= dword ptr -108h
+	stringBuffer= word ptr -102h
+	canSingFlag= word ptr	-2
+	slotNumber= word ptr	 6
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 108h
 	call	someStackOperation
-	mov	[bp+var_2], 0
-	getCharP	[bp+arg_0], bx
+
+	mov	[bp+canSingFlag], 0
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	lea	ax, [bp+var_102]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_108], ax
-	mov	[bp+var_106], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
 	mov	ax, itemEff_freeSinging
 	push	ax
-	push	[bp+arg_0]
-	call	hasEffectEquipped
+	push	[bp+slotNumber]
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jnz	short loc_1C384
-	mov	[bp+var_2], 1
+
+	mov	[bp+canSingFlag], 1
 	jmp	short loc_1C3AA
+
 loc_1C384:
-	getCharP	[bp+arg_0], bx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	gs:party.specAbil[bx],	0
 	jz	short loc_1C3AA
-	mov	[bp+var_2], 1
-	getCharP	[bp+arg_0], bx
+
+	mov	[bp+canSingFlag], 1
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	dec	gs:party.specAbil[bx]
+
 loc_1C3AA:
-	cmp	[bp+var_2], 0
+	cmp	[bp+canSingFlag], 0
 	jz	short loc_1C3F4
-	mov	ax, offset aPlays___
+	mov	ax, offset s_plays
 	push	ds
 	push	ax
-	push	[bp+var_106]
-	push	[bp+var_108]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_108], ax
-	mov	[bp+var_106], dx
-	lea	ax, [bp+var_102]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
 	add	sp, 4
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+slotNumber]
 	mov	al, gs:byte_42244[bx]
 	sub	ah, ah
 	push	ax
 	push	bx
-	push	cs
-	call	near ptr bat_doCombatSong
+	call	bat_doCombatSong
 	add	sp, 4
-	jmp	short loc_1C455
+	jmp	short l_return
 loc_1C3F4:
-	mov	ax, offset aLost
+	mov	ax, offset s_lost
 	push	ds
 	push	ax
-	push	[bp+var_106]
-	push	[bp+var_108]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_108], ax
-	mov	[bp+var_106], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	mov	ax, 0
 	push	ax
 	mov	ax, 6
 	push	ax
-	push	[bp+arg_0]
+	push	[bp+slotNumber]
 	push	dx
-	push	[bp+var_108]
+	push	word ptr [bp+stringBufferP]
 	call	printCharPronoun
 	add	sp, 0Ah
-	mov	[bp+var_108], ax
-	mov	[bp+var_106], dx
-	mov	ax, offset aVoice
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	ax, offset s_voice
 	push	ds
 	push	ax
 	push	dx
-	push	[bp+var_108]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_108], ax
-	mov	[bp+var_106], dx
-	lea	ax, [bp+var_102]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
 	add	sp, 4
-loc_1C455:
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doCharSong endp
+bat_charSing endp
 
 ; Attributes: bp-based frame
 
-bat_charMeleeAttack proc far
+bat_charPossessedAttack proc far
 
-	arg_0= word ptr	 6
+	slotNumber= word ptr	 6
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	getCharP	[bp+arg_0], bx
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	test	gs:party.status[bx], stat_nuts
-	jz	short loc_1C480
+	jz	short l_checkHostile
+
 	call	random
 	test	al, 1
-	jnz	short loc_1C494
-loc_1C480:
-	getCharIndex	ax, [bp+arg_0]
+	jnz	short l_partyTarget
+
+l_checkHostile:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
 	mov	bx, ax
 	cmp	gs:party.hostileFlag[bx], 0
-	jz	short loc_1C4AD
-loc_1C494:
+	jz	short l_checkEnemyGroup
+
+l_partyTarget:
 	mov	ax, 7
 	push	ax
-	push	cs
-	call	near ptr bat_getRandomChar
+	call	bat_getRandomChar
 	add	sp, 2
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+slotNumber]
 	mov	gs:byte_42244[bx], al
-	jmp	short loc_1C4C8
-loc_1C4AD:
+	jmp	short l_doAttack
+
+l_checkEnemyGroup:
 	cmp	byte ptr gs:monGroups._name, 0
-	jnz	short loc_1C4BB
-	jmp	short loc_1C4D2
-loc_1C4BB:
-	mov	bx, [bp+arg_0]
+	jz	short l_return
+
+l_enemyTarget:
+	mov	bx, [bp+slotNumber]
 	mov	gs:byte_42244[bx], 80h
-loc_1C4C8:
-	push	[bp+arg_0]
+
+l_doAttack:
+	push	[bp+slotNumber]
 	push	cs
-	call	near ptr bat_doCharMeleeAttack
-	add	sp, 2
-loc_1C4D2:
+	call	near ptr bat_charMelee
+	add	sp, 4
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_charMeleeAttack endp
+bat_charPossessedAttack endp
 
 ; This function	returns	the highest priority in	the
 ; party. The character number with the highest
 ; priority is returned via membuf.
 ; Attributes: bp-based frame
 
-bat_getHighCharPrio proc far
+bat_charGetNextPriority proc far
 
 	char= word ptr -6
-	charNo=	word ptr -4
+	slotNumber=	word ptr -4
 	highestPriority= word ptr -2
 	membuf=	dword ptr  6
 
@@ -19700,37 +22539,38 @@ bat_getHighCharPrio proc far
 	mov	ax, 6
 	call	someStackOperation
 	push	si
+
 	mov	[bp+highestPriority], 0
 	mov	[bp+char], 0
-	mov	[bp+charNo], 0
-	jmp	short loc_1C4F6
-loc_1C4F3:
-	inc	[bp+charNo]
-loc_1C4F6:
-	cmp	[bp+charNo], 7
-	jge	short loc_1C51B
-	mov	bx, [bp+charNo]
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	mov	bx, [bp+slotNumber]
 	mov	al, gs:bat_charPriority[bx]
 	sub	ah, ah
 	mov	si, ax
 	cmp	[bp+highestPriority], si
-	jnb	short loc_1C519
+	jnb	short l_next
 	mov	[bp+highestPriority], si
 	mov	ax, bx
 	mov	[bp+char], ax
-loc_1C519:
-	jmp	short loc_1C4F3
-loc_1C51B:
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
 	lfs	bx, [bp+membuf]
 	mov	ax, [bp+char]
 	mov	fs:[bx], ax
 	mov	ax, [bp+highestPriority]
-	jmp	short $+2
+
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getHighCharPrio endp
+bat_charGetNextPriority endp
 
 ; This function	returns	the highest attack priority
 ; in the monster groups. The monster group and
@@ -19738,14 +22578,14 @@ bat_getHighCharPrio endp
 ; respectively.
 ; Attributes: bp-based frame
 
-bat_getHighMonPriority proc far
+bat_monGetNextPriority proc far
 
 	highMon= word ptr -0Ch
 	monNo= word ptr	-0Ah
 	groupNo= word ptr -8
 	highPri= word ptr -6
 	highGroup= word	ptr -4
-	var_2= word ptr	-2
+	groupSize= word ptr	-2
 	rGroup=	dword ptr  6
 	rMon= dword ptr	 0Ah
 
@@ -19754,32 +22594,26 @@ bat_getHighMonPriority proc far
 	mov	ax, 0Ch
 	call	someStackOperation
 	push	si
+
 	sub	ax, ax
 	mov	[bp+highMon], ax
 	mov	[bp+highGroup],	ax
 	mov	[bp+highPri], ax
 	mov	[bp+groupNo], ax
-	jmp	short loc_1C54D
-loc_1C54A:
-	inc	[bp+groupNo]
-loc_1C54D:
-	cmp	[bp+groupNo], 4
-	jge	short loc_1C5B1
-	getMonP	[bp+groupNo], bx
+
+l_groupLoop:
+	mov	ax, monStruSize
+	imul	[bp+groupNo]
+	mov	bx, ax
 	mov	al, gs:monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
-	mov	[bp+var_2], ax
+	mov	[bp+groupSize], ax
 	or	ax, ax
-	jz	short loc_1C5AF
+	jz	short l_groupLoopNext
 	mov	[bp+monNo], 0
-	jmp	short loc_1C57A
-loc_1C577:
-	inc	[bp+monNo]
-loc_1C57A:
-	mov	ax, [bp+var_2]
-	cmp	[bp+monNo], ax
-	jge	short loc_1C5AF
+
+l_monsterLoop:
 	mov	bx, [bp+groupNo]
 	mov	cl, 6
 	shl	bx, cl
@@ -19788,17 +22622,24 @@ loc_1C57A:
 	add	bx, ax
 	mov	si, gs:bat_monPriorityList[bx]
 	cmp	[bp+highPri], si
-	jge	short loc_1C5AD
+	jge	short l_monsterLoopNext
 	mov	[bp+highPri], si
 	mov	ax, [bp+groupNo]
 	mov	[bp+highGroup],	ax
 	mov	ax, [bp+monNo]
 	mov	[bp+highMon], ax
-loc_1C5AD:
-	jmp	short loc_1C577
-loc_1C5AF:
-	jmp	short loc_1C54A
-loc_1C5B1:
+
+l_monsterLoopNext:
+	inc	[bp+monNo]
+	mov	ax, [bp+groupSize]
+	cmp	[bp+monNo], ax
+	jl	short l_monsterLoop
+
+l_groupLoopNext:
+	inc	[bp+groupNo]
+	cmp	[bp+groupNo], 4
+	jl	short l_groupLoop
+
 	lfs	bx, [bp+rGroup]
 	mov	ax, [bp+highGroup]
 	mov	fs:[bx], ax
@@ -19806,66 +22647,63 @@ loc_1C5B1:
 	mov	ax, [bp+highMon]
 	mov	fs:[bx], ax
 	mov	ax, [bp+highPri]
-	jmp	short $+2
+
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getHighMonPriority endp
+bat_monGetNextPriority endp
+
 
 ; Attributes: bp-based frame
 
-bat_getAttackPriority proc far
+bat_setPriorities proc far
 
-	var_E= word ptr	-0Eh
-	var_C= word ptr	-0Ch
-	var_A= word ptr	-0Ah
-	var_8= word ptr	-8
-	var_6= word ptr	-6
-	var_4= dword ptr -4
+	monsterPriorityLo= word ptr	-0Eh
+	loopCounter= word ptr	-0Ch
+	currentMonster= word ptr	-0Ah
+	monsterPriorityHi= word ptr	-8
+	monsterGroupSize= word ptr	-6
+	summonSlotP= dword ptr -4
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 0Eh
 	call	someStackOperation
 	push	si
+
 	cmp	gs:partyFrozenFlag, 0
-	jz	short loc_1C611
-	mov	[bp+var_C], 0
-	jmp	short loc_1C5EF
-loc_1C5EC:
-	inc	[bp+var_C]
-loc_1C5EF:
-	cmp	[bp+var_C], 7
-	jge	short loc_1C604
-	mov	bx, [bp+var_C]
+	jz	short l_getCharPriorities
+
+	mov	[bp+loopCounter], 0
+l_partyFrozenLoop:
+	mov	bx, [bp+loopCounter]
 	mov	gs:bat_charPriority[bx], 0
-	jmp	short loc_1C5EC
-loc_1C604:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jl	short l_partyFrozenLoop
 	mov	gs:partyFrozenFlag, 0
-	jmp	loc_1C707
-loc_1C611:
-	mov	[bp+var_C], 0
-	jmp	short loc_1C61B
-loc_1C618:
-	inc	[bp+var_C]
-loc_1C61B:
-	cmp	[bp+var_C], 7
-	jl	short loc_1C624
-	jmp	loc_1C707
-loc_1C624:
-	getCharP	[bp+var_C], bx
+	jmp	l_getMonsterPriorities
+
+l_getCharPriorities:
+	mov	[bp+loopCounter], 0
+
+l_characterLoop:
+	mov	ax, charSize
+	imul	[bp+loopCounter]
+	mov	bx, ax
 	cmp	byte ptr gs:party._name[bx], 0
-	jnz	short loc_1C63B
-	jmp	loc_1C707
-loc_1C63B:
-	getCharP	[bp+var_C], si
+	jz	l_getMonsterPriorities
+
+	mov	ax, charSize
+	imul	[bp+loopCounter]
+	mov	si, ax
 	cmp	gs:party.class[si], class_monster
-	jb	short loc_1C67B
+	jb	short l_notSummon
 	add	ax, offset party
-	mov	word ptr [bp+var_4], ax
-	mov	word ptr [bp+var_4+2], seg seg027
-	lfs	bx, [bp+var_4]
+	mov	word ptr [bp+summonSlotP], ax
+	mov	word ptr [bp+summonSlotP+2], seg seg027
+	lfs	bx, [bp+summonSlotP]
 	mov	al, fs:[bx+18h]
 	sub	ah, ah
 	push	ax
@@ -19874,114 +22712,127 @@ loc_1C63B:
 	push	cs
 	call	near ptr randomBetweenXandY
 	add	sp, 4
-	mov	bx, [bp+var_C]
+	mov	bx, [bp+loopCounter]
 	mov	fs:bat_charPriority[bx], al
-	jmp	loc_1C704
-loc_1C67B:
-	mov	bx, [bp+var_C]
-	cmp	gs:charActionList[bx], 6
+	jmp	l_characterLoopNext
+
+l_notSummon:
+	mov	bx, [bp+loopCounter]
+	cmp	gs:g_charActionList[bx], 6
 	jnz	short loc_1C696
+
 	mov	gs:bat_charPriority[bx], 0FFh
-	jmp	short loc_1C704
+	jmp	short l_characterLoopNext
+
 loc_1C696:
-	getCharP	[bp+var_C], si
+	mov	ax, charSize
+	imul	[bp+loopCounter]
+	mov	si, ax
 	mov	bl, gs:party.class[si]
 	sub	bh, bh
 	mov	al, byte_475AE[bx]
-	mov	bx, [bp+var_C]
+	mov	bx, [bp+loopCounter]
 	mov	gs:bat_charPriority[bx], al
-	call	rnd_2d16
+	call	random_2d16
 	mov	cx, gs:party.level[si]
 	shr	cx, 1
 	mov	dl, gs:party.dexterity[si]
 	shl	dl, 1
 	add	cl, dl
 	add	cl, al
-	mov	bx, [bp+var_C]
+	mov	bx, [bp+loopCounter]
 	add	gs:bat_charPriority[bx], cl
-	mov	bx, [bp+var_C]
+	mov	bx, [bp+loopCounter]
 	cmp	gs:bat_charPriority[bx], 0FFh
-	jbe	short loc_1C6F3
+	jbe	short l_setMinimumPriority
 	mov	gs:bat_charPriority[bx], 0FFh
-	jmp	short loc_1C704
-loc_1C6F3:
-	mov	bx, [bp+var_C]
+	jmp	short l_characterLoopNext
+
+l_setMinimumPriority:
+	mov	bx, [bp+loopCounter]
 	cmp	gs:bat_charPriority[bx], 0
-	jnz	short loc_1C704
+	jnz	short l_characterLoopNext
 	mov	gs:bat_charPriority[bx], 1
-loc_1C704:
-	jmp	loc_1C618
-loc_1C707:
-	mov	[bp+var_C], 0
-	jmp	short loc_1C711
-loc_1C70E:
-	inc	[bp+var_C]
-loc_1C711:
-	cmp	[bp+var_C], 4
-	jge	short loc_1C780
-	getMonP	[bp+var_C], si
+
+l_characterLoopNext:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jl	l_characterLoop
+
+l_getMonsterPriorities:
+	mov	[bp+loopCounter], 0
+
+l_monsterGroupLoop:
+	mov	ax, monStruSize
+	imul	[bp+loopCounter]
+	mov	si, ax
 	mov	al, gs:monGroups.groupSize[si]
 	sub	ah, ah
 	and	ax, 1Fh
-	mov	[bp+var_6], ax
+	mov	[bp+monsterGroupSize], ax
 	or	ax, ax
-	jz	short loc_1C77E
+	jz	short l_monsterGroupNext
 	mov	al, gs:monGroups.oppPriorityLo[si]
 	sub	ah, ah
-	mov	[bp+var_E], ax
+	mov	[bp+monsterPriorityLo], ax
 	mov	al, gs:monGroups.oppPriorityHi[si]
-	mov	[bp+var_8], ax
-	mov	[bp+var_A], 0
-	jmp	short loc_1C750
-loc_1C74D:
-	inc	[bp+var_A]
-loc_1C750:
-	mov	ax, [bp+var_6]
-	cmp	[bp+var_A], ax
-	jge	short loc_1C77E
-	push	[bp+var_8]
-	push	[bp+var_E]
+	mov	[bp+monsterPriorityHi], ax
+	mov	[bp+currentMonster], 0
+
+l_monsterLoop:
+	push	[bp+monsterPriorityHi]
+	push	[bp+monsterPriorityLo]
 	push	cs
 	call	near ptr randomBetweenXandY
 	add	sp, 4
-	mov	bx, [bp+var_C]
+	mov	bx, [bp+loopCounter]
 	mov	cl, 6
 	shl	bx, cl
-	mov	cx, [bp+var_A]
+	mov	cx, [bp+currentMonster]
 	shl	cx, 1
 	add	bx, cx
 	mov	gs:bat_monPriorityList[bx], ax
-	jmp	short loc_1C74D
-loc_1C77E:
-	jmp	short loc_1C70E
-loc_1C780:
+	inc	[bp+currentMonster]
+	mov	ax, [bp+monsterGroupSize]
+	cmp	[bp+currentMonster], ax
+	jl	short l_monsterLoop
+
+l_monsterGroupNext:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 4
+	jl	short l_monsterGroupLoop
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getAttackPriority endp
+bat_setPriorities endp
 
 ; Attributes: bp-based frame
 
-bat_getOpponents proc far
+bat_setOpponents proc far
 
 	var_E= word ptr	-0Eh
-	var_C= word ptr	-0Ch
-	var_A= dword ptr -0Ah
-	var_6= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	currentGroupSize= word ptr	-0Ch
+	monsterDataP= dword ptr -0Ah
+	currentMonsterIndex= word ptr	-6
+	currentGroupIndex= word ptr	-4
+	monsterTypeIndex= word ptr	-2
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 0Eh
 	call	someStackOperation
 	push	si
+
 	push	cs
-	call	near ptr bat_resetData
+	call	near ptr bat_reset
 	mov	gs:byte_422A4, 1
+
 	cmp	gs:bat_curSong,	0
-	jz	short loc_1C7D3
+	jz	short l_skipSongConversion
+
 	mov	al, gs:g_currentSong
 	sub	ah, ah
 	push	ax
@@ -19992,60 +22843,60 @@ bat_getOpponents proc far
 	push	cs
 	call	near ptr bat_convertSongToCombat
 	add	sp, 4
-loc_1C7D3:
+
+l_skipSongConversion:
 	cmp	g_partyAttackFlag, 0
-	jz	short loc_1C7EC
+	jz	short l_notPartyAttack
+
 	sub	ax, ax
 	push	ax
 	push	cs
-	call	near ptr bat_zeroMonGroups
+	call	near ptr bat_monResetGroups
 	add	sp, 2
-	jmp	loc_1C992
-loc_1C7EC:
+	jmp	l_return
+
+l_notPartyAttack:
 	cmp	gs:g_nonRandomBattleFlag, 0
-	jnz	short loc_1C81D
-loc_1C7F8:
+	jnz	short l_getGroup
+
+l_getGroupCount:
 	call	random
 	and	al, 3
 	mov	g_monsterGroupCount, al
-	cmp	al, levelNoMaybe
-	jbe	short loc_1C814
-	jmp	short loc_1C7F8
-loc_1C814:
+	cmp	al, g_levelNumber
+	ja	short l_getGroupCount
 	inc	g_monsterGroupCount
-loc_1C81D:
-	mov	[bp+var_4], 0
-	jmp	short loc_1C827
-loc_1C824:
-	inc	[bp+var_4]
-loc_1C827:
-	mov	al, g_monsterGroupCount
-	sub	ah, ah
-	cmp	ax, [bp+var_4]
-	ja	short loc_1C839
-	jmp	loc_1C978
-loc_1C839:
-	cmp	gs:g_nonRandomBattleFlag, ah
-	jz	short loc_1C889
-	getMonP	[bp+var_4], si
-	mov	al, byte ptr gs:monGroups._name[si]
-	sub	ah, ah
-	mov	[bp+var_2], ax
-	getMonIndex	ax, [bp+var_2]
+
+l_getGroup:
+	mov	[bp+currentGroupIndex], 0
+
+l_setGroupLoop:
+	cmp	gs:g_nonRandomBattleFlag, 0
+	jz	short l_selectRandomMonsterGroup
+
+	mov	ax, monStruSize
+	imul	[bp+currentGroupIndex]
+	mov	si, ax
+	mov	al, byte ptr gs:monGroups._name[si]	; Monster type index is stored in the
+	sub	ah, ah					; first byte of the _name field for
+	mov	[bp+monsterTypeIndex], ax		; hardcoded encounters
+	mov	ax, monStruSize
+	imul	[bp+monsterTypeIndex]
 	add	ax, offset monsterBuf
-	mov	word ptr [bp+var_A], ax
-	mov	word ptr [bp+var_A+2], seg seg023
+	mov	word ptr [bp+monsterDataP], ax
+	mov	word ptr [bp+monsterDataP+2], seg seg023
 	mov	al, gs:monGroups.groupSize[si]
 	sub	ah, ah
 	and	ax, 1Fh
-	mov	[bp+var_C], ax
-	lfs	bx, [bp+var_A]
+	mov	[bp+currentGroupSize], ax
+	lfs	bx, [bp+monsterDataP]
 	mov	al, fs:[bx+mon_t.groupSize]
 	sub	ah, ah
 	and	ax, 0E0h
 	mov	[bp+var_E], ax
-	jmp	short loc_1C8EB
-loc_1C889:
+	jmp	short l_copyMonsterData
+
+l_selectRandomMonsterGroup:
 	mov	ax, 23
 	push	ax
 	sub	ax, ax
@@ -20053,22 +22904,26 @@ loc_1C889:
 	push	cs
 	call	near ptr randomBetweenXandY
 	add	sp, 4
-	mov	[bp+var_2], ax
-	getMonIndex	ax, [bp+var_2]
+	mov	[bp+monsterTypeIndex], ax
+	mov	ax, monStruSize
+	imul	[bp+monsterTypeIndex]
 	add	ax, offset monsterBuf
-	mov	word ptr [bp+var_A], ax
-	mov	word ptr [bp+var_A+2], seg seg023
-	lfs	bx, [bp+var_A]
+	mov	word ptr [bp+monsterDataP], ax
+	mov	word ptr [bp+monsterDataP+2], seg seg023
+	lfs	bx, [bp+monsterDataP]
 	test	fs:[bx+mon_t.flags], mon_noSummon
-	jnz	short loc_1C889
+	jnz	short l_selectRandomMonsterGroup
+
 	cmp	byte ptr fs:[bx], 0
-	jz	short loc_1C889
+	jz	short l_selectRandomMonsterGroup
+
 	mov	al, fs:[bx+mon_t.groupSize]
 	sub	ah, ah
 	and	ax, 0E0h
 	mov	[bp+var_E], ax
 	test	fs:[bx+mon_t.groupSize], 1Fh
-	jz	short loc_1C8E5
+	jz	short l_setMinimumGroupSize
+
 	mov	al, fs:[bx+mon_t.groupSize]
 	sub	ah, ah
 	and	ax, 1Fh
@@ -20078,74 +22933,86 @@ loc_1C889:
 	push	cs
 	call	near ptr randomBetweenXandY
 	add	sp, 4
-	jmp	short loc_1C8E8
-loc_1C8E5:
+	jmp	short l_setGroupSize
+
+l_setMinimumGroupSize:
 	mov	ax, 1
-loc_1C8E8:
-	mov	[bp+var_C], ax
-loc_1C8EB:
-	getMonP	[bp+var_4], bx
+
+l_setGroupSize:
+	mov	[bp+currentGroupSize], ax
+
+l_copyMonsterData:
+	mov	ax, monStruSize
+	imul	[bp+currentGroupIndex]
+	mov	bx, ax
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	word ptr [bp+var_A+2]
-	push	word ptr [bp+var_A]
-	push	cs
-	call	near ptr mon_copyBuffer
+	push	word ptr [bp+monsterDataP+2]
+	push	word ptr [bp+monsterDataP]
+	call	bat_monCopyBuffer
 	add	sp, 8
 	mov	al, byte ptr [bp+var_E]
-	or	al, byte ptr [bp+var_C]
+	or	al, byte ptr [bp+currentGroupSize]
 	mov	cx, ax
-	getMonP	[bp+var_4], bx
+	mov	ax, monStruSize
+	imul	[bp+currentGroupIndex]
+	mov	bx, ax
 	mov	gs:monGroups.groupSize[bx], cl
-	mov	[bp+var_6], 0
-	jmp	short loc_1C92C
-loc_1C929:
-	inc	[bp+var_6]
-loc_1C92C:
-	mov	ax, [bp+var_C]
-	cmp	[bp+var_6], ax
-	jge	short loc_1C975
-	getMonP	[bp+var_4], si
+
+	mov	[bp+currentMonsterIndex], 0
+l_setGroupHpLoop:
+	mov	ax, monStruSize
+	imul	[bp+currentGroupIndex]
+	mov	si, ax
 	mov	al, gs:monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
 	push	cs
-	call	near ptr dice_doYDX
+	call	near ptr randomYdX
 	add	sp, 2
 	mov	cx, gs:monGroups.hpBase[si]
 	add	cx, ax
-	mov	bx, [bp+var_4]
+	mov	bx, [bp+currentGroupIndex]
 	mov	ax, cx
 	mov	cl, 6
 	shl	bx, cl
-	mov	cx, [bp+var_6]
+	mov	cx, [bp+currentMonsterIndex]
 	shl	cx, 1
 	add	bx, cx
 	mov	gs:monHpList[bx], ax
-	jmp	short loc_1C929
-loc_1C975:
-	jmp	loc_1C824
-loc_1C978:
+	inc	[bp+currentMonsterIndex]
+	mov	ax, [bp+currentGroupSize]
+	cmp	[bp+currentMonsterIndex], ax
+	jl	short l_setGroupHpLoop
+
+	inc	[bp+currentGroupIndex]
+	mov	al, g_monsterGroupCount
+	sub	ah, ah
+	cmp	ax, [bp+currentGroupIndex]
+	ja	l_setGroupLoop
+
 	cmp	g_monsterGroupCount, 4
-	jnb	short loc_1C992
+	jnb	short l_return
+
 	mov	al, g_monsterGroupCount
 	sub	ah, ah
 	push	ax
 	push	cs
-	call	near ptr bat_zeroMonGroups
+	call	near ptr bat_monResetGroups
 	add	sp, 2
-loc_1C992:
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getOpponents endp
+bat_setOpponents endp
 
 ; Attributes: bp-based frame
 
-bat_zeroMonGroups proc far
+bat_monResetGroups proc far
 
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
@@ -20178,11 +23045,11 @@ loc_1C9D5:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_zeroMonGroups endp
+bat_monResetGroups endp
 
 ; Attributes: bp-based frame
 
-bat_sortMonGroupByDist proc far
+bat_monSortGroups proc far
 
 	var_4= word ptr	-4
 	var_2= word ptr	-2
@@ -20216,7 +23083,7 @@ loc_1C9F4:
 	push	ax
 	push	[bp+var_2]
 	push	cs
-	call	near ptr bat_swapMonGroups
+	call	near ptr bat_monSwapGroups
 	add	sp, 4
 loc_1CA35:
 	jmp	short loc_1C9F1
@@ -20227,11 +23094,11 @@ loc_1CA37:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_sortMonGroupByDist endp
+bat_monSortGroups endp
 
 ; Attributes: bp-based frame
 
-bat_swapMonGroups proc far
+bat_monSwapGroups proc far
 
 	var_40=	word ptr -40h
 	arg_0= word ptr	 6
@@ -20326,7 +23193,7 @@ bat_swapMonGroups proc far
 	mov	sp, bp
 	pop	bp
 	retf
-bat_swapMonGroups endp
+bat_monSwapGroups endp
 
 ; Attributes: bp-based frame
 bat_printOpponents proc	far
@@ -20405,7 +23272,7 @@ loc_1CBCA:
 	push	[bp+var_6]
 	push	[bp+var_8]
 	push	cs
-	call	near ptr bat_printOpponentGroup
+	call	near ptr bat_monPrintGroup
 	add	sp, 6
 	mov	[bp+var_8], ax
 	mov	[bp+var_6], dx
@@ -20464,7 +23331,7 @@ loc_1CC52:
 	push	dx
 	push	ax
 	push	cs
-	call	near ptr bat_printOpponentGroup
+	call	near ptr bat_monPrintGroup
 	add	sp, 6
 	mov	[bp+var_8], ax
 	mov	[bp+var_6], dx
@@ -20483,7 +23350,7 @@ bat_printOpponents endp
 ;   YY - Distance to the group
 ; Attributes: bp-based frame
 
-bat_printOpponentGroup proc far
+bat_monPrintGroup proc far
 
 	var_16=	word ptr -16h
 	var_14=	word ptr -14h
@@ -20579,7 +23446,7 @@ bat_printOpponentGroup proc far
 	mov	sp, bp
 	pop	bp
 	retf
-bat_printOpponentGroup endp
+bat_monPrintGroup endp
 
 ; Attributes: bp-based frame
 
@@ -20653,7 +23520,7 @@ bat_setBigpic endp
 
 ; Attributes: bp-based frame
 
-mon_copyBuffer proc far
+bat_monCopyBuffer proc far
 
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
@@ -20675,7 +23542,7 @@ mon_copyBuffer proc far
 	mov	sp, bp
 	pop	bp
 	retf
-mon_copyBuffer endp
+bat_monCopyBuffer endp
 
 ; Attributes: bp-based frame
 
@@ -20704,10 +23571,10 @@ loc_1CE75:
 	sar	ax, 1
 	sar	ax, 1
 loc_1CE7C:
-	mov	gs:songACBonus,	al
+	mov	gs:g_songAcBonus,	al
 	or	al, al
 	jnz	short loc_1CE8D
-	inc	gs:songACBonus
+	inc	gs:g_songAcBonus
 loc_1CE8D:
 	jmp	short loc_1CEDA
 loc_1CE8F:
@@ -20806,10 +23673,10 @@ l_sanctuary:
 loc_1CF7E:
 	mov	al, 0Fh
 loc_1CF80:
-	mov	gs:songACBonus,	al
+	mov	gs:g_songAcBonus,	al
 	or	al, al
 	jnz	short loc_1CF91
-	inc	gs:songACBonus
+	inc	gs:g_songAcBonus
 loc_1CF91:
 	jmp	short l_return
 
@@ -20880,7 +23747,7 @@ l_shield:
 	mov	gs:partySpellAcBonus, 0
 	jmp	short l_endAndReturn
 l_sanctuary:
-	mov	gs:songACBonus,	0
+	mov	gs:g_songAcBonus,	0
 l_bringaround:
 	mov	gs:songRegenHP,	0
 	jmp	short l_endAndReturn
@@ -20906,10 +23773,9 @@ l_return:
 	retf
 bat_endCombatSong endp
 
-
 ; Attributes: bp-based frame
 
-bat_resetData proc far
+bat_reset proc far
 
 	counter= word ptr -2
 
@@ -20923,7 +23789,7 @@ loc_1D0B5:
 	inc	[bp+counter]
 loc_1D0B8:
 	cmp	[bp+counter], 4
-	jge	short loc_1D130
+	jge	loc_1D130
 	mov	ax, 40h	
 	push	ax
 	sub	ax, ax
@@ -20937,6 +23803,7 @@ loc_1D0B8:
 	push	ax
 	call	memset
 	add	sp, 8
+
 	mov	ax, 40h	
 	push	ax
 	sub	ax, ax
@@ -20950,6 +23817,21 @@ loc_1D0B8:
 	push	ax
 	call	memset
 	add	sp, 8
+
+	mov	ax, 40h	
+	push	ax
+	sub	ax, ax
+	push	ax
+	mov	bx, [bp+counter]
+	mov	cl, 6
+	shl	bx, cl
+	lea	ax, bat_monBeenHitList[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	memset
+	add	sp, 8
+
 	sub	al, al
 	mov	bx, [bp+counter]
 	mov	gs:g_monFreezeAcPenalty[bx], al
@@ -20959,7 +23841,7 @@ loc_1D0B8:
 	mov	gs:monSpellToHitPenalty[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:monAttackBonus[bx], al
-	jmp	short loc_1D0B5
+	jmp	loc_1D0B5
 loc_1D130:
 	mov	[bp+counter], 0
 	jmp	short loc_1D13A
@@ -20969,26 +23851,26 @@ loc_1D13A:
 	cmp	[bp+counter], 7
 	jge	short loc_1D18D
 	mov	bx, [bp+counter]
-	mov	gs:charActionList[bx], 2
+	mov	gs:g_charActionList[bx], 2
 	sub	al, al
 	mov	bx, [bp+counter]
 	mov	gs:[bx+8], al
 	mov	bx, [bp+counter]
-	mov	gs:strengthBonus[bx], al
+	mov	gs:g_strengthSpellBonus[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:byte_42444[bx], al
 	mov	bx, [bp+counter]
-	mov	gs:byte_42280[bx], al
+	mov	gs:g_characterMeleeDistance[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:bat_charPriority[bx], al
 	jmp	short loc_1D137
 loc_1D18D:
 	sub	al, al
-	mov	gs:byte_42440, al
-	mov	gs:byte_41E70, al
+	mov	gs:g_divineDamageBonus, al
+	mov	gs:g_charFreezeToHitBonus, al
 	mov	gs:g_charFreezeAcPenalty, al
 	mov	gs:partySpellAcBonus, al
-	mov	gs:byte_42567, al
+	mov	gs:g_monsterWOFBonus, al
 	mov	gs:monFrozenFlag, al
 	mov	gs:byte_422A4, al
 	mov	gs:byte_41E63, al
@@ -21007,7 +23889,7 @@ loc_1D18D:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_resetData endp
+bat_reset endp
 
 ; This function	returns	a random number	between	the
 ; low and the high
@@ -21100,7 +23982,7 @@ getRndDiceMask endp
 ; of dice to roll and the sides	of the dice. A random
 ; number between 1DX and YDX is	returned
 ; Attributes: bp-based frame
-dice_doYDX proc	far
+randomYdX proc	far
 
 	rval= word ptr -8
 	counter= word ptr -6
@@ -21143,11 +24025,11 @@ loc_1D356:
 	mov	sp, bp
 	pop	bp
 	retf
-dice_doYDX endp
+randomYdX endp
 
 ; Attributes: bp-based frame
 
-party_fight proc far
+bat_partyFightAction proc far
 	push	bp
 	mov	bp, sp
 	xor	ax, ax
@@ -21157,11 +24039,11 @@ party_fight proc far
 	mov	sp, bp
 	pop	bp
 	retf
-party_fight endp
+bat_partyFightAction endp
 
 ; Attributes: bp-based frame
 
-party_advance proc far
+bat_partyAdvanceAction proc far
 
 	var_2= word ptr	-2
 
@@ -21197,7 +24079,7 @@ loc_1D3BF:
 	cmp	[bp+var_2], 7
 	jge	short loc_1D3D4
 	mov	bx, [bp+var_2]
-	mov	gs:charActionList[bx], 2
+	mov	gs:g_charActionList[bx], 2
 	jmp	short loc_1D3BC
 loc_1D3D4:
 	mov	ax, 1
@@ -21206,11 +24088,11 @@ loc_1D3D4:
 	mov	sp, bp
 	pop	bp
 	retf
-party_advance endp
+bat_partyAdvanceAction endp
 
 ; Attributes: bp-based frame
 
-party_run proc far
+bat_partyRunAction proc far
 
 	var_2= word ptr	-2
 
@@ -21237,7 +24119,7 @@ loc_1D40E:
 	mov	ax, itemEff_alwaysRunAway
 	push	ax
 	push	[bp+var_2]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jnz	short loc_1D44A
@@ -21264,11 +24146,11 @@ loc_1D46D:
 	mov	sp, bp
 	pop	bp
 	retf
-party_run endp
+bat_partyRunAction endp
 
 ; Attributes: bp-based frame
 
-bat_attackOpt proc far
+bat_charPartyAttackActionion proc far
 
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
@@ -21283,7 +24165,7 @@ bat_attackOpt proc far
 	mov	ax, 2
 	push	ax
 	push	cs
-	call	near ptr getTarget
+	call	near ptr bat_charGetActionTarget
 	add	sp, 6
 	mov	[bp+var_2], ax
 	or	ax, ax
@@ -21303,11 +24185,11 @@ loc_1D4AF:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_attackOpt endp
+bat_charPartyAttackActionion endp
 
 ; Attributes: bp-based frame
 
-bat_defendOpt proc far
+bat_charDefendAction proc far
 	push	bp
 	mov	bp, sp
 	xor	ax, ax
@@ -21317,11 +24199,11 @@ bat_defendOpt proc far
 	mov	sp, bp
 	pop	bp
 	retf
-bat_defendOpt endp
+bat_charDefendAction endp
 
 ; Attributes: bp-based frame
 
-bat_castOpt proc far
+bat_charCastAction proc far
 
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
@@ -21351,15 +24233,15 @@ loc_1D4ED:
 	push	ax
 	push	[bp+var_2]
 	push	cs
-	call	near ptr getTarget
+	call	near ptr bat_charGetActionTarget
 	add	sp, 6
 	or	ax,ax
-	jge	l_bat_castOpt_gotTarget
+	jge	l_bat_charCastAction_gotTarget
 
 	mov	ax, 0				; Return 0 if no target selected.
 	jmp	loc_1D541
 
-l_bat_castOpt_gotTarget:
+l_bat_charCastAction_gotTarget:
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42276[bx], al
 	mov	ax, 1
@@ -21375,11 +24257,11 @@ loc_1D541:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_castOpt endp
+bat_charCastAction endp
 
 ; Attributes: bp-based frame
 
-bat_useItemOpt proc far
+bat_charUseAction proc far
 
 	var_F8=	word ptr -0F8h
 	var_36=	word ptr -36h
@@ -21399,7 +24281,7 @@ bat_useItemOpt proc far
 	push	ss
 	push	ax
 	push	[bp+arg_0]
-	call	sub_188E8
+	call	inventory_getItemList
 	add	sp, 0Ah
 	mov	[bp+var_36], ax
 	or	ax, ax
@@ -21423,7 +24305,7 @@ loc_1D570:
 loc_1D58F:
 	push	[bp+var_4]
 	push	[bp+arg_0]
-	call	item_canBeUsed
+	call	inventory_canBeUsed
 	add	sp, 4
 	or	ax, ax
 	jz	short loc_1D61F
@@ -21445,7 +24327,7 @@ loc_1D58F:
 	push	ax
 	push	[bp+var_2]
 	push	cs
-	call	near ptr getTarget
+	call	near ptr bat_charGetActionTarget
 	add	sp, 6
 
 	or	ax, ax
@@ -21493,11 +24375,11 @@ loc_1D663:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_useItemOpt endp
+bat_charUseAction endp
 
 ; Attributes: bp-based frame
 
-bat_hideOpt proc far
+bat_charHideAction proc far
 	push	bp
 	mov	bp, sp
 	xor	ax, ax
@@ -21507,11 +24389,11 @@ bat_hideOpt proc far
 	mov	sp, bp
 	pop	bp
 	retf
-bat_hideOpt endp
+bat_charHideAction endp
 
 ; Attributes: bp-based frame
 
-bat_songOpt proc far
+bat_charSingAction proc far
 
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
@@ -21544,10 +24426,10 @@ loc_1D6BB:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_songOpt endp
+bat_charSingAction endp
 
 ; Attributes: bp-based frame
-bat_partyAttackOpt proc	far
+bat_charPartyAttackAction proc	far
 
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
@@ -21562,7 +24444,7 @@ bat_partyAttackOpt proc	far
 	mov	ax, 1
 	push	ax
 	push	cs
-	call	near ptr getTarget
+	call	near ptr bat_charGetActionTarget
 	add	sp, 6
 	mov	[bp+var_2], ax
 	or	ax, ax
@@ -21582,11 +24464,11 @@ loc_1D6FF:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_partyAttackOpt endp
+bat_charPartyAttackAction endp
 
 ; Attributes: bp-based frame
 
-bat_getPartyOptions proc far
+bat_partyGetActions proc far
 
 	charNo=	word ptr -138h
 	var_136= word ptr -136h
@@ -21623,7 +24505,7 @@ loc_1D738:
 	push	ss
 	push	ax
 	push	cs
-	call	near ptr bat_getFightRunOpt
+	call	near ptr bat_partyCanAdvance
 	add	sp, 4
 	lea	ax, [bp+var_36]
 	push	ss
@@ -21731,9 +24613,9 @@ loc_1D827:
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], dx
 	mov	bx, [bp+charNo]
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jz	short loc_1D89A
-	mov	al, gs:byte_42280[bx]
+	mov	al, gs:g_characterMeleeDistance[bx]
 	add	al, '1'
 	mov	byte_4724A, al
 	mov	ax, offset byte_4724A
@@ -21763,7 +24645,7 @@ loc_1D89A:
 	push	ss
 	push	ax
 	push	cs
-	call	near ptr bat_getCharOptions
+	call	near ptr bat_charGetAction
 	add	sp, 6
 	lea	ax, [bp+var_36]
 	push	ss
@@ -21807,7 +24689,7 @@ loc_1D92E:
 	mov	al, byte ptr [bp+var_16]
 	inc	al
 	mov	bx, [bp+charNo]
-	mov	gs:charActionList[bx], al
+	mov	gs:g_charActionList[bx], al
 	push	[bp+charNo]
 	mov	bx, [bp+var_16]
 	shl	bx, 1
@@ -21829,7 +24711,7 @@ loc_1D96A:
 	jmp	short loc_1D97A
 loc_1D96C:
 	mov	bx, [bp+charNo]
-	mov	gs:charActionList[bx], 8
+	mov	gs:g_charActionList[bx], 8
 loc_1D97A:
 	jmp	loc_1D7C6
 loc_1D97D:
@@ -21847,10 +24729,10 @@ loc_1D996:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getPartyOptions endp
+bat_partyGetActions endp
 
 ; Attributes: bp-based frame
-bat_getFightRunOpt proc	far
+bat_partyCanAdvance proc	far
 
 	arg_0= dword ptr  6
 
@@ -21861,7 +24743,7 @@ bat_getFightRunOpt proc	far
 	lfs	bx, [bp+arg_0]
 	mov	byte ptr fs:[bx], 1
 	push	cs
-	call	near ptr bat_monInMeleeRange
+	call	near ptr bat_monGroupInMeleeRange
 	lfs	bx, [bp+arg_0]
 	mov	fs:[bx+1], al
 	lfs	bx, [bp+arg_0]
@@ -21869,7 +24751,8 @@ bat_getFightRunOpt proc	far
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getFightRunOpt endp
+bat_partyCanAdvance endp
+
 
 ; This function	returns	0 if there is a	monster
 ; group	in melee range.	1 otherwise. This is used
@@ -21877,7 +24760,7 @@ bat_getFightRunOpt endp
 ; the "Advance"	option in battle.
 ; Attributes: bp-based frame
 
-bat_monInMeleeRange proc far
+bat_monGroupInMeleeRange proc far
 
 	var_2= word ptr	-2
 
@@ -21912,10 +24795,10 @@ loc_1DA09:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_monInMeleeRange endp
+bat_monGroupInMeleeRange endp
 
 ; Attributes: bp-based frame
-bat_getCharOptions proc	far
+bat_charGetAction proc	far
 
 	arg_0= dword ptr  6
 	arg_4= word ptr	 0Ah
@@ -21931,7 +24814,7 @@ bat_getCharOptions proc	far
 	cmp	[bp+arg_4], 4
 	jl	short loc_1DA45
 	mov	bx, [bp+arg_4]
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jz	short loc_1DA49
 loc_1DA45:
 	mov	al, 1
@@ -21948,14 +24831,14 @@ loc_1DA4B:
 	mov	ax, gs:party.currentSppt[bx]
 	lfs	bx, [bp+arg_0]
 	or	ax, ax
-	jz	l_bat_getCharOptions_sppts
+	jz	l_bat_charGetAction_sppts
 	mov	al, 1
 
-l_bat_getCharOptions_sppts:
+l_bat_charGetAction_sppts:
 	mov	fs:[bx+3], al
 	mov	byte ptr fs:[bx+4], 1
 	mov	bx, [bp+arg_4]
-	cmp	gs:byte_42280[bx], 9
+	cmp	gs:g_characterMeleeDistance[bx], 9
 	jnb	short loc_1DAA7
 	getCharP	bx, bx
 	cmp	gs:party.class[bx], class_rogue
@@ -21973,7 +24856,7 @@ loc_1DAA9:
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+arg_4]
-	call	inven_hasTypeEquipped
+	call	character_hasTypeEquipped
 	add	sp, 4
 	or	ax, ax
 	jz	short loc_1DADB
@@ -21987,11 +24870,11 @@ loc_1DADD:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getCharOptions endp
+bat_charGetAction endp
 
 ; Attributes: bp-based frame
 
-getTarget proc far
+bat_charGetActionTarget proc far
 
 	var_228= byte ptr -228h
 	var_11E= byte ptr -11Eh
@@ -22055,7 +24938,7 @@ loc_1DB46:
 	jmp	loc_1DD20
 loc_1DB63:
 	push	cs
-	call	near ptr bat_cntActiveMonGroups
+	call	near ptr bat_monGroupCount
 	mov	[bp+var_2], ax
 	cmp	ax, 1
 	jg	short loc_1DB75
@@ -22096,7 +24979,7 @@ loc_1DB86:
 	push	word ptr [bp+var_C+2]
 	push	word ptr [bp+var_C]
 	push	cs
-	call	near ptr bat_printOpponentGroup
+	call	near ptr bat_monPrintGroup
 	add	sp, 6
 	mov	word ptr [bp+var_C], ax
 	mov	word ptr [bp+var_C+2], dx
@@ -22114,7 +24997,7 @@ loc_1DC0C:
 	call	party_findEmptySlot
 	mov	[bp+var_8], ax
 	push	cs
-	call	near ptr bat_cntActiveMonGroups
+	call	near ptr bat_monGroupCount
 	mov	[bp+var_2], ax
 	mov	[bp+var_4], 2000h
 	mov	[bp+var_11C], 0
@@ -22150,7 +25033,7 @@ loc_1DC2C:
 	push	word ptr [bp+var_C+2]
 	push	word ptr [bp+var_C]
 	push	cs
-	call	near ptr bat_printOpponentGroup
+	call	near ptr bat_monPrintGroup
 	add	sp, 6
 	mov	word ptr [bp+var_C], ax
 	mov	word ptr [bp+var_C+2], dx
@@ -22266,11 +25149,11 @@ loc_1DD93:
 	mov	sp, bp
 	pop	bp
 	retf
-getTarget endp
+bat_charGetActionTarget endp
 
 ; Attributes: bp-based frame
 
-bat_cntActiveMonGroups proc far
+bat_monGroupCount proc far
 
 	var_2= word ptr	-2
 
@@ -22299,11 +25182,11 @@ loc_1DDD3:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_cntActiveMonGroups endp
+bat_monGroupCount endp
 
 ; Attributes: bp-based frame
 
-bat_getCharDamage proc far
+bat_charExecuteMeleeAttack proc far
 
 	var_22=	word ptr -22h
 	var_20=	word ptr -20h
@@ -22348,7 +25231,7 @@ loc_1DED6:
 	or	ax, ax
 	jz	short loc_1DF17
 	mov	bx, [bp+arg_0]
-	mov	al, gs:byte_42280[bx]
+	mov	al, gs:g_characterMeleeDistance[bx]
 	sub	ah, ah
 	mov	cx, [bp+var_C]
 	dec	cx
@@ -22369,7 +25252,7 @@ loc_1DF17:
 	and	ax, 3
 	mov	[bp+var_22], ax
 	mov	bx, ax
-	mov	al, byte_47606[bx]
+	mov	al, g_monsterAcBonusList[bx]
 	cbw
 	add	[bp+var_4], ax
 	mov	al, gs:monGroups.distance[si]
@@ -22378,7 +25261,7 @@ loc_1DF17:
 	shr	ax, cl
 	mov	[bp+var_8], ax
 	mov	bx, ax
-	mov	al, byte_4760A[bx]
+	mov	al, g_monsterAdvanceSpeedAcBonusList[bx]
 	cbw
 	add	[bp+var_4], ax
 	mov	bx, [bp+var_E]
@@ -22389,7 +25272,7 @@ loc_1DF74:
 	mov	ax, itType_weapon
 	push	ax
 	push	[bp+arg_0]
-	call	inven_getTypeEqSlot
+	call	character_getTypeEquippedSlot
 	add	sp, 4
 	mov	[bp+var_6], ax
 	or	ax, ax
@@ -22410,7 +25293,7 @@ loc_1DFB8:
 	mov	[bp+var_10], 0
 	mov	gs:specialAttackVal, 0
 loc_1DFC8:
-	mov	al, gs:byte_42567
+	mov	al, gs:g_monsterWOFBonus
 	sub	ah, ah
 	add	ax, [bp+var_4]
 	mov	[bp+var_18], ax
@@ -22453,19 +25336,19 @@ loc_1E03D:
 	sub	cx, [bp+var_12]
 	mov	[bp+var_A], cx
 loc_1E059:
-	call	rnd_2d8
+	call	random_2d8
 	mov	cx, ax
 	getCharP	[bp+arg_0], bx
 	mov	bl, gs:party.class[bx]
 	sub	bh, bh
-	mov	al, byte_475F8[bx]
+	mov	al, g_classToHitBonus[bx]
 	cbw
 	mov	bx, [bp+arg_0]
-	mov	dl, gs:strengthBonus[bx]
+	mov	dl, gs:g_strengthSpellBonus[bx]
 	sub	dh, dh
 	add	ax, dx
 	add	ax, cx
-	mov	cl, gs:byte_41E70
+	mov	cl, gs:g_charFreezeToHitBonus
 	sub	ch, ch
 	add	ax, cx
 	sub	[bp+var_A], ax
@@ -22503,7 +25386,7 @@ loc_1E0EE:
 	mov	[bp+var_20], 0Fh
 loc_1E118:
 	mov	bx, [bp+var_20]
-	mov	al, byte_47412[bx]
+	mov	al, g_monkDamageDice[bx]
 	sub	ah, ah
 	mov	[bp+var_16], ax
 	jmp	short loc_1E12B
@@ -22514,7 +25397,7 @@ loc_1E12B:
 	cmp	gs:party.class[bx], class_rogue
 	jnz	short loc_1E152
 	mov	bx, [bp+arg_0]
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jnz	short loc_1E152
 	sub	ax, ax
 	jmp	short loc_1E165
@@ -22539,13 +25422,13 @@ loc_1E18E:
 	jle	short loc_1E1F8
 	push	[bp+var_16]
 	push	cs
-	call	near ptr dice_doYDX
+	call	near ptr randomYdX
 	add	sp, 2
 	mov	bx, [bp+arg_0]
-	mov	cl, gs:strengthBonus[bx]
+	mov	cl, gs:g_strengthSpellBonus[bx]
 	sub	ch, ch
 	add	cx, ax
-	mov	al, gs:byte_42440
+	mov	al, gs:g_divineDamageBonus
 	sub	ah, ah
 	add	cx, ax
 	add	cx, [bp+var_10]
@@ -22568,7 +25451,7 @@ loc_1E1F6:
 	jmp	short loc_1E18B
 loc_1E1F8:
 	mov	bx, [bp+arg_0]
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jz	short loc_1E232
 	call	random
 	mov	cx, ax
@@ -22607,10 +25490,10 @@ loc_1E277:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getCharDamage endp
+bat_charExecuteMeleeAttack endp
 
 ; Attributes: bp-based frame
-bat_printHitDamage proc	far
+bat_charPrintMeleeDamage proc	far
 
 	dmgLo= word ptr	 6
 	dmgHi= word ptr	 8
@@ -22692,11 +25575,11 @@ loc_1E2F4:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_printHitDamage endp
+bat_charPrintMeleeDamage endp
 
 ; Attributes: bp-based frame
 
-bat_getKillString proc far
+bat_appendSpecialAttackString proc far
 
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
@@ -22718,11 +25601,11 @@ bat_getKillString proc far
 	mov	sp, bp
 	pop	bp
 	retf
-bat_getKillString endp
+bat_appendSpecialAttackString endp
 
 ; Attributes: bp-based frame
 
-bat_doHPDamage proc far
+bat_damageHp proc far
 
 	arg_0= word ptr	 6
 
@@ -22734,7 +25617,7 @@ bat_doHPDamage proc far
 	jge	short loc_1E3A1
 	push	[bp+arg_0]
 	push	cs
-	call	near ptr bat_charAfterDmgCheck
+	call	near ptr bat_charDamageHp
 	add	sp, 2
 	jmp	short loc_1E3B1
 	jmp	short loc_1E3B1
@@ -22743,18 +25626,19 @@ loc_1E3A1:
 	and	ax, 7Fh
 	push	ax
 	push	cs
-	call	near ptr bat_doMonHPDamage
+	call	near ptr bat_monDamageHp
 	add	sp, 2
 	jmp	short $+2
 loc_1E3B1:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doHPDamage endp
+bat_damageHp endp
+
 
 ; Attributes: bp-based frame
 
-bat_doMonHPDamage proc far
+bat_monDamageHp proc far
 
 	monNo= word ptr	-4
 	groupSize= word	ptr -2
@@ -22788,12 +25672,12 @@ loc_1E3EB:
 	mov	ax, [bp+monNo]
 	shl	ax, 1
 	add	bx, ax
-	test	byte ptr gs:bat_monPriorityList[bx], 1
+	test	byte ptr gs:bat_monBeenHitList[bx], 1
 	jz	short loc_1E41C
 	push	[bp+monNo]
 	push	[bp+groupNo]
 	push	cs
-	call	near ptr bat_monAfterDmgCheck
+	call	near ptr bat_monApplySpecialEffect
 	add	sp, 4
 	jmp	short loc_1E459
 loc_1E41C:
@@ -22813,25 +25697,26 @@ loc_1E428:
 	mov	ax, [bp+monNo]
 	shl	ax, 1
 	add	bx, ax
-	or	byte ptr gs:bat_monPriorityList[bx], 1
+	or	byte ptr gs:bat_monBeenHitList[bx], 1
 	jmp	short loc_1E425
 loc_1E44A:
 	sub	ax, ax
 	push	ax
 	push	[bp+groupNo]
 	push	cs
-	call	near ptr bat_monAfterDmgCheck
+	call	near ptr bat_monApplySpecialEffect
 	add	sp, 4
 	jmp	short $+2
 loc_1E459:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_doMonHPDamage endp
+bat_monDamageHp endp
+
 
 ; Attributes: bp-based frame
 
-bat_monAfterDmgCheck proc far
+bat_monApplySpecialEffect proc far
 
 	var_4= dword ptr -4
 	groupNo= word ptr  6
@@ -22847,7 +25732,7 @@ bat_monAfterDmgCheck proc far
 	mov	ax, [bp+monNo]
 	shl	ax, 1
 	add	bx, ax
-	and	gs:bat_monPriorityList[bx], 0FEh
+	and	gs:bat_monBeenHitList[bx], 0FEh
 	cmp	gs:specialAttackVal, speAtt_stoning
 	jz	short loc_1E495
 	cmp	gs:specialAttackVal, speAtt_criticalHit
@@ -22856,7 +25741,7 @@ loc_1E495:
 	push	[bp+monNo]
 	push	[bp+groupNo]
 	push	cs
-	call	near ptr bat_killMon
+	call	near ptr bat_monKill
 	add	sp, 4
 	mov	ax, 1
 	jmp	short loc_1E4ED
@@ -22879,7 +25764,7 @@ loc_1E4A7:
 	push	[bp+monNo]
 	push	[bp+groupNo]
 	push	cs
-	call	near ptr bat_killMon
+	call	near ptr bat_monKill
 	add	sp, 4
 	mov	ax, 1
 	jmp	short loc_1E4ED
@@ -22890,11 +25775,11 @@ loc_1E4ED:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_monAfterDmgCheck endp
+bat_monApplySpecialEffect endp
 
 ; Attributes: bp-based frame
 
-bat_killMon proc far
+bat_monKill proc far
 
 	mon= word ptr -2
 	groupNo= word ptr  6
@@ -22953,11 +25838,11 @@ loc_1E56E:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_killMon endp
+bat_monKill endp
 
 ; Attributes: bp-based frame
 
-bat_charAfterDmgCheck proc far
+bat_charDamageHp proc far
 
 	arg_0= word ptr	 6
 
@@ -22979,7 +25864,7 @@ loc_1E5CC:
 	jnz	short loc_1E5F6
 	push	[bp+arg_0]
 	push	cs
-	call	near ptr bat_inflictStatus
+	call	near ptr bat_charApplySpecialEffect
 	add	sp, 2
 	jmp	short loc_1E66E
 	jmp	short loc_1E5FA
@@ -23011,7 +25896,7 @@ loc_1E647:
 loc_1E662:
 	push	[bp+arg_0]
 	push	cs
-	call	near ptr bat_inflictStatus
+	call	near ptr bat_charApplySpecialEffect
 	add	sp, 2
 	jmp	short $+2
 loc_1E66E:
@@ -23019,11 +25904,11 @@ loc_1E66E:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_charAfterDmgCheck endp
+bat_charDamageHp endp
 
 ; Attributes: bp-based frame
 
-bat_inflictStatus proc far
+bat_charApplySpecialEffect proc far
 
 	var_4= word ptr	-4
 	var_2= word ptr	-2
@@ -23102,7 +25987,7 @@ loc_1E759:
 	push	dx
 	push	ax
 	push	cs
-	call	near ptr _doAgeStatus
+	call	near ptr character_applyAgeStatus
 	add	sp, 0Ah
 	getCharP	[bp+charNo], bx
 	or	gs:party.status[bx], stat_old
@@ -23181,11 +26066,11 @@ loc_1E88A:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_inflictStatus endp
+bat_charApplySpecialEffect endp
 
 ; Attributes: bp-based frame
 
-_doAgeStatus proc far
+character_applyAgeStatus proc far
 
 	arg_0= dword ptr  6
 	arg_4= dword ptr  0Ah
@@ -23214,11 +26099,11 @@ loc_1E8BF:
 	mov	sp, bp
 	pop	bp
 	retf
-_doAgeStatus endp
+character_applyAgeStatus endp
 
 ; Attributes: bp-based frame
 
-partyDied proc far
+party_died proc far
 	push	bp
 	mov	bp, sp
 	xor	ax, ax
@@ -23244,7 +26129,7 @@ partyDied proc far
 	mov	gs:g_nonRandomBattleFlag, al
 	mov	g_partyAttackFlag, al
 	sub	ah, ah
-	mov	currentLocationMaybe, ax
+	mov	g_locationNumber, ax
 	mov	sq_north, 0Bh
 	mov	sq_east, 0Fh
 	mov	g_direction, 0
@@ -23254,18 +26139,1920 @@ partyDied proc far
 	pop	bp
 locret_1E958:
 	retf
-partyDied endp
+party_died endp
+
 
 seg008 ends
 
-include seg009.asm
+; Segment type: Pure code
+seg009 segment word public 'CODE' use16
+        assume cs:seg009
+;org 9
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+random_2d16 proc far
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+	push	si
+	call	random
+	and	ax, 15
+	mov	si, ax
+	call	random
+	and	ax, 15
+	add	ax, si
+	add	ax, 2
+	jmp	short $+2
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+random_2d16 endp
+
+; Attributes: bp-based frame
+
+random_2d8	proc far
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+	push	si
+	call	random
+	and	ax, 7
+	mov	si, ax
+	call	random
+	and	ax, 7
+	add	ax, si
+	add	ax, 2
+	jmp	short $+2
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+random_2d8	endp
+
+; Attributes: bp-based frame
+
+random_1d8	proc far
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+	call	random
+	and	ax, 7
+	inc	ax
+	jmp	short $+2
+	mov	sp, bp
+	pop	bp
+	retf
+random_1d8	endp
+
+; Attributes: bp-based frame
+bat_giveExperience proc	far
+
+	rostSize= word ptr -8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+	call	party_getLastSlot
+	inc	ax
+	mov	[bp+rostSize], ax
+	cmp	ax, 7
+	jle	short loc_1E9E4
+	sub	ax, ax
+	cwd
+	jmp	short loc_1EA3B
+loc_1E9E4:
+	mov	ax, [bp+rostSize]
+	cwd
+	push	dx
+	push	ax
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	call	__32bitDivide
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	mov	[bp+var_6], 0
+	jmp	short loc_1EA05
+loc_1EA02:
+	inc	[bp+var_6]
+loc_1EA05:
+	mov	ax, [bp+rostSize]
+	cmp	[bp+var_6], ax
+	jge	short loc_1EA33
+	getCharP	[bp+var_6], si
+	cmp	gs:party.class[si], class_monster
+	jnb	short loc_1EA31
+	mov	ax, [bp+var_4]
+	mov	dx, [bp+var_2]
+	add	word ptr gs:party.experience[si], ax
+	adc	word ptr gs:(party.experience+2)[si], dx
+loc_1EA31:
+	jmp	short loc_1EA02
+loc_1EA33:
+	mov	ax, [bp+var_4]
+	mov	dx, [bp+var_2]
+	jmp	short $+2
+loc_1EA3B:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_giveExperience endp
+
+; Attributes: bp-based frame
+
+bat_giveGold proc far
+
+	var_8= word ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	push	si
+	call	party_getLastSlot
+	inc	ax
+	mov	[bp+var_8], ax
+	cmp	ax, 7
+	jle	short loc_1EA5F
+	sub	ax, ax
+	cwd
+	jmp	short loc_1EAB6
+loc_1EA5F:
+	mov	ax, [bp+var_8]
+	cwd
+	push	dx
+	push	ax
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	call	__32bitDivide
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	mov	[bp+var_6], 0
+	jmp	short loc_1EA80
+loc_1EA7D:
+	inc	[bp+var_6]
+loc_1EA80:
+	mov	ax, [bp+var_8]
+	cmp	[bp+var_6], ax
+	jge	short loc_1EAAE
+	getCharP	[bp+var_6], si
+	cmp	gs:party.class[si], class_illusion
+	jnb	short loc_1EAAC
+	mov	ax, [bp+var_4]
+	mov	dx, [bp+var_2]
+	add	word ptr gs:party.gold[si], ax
+	adc	word ptr gs:(party.gold+2)[si], dx
+loc_1EAAC:
+	jmp	short loc_1EA7D
+loc_1EAAE:
+	mov	ax, [bp+var_4]
+	mov	dx, [bp+var_2]
+	jmp	short $+2
+loc_1EAB6:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_giveGold endp
+
+; Attributes: bp-based frame
+
+bat_partyDisbelieves proc far
+
+	groupNo= word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+	mov	[bp+groupNo], 3
+	jmp	short loc_1EAD1
+loc_1EACE:
+	dec	[bp+groupNo]
+loc_1EAD1:
+	cmp	[bp+groupNo], 0
+	jge	short loc_1EADA
+	jmp	loc_1EB64
+loc_1EADA:
+	getMonP	[bp+groupNo], si
+	test	gs:monGroups.groupSize[si], 1Fh
+	jz	short loc_1EB61
+	test	gs:monGroups.flags[si],	10h
+	jz	short loc_1EB61
+	mov	gs:bat_curTarget, 0
+;	test	gs:byte_4240E, 81h
+	test	gs:disbelieveFlags, disb_disruptill OR disb_disbelieve
+	jnz	short loc_1EB20
+	sub	ax, ax
+	push	ax
+	mov	ax, 80h
+	push	ax
+	call	savingThrowCheck
+	add	sp, 4
+	cmp	ax, 2
+	jnz	short loc_1EB61
+loc_1EB20:
+	mov	gs:specialAttackVal, speAtt_stoning
+	getMonP	[bp+groupNo], bx
+	mov	gs:monGroups.groupSize[bx], 1
+	push	[bp+groupNo]
+	call	bat_monDamageHp
+	add	sp, 2
+	mov	ax, offset aThePartyDisbelieves_
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	delayWithTable
+loc_1EB61:
+	jmp	loc_1EACE
+loc_1EB64:
+	and	gs:disbelieveFlags, 0FEh
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_partyDisbelieves endp
+
+; Attributes: bp-based frame
+
+bat_monDisbelieve proc far
+
+	charNo=	word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+	mov	[bp+charNo], 0
+	jmp	short loc_1EB89
+loc_1EB86:
+	inc	[bp+charNo]
+loc_1EB89:
+	cmp	[bp+charNo], 7
+	jge	short loc_1EBEB
+	getCharP	[bp+charNo], si
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short loc_1EBE9
+	cmp	gs:party.class[si], class_illusion
+	jnz	short loc_1EBE9
+	mov	gs:bat_curTarget, 80h
+	sub	ax, ax
+	push	ax
+	push	ax
+	call	savingThrowCheck
+	add	sp, 4
+	or	ax, ax
+	jz	short loc_1EBE9
+	inc	gs:monDisbelieveFlag
+	mov	ax, offset aTheyDisbelieve
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	delayWithTable
+	jmp	short loc_1EBEB
+loc_1EBE9:
+	jmp	short loc_1EB86
+loc_1EBEB:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_monDisbelieve endp
+
+; Attributes: bp-based frame
+bat_partyApplyPoison proc	far
+
+	charNo=	word ptr -4
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+	mov	bl, g_levelNumber
+	sub	bh, bh
+	mov	al, poisonDmg[bx]
+	cbw
+	mov	[bp+var_2], ax
+	mov	[bp+charNo], 0
+	jmp	short loc_1EC19
+loc_1EC16:
+	inc	[bp+charNo]
+loc_1EC19:
+	cmp	[bp+charNo], 7
+	jge	short loc_1EC66
+	getCharP	[bp+charNo], si
+	test	gs:party.status[si], stat_poisoned
+	jz	short loc_1EC64
+	mov	ax, [bp+var_2]
+	cmp	gs:party.currentHP[si], ax
+	ja	short loc_1EC52
+	and	gs:party.status[si], 0FEh
+	or	gs:party.status[si], stat_dead
+	mov	gs:party.currentHP[si], 0
+	jmp	short loc_1EC64
+loc_1EC52:
+	mov	ax, [bp+var_2]
+	mov	cx, ax
+	getCharP	[bp+charNo], bx
+	sub	gs:party.currentHP[bx], cx
+loc_1EC64:
+	jmp	short loc_1EC16
+loc_1EC66:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_partyApplyPoison endp
+
+; Attributes: bp-based frame
+
+party_applyEquipmentEffects proc far
+
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	push	si
+	mov	[bp+var_4], 0
+	jmp	short loc_1EC81
+loc_1EC7E:
+	inc	[bp+var_4]
+loc_1EC81:
+	cmp	[bp+var_4], 7
+	jl	short loc_1EC8A
+	jmp	loc_1ED56
+loc_1EC8A:
+	getCharP	[bp+var_4], bx
+	test	gs:party.status[bx], 0Ch
+	jz	short loc_1ECA1
+	jmp	loc_1ED53
+loc_1ECA1:
+	mov	[bp+var_2], 0
+	mov	ax, itemEff_anotherSpptRegen
+	push	ax
+	push	[bp+var_4]
+	call	character_isEffectEquipped
+	add	sp, 4
+	or	ax, ax
+	jnz	short loc_1ECBC
+	inc	[bp+var_2]
+loc_1ECBC:
+	mov	ax, itemEff_regenSppt
+	push	ax
+	push	[bp+var_4]
+	call	character_isEffectEquipped
+	add	sp, 4
+	or	ax, ax
+	jnz	short loc_1ECD2
+	inc	[bp+var_2]
+loc_1ECD2:
+	getCharP	[bp+var_4], si
+	mov	ax, [bp+var_2]
+	add	gs:party.currentSppt[si], ax
+	mov	ax, gs:party.maxSppt[si]
+	cmp	gs:party.currentSppt[si], ax
+	jbe	short loc_1ECF7
+	mov	gs:party.currentSppt[si], ax
+loc_1ECF7:
+	cmp	gs:g_currentSongPlusOne, 0
+	jz	short loc_1ED1E
+	cmp	gs:g_currentSong, 3
+	jnz	short loc_1ED1E
+	mov	al, gs:g_currentSinger
+	sub	ah, ah
+	cmp	ax, [bp+var_4]
+	jz	short loc_1ED31
+loc_1ED1E:
+	mov	ax, itemEff_regenHP
+	push	ax
+	push	[bp+var_4]
+	call	character_isEffectEquipped
+	add	sp, 4
+	or	ax, ax
+	jnz	short loc_1ED53
+loc_1ED31:
+	getCharP	[bp+var_4], si
+	inc	gs:party.currentHP[si]
+	mov	ax, gs:party.maxHP[si]
+	cmp	gs:party.currentHP[si], ax
+	jbe	short loc_1ED53
+	mov	gs:party.currentHP[si], ax
+loc_1ED53:
+	jmp	loc_1EC7E
+loc_1ED56:
+	mov	byte ptr g_printPartyFlag,	0
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+party_applyEquipmentEffects endp
+
+; Attributes: bp-based frame
+
+bat_partyApplyHpRegen proc far
+
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+	cmp	[bp+arg_0], 0
+	jz	short loc_1EDC8
+	mov	[bp+var_2], 0
+	jmp	short loc_1ED81
+loc_1ED7E:
+	inc	[bp+var_2]
+loc_1ED81:
+	cmp	[bp+var_2], 7
+	jge	short loc_1EDBE
+	getCharP	[bp+var_2], si
+	test	gs:party.status[si], stat_dead	or stat_stoned
+	jnz	short loc_1EDA3
+	mov	ax, [bp+arg_0]
+	add	gs:party.currentHP[si], ax
+loc_1EDA3:
+	getCharP	[bp+var_2], si
+	mov	ax, gs:party.maxHP[si]
+	cmp	gs:party.currentHP[si], ax
+	jbe	short loc_1EDBC
+	mov	gs:party.currentHP[si], ax
+loc_1EDBC:
+	jmp	short loc_1ED7E
+loc_1EDBE:
+	mov	byte ptr g_printPartyFlag,	0
+loc_1EDC8:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_partyApplyHpRegen endp
+
+; Attributes: bp-based frame
+
+party_applySpptRegen proc far
+
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+	mov	[bp+var_2], 0
+	jmp	short loc_1EDE3
+loc_1EDE0:
+	inc	[bp+var_2]
+loc_1EDE3:
+	cmp	[bp+var_2], 7
+	jge	short loc_1EE1A
+	getCharP	[bp+var_2], si
+	test	gs:party.status[si], stat_dead	or stat_stoned
+	jnz	short loc_1EE18
+	mov	ax, gs:party.maxSppt[si]
+	cmp	gs:party.currentSppt[si], ax
+	jnb	short loc_1EE18
+	inc	gs:party.currentSppt[si]
+	mov	byte ptr g_printPartyFlag,	0
+loc_1EE18:
+	jmp	short loc_1EDE0
+loc_1EE1A:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+party_applySpptRegen endp
+
+; Attributes: bp-based frame
+
+bat_postRound proc far
+
+	var_6= word ptr	-6
+	counter= word ptr -4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	si
+	cmp	[bp+arg_0], 0
+	jz	short loc_1EE5D
+	mov	[bp+counter], 0
+	jmp	short loc_1EE3B
+loc_1EE38:
+	inc	[bp+counter]
+loc_1EE3B:
+	cmp	[bp+counter], 7
+	jge	short loc_1EE5D
+	getCharP	[bp+counter], si
+	cmp	gs:party.class[si], class_illusion
+	jnz	short loc_1EE5B
+	or	gs:party.status[si], stat_dead
+loc_1EE5B:
+	jmp	short loc_1EE38
+loc_1EE5D:
+	call	party_getLastSlot
+	mov	[bp+var_2], ax
+	cmp	ax, 7
+	jl	short loc_1EE6D
+	jmp	loc_1EF62
+loc_1EE6D:
+	mov	[bp+counter], 0
+loc_1EE72:
+	call	party_getLastSlot
+	cmp	ax, [bp+counter]
+	jge	short loc_1EE7F
+	jmp	loc_1EF62
+loc_1EE7F:
+	getCharP	[bp+counter], bx
+	test	gs:party.status[bx], stat_dead	or stat_stoned or stat_paralyzed
+	jnz	short loc_1EE96
+	jmp	loc_1EF5C
+loc_1EE96:
+	mov	al, gs:byte_4255E
+	sub	ah, ah
+	cmp	ax, [bp+counter]
+	jnz	short loc_1EEAE
+	mov	gs:bat_curSong,	ah
+loc_1EEAE:
+	mov	al, gs:byte_4255E
+	sub	ah, ah
+	cmp	ax, [bp+counter]
+	jbe	short loc_1EEC2
+	dec	gs:byte_4255E
+loc_1EEC2:
+	mov	al, gs:g_currentSinger
+	sub	ah, ah
+	cmp	ax, [bp+counter]
+	jnz	short loc_1EED6
+	call	bat_endCombatSong
+loc_1EED6:
+	mov	al, gs:g_currentSinger
+	sub	ah, ah
+	cmp	ax, [bp+counter]
+	jbe	short loc_1EEEA
+	dec	gs:g_currentSinger
+loc_1EEEA:
+	push	[bp+counter]
+	push	cs
+	call	near ptr bat_partyPackBonuses
+	add	sp, 2
+	mov	ax, offset newCharBuffer
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	getCharP	[bp+counter], bx
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	copyCharacterBuf
+	add	sp, 8
+	push	[bp+counter]
+	call	party_pack
+	add	sp, 2
+	cmp	gs:newCharBuffer.class,	class_illusion
+	jz	short loc_1EF5A
+	cmp	gs:newCharBuffer.specAbil+3, 0
+	jnz	short loc_1EF5A
+	call	party_findEmptySlot
+	mov	[bp+var_6], ax
+	getCharP	[bp+var_6], bx
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	mov	ax, offset newCharBuffer
+	push	dx
+	push	ax
+	call	copyCharacterBuf
+	add	sp, 8
+loc_1EF5A:
+	jmp	short loc_1EF5F
+loc_1EF5C:
+	inc	[bp+counter]
+loc_1EF5F:
+	jmp	loc_1EE72
+loc_1EF62:
+	push	cs
+	call	near ptr bat_monCountGroups
+	or	ax, ax
+	jle	short loc_1EF6F
+	mov	[bp+counter], 0
+loc_1EF6F:
+	push	cs
+	call	near ptr bat_monCountGroups
+	cmp	ax, [bp+counter]
+	jl	short loc_1EFB5
+	getMonP	[bp+counter], bx
+	test	gs:monGroups.groupSize[bx], 1Fh
+	jnz	short loc_1EFB0
+	mov	ax, [bp+counter]
+	mov	[bp+var_2], ax
+	jmp	short loc_1EF97
+loc_1EF94:
+	inc	[bp+var_2]
+loc_1EF97:
+	cmp	[bp+var_2], 3
+	jge	short loc_1EFAE
+	push	[bp+var_2]
+	mov	ax, [bp+var_2]
+	inc	ax
+	push	ax
+	push	cs
+	call	near ptr bat_monMoveGroup
+	add	sp, 4
+	jmp	short loc_1EF94
+loc_1EFAE:
+	jmp	short loc_1EFB3
+loc_1EFB0:
+	inc	[bp+counter]
+loc_1EFB3:
+	jmp	short loc_1EF6F
+loc_1EFB5:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_postRound endp
+
+; Attributes: bp-based frame
+
+bat_monCountGroups proc far
+
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	[bp+var_2], 3
+	jmp	short loc_1EFCF
+loc_1EFCC:
+	dec	[bp+var_2]
+loc_1EFCF:
+	cmp	[bp+var_2], 0
+	jl	short loc_1EFF0
+	getMonP	[bp+var_2], bx
+	test	gs:monGroups.groupSize[bx], 1Fh
+	jz	short loc_1EFEE
+	mov	ax, [bp+var_2]
+	jmp	short loc_1EFF5
+loc_1EFEE:
+	jmp	short loc_1EFCC
+loc_1EFF0:
+	mov	ax, 0FFFFh
+	jmp	short $+2
+loc_1EFF5:
+	mov	sp, bp
+	pop	bp
+	retf
+bat_monCountGroups endp
+
+
+; This function	copies the monster group to a
+; different slot and zeroes the	vacated	slot.
+; Attributes: bp-based frame
+
+bat_monMoveGroup proc far
+
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+	getMonP	[bp+arg_2], bx
+	lea	ax, monGroups._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	getMonP	[bp+arg_0], bx
+	lea	ax, monGroups._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	bat_monCopyBuffer
+	add	sp, 8
+	mov	ax, 40h	
+	push	ax
+	mov	bx, [bp+arg_0]
+	mov	cl, 6
+	shl	bx, cl
+	lea	ax, monHpList[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	mov	bx, [bp+arg_2]
+	shl	bx, cl
+	lea	ax, monHpList[bx]
+	push	dx
+	push	ax
+	call	memcpy
+	add	sp, 0Ah
+	mov	ax, monStruSize
+	push	ax
+	sub	ax, ax
+	push	ax
+	getMonP	[bp+arg_0], bx
+	lea	ax, monGroups._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	memset
+	add	sp, 8
+	mov	ax, 40h	
+	push	ax
+	sub	ax, ax
+	push	ax
+	mov	bx, [bp+arg_0]
+	mov	cl, 6
+	shl	bx, cl
+	lea	ax, monHpList[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	call	memset
+	add	sp, 8
+	mov	sp, bp
+	pop	bp
+	retf
+bat_monMoveGroup endp
+
+; Attributes: bp-based frame
+bat_partyPackBonuses proc	far
+
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	ax, [bp+arg_0]
+	mov	[bp+var_2], ax
+	jmp	short loc_1F0AD
+loc_1F0AA:
+	inc	[bp+var_2]
+loc_1F0AD:
+	cmp	[bp+var_2], 6
+	jge	short loc_1F0F9
+	mov	bx, [bp+var_2]
+	mov	al, gs:(byte_42444+1)[bx]
+	mov	gs:byte_42444[bx], al
+	mov	bx, [bp+var_2]
+	mov	al, gs:(strengthBonus+1)[bx]
+	mov	gs:g_strengthSpellBonus[bx], al
+	mov	bx, [bp+var_2]
+	mov	al, gs:(vorpalPlateBonus+1)[bx]
+	mov	gs:vorpalPlateBonus[bx], al
+	mov	bx, [bp+var_2]
+	mov	al, gs:(g_characterMeleeDistance+1)[bx]
+	mov	gs:g_characterMeleeDistance[bx], al
+	jmp	short loc_1F0AA
+loc_1F0F9:
+	mov	gs:byte_42444+6, 0
+	mov	gs:g_strengthSpellBonus+6, 0
+	mov	gs:vorpalPlateBonus+6, 0
+	mov	gs:byte_42286, 0
+	mov	sp, bp
+	pop	bp
+	retf
+bat_partyPackBonuses endp
+
+; Attributes: bp-based frame
+
+bat_isAMonGroupActive proc far
+
+	groupNo= word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	[bp+groupNo], 0
+	jmp	short loc_1F13A
+loc_1F137:
+	inc	[bp+groupNo]
+loc_1F13A:
+	cmp	[bp+groupNo], 4
+	jge	short loc_1F15B
+	getMonP	[bp+groupNo], bx
+	test	gs:monGroups.groupSize[bx], 1Fh
+	jz	short loc_1F159
+	mov	ax, 1
+	jmp	short loc_1F15F
+loc_1F159:
+	jmp	short loc_1F137
+loc_1F15B:
+	sub	ax, ax
+	jmp	short $+2
+loc_1F15F:
+	mov	sp, bp
+	pop	bp
+	retf
+bat_isAMonGroupActive endp
+
+; Attributes: bp-based frame
+
+_return_zero proc far
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+	sub	ax, ax
+	jmp	short $+2
+	mov	sp, bp
+	pop	bp
+	retf
+_return_zero endp
+
+; Attributes: bp-based frame
+
+bat_end	proc far
+
+	var_2= word ptr	-2
+	song= word ptr	6
+	arg_2= word ptr	 8
+	arg_4= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+	sub	al, al
+	mov	gs:g_nonRandomBattleFlag, al
+	mov	byte_4EECC, al
+	mov	g_partyAttackFlag, al
+	mov	[bp+var_2], 0
+	jmp	short loc_1F1A5
+loc_1F1A2:
+	inc	[bp+var_2]
+loc_1F1A5:
+	cmp	[bp+var_2], 4
+	jge	short loc_1F1C5
+	getMonP	[bp+var_2], si
+	mov	byte ptr gs:monGroups._name[si], 0
+	mov	gs:monGroups.groupSize[si], 0
+	jmp	short loc_1F1A2
+loc_1F1C5:
+	cmp	[bp+song], 0
+	jz	short loc_1F1EF
+	push	[bp+arg_2]
+	call	_charCanPlaySong
+	add	sp, 2
+	or	ax, ax
+	jz	short loc_1F1EF
+	push	[bp+arg_4]
+	push	[bp+arg_2]
+	call	song_playSong
+	add	sp, 4
+	call	song_doNoncombatEffect
+	jmp	short loc_1F1F4
+loc_1F1EF:
+	call	song_endMusic
+loc_1F1F4:
+	call	bat_reset
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+bat_end	endp
+
+; Attributes: bp-based frame
+
+bat_getReward proc far
+
+	var_114= word ptr -114h
+	var_112= word ptr -112h
+	var_110= word ptr -110h
+	var_10E= word ptr -10Eh
+	var_10C= word ptr -10Ch
+	var_10A= word ptr -10Ah
+	var_108= dword ptr -108h
+	var_104= word ptr -104h
+	var_102= word ptr -102h
+	var_100= word ptr -100h
+
+	func_enter
+	_chkstk	114h
+	delayNoTable	2
+	call	text_clear
+	mov	gs:trapIndex, 0
+	mov	ax, gs:batRewardLo
+	or	ax, gs:batRewardHi
+	jnz	short loc_1F239
+	sub	ax, ax
+	jmp	loc_1F565
+loc_1F239:
+	cmp	inDungeonMaybe, 0
+	jz	short loc_1F255
+	cmp	byte_4EECC, 0
+	jz	short loc_1F255
+	push	cs
+	call	near ptr bat_doChest
+loc_1F255:
+	call	party_getLastSlot
+	cmp	ax, 7
+	jle	short loc_1F265
+	mov	ax, 1
+	jmp	loc_1F565
+loc_1F265:
+	mov	ax, gs:batRewardLo
+	or	ax, gs:batRewardHi
+	jnz	short loc_1F279
+	sub	ax, ax
+	jmp	loc_1F565
+loc_1F279:
+	mov	ax, offset aEachCharacterReceive
+	push	ds
+	push	ax
+	lea	ax, [bp+var_100]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	sub	ax, ax
+	push	ax
+	push	gs:batRewardHi
+	push	gs:batRewardLo
+	push	cs
+	call	near ptr bat_giveExperience
+	add	sp, 4
+	push	dx
+	push	ax
+	push	word ptr [bp+var_108+2]
+	push	word ptr [bp+var_108]
+	call	itoa
+	add	sp, 0Ah
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	mov	ax, offset s_experiencePoinsForV
+	push	ds
+	push	ax
+	push	dx
+	push	word ptr [bp+var_108]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	cmp	gs:trapIndex, 0
+	jz	short loc_1F2F1
+	sub	ax, ax
+	cwd
+	jmp	short loc_1F30A
+loc_1F2F1:
+	mov	ax, 5
+	cwd
+	push	dx
+	push	ax
+	push	gs:batRewardHi
+	push	gs:batRewardLo
+	call	__32bitDivide
+loc_1F30A:
+	mov	[bp+var_10E], ax
+	mov	[bp+var_10C], dx
+loc_1F319:
+	mov	ax, 34h	
+	push	ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+	mov	ax, offset aTreasure
+	push	ds
+	push	ax
+	call	setTitle
+	add	sp, 4
+	sub	ax, ax
+	push	ax
+	push	[bp+var_10C]
+	push	[bp+var_10E]
+	push	cs
+	call	near ptr bat_giveGold
+	add	sp, 4
+	push	dx
+	push	ax
+	push	word ptr [bp+var_108+2]
+	push	word ptr [bp+var_108]
+	call	itoa
+	add	sp, 0Ah
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	mov	ax, offset aInGold_
+	push	ds
+	push	ax
+	push	dx
+	push	word ptr [bp+var_108]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	mov	[bp+var_112], 0
+	jmp	short loc_1F384
+loc_1F380:
+	inc	[bp+var_112]
+loc_1F384:
+	cmp	[bp+var_112], 4
+	jl	short loc_1F38E
+	jmp	loc_1F547
+loc_1F38E:
+	mov	al, g_levelNumber
+	sub	ah, ah
+	sub	ax, 9
+	neg	ax
+	push	ax
+	sub	ax, ax
+	push	ax
+	call	randomBetweenXandY
+	add	sp, 4
+	or	ax, ax
+	jz	short loc_1F3B0
+	jmp	loc_1F544
+loc_1F3B0:
+	cmp	gs:trapIndex, 0
+	jnz	short loc_1F3C8
+	delayNoTable	1
+loc_1F3C8:
+	call	random
+	sub	ah, ah
+	cmp	ax, 224
+	jl	short loc_1F3E9
+	cmp	ax, 240
+	jge	short loc_1F3E9
+	mov	ax, 195
+loc_1F3E9:
+	mov	[bp+var_104], ax
+	mov	bl, g_levelNumber
+	sub	bh, bh
+	mov	al, byteMaskList[bx]
+	sub	ah, ah
+	mov	bx, [bp+var_104]
+	mov	cl, itemLevMask[bx]
+	sub	ch, ch
+	test	ax, cx
+	jz	short loc_1F3C8
+	mov	al, g_itemBaseCount[bx]
+	mov	[bp+var_10A], ax
+	cmp	ax, 1
+	jz	short loc_1F43A
+	cmp	ax, 0FFh
+	jz	short loc_1F43A
+	push	ax
+	mov	ax, 1
+	push	ax
+	call	randomBetweenXandY
+	add	sp, 4
+	mov	[bp+var_10A], ax
+loc_1F43A:
+	call	random
+	test	al, 7
+	jnz	short loc_1F448
+	mov	ax, 80h
+	jmp	short loc_1F44A
+loc_1F448:
+	sub	ax, ax
+loc_1F44A:
+	mov	[bp+var_110], ax
+	mov	ax, 7
+	push	ax
+	call	bat_getRandomChar
+	add	sp, 2
+	mov	[bp+var_102], ax
+	mov	[bp+var_114], 0
+	jmp	short loc_1F46A
+loc_1F466:
+	inc	[bp+var_114]
+loc_1F46A:
+	cmp	[bp+var_114], 7
+	jl	short loc_1F474
+	jmp	loc_1F544
+loc_1F474:
+	push	[bp+var_102]
+	push	cs
+	call	near ptr bat_canGetTreasure
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_1F486
+	jmp	loc_1F535
+loc_1F486:
+	push	[bp+var_10A]
+	push	[bp+var_110]
+	push	[bp+var_104]
+	push	[bp+var_102]
+	call	inventory_addItem
+	add	sp, 8
+	or	ax, ax
+	jnz	short loc_1F4A5
+	jmp	loc_1F535
+loc_1F4A5:
+	getCharP	[bp+var_102], bx
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	word ptr [bp+var_108+2]
+	push	word ptr [bp+var_108]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	mov	ax, offset aFoundA
+	push	ds
+	push	ax
+	push	dx
+	push	word ptr [bp+var_108]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	push	[bp+var_110]
+	push	[bp+var_104]
+	push	dx
+	push	ax
+	call	inventory_getItemName
+	add	sp, 8
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], dx
+	lea	ax, [bp+var_100]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	lea	ax, [bp+var_100]
+	mov	word ptr [bp+var_108], ax
+	mov	word ptr [bp+var_108+2], ss
+	lfs	bx, [bp+var_108]
+	mov	byte ptr fs:[bx], 0
+	delayNoTable	2
+	jmp	short loc_1F544
+	jmp	short loc_1F541
+loc_1F535:
+	dec	[bp+var_102]
+	jns	short loc_1F541
+	mov	[bp+var_102], 6
+loc_1F541:
+	jmp	loc_1F466
+loc_1F544:
+	jmp	loc_1F380
+loc_1F547:
+	lea	ax, [bp+var_100]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	delayNoTable	8
+	sub	ax, ax
+	jmp	short $+2
+loc_1F565:
+	mov	sp, bp
+	pop	bp
+	retf
+bat_getReward endp
+
+; Attributes: bp-based frame
+bat_canGetTreasure proc	far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+	getCharP	[bp+arg_0], bx
+	cmp	byte ptr gs:party._name[bx], 0
+	jnz	short loc_1F58B
+	sub	ax, ax
+	jmp	short loc_1F5B9
+loc_1F58B:
+	getCharP	[bp+arg_0], bx
+	cmp	gs:party.class[bx], class_monster
+	jb	short loc_1F59F
+	sub	ax, ax
+	jmp	short loc_1F5B9
+loc_1F59F:
+	getCharP	[bp+arg_0], bx
+	mov	al, gs:party.status[bx]
+	and	al, stat_dead or stat_stoned or	stat_paralyzed
+	mov	cx, ax
+	cmp	cl, 1
+	sbb	ax, ax
+	neg	ax
+	jmp	short $+2
+loc_1F5B9:
+	mov	sp, bp
+	pop	bp
+	retf
+bat_canGetTreasure endp
+
+; Attributes: bp-based frame
+
+chest_examine proc far
+
+	var_106= word ptr -106h
+	var_104= word ptr -104h
+	var_102= word ptr -102h
+	var_100= word ptr -100h
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 106h
+	call	someStackOperation
+	push	si
+	mov	ax, offset aWhoWillExamineIt?
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+var_106], ax
+	or	ax, ax
+	jge	short loc_1F5E8
+	sub	ax, ax
+	jmp	loc_1F6EE
+loc_1F5E8:
+	getCharP	[bp+var_106], bx
+	cmp	gs:party.class[bx], class_monster
+	jb	short loc_1F602
+	sub	ax, ax
+	jmp	loc_1F6EE
+loc_1F602:
+	mov	bx, [bp+var_106]
+	mov	al, byteMaskList[bx]
+	sub	ah, ah
+	test	gs:word_42298, ax
+	jz	short loc_1F62E
+	mov	ax, offset aThatCharacterHasAlr
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	sub	ax, ax
+	jmp	loc_1F6EE
+loc_1F62E:
+	mov	bx, [bp+var_106]
+	mov	al, byteMaskList[bx]
+	sub	ah, ah
+	or	gs:word_42298, ax
+	getCharP	bx, bx
+	test	gs:party.status[bx], 1Ch
+	jz	short loc_1F65E
+	sub	ax, ax
+	jmp	loc_1F6EE
+loc_1F65E:
+	getCharP	[bp+var_106], si
+	cmp	gs:party.class[si], class_rogue
+	jnz	short loc_1F67F
+	call	random
+	cmp	gs:(party.specAbil+1)[si], al
+	jnb	short loc_1F690
+loc_1F67F:
+	mov	ax, offset aYouFoundNothing_
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	sub	ax, ax
+	jmp	short loc_1F6EE
+loc_1F690:
+	mov	ax, offset aItLooksLikeA
+	push	ds
+	push	ax
+	lea	ax, [bp+var_100]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_104], ax
+	mov	[bp+var_102], dx
+	mov	bx, gs:trapIndex
+	mov	al, byte_47988[bx]
+	cbw
+	mov	bx, ax
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (trapName+2)[bx]
+	push	word ptr trapName[bx]
+	push	dx
+	push	[bp+var_104]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_104], ax
+	mov	[bp+var_102], dx
+	lea	ax, [bp+var_100]
+	push	ss
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	sub	ax, ax
+	jmp	short $+2
+loc_1F6EE:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+chest_examine endp
+
+; Attributes: bp-based frame
+
+chest_setOffTrap proc far
+
+	var_108= word ptr -108h
+	var_106= word ptr -106h
+	var_104= word ptr -104h
+	var_102= word ptr -102h
+	var_100= word ptr -100h
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 108h
+	call	someStackOperation
+	push	si
+	mov	ax, offset aYouSetOffA
+	push	ds
+	push	ax
+	lea	ax, [bp+var_100]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	mov	bx, gs:trapIndex
+	mov	al, byte_47988[bx]
+	cbw
+	mov	bx, ax
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (trapName+2)[bx]
+	push	word ptr trapName[bx]
+	push	dx
+	push	[bp+var_106]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	mov	bx, gs:trapIndex
+	mov	al, trapDice[bx]
+	sub	ah, ah
+	push	ax
+	call	randomYdX
+	add	sp, 2
+	mov	[bp+var_108], ax
+	mov	si, gs:trapIndex
+	shl	si, 1
+	mov	al, byte ptr stru_47938.lo[si]
+	mov	gs:monGroups.breathSaveLo, al
+	mov	al, stru_47938.hi[si]
+	mov	gs:monGroups.breathSaveHi, al
+	mov	bx, gs:trapIndex
+	test	trapFlags[bx], 80h
+	jz	short loc_1F7A6
+	push	[bp+var_108]
+	push	[bp+arg_0]
+	push	cs
+	call	near ptr chest_doTrapAttack
+	add	sp, 4
+	jmp	short loc_1F7CA
+loc_1F7A6:
+	mov	[bp+var_102], 0
+	jmp	short loc_1F7B2
+loc_1F7AE:
+	inc	[bp+var_102]
+loc_1F7B2:
+	cmp	[bp+var_102], 7
+	jge	short loc_1F7CA
+	push	[bp+var_108]
+	push	[bp+var_102]
+	push	cs
+	call	near ptr chest_doTrapAttack
+	add	sp, 4
+	jmp	short loc_1F7AE
+loc_1F7CA:
+	mov	gs:trapIndex, 0
+	lea	ax, [bp+var_100]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	byte ptr g_printPartyFlag,	0
+	wait4IO
+	mov	ax, 1
+	jmp	short $+2
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+chest_setOffTrap endp
+
+; Attributes: bp-based frame
+chest_doTrapAttack proc	far
+
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+	getCharP	[bp+arg_0], si
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short loc_1F88B
+	test	gs:party.status[si], stat_dead
+	jnz	short loc_1F88B
+	mov	al, byte ptr [bp+arg_0]
+	mov	gs:bat_curTarget, al
+	mov	bx, gs:trapIndex
+	mov	al, trapFlags[bx]
+	sub	ah, ah
+	and	ax, 7Fh
+	mov	gs:specialAttackVal, ax
+	mov	ax, [bp+arg_2]
+	mov	gs:damageAmount, ax
+	sub	ax, ax
+	push	ax
+	mov	ax, 80h
+	push	ax
+	call	savingThrowCheck
+	add	sp, 4
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jz	short loc_1F88B
+	mov	ax, 1
+	mov	[bp+var_2], ax
+	sar	gs:damageAmount, 1
+	push	[bp+arg_0]
+	call	bat_damageHp
+	add	sp, 2
+loc_1F88B:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+chest_doTrapAttack endp
+
+; Attributes: bp-based frame
+chest_open proc	far
+
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	ax, offset aWhoWillOpenIt?
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jge	short loc_1F8B8
+	sub	ax, ax
+	jmp	short loc_1F920
+loc_1F8B8:
+	getCharP	[bp+var_2], bx
+	test	gs:party.status[bx], 7Ch
+	jz	short loc_1F8D0
+	sub	ax, ax
+	jmp	short loc_1F920
+loc_1F8D0:
+	getCharP	[bp+var_2], bx
+	cmp	gs:party.class[bx], class_monster
+	jb	short loc_1F8E4
+	sub	ax, ax
+	jmp	short loc_1F920
+loc_1F8E4:
+	call	random
+	test	al, 80h
+	jz	short loc_1F8F9
+	push	[bp+var_2]
+	push	cs
+	call	near ptr chest_setOffTrap
+	add	sp, 2
+	jmp	short loc_1F90F
+loc_1F8F9:
+	mov	gs:trapIndex, 0
+	mov	gs:word_42560, 1
+loc_1F90F:
+	delayNoTable	5
+	mov	ax, 1
+	jmp	short $+2
+loc_1F920:
+	mov	sp, bp
+	pop	bp
+	retf
+chest_open endp
+
+; Attributes: bp-based frame
+
+chest_disarm proc far
+
+	var_2A=	word ptr -2Ah
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2Ah	
+	call	someStackOperation
+	push	si
+	mov	ax, offset aWhoWillDisarmIt?
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jge	short loc_1F94E
+	sub	ax, ax
+	jmp	loc_1FA16
+loc_1F94E:
+	getCharP	[bp+var_2], bx
+	test	gs:party.status[bx], 1Ch
+	jz	short loc_1F967
+	sub	ax, ax
+	jmp	loc_1FA16
+loc_1F967:
+	mov	ax, offset aEnterTrapName
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	ax, 28h	
+	push	ax
+	lea	ax, [bp+var_2A]
+	push	ss
+	push	ax
+	call	readString
+	add	sp, 6
+	mov	bx, gs:trapIndex
+	mov	al, byte_47988[bx]
+	cbw
+	mov	bx, ax
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (trapName+2)[bx]
+	push	word ptr trapName[bx]
+	lea	ax, [bp+var_2A]
+	push	ss
+	push	ax
+	push	cs
+	call	near ptr chest_trapStrcmp
+	add	sp, 8
+	or	ax, ax
+	jz	short loc_1FA07
+	getCharP	[bp+var_2], si
+	cmp	gs:party.class[si], class_rogue
+	jnz	short loc_1F9F4
+	call	random
+	cmp	gs:party.specAbil[si],	al
+	jb	short loc_1F9F4
+	mov	ax, offset aYouDisarmedIt
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	gs:trapIndex, 0
+	mov	ax, 1
+	jmp	short loc_1FA16
+	jmp	short loc_1FA05
+loc_1F9F4:
+	mov	ax, offset aDisarmFailed
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	sub	ax, ax
+	jmp	short loc_1FA16
+loc_1FA05:
+	jmp	short loc_1FA11
+loc_1FA07:
+	push	[bp+var_2]
+	push	cs
+	call	near ptr chest_setOffTrap
+	add	sp, 2
+loc_1FA11:
+	mov	ax, 1
+	jmp	short $+2
+loc_1FA16:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+chest_disarm endp
+
+; Attributes: bp-based frame
+
+chest_trapZap proc far
+
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	ax, offset aWhoWillCastATrzp?
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+var_2], ax
+	or	ax, ax
+	jge	short loc_1FA44
+	sub	ax, ax
+	jmp	loc_1FB00
+loc_1FA44:
+	getCharP	[bp+var_2], bx
+	test	gs:party.status[bx], 7Ch
+	jz	short loc_1FA5D
+	sub	ax, ax
+	jmp	loc_1FB00
+loc_1FA5D:
+	getCharP	[bp+var_2], bx
+	cmp	gs:party.class[bx], class_monster
+	jb	short loc_1FA72
+	sub	ax, ax
+	jmp	loc_1FB00
+loc_1FA72:
+	mov	ax, 2
+	push	ax
+	push	[bp+var_2]
+	call	character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jz	short loc_1FAEF
+	getCharP	[bp+var_2], bx
+	cmp	gs:party.currentSppt[bx], 2
+	jnb	short loc_1FAAA
+	mov	ax, offset aYouNeedAtLeast2SpellP
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	sub	ax, ax
+	jmp	short loc_1FB00
+loc_1FAAA:
+	getCharP	[bp+var_2], bx
+	sub	gs:party.currentSppt[bx], 2
+	mov	gs:trapIndex, 0
+	mov	byte ptr g_printPartyFlag,	0
+	mov	ax, offset aYouDisarmedIt
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	wait4IO
+	mov	ax, 1
+	jmp	short loc_1FB00
+loc_1FAEF:
+	mov	ax, offset s_dontKnowThatSpell_
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	sub	ax, ax
+	jmp	short $+2
+loc_1FB00:
+	mov	sp, bp
+	pop	bp
+	retf
+chest_trapZap endp
+
+; Attributes: bp-based frame
+
+chest_returnOne	proc far
+	push	bp
+	mov	bp, sp
+	xor	ax, ax
+	call	someStackOperation
+	mov	ax, 1
+	jmp	short $+2
+	mov	sp, bp
+	pop	bp
+	retf
+chest_returnOne	endp
+
+; Attributes: bp-based frame
+
+chest_trapStrcmp proc far
+
+	var_2= word ptr	-2
+	arg_0= dword ptr  6
+	arg_4= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+	mov	[bp+var_2], 0
+	jmp	short loc_1FB2D
+loc_1FB2A:
+	inc	[bp+var_2]
+loc_1FB2D:
+	cmp	[bp+var_2], 28h	
+	jge	short loc_1FB80
+	mov	bx, [bp+var_2]
+	lfs	si, [bp+arg_4]
+	mov	al, fs:[bx+si]
+	cbw
+	lfs	si, [bp+arg_0]
+	mov	cx, ax
+	mov	al, fs:[bx+si]
+	cbw
+	or	ax, cx
+	jnz	short loc_1FB4F
+	mov	ax, 1
+	jmp	short loc_1FB85
+loc_1FB4F:
+	lfs	si, [bp+arg_4]
+	mov	al, fs:[bx+si]
+	cbw
+	push	ax
+	call	toUpper
+	add	sp, 2
+	mov	bx, [bp+var_2]
+	lfs	si, [bp+arg_0]
+	mov	cx, ax
+	mov	al, fs:[bx+si]
+	cbw
+	push	ax
+	mov	si, cx
+	call	toUpper
+	add	sp, 2
+	cmp	ax, si
+	jz	short loc_1FB7E
+	sub	ax, ax
+	jmp	short loc_1FB85
+loc_1FB7E:
+	jmp	short loc_1FB2A
+loc_1FB80:
+	mov	ax, 1
+	jmp	short $+2
+loc_1FB85:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+chest_trapStrcmp endp
+
+; Attributes: bp-based frame
+
+bat_doChest proc far
+
+	var_30=	word ptr -30h
+	var_1C=	word ptr -1Ch
+	var_1A=	word ptr -1Ah
+	var_18=	word ptr -18h
+	var_16=	word ptr -16h
+	var_C= word ptr	-0Ch
+	var_A= word ptr	-0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 30h	
+	call	someStackOperation
+	push	si
+	mov	ax, 35h	
+	push	ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+	mov	ax, offset aChest
+	push	ds
+	push	ax
+	call	setTitle
+	add	sp, 4
+	call	random
+	and	ax, 3
+	mov	cl, g_levelNumber
+	sub	ch, ch
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, ax
+	mov	gs:trapIndex, cx
+	mov	gs:word_42298, 0
+	mov	[bp+var_1A], 0
+	jmp	short loc_1FBE6
+loc_1FBE3:
+	inc	[bp+var_1A]
+loc_1FBE6:
+	cmp	[bp+var_1A], 0Ah
+	jge	short loc_1FBF5
+	mov	si, [bp+var_1A]
+	mov	byte ptr [bp+si+var_A],	1
+	jmp	short loc_1FBE3
+loc_1FBF5:
+	call	text_clear
+	lea	ax, [bp+var_30]
+	push	ss
+	push	ax
+	lea	ax, [bp+var_16]
+	push	ss
+	push	ax
+	lea	ax, [bp+var_A]
+	push	ss
+	push	ax
+	mov	ax, offset aThereIsAChestHere_Wil
+	push	ds
+	push	ax
+	call	printVarString
+	add	sp, 10h
+	mov	[bp+var_18], ax
+loc_1FC19:
+	mov	[bp+var_1C], 1
+	push	[bp+var_18]
+	call	getKey
+	add	sp, 2
+	mov	[bp+var_C], ax
+	mov	[bp+var_1A], 0
+loc_1FC31:
+	mov	si, [bp+var_1A]
+	cmp	byte ptr [bp+si+var_16], 0
+	jz	short loc_1FC7B
+	mov	al, byte ptr [bp+si+var_16]
+	cbw
+	cmp	ax, [bp+var_C]
+	jz	short loc_1FC4D
+	shl	si, 1
+	mov	ax, [bp+var_C]
+	cmp	[bp+si+var_30],	ax
+	jnz	short loc_1FC76
+loc_1FC4D:
+	mov	bx, [bp+var_1A]
+	shl	bx, 1
+	shl	bx, 1
+	call	off_47A00[bx]
+	or	ax, ax
+	jz	short loc_1FC65
+	call	text_clear
+	jmp	short loc_1FC84
+	jmp	short loc_1FC6A
+loc_1FC65:
+	mov	[bp+var_1C], 0
+loc_1FC6A:
+	delayNoTable	2
+loc_1FC76:
+	inc	[bp+var_1A]
+	jmp	short loc_1FC31
+loc_1FC7B:
+	cmp	[bp+var_1C], 0
+	jnz	short loc_1FC19
+	jmp	loc_1FBF5
+loc_1FC84:
+	pop	si
+	mov	sp, bp
+	pop	bp
+locret_1FC88:
+	retf
+bat_doChest endp
+align 2
+
+
+seg009 ends
 
 ; Segment type: Pure code
 seg010 segment word public 'CODE' use16
         assume cs:seg010
 ;org 9
         assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
-algn_1FC89:
 align 2
 
 noncombatCast proc far
@@ -23341,7 +28128,7 @@ l_isSpellCaster:
 	push	ds
 	push	ax
 	push	[bp+spellTargetFlag]
-	call	getTarget
+	call	bat_charGetActionTarget
 	add	sp, 6
 	mov	[bp+var_2], ax
 	or	ax, ax
@@ -23425,7 +28212,7 @@ loc_1FDC6:
 	jge	short loc_1FE1A
 	push	[bp+var_104]
 	push	[bp+partySlotNumber]
-	call	mage_hasLearnedSpell
+	call	character_learnedSpell
 	add	sp, 4
 
 	or	ax, ax
@@ -23543,7 +28330,7 @@ getSpptRequired	proc far
 	mov	ax, itemEff_quaterSpptUse
 	push	ax
 	push	[bp+partySlotNumber]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jnz	short l_checkHalf
@@ -23555,7 +28342,7 @@ l_checkHalf:
 	mov	ax, itemEff_halfSpptUsage
 	push	ax
 	push	[bp+partySlotNumber]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jnz	short l_returnSppt
@@ -23851,6 +28638,7 @@ bat_doBreathAttack proc	far
 	; Set levelMultiplier to 1 if source is an enemy
 	cmp	[bp+partySlotNumber], 80h 
 	jl	short l_partyMultiplier
+
 	mov	[bp+levelMultiplier], 1
 	jmp	short l_allFoesCheck
 
@@ -23860,7 +28648,7 @@ l_partyMultiplier:
 	mov	bx, ax
 	push	gs:party.level[bx]
 	push	cs
-	call	near ptr _returnXor255
+	call	near ptr lib_maxFF
 	add	sp, 2
 	mov	[bp+levelMultiplier], al
 
@@ -23868,10 +28656,13 @@ l_allFoesCheck:
 	mov	[bp+partyAttackRval], 0
 	test	[bp+breathFlags], breath_allFoes		; if breathFlags & breathAllFoes
 	jz	short l_oneGroupCheck
+
 	cmp	[bp+partySlotNumber], 80h 			;   if source.isEnemy
 	jge	short l_stripAllFoesFlag			;     breathFlags &= !breathAllFoes
+
 	mov	gs:bat_curTarget, 80h				;   else
 	jmp	short l_oneGroupCheck				;     currentTarget = first enemy group
+
 l_stripAllFoesFlag:
 	and	[bp+breathFlags], 7Fh
 
@@ -23883,6 +28674,7 @@ l_oneGroupCheck:
 	jnb	short loc_201B9
 	test	[bp+breathFlags], breath_oneGroup
 	jz	short loc_201B9
+
 	mov	ax, [bp+partySlotNumber]
 	jmp	short loc_201BC
 loc_201B9:
@@ -23921,6 +28713,7 @@ loc_201E6:
 	add	sp, 4
 	or	ax, ax
 	jnz	loc_20324
+
 	mov	ax, offset s_partyTooFarAway
 	push	ds
 	push	ax
@@ -23939,7 +28732,7 @@ loc_201E6:
 	call	text_delayWithTable
 	mov	ax, [bp+partyAttackRval]
 	dec	ax
-	jmp	bat_doBreathAttack_exit
+	jmp	l_return
 
 l_targetIsEnemy:
 	mov	al, gs:bat_curTarget
@@ -24006,7 +28799,7 @@ l_enemyGroupGone:
 	cmp	[bp+breathFlags], breath_allFoes
 	jnb	short loc_20324
 	mov	ax, [bp+partyAttackRval]
-	jmp	bat_doBreathAttack_exit
+	jmp	l_return
 
 loc_20324:
 	cmp	[bp+target], 0
@@ -24024,7 +28817,7 @@ loc_20345:
 	jbe	short loc_20379
 	mov	al, [bp+arg_6]
 	push	ax
-	call	dice_doYDX
+	call	randomYdX
 	add	sp, 2
 	add	gs:damageAmount, ax
 	cmp	gs:damageAmount, 20000
@@ -24053,14 +28846,14 @@ loc_203AA:
 	cmp	[bp+var_11A], ax
 	jz	loc_2047A
 	mov	bx, ax
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jnz	loc_2047A
 	mov	al, [bp+specialAttackIndex]
 	sub	ah, ah
 	push	ax
 	push	bx
 	push	cs
-	call	near ptr _canAttackChar
+	call	near ptr bat_charIsBreathAttackable
 	add	sp, 4
 	or	ax, ax
 	jz	loc_2047A
@@ -24083,7 +28876,7 @@ loc_203AA:
 	mov	ax, itemEff_breathDefense
 	push	ax
 	push	[bp+target]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jl	short loc_20467
@@ -24109,15 +28902,17 @@ loc_20478:
 	jmp	short loc_2047F
 loc_2047A:
 	mov	[bp+var_2], 0
+
 loc_2047F:
 	cmp	[bp+var_2], 0
-	jnz	short loc_20488
-	jmp	loc_2050C
-loc_20488:
+	jz	loc_2050C
+
 	cmp	[bp+arg_5], 0
 	jz	short loc_2050C
+
 	cmp	gs:bat_curTarget, 80h
 	jnb	short loc_204B0
+
 	mov	al, charSize
 	mul	gs:bat_curTarget
 	mov	bx, ax
@@ -24151,9 +28946,8 @@ loc_204CF:
 	mov	[bp+var_2], 0
 loc_2050C:
 	cmp	[bp+var_2], 0
-	jnz	short loc_20515
-	jmp	loc_20810
-loc_20515:
+	jz	loc_20810
+
 	push	[bp+spellRange]
 	push	[bp+partySlotNumber]
 	push	cs
@@ -24161,9 +28955,11 @@ loc_20515:
 	add	sp, 4
 	mov	[bp+var_4], ax
 	or	ax, ax
-	jz	loc_207F3
+	jz	l_printTooFarAway
+
 	cmp	ax, 2
 	jnz	short loc_2053B
+
 	mov	gs:byte_41E63, 4
 loc_2053B:
 	mov	al, [bp+breathFlags]
@@ -24176,12 +28972,12 @@ loc_2053B:
 	add	sp, 4
 	mov	[bp+var_118], ax
 	or	ax, ax
-	jnz	short loc_20559
-	jmp	loc_207D4
-loc_20559:
+	jz	loc_207D4
+
 	cmp	ax, 1
 	jnz	short loc_20567
 	sar	gs:damageAmount, 1
+
 loc_20567:
 	test	[bp+breathFlags], 3
 	jz	short loc_2058E
@@ -24213,13 +29009,9 @@ loc_205CF:
 	mov	al, [bp+arg_3]
 	sub	ah, ah
 	and	[bp+var_108], ax
+
 	mov	[bp+counter], 0
-	jmp	short loc_205E8
 loc_205E4:
-	inc	[bp+counter]
-loc_205E8:
-	cmp	[bp+counter], 7
-	jge	short loc_2060F
 	mov	bx, [bp+counter]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
@@ -24227,7 +29019,10 @@ loc_205E8:
 	jz	short loc_2060D
 	sar	gs:damageAmount, 1
 loc_2060D:
-	jmp	short loc_205E4
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short loc_205E4
+
 loc_2060F:
 	cmp	gs:bat_curTarget, 80h
 	jnb	short loc_20631
@@ -24251,13 +29046,9 @@ loc_20650:
 	mov	al, [bp+arg_3]
 	sub	ah, ah
 	and	[bp+var_6], ax
+
 	mov	[bp+counter], 0
-	jmp	short loc_20667
 loc_20663:
-	inc	[bp+counter]
-loc_20667:
-	cmp	[bp+counter], 7
-	jge	short loc_2068D
 	mov	bx, [bp+counter]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
@@ -24265,14 +29056,16 @@ loc_20667:
 	jz	short loc_2068B
 	shl	gs:damageAmount, 1
 loc_2068B:
-	jmp	short loc_20663
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short loc_20663
+
 loc_2068D:
 	mov	ax, gs:damageAmount
 	mov	cl, [bp+specialAttackIndex]
 	sub	ch, ch
 	or	ax, cx
-	jnz	short loc_206A1
-	jmp	loc_207B5
+	jz	loc_207B5
 loc_206A1:
 	mov	ax, offset s_is
 	push	ds
@@ -24333,13 +29126,13 @@ loc_206A1:
 	mov	gs:specialAttackVal, ax
 	mov	al, gs:bat_curTarget
 	push	ax
-	call	bat_doHPDamage
+	call	bat_damageHp
 	add	sp, 2
 	or	ax, ax
 	jz	short loc_207A7
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
-	call	bat_getKillString
+	call	bat_appendSpecialAttackString
 	add	sp, 4
 	mov	word ptr [bp+outputStringP], ax
 	mov	word ptr [bp+outputStringP+2], dx
@@ -24372,6 +29165,8 @@ loc_207B5:
 	mov	ax, offset s_repelledAttack
 	push	ds
 	push	ax
+	push	word ptr [bp+outputStringP+2]
+	push	word ptr [bp+outputStringP]
 	call	strcat
 	add	sp, 8
 	mov	word ptr [bp+outputStringP], ax
@@ -24390,7 +29185,7 @@ loc_207D4:
 	mov	word ptr [bp+outputStringP+2], dx
 loc_207F1:
 	jmp	short loc_20810
-loc_207F3:
+l_printTooFarAway:
 	mov	ax, offset s_wasTooFarAway
 	push	ds
 	push	ax
@@ -24438,7 +29233,7 @@ loc_20896:
 loc_2089C:
 	cmp	[bp+var_110], 0
 	jnz	loc_201C6
-bat_doBreathAttack_exit:
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
@@ -24446,7 +29241,7 @@ bat_doBreathAttack endp
 
 ; Attributes: bp-based frame
 
-_canAttackChar proc far
+bat_charIsBreathAttackable proc far
         partySlotNumber=        word ptr  6
         specialAttackIndex= word ptr  8
 
@@ -24482,7 +29277,7 @@ l_return:
 	mov	sp, bp
 	pop	bp
         retf
-_canAttackChar endp
+bat_charIsBreathAttackable endp
 
 ; Attributes: bp-based frame
 sp_trapZap proc	far
@@ -24576,7 +29371,7 @@ sp_freezeFoes proc far
 	mov	bl, gs:bat_curTarget
 	and	bx, 3
 	add	gs:g_monFreezeAcPenalty[bx], al
-	add	gs:byte_41E70, 2
+	add	gs:g_charFreezeToHitBonus, 2
 	jmp	short l_return
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
@@ -24679,7 +29474,7 @@ savingThrowCheck proc far
 	add	ax, [bp+targetSaveValue]
 	push	ax
 	push	cs
-	call	near ptr _returnXor255
+	call	near ptr lib_maxFF
 	add	sp, 2
 	mov	[bp+targetSaveValue], ax
 	mov	gs:byte_41E63, 0
@@ -24811,7 +29606,7 @@ l_partyMemberNotMonster:
 	mov	ax, itemEff_alwaysHide
 	push	ax
 	push	[bp+indexNo]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jnz	short l_noLuckBonus
@@ -24822,7 +29617,7 @@ l_noLuckBonus:
 	mov	si, ax
 	mov	ax, 41h	
 	push	ax
-	call	dice_doYDX
+	call	randomYdX
 	add	sp, 2
 	mov	bl, gs:party.class[si]
 	sub	bh, bh
@@ -24839,7 +29634,7 @@ l_antiMagicCheck:
 	add	ax, [bp+partySaveValue]
 	push	ax
 	push	cs
-	call	near ptr _returnXor255
+	call	near ptr lib_maxFF
 	add	sp, 2
 l_return:
 	pop	si
@@ -24854,7 +29649,7 @@ _savingThrowCheck endp
 ; (val)	<= 255 ? (val) : 255
 ; Attributes: bp-based frame
 
-_returnXor255 proc far
+lib_maxFF proc far
 
 	val= word ptr  6
 
@@ -24865,11 +29660,12 @@ _returnXor255 proc far
 	cmp	ax, 255
 	jle	short l_return
 	mov	ax, 255
+
 l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-_returnXor255 endp
+lib_maxFF endp
 
 ; Attributes: bp-based frame
 
@@ -25097,7 +29893,7 @@ l_cureOld:
 	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
-	call	_doAgeStatus
+	call	character_applyAgeStatus
 	add	sp, 0Ah
 l_cureOldReturn:
 	jmp	short l_return
@@ -25163,7 +29959,7 @@ l_notDead:
 	mov	bx, ax
 	mov	gs:party.hostileFlag[bx], 0
 	mov	bx, [bp+partySlotNumber]
-	mov	gs:charActionList[bx], 0
+	mov	gs:g_charActionList[bx], 0
 	mov	sp, bp
 	pop	bp
 	retf
@@ -25274,7 +30070,7 @@ loc_20FF7:
 	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	[bp+var_C], ax
-	mov	al, levFlags
+	mov	al, g_levelFlags
 	and	ax, 10h
 	push	ax
 	push	dx
@@ -25389,7 +30185,7 @@ loc_21104:
 	add	sp, 2
 	jmp	l_return
 loc_21136:
-	mov	ax, dunLevelNum
+	mov	ax, g_dunLevelNum
 	add	ax, [bp+teleDeltaList+4]
 	push	ax
 	mov	ax, sq_east
@@ -25414,8 +30210,8 @@ loc_21168:
 	mov	ax, [bp+teleDeltaList+2]
 	add	sq_east, ax
 	mov	ax, [bp+teleDeltaList+4]
-	add	dunLevelNum,	ax
-	mov	di, dunLevelNum
+	add	g_dunLevelNum,	ax
+	mov	di, g_dunLevelNum
 	lfs	bx, [bp+var_16]
 	mov	al, fs:[bx+di+12h]
 	sub	ah, ah
@@ -25423,7 +30219,7 @@ loc_21168:
 	cmp	dunLevelIndex, si
 	jz	short loc_211F1
 	mov	dunLevelIndex, si
-	mov	buildingRvalMaybe, 4
+	mov	g_mapRval, 4
 	mov	al, fs:[bx+dun_t.deltaSqN]
 	cbw
 	add	sq_north, ax
@@ -25891,7 +30687,7 @@ l_partCaster:
 	mov	al, spellEffectFlags[bx]
 	mov	bl, gs:bat_curTarget
 	and	bx, 7
-	mov	gs:strengthBonus[bx], al
+	mov	gs:g_strengthSpellBonus[bx], al
 l_return:
 	mov	sp, bp
 	pop	bp
@@ -26172,7 +30968,7 @@ loc_21840:
 	add	sp, 0Ah
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
-	mov	al, levFlags
+	mov	al, g_levelFlags
 	and	al, 10h
 	cmp	al, 1
 	sbb	cx, cx
@@ -26457,7 +31253,7 @@ sp_wordOfFear proc far
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
-	add	gs:byte_42567, al
+	add	gs:g_monsterWOFBonus, al
 l_return:
 	pop	si
 	mov	sp, bp
@@ -26718,7 +31514,7 @@ l_attackLoopExit:
 	mov	al, fs:[bx+mon_t.hpDice]
 	sub	ah, ah
 	push	ax
-	call	dice_doYDX
+	call	randomYdX
 	add	sp, 2
 	lfs	bx, [bp+monBufferP]
 	mov	cx, fs:[bx+mon_t.hpBase]
@@ -26950,7 +31746,7 @@ sp_luckSpell proc far
 
 	mov	bx, [bp+spelIndexNumber]
 	mov	al, spellEffectFlags[bx]
-	add	gs:byte_41E70, al
+	add	gs:g_charFreezeToHitBonus, al
 	push	bx
 	push	[bp+spellCaster]
 	push	cs
@@ -26985,7 +31781,7 @@ sp_identifySpell proc far
 	push	ss
 	push	ax
 	push	[bp+spellCaster]
-	call	sub_188E8
+	call	inventory_getItemList
 	add	sp, 0Ah
 	mov	[bp+var_34], ax
 	or	ax, ax
@@ -27203,8 +31999,8 @@ l_notIllusion:
 	cmp	gs:byte_422A4, 0
 	jz	short l_return
 	mov	al, 14h
-	mov	gs:byte_42440, al
-	mov	gs:byte_41E70, al
+	mov	gs:g_divineDamageBonus, al
+	mov	gs:g_charFreezeToHitBonus, al
 	mov	gs:antiMagicFlag, al
 	mov	gs:partySpellAcBonus, al
 	mov	gs:songExtraAttack, 8
@@ -27556,7 +32352,7 @@ _sp_useWineskin	proc far
 	jnz	short loc_2252F
 	push	gs:party.level[si]
 	push	cs
-	call	near ptr _returnXor255
+	call	near ptr lib_maxFF
 	add	sp, 2
 	mov	gs:party.specAbil[si],	al
 	jmp	short l_return
@@ -28233,7 +33029,7 @@ l_checkInstrument:
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	call	inven_hasTypeEquipped
+	call	character_hasTypeEquipped
 	add	sp, 4
 	or	ax, ax
 	jz	short l_noInstrument
@@ -28296,7 +33092,7 @@ _charCanPlaySong proc far
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	call	inven_hasTypeEquipped
+	call	character_hasTypeEquipped
 	add	sp, 4
 	jmp	short l_return
 l_returnZero:
@@ -28326,7 +33122,7 @@ sing_getSongSubtractor proc far
 	mov	ax, itemEff_freeSinging
 	push	ax
 	push	[bp+partySlotNumber]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jz	short l_returnZero
@@ -28528,13 +33324,13 @@ song_playSong proc far
 	shl	bx, 1
 	push	gs:musicBufs._segment[bx]
 	push	word ptr gs:musicBufs._offset[bx]
-	call	d3comp
+	call	d3cmp_flate
 	add	sp, 8
 
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	call	inven_getTypeEqSlot
+	call	character_getTypeEquippedSlot
 	add	sp, 4
 	mov	[bp+var_4], ax
 	inc	ax
@@ -28627,10 +33423,10 @@ l_sanctuary:
 l_maxFifteen:
 	mov	al, 15
 l_setBonus:
-	mov	gs:songACBonus,	al
+	mov	gs:g_songAcBonus,	al
 	or	al, al
 	jnz	short l_setBonusIfZero
-	inc	gs:songACBonus
+	inc	gs:g_songAcBonus
 l_setBonusIfZero:
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	l_return
@@ -28701,7 +33497,7 @@ l_safety:
 	mov	gs:songAntiMonster, 0
 	jmp	short l_return
 l_sanctuary:
-	mov	gs:songACBonus,	0
+	mov	gs:g_songAcBonus,	0
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_return
 l_duotime:
@@ -28747,7 +33543,3395 @@ song_endNoncombatEffect	endp
 
 seg011 ends
 
-include seg012.asm
+; Segment type: Pure code
+seg012 segment byte public 'CODE' use16
+        assume cs:seg012
+;org 0Eh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+; Attributes: bp-based frame
+;
+; This function sets the maximum value of the dword
+; to 0xFFFF. The function is always called with the high
+; word as 0 so this doesn't really have any use.
+
+lib_maxFFFF proc	far
+
+	value= dword ptr	 6
+
+	push	bp
+	mov	bp, sp
+	cmp	word ptr [bp+value+2], 0
+	jnz	short l_setToMax
+	cmp	word ptr [bp+value], 0FFFFh
+	jbe	short l_return
+l_setToMax:
+	mov	word ptr [bp+value], 0FFFFh
+	mov	word ptr [bp+value+2], 0
+l_return:
+	mov	ax, word ptr [bp+value]
+	mov	sp, bp
+	pop	bp
+	retf
+lib_maxFFFF endp
+
+; Attributes: bp-based frame
+
+review_enter proc far
+
+	loopCounter= word ptr	-6
+	inKey= word ptr	-4
+	getKeyMouseMask= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+
+loc_23001:
+	and	byte_4EE71, 0FDh
+	push	cs
+	call	near ptr review_setTitle
+	test	byte_4EE71, 2
+	jnz	l_return
+
+	push	cs
+	call	near ptr review_quest
+	test	byte_4EE71, 2
+	jnz	short loc_23001
+
+l_ioLoop:
+	mov	ax, offset s_lastOfTheGuildElders
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	[bp+getKeyMouseMask], 0
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	mov	bl, gs:txt_numLines
+	sub	bh, bh
+	sub	bx, [bp+loopCounter]
+	shl	bx, 1
+	mov	ax, bitMask16bit[bx]
+	or	[bp+getKeyMouseMask], ax
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 5
+	jl	short l_loop
+
+	push	[bp+getKeyMouseMask]
+	call	getKey
+	add	sp, 2
+	mov	[bp+inKey], ax
+	cmp	ax, 10Eh
+	jl	short l_processKey
+	cmp	ax, 119h
+	jg	short l_processKey
+	mov	al, gs:txt_numLines
+	sub	ah, ah
+	sub	ax, 4
+	sub	[bp+inKey], ax
+
+l_processKey:
+	mov	ax, [bp+inKey]
+	cmp	ax, 'T'
+	jz	short l_speakToElder
+	jg	short l_processMouseKey
+	cmp	ax, 'A'
+	jz	short l_checkXp
+	cmp	ax, 'C'
+	jz	short l_changeClass
+	cmp	ax, 'S'
+	jz	short l_learnSpells
+	jmp	short l_checkExit
+
+l_processMouseKey:
+	cmp	ax, 10Eh
+	jz	short l_checkXp
+	cmp	ax, 10Fh
+	jz	short l_learnSpells
+	cmp	ax, 110h
+	jz	short l_changeClass
+	cmp	ax, 111h
+	jz	short l_speakToElder
+
+l_checkExit:
+	cmp	[bp+inKey], 'E'
+	jz	short l_return
+	cmp	[bp+inKey], 112h
+	jz	short l_return
+	jmp	l_ioLoop
+
+l_checkXp:
+	sub	ax, ax
+	push	ax
+	push	cs
+	call	near ptr review_checkXp
+	add	sp, 2
+	jmp	l_ioLoop
+
+l_learnSpells:
+	sub	ax, ax
+	push	ax
+	push	cs
+	call	near ptr review_learnSpells
+	add	sp, 2
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	l_ioLoop
+
+l_changeClass:
+	push	cs
+	call	near ptr review_changeMageClass
+	jmp	l_ioLoop
+
+l_speakToElder:
+	push	cs
+	call	near ptr review_speakToElder
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	l_ioLoop
+
+l_return:
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+review_enter endp
+
+; Attributes: bp-based frame
+;
+; DWORD var_2 & var_4, var_8 & var_A
+
+review_checkXp proc far
+
+	stringBuffer= word ptr -10Ah
+	var_A= word ptr	-0Ah
+	var_8= word ptr	-8
+	slotNumber= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 10Ah
+	call	someStackOperation
+
+l_loop:
+	mov	ax, offset s_elderWeighsMerits
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+slotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	test	gs:party.status[bx], 0Ch
+	jz	short l_ableMember
+	mov	ax, offset s_elderDeadCharacter
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	jmp	l_printBuffer
+
+l_ableMember:
+	mov	ax, offset s_guildElderDeems
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	lea	ax, party._name[bx]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_monster
+	jnz	short l_notMonster
+
+	mov	ax, offset s_cannotBeRaised
+	push	ds
+	push	ax
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	jmp	l_printBuffer
+
+l_notMonster:
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_getXpDelta
+	add	sp, 2
+	mov	[bp+var_A], ax
+	mov	[bp+var_8], dx
+	or	dx, dx
+	jg	short l_notYet
+	jl	short l_earnedLevel
+	or	ax, ax
+	jnz	short l_notYet
+
+l_earnedLevel:
+	mov	ax, offset s_hathEarnedLevel
+	push	ds
+	push	ax
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	push	dx
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_advance
+	add	sp, 6
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	jmp	short l_printBuffer
+
+l_notYet:
+	mov	ax, offset s_stillNeedeth
+	push	ds
+	push	ax
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	sub	ax, ax
+	push	ax
+	push	[bp+var_8]
+	push	[bp+var_A]
+	push	dx
+	push	[bp+var_4]
+	call	itoa
+	add	sp, 0Ah
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	mov	ax, offset s_experiencePoints
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_4]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+
+l_printBuffer:
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printString
+	add	sp, 4
+	mov	byte ptr g_printPartyFlag,	0
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	l_loop
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_checkXp endp
+
+; Attributes: bp-based frame
+
+review_advance proc far
+
+	var_C= dword ptr -0Ch
+	ageStatusFlag= word ptr	-8
+	attributeIndex= word ptr	-6
+	hpBonus= word ptr	-4
+	bonusVar= word ptr	-2
+	charNo=	word ptr  6
+	arg_2= word ptr	 8
+	arg_4= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ch
+	call	someStackOperation
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
+	inc	gs:party.maxLevel[si]
+	mov	ax, gs:party.maxLevel[si]
+	mov	gs:party.level[si], ax
+	push	[bp+charNo]
+	push	cs
+	call	near ptr review_removeAgeStatus
+	add	sp, 2
+	mov	[bp+ageStatusFlag], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
+	call	random
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	bl, gs:party.class[bx]
+	sub	bh, bh
+	mov	al, hpLevelBonusMask[bx]
+	sub	ah, ah
+	and	ax, cx
+	mov	cl, gs:party.constitution[si]
+	sub	ch, ch
+	shr	cx, 1
+	shr	cx, 1
+	add	ax, cx
+	mov	[bp+hpBonus], ax
+	mov	ax, gs:party.currentHP[si]
+	add	ax, [bp+hpBonus]
+	sub	cx, cx
+	push	cx
+	push	ax
+	push	cs
+	call	near ptr lib_maxFFFF
+	add	sp, 4
+	mov	gs:party.currentHP[si], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	ax, gs:party.maxHP[bx]
+	add	ax, [bp+hpBonus]
+	sub	cx, cx
+	push	cx
+	push	ax
+	push	cs
+	call	near ptr lib_maxFFFF
+	add	sp, 4
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	gs:party.maxHP[bx], cx
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:party.class[bx]
+	sub	ah, ah
+
+	or	ax, ax
+	jz	fighterLevelUp
+	cmp	ax, class_rogue
+	jz	rogueLevelUp
+	cmp	ax, class_bard
+	jz	bardLevelUp
+	cmp	ax, class_paladin
+	jz	fighterLevelUp
+	cmp	ax, class_hunter
+	jz	hunterLevelUp
+	cmp	ax, class_monk
+	jz	fighterLevelUp
+	jmp	mageLevelUp
+
+fighterLevelUp:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
+	mov	ax, gs:party.level[si]
+	dec	ax
+	shr	ax, 1
+	shr	ax, 1
+	mov	[bp+bonusVar], ax
+	cmp	ax, 8
+	jge	short l_setMaxAttacks
+	mov	al, byte ptr [bp+bonusVar]
+	jmp	short l_setAttackCount
+l_setMaxAttacks:
+	mov	al, 7
+l_setAttackCount:
+	mov	gs:party.numAttacks[si], al
+	jmp	l_increaseRandomAttribute
+
+rogueLevelUp:
+	call	random_1d8
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:party.dexterity[bx]
+	sub	ah, ah
+	mov	dx, cx
+	mov	cl, 3
+	shr	ax, cl
+	add	ax, dx
+	mov	[bp+bonusVar], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:party.specAbil[bx]
+	sub	ah, ah
+	add	ax, [bp+bonusVar]
+	push	ax
+	call	lib_maxFF
+	add	sp, 2
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	gs:party.specAbil[bx],	cl
+
+	; Adding random_1d8 to bonusVar looks wrong. Doing it this way,
+	; specAbil+1 gets bonusVar+1d8 and specAbil+2 gets bonusVar+1d8+1d8.
+	call	random_1d8
+	add	[bp+bonusVar], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:(party.specAbil+1)[bx]
+	sub	ah, ah
+	add	ax, [bp+bonusVar]
+	push	ax
+	call	lib_maxFF
+	add	sp, 2
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	gs:(party.specAbil+1)[bx], cl
+
+	call	random_1d8
+	add	[bp+bonusVar], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:(party.specAbil+2)[bx]
+	sub	ah, ah
+	add	ax, [bp+bonusVar]
+	push	ax
+	call	lib_maxFF
+	add	sp, 2
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	gs:(party.specAbil+2)[bx], cl
+
+	jmp	l_increaseRandomAttribute
+
+bardLevelUp:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
+	push	gs:party.level[si]
+	call	lib_maxFF
+	add	sp, 2
+	mov	gs:party.specAbil[si],	al
+	jmp	l_increaseRandomAttribute
+
+hunterLevelUp:
+	call	random_1d8
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:party.dexterity[bx]
+	sub	ah, ah
+	mov	dx, cx
+	mov	cl, 3
+	shr	ax, cl
+	add	ax, dx
+	mov	[bp+bonusVar], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:party.specAbil[bx]
+	sub	ah, ah
+	add	ax, [bp+bonusVar]
+	push	ax
+	call	lib_maxFF
+	add	sp, 2
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	gs:party.specAbil[bx],	cl
+	jmp	l_increaseRandomAttribute
+
+mageLevelUp:
+	call	random
+	and	ax, 3
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	al, gs:party.intelligence[bx]
+	sub	ah, ah
+	shr	ax, 1
+	shr	ax, 1
+	add	ax, cx
+	inc	ax
+	mov	[bp+bonusVar], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	ax, gs:party.currentSppt[bx]
+	add	ax, [bp+bonusVar]
+	sub	cx, cx
+	push	cx
+	push	ax
+	push	cs
+	call	near ptr lib_maxFFFF
+	add	sp, 4
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	gs:party.currentSppt[bx], cx
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	ax, gs:party.maxSppt[bx]
+	add	ax, [bp+bonusVar]
+	sub	cx, cx
+	push	cx
+	push	ax
+	push	cs
+	call	near ptr lib_maxFFFF
+	add	sp, 4
+	mov	cx, ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	mov	gs:party.maxSppt[bx], cx
+	jmp	short l_increaseRandomAttribute
+
+l_increaseRandomAttribute:
+	mov	ax, 4
+	push	ax
+	sub	ax, ax
+	push	ax
+	call	randomBetweenXandY
+	add	sp, 4
+	mov	[bp+attributeIndex], ax
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
+	add	ax, offset party.strength
+	mov	word ptr [bp+var_C], ax
+	mov	word ptr [bp+var_C+2], seg seg027
+
+; This section looks for an attribute under 30 to increase. It is possible
+; to not increase an attribute when levelling up since the attribute search
+; starts at a random attribute and doesn't wrap. 
+;
+l_findAttributeToIncrease:
+	cmp	[bp+attributeIndex], 5
+	jge	short l_restoreAgeStatus
+	mov	bx, [bp+attributeIndex]
+	lfs	si, [bp+var_C]
+	cmp	byte ptr fs:[bx+si], 30
+	jl	short l_printIncreasedAttribute
+	mov	byte ptr fs:[bx+si], 30
+	inc	[bp+attributeIndex]
+	jmp	short l_findAttributeToIncrease
+
+l_printIncreasedAttribute:
+	mov	bx, [bp+attributeIndex]
+	lfs	si, [bp+var_C]
+	inc	byte ptr fs:[bx+si]
+	mov	ax, offset s_plusOneTo
+	push	ds
+	push	ax
+	push	[bp+arg_4]
+	push	[bp+arg_2]
+	call	strcat
+	add	sp, 8
+	mov	[bp+arg_2], ax
+	mov	[bp+arg_4], dx
+	mov	bx, [bp+attributeIndex]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (fullAttributeString+2)[bx]
+	push	word ptr fullAttributeString[bx]
+	push	dx
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+arg_2], ax
+	mov	[bp+arg_4], dx
+	jmp	short l_restoreAgeStatus
+
+l_restoreAgeStatus:
+	cmp	[bp+ageStatusFlag], 0
+	jz	short l_return
+	push	[bp+charNo]
+	call	review_resetAgeStatus
+	add	sp, 2
+
+l_return:
+	mov	ax, [bp+arg_2]
+	mov	dx, [bp+arg_4]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_advance endp
+
+; This function	returns	the difference between the
+; players experience points and the requirements
+; for the next level.
+; Attributes: bp-based frame
+
+review_getXpDelta proc far
+
+	slotNumber= word ptr  6
+
+	push	bp
+	mov	bp, sp
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, gs:party.maxLevel[bx]
+	or	ax, ax
+	jz	short l_levelZero
+	dec	ax
+	push	ax
+	push	[bp+slotNumber]
+	call	getLevelXp
+	add	sp, 4
+	mov	cx, ax
+	mov	bx, dx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	ax, cx
+	mov	dx, bx
+	sub	ax, word ptr gs:party.experience[si]
+	sbb	dx, word ptr gs:(party.experience+2)[si]
+	jmp	short l_return
+
+l_levelZero:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, word ptr gs:party.experience[bx]
+	mov	dx, word ptr gs:(party.experience+2)[bx]
+	neg	ax
+	adc	dx, 0
+	neg	dx
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_getXpDelta endp
+
+; Attributes: bp-based frame
+
+review_learnSpells	proc far
+
+	stringBuffer= word ptr -10Eh
+	payeeSlotNumber= word ptr	-0Eh
+	spellBase= word	ptr -0Ch
+	loopCounter= word ptr -0Ah
+	levelCost= word ptr	-8
+	stringBufferP= dword ptr -6
+	slotNumber=	word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 10Eh
+	call	someStackOperation
+	push	si
+
+	mov	ax, offset s_whoSeeksKnowledge
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+slotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.class[bx]
+	sub	bh, bh
+	mov	al, mageSpellIndex[bx]
+	sub	ah, ah
+	mov	[bp+spellBase],	ax
+	cmp	ax, 0FFh
+	jnz	short l_isSpellcaster
+	mov	ax, offset s_thouArtNotASpellcaster
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_return
+
+l_isSpellcaster:
+	mov	[bp+loopCounter], 0
+
+l_searchSpellLevelsLoop:
+	push	[bp+spellBase]
+	push	[bp+loopCounter]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_learnedSpellLevel
+	add	sp, 6
+	or	ax, ax
+	jz	short l_learnedAllLevelsCheck
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jl	short l_searchSpellLevelsLoop
+
+l_learnedAllLevelsCheck:
+	cmp	[bp+loopCounter], 6
+	jle	short l_levelCheckForSpells
+	mov	ax, offset s_learnedAllSpells
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_return
+
+l_levelCheckForSpells:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, gs:party.level[bx]
+	inc	ax
+	shr	ax, 1
+	mov	cx, [bp+loopCounter]
+	inc	cx
+	cmp	ax, cx
+	jnb	short l_ioLoop
+	mov	ax, offset s_cannotAcquireNewSpells
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_return
+
+l_ioLoop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.class[bx]
+	sub	bh, bh
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_classString+2)[bx]
+	push	word ptr g_classString[bx]
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	ax, offset s_spellLevel
+	push	ds
+	push	ax
+	push	dx
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	al, byte ptr [bp+loopCounter]
+	add	al, '1'
+	mov	fs:[bx], al
+	mov	ax, offset s_willCost
+	push	ds
+	push	ax
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	bx, [bp+loopCounter]
+	shl	bx, 1
+	mov	ax, levelCost[bx]
+	mov	[bp+levelCost], ax
+	sub	ax, ax
+	push	ax
+	mov	ax, [bp+levelCost]
+	cwd
+	push	dx
+	push	ax
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
+	call	itoa
+	add	sp, 0Ah
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	mov	ax, offset s_inGoldWhoWillPay
+	push	ds
+	push	ax
+	push	dx
+	push	word ptr [bp+stringBufferP]
+	call	strcat
+	add	sp, 8
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+payeeSlotNumber], ax
+	or	ax, ax
+	jl	short l_return
+
+	mov	ax, [bp+levelCost]
+	cwd
+	mov	cx, ax
+	mov	bx, dx
+	mov	ax, charSize
+	imul	[bp+payeeSlotNumber]
+	mov	si, ax
+	cmp	word ptr gs:(party.gold+2)[si], bx
+	ja	short l_removeGold
+	jb	short l_notEnoughGold
+	cmp	word ptr gs:party.gold[si], cx
+	jnb	short l_removeGold
+
+l_notEnoughGold:
+	mov	ax, offset s_notEnoughGoldNl
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_ioLoop
+
+l_removeGold:
+	mov	ax, [bp+levelCost]
+	cwd
+	mov	cx, ax
+	mov	bx, dx
+	mov	ax, charSize
+	imul	[bp+payeeSlotNumber]
+	mov	si, ax
+	sub	word ptr gs:party.gold[si], cx
+	sbb	word ptr gs:(party.gold+2)[si], bx
+	mov	ax, offset s_elderTeachersLore
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	push	[bp+spellBase]
+	push	[bp+loopCounter]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_learnSpellLevel
+	add	sp, 6
+	jmp	short l_return
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_learnSpells	endp
+
+; Attributes: bp-based frame
+
+mage_convertConjurorCheck proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	ax, ax
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_hasBeenClass
+	add	sp, 4
+	mov	cx, ax
+	cmp	cx, 1
+	sbb	ax, ax
+	neg	ax
+	mov	sp, bp
+	pop	bp
+	retf
+mage_convertConjurorCheck endp
+
+; Attributes: bp-based frame
+
+mage_convertMagicianCheck proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Eh
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_hasBeenClass
+	add	sp, 4
+	mov	cx, ax
+	cmp	cx, 1
+	sbb	ax, ax
+	neg	ax
+	mov	sp, bp
+	pop	bp
+	retf
+mage_convertMagicianCheck endp
+
+; Attributes: bp-based frame
+
+mage_convertSorcererCheck proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 1Ch
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_hasBeenClass
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_returnZero
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_countClassesGained
+	add	sp, 2
+	cmp	ax, 1
+	jl	short l_returnZero
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+mage_convertSorcererCheck endp
+
+; Attributes: bp-based frame
+
+mage_convertWizardCheck proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2Ah
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_hasBeenClass
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_returnZero
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_countClassesGained
+	add	sp, 2
+	cmp	ax, 2
+	jl	short l_returnZero
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+mage_convertWizardCheck endp
+
+; Attributes: bp-based frame
+
+mage_convertArchmageCheck proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 38h	
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_hasBeenClass
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_returnZero
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_countClassesGained
+	add	sp, 2
+	cmp	ax, 3
+	jl	short l_returnZero
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+mage_convertArchmageCheck endp
+
+; Attributes: bp-based frame
+
+mage_convertChronomancerCheck proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 46h	
+	push	ax
+	push	[bp+slotNumber]
+	call	mage_hasBeenClass
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_returnZero
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_countClassesGained
+	add	sp, 2
+	cmp	ax, 2
+	jl	short l_returnZero
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+mage_convertChronomancerCheck endp
+
+; Attributes: bp-based frame
+
+review_changeMageClass proc far
+
+	var_78=	word ptr -76h
+	convertList=	word ptr -22h
+	currentClassSpellIndex=	word ptr -20h
+	loopCounter= word ptr -1Eh
+	slotNumber=	word ptr -1Ch
+	inKey=	word ptr -1Ah
+	newClass=	word ptr -18h
+	var_16=	word ptr -16h
+	convertListMouseMask= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 76h
+	call	someStackOperation
+	push	si
+
+	mov	ax, offset s_whichMageSeeksChange
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+slotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	al, gs:party.class[bx]
+	cmp	al, class_chronomancer
+	jz	short l_unableToChangeClass
+	cmp	al, class_geomancer
+	jnz	short l_spellcasterCheck
+
+l_unableToChangeClass:
+	mov	ax, offset s_cannotChangeClass
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_return
+
+l_spellcasterCheck:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.class[bx]
+	sub	bh, bh
+	mov	al, mageSpellIndex[bx]
+	sub	ah, ah
+	mov	[bp+currentClassSpellIndex], ax
+	cmp	ax, 0FFh
+	jnz	short l_checkSpellLevels
+
+	mov	ax, offset s_thouArtNotASpellcaster
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_return
+
+l_checkSpellLevels:
+	mov	[bp+loopCounter], 0
+
+l_spellLevelLoop:
+	push	[bp+currentClassSpellIndex]
+	push	[bp+loopCounter]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_learnedSpellLevel
+	add	sp, 6
+	or	ax, ax
+	jnz	short l_spellLevelNext
+
+	mov	ax, offset s_mustKnowThreeSpellLevels
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_return
+
+l_spellLevelNext:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 3
+	jl	short l_spellLevelLoop
+
+	mov	[bp+convertList], 0
+	mov	[bp+convertListMouseMask], 0
+	mov	[bp+loopCounter], 0
+
+l_convertLoop:
+	push	[bp+slotNumber]
+	mov	bx, [bp+loopCounter]
+	shl	bx, 1
+	shl	bx, 1
+	call	g_mageConversionCheckFunctions[bx]
+	add	sp, 2
+	or	ax, ax
+	jz	short l_convertNext
+	mov	bx, [bp+loopCounter]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (magicUserString+2)[bx]
+	push	word ptr magicUserString[bx]
+	push	[bp+convertList]
+	call	printListItem
+	add	sp, 6
+	mov	si, [bp+convertList]
+	inc	[bp+convertList]
+	shl	si, 1
+	mov	ax, [bp+loopCounter]
+	mov	[bp+si+var_16],	ax
+	mov	bl, gs:txt_numLines
+	sub	bh, bh
+	shl	bx, 1
+	mov	ax, bitMask16bit[bx]
+	or	[bp+convertListMouseMask], ax
+
+l_convertNext:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 6
+	jl	short l_convertLoop
+
+l_emptyListCheck:
+	cmp	[bp+convertList], 0
+	jnz	short l_promptForNewClass
+	mov	ax, offset s_doesntQualifyForNewClass
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_return
+
+l_promptForNewClass:
+	mov	ax, offset s_newClassPrompt
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+
+l_ioLoop:
+	push	[bp+convertListMouseMask]
+	call	getKey
+	add	sp, 2
+	mov	[bp+inKey], ax
+	cmp	ax, dosKeys_ESC
+	jz	l_return
+	cmp	[bp+inKey], 10Eh
+	jl	short l_checkKey
+	cmp	[bp+inKey], 119h
+	jg	short l_checkKey
+	sub	[bp+inKey], 0DEh 
+
+l_checkKey:
+	cmp	[bp+inKey], 31h 
+	jl	short l_ioLoop
+	mov	ax, [bp+convertList]
+	add	ax, 31h	
+	cmp	ax, [bp+inKey]
+	jl	short l_ioLoop
+	mov	si, [bp+inKey]
+	shl	si, 1
+	mov	ax, [bp+si+var_78]
+	mov	[bp+loopCounter], ax
+	cmp	ax, 5
+	jnz	short l_changeClass
+
+	mov	ax, offset s_convertChronomancerPrompt
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_dostThouAccept
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	getYesNo
+	or	ax, ax
+	jz	l_return
+
+	mov	ax, offset s_arboriaSpellText
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_arboriaSpellLocation
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_removeAllSpells
+	add	sp, 2
+
+l_changeClass:
+	getCharP	[bp+slotNumber], si
+	mov	bx, [bp+loopCounter]
+	mov	al, g_convertListToMageClass[bx]
+	sub	ah, ah
+	mov	[bp+newClass], ax
+	mov	cl, gs:party.class[si]
+	sub	ch, ch
+	cmp	ax, cx
+	jz	short l_return
+	sub	ax, ax
+	mov	word ptr gs:(party.experience+2)[si], ax
+	mov	word ptr gs:party.experience[si], ax
+	mov	gs:party.maxLevel[si],	1
+	mov	gs:party.level[si], 1
+	mov	al, byte ptr [bp+newClass]
+	mov	gs:party.class[si], al
+	mov	bx, [bp+newClass]
+	mov	al, mageSpellIndex[bx]
+	sub	ah, ah
+	push	ax
+	sub	ax, ax
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_learnSpellLevel
+	add	sp, 6
+	mov	byte ptr g_printPartyFlag,	0
+	mov	ax, offset s_beginsNewProfession
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_changeMageClass endp
+
+; Attributes: bp-based frame
+
+character_learnSpellLevel proc far
+
+	spellCount= word ptr	-4
+	spellNumber= word ptr	-2
+	slotNumber=	word ptr  6
+	spellLevelOffset= word ptr	 8
+	spellLevelBase= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	mov	ax, [bp+spellLevelOffset]
+	shl	ax, 1
+	add	ax, [bp+spellLevelBase]
+	mov	bx, ax
+	mov	al, byte ptr g_spellLevelData.levelBase[bx]
+	sub	ah, ah
+	mov	[bp+spellNumber], ax
+	mov	al, g_spellLevelData.numSpells[bx]
+	mov	[bp+spellCount], ax
+
+l_loop:
+	mov	ax, [bp+spellCount]
+	dec	[bp+spellCount]
+	or	ax, ax
+	jz	short l_return
+	push	[bp+spellNumber]
+	inc	[bp+spellNumber]
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+	jmp	short l_loop
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_learnSpellLevel endp
+
+; Attributes: bp-spellLevelBased frame
+
+character_learnedSpellLevel proc far
+
+	spellCount= word ptr	-4
+	baseSpellNumber= word ptr	-2
+	slotNumber=	word ptr  6
+	spellLevelOffset= word ptr  8
+	spellLevelBase= word ptr	0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+	mov	ax, [bp+spellLevelOffset]
+	shl	ax, 1
+	add	ax, [bp+spellLevelBase]
+	mov	bx, ax
+	mov	al, byte ptr g_spellLevelData.levelBase[bx]
+	sub	ah, ah
+	mov	[bp+baseSpellNumber], ax
+	mov	al, g_spellLevelData.numSpells[bx]
+	mov	[bp+spellCount], ax
+
+l_loop:
+	mov	ax, [bp+spellCount]
+	dec	[bp+spellCount]
+	or	ax, ax
+	jz	short l_returnOne
+	push	[bp+baseSpellNumber]
+	inc	[bp+baseSpellNumber]
+	push	[bp+slotNumber]
+	call	character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_loop
+	sub	ax, ax
+	jmp	short l_return
+
+l_returnOne:
+	mov	ax, 1
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+character_learnedSpellLevel endp
+
+; This function	returns	1 if the mage has learned
+; at least one level of	a certain mage class
+; Attributes: bp-based frame
+
+mage_hasBeenClass proc far
+
+	loopCounter= word ptr -2
+	slotNumber=	word ptr  6
+	spellBase= word	ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	[bp+loopCounter], 6
+l_loop:
+	push	[bp+spellBase]
+	push	[bp+loopCounter]
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr character_learnedSpellLevel
+	add	sp, 6
+	or	ax, ax
+	jz	short l_returnZero
+	dec	[bp+loopCounter]
+	cmp	[bp+loopCounter], 0
+	jge	short l_loop
+
+l_returnOne:
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+mage_hasBeenClass endp
+
+; This function	returns	the number of classes that
+; a mage has learned a spell level as. This is used,
+; for example, to ensure that a	mage has learned two
+; classes before changing to a wizard.
+; Attributes: bp-based frame
+
+mage_countClassesGained	proc far
+
+	classCount= word ptr -4
+	loopCounter= word ptr -2
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	call	someStackOperation
+
+	mov	[bp+classCount], 0
+	mov	[bp+loopCounter], 0
+l_loop:
+	mov	ax, [bp+loopCounter]
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	shl	ax, 1
+	add	ax, cx
+	shl	ax, 1
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr mage_hasBeenClass
+	add	sp, 4
+	or	ax, ax
+	jz	short l_next
+	inc	[bp+classCount]
+	jmp	short l_loop
+
+l_next:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 6
+	jl	short l_loop
+
+	mov	ax, [bp+classCount]
+	mov	sp, bp
+	pop	bp
+	retf
+mage_countClassesGained	endp
+
+; Attributes: bp-based frame
+
+mage_removeAllSpells proc far
+
+	loopCounter= word ptr	-2
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	mov	[bp+loopCounter], 0
+
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	add	bx, [bp+loopCounter]
+	mov	gs:party.spells[bx], 0
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 0Eh
+	jl	short l_loop
+
+	mov	sp, bp
+	pop	bp
+	retf
+mage_removeAllSpells endp
+
+; Attributes: bp-based frame
+
+review_speakToElder proc far
+
+	slotNumber=	word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+l_mainLoop:
+	mov	ax, offset s_whoSpeaksToElder
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+slotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+	sub	ax, ax
+	push	ax
+	push	[bp+slotNumber]
+	call	review_isQuestComplete
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_checkForChronomancer
+	mov	ax, offset s_seekOutBrilhasti
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	l_mainLoop
+
+l_checkForChronomancer:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	cmp	gs:party.class[bx], class_chronomancer
+	jz	short l_checkQuests
+	mov	ax, offset s_teachOnlyChronomancer
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	jmp	short l_mainLoop
+
+l_checkQuests:
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_elderGelidia
+	add	sp, 2
+	or	ax, ax
+	jnz	short l_waitAndLoop
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_elderLucencia
+	add	sp, 2
+	or	ax, ax
+	jnz	short l_waitAndLoop
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_elderKinestia
+	add	sp, 2
+	or	ax, ax
+	jnz	short l_waitAndLoop
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_elderTenebrosia
+	add	sp, 2
+	or	ax, ax
+	jnz	short l_waitAndLoop
+
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_elderTarmitia
+	add	sp, 2
+	or	ax, ax
+	jnz	short l_waitAndLoop
+	mov	ax, offset s_timeIsRunningOut
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+
+l_waitAndLoop:
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	l_mainLoop
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_speakToElder endp
+
+; Attributes: bp-based frame
+
+review_elderGelidia proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_isQuestComplete
+	add	sp, 4
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 54h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_returnZero
+
+	mov	ax, offset s_gelidiaSpellText
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_gelidiaSpellLocation
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, 54h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+	mov	ax, 55h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_elderGelidia endp
+
+; Attributes: bp-based frame
+
+review_elderLucencia proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 4
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_isQuestComplete
+	add	sp, 4
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 58h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jnz	l_returnZero
+
+	mov	ax, offset s_lucenciaSpellText
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_lucenciaSpellLocation
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 58h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 59h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_elderLucencia endp
+
+; Attributes: bp-based frame
+
+review_elderKinestia proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_isQuestComplete
+	add	sp, 4
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 5Ch	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jnz	l_returnZero
+
+	mov	ax, offset s_kinestiaSpellText
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_kinestiaSpellLocation
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 5Ch	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 5Dh	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_elderKinestia endp
+
+; Attributes: bp-based frame
+
+review_elderTenebrosia proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_isQuestComplete
+	add	sp, 4
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 60h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_returnZero
+
+	mov	ax, offset s_tenebrosiaSpellText
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_tenebrosiaSpellLocation
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 60h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 61h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	mov	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_elderTenebrosia endp
+
+; Attributes: bp-based frame
+
+review_elderTarmitia proc far
+
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ah
+	push	ax
+	push	[bp+slotNumber]
+	push	cs
+	call	near ptr review_isQuestComplete
+	add	sp, 4
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 64h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnedSpell
+	add	sp, 4
+	or	ax, ax
+	jnz	short l_returnZero
+
+	mov	ax, offset s_tarmitiaSpellText
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_tarmitiaSpellLocation
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 64h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 65h	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_elderTarmitia endp
+
+; This function	returns	non-zero if the	chronomancer
+; quest	flag has been set in slotNumber
+; Attributes: bp-based frame
+
+review_isQuestComplete proc far
+
+	slotNumber=	word ptr  6
+	questByte= word ptr	 8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	ax, [bp+questByte]
+	mov	cl, 3
+	sar	ax, cl
+	add	bx, ax
+	mov	al, gs:party.chronoQuest[bx]
+	sub	ah, ah
+	mov	bx, [bp+questByte]
+	and	bx, 7
+	mov	cl, byteMaskList[bx]
+	sub	ch, ch
+	and	ax, cx
+	mov	sp, bp
+	pop	bp
+	retf
+review_isQuestComplete endp
+
+; Attributes: bp-based frame
+;
+; DWORD var_2 & var_4
+
+review_setTitle proc far
+
+	bigpicNumber= word ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 8
+	call	someStackOperation
+	mov	ax, 0Ch
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	cmp	ax, 1
+	sbb	cx, cx
+	neg	cx
+	mov	[bp+var_6], cx
+	or	cx, cx
+	jz	short loc_24150
+	mov	ax, 32h	
+	jmp	short loc_24153
+loc_24150:
+	mov	ax, 2Fh	
+loc_24153:
+	mov	[bp+bigpicNumber], ax
+	cmp	[bp+var_6], 0
+	jz	short loc_24161
+	mov	ax, offset s_building
+	jmp	short loc_24164
+
+loc_24161:
+	mov	ax, offset s_reviewBoard
+
+loc_24164:
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], ds
+	push	[bp+bigpicNumber]
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	setTitle
+	add	sp, 4
+
+	cmp	[bp+var_6], 0
+	jz	short l_return
+	call	text_clear
+	mov	ax, offset s_desertedReviewBoard
+	push	ds
+	push	ax
+	call	printString
+	add	sp, 4
+	add	sp, 4
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Eh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_setTitle endp
+
+; Attributes: bp-based frame
+
+review_questBrilhasti proc far
+	push	bp
+	mov	bp, sp
+
+	mov	ax, 35
+	push	ax
+	call	vm_partyUnderLevel
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_24250
+
+	mov	ax, quest_brilhastDone
+	push	ax
+	call	quest_partyHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_24250
+
+	mov	ax, quest_brilhastActive
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, offset s_questBrilhasti_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questBrilhasti_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questBrilhasti_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questBrilhasti_4
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Fh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_brilhastActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+	mov	ax, 1
+	jmp	short l_return
+
+loc_24250:
+	mov	ax, quest_brilhastActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, quest_brilhastDone
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_questBrilhasti endp
+
+; Attributes: bp-based frame
+
+review_questValarian proc far
+	push	bp
+	mov	bp, sp
+	sub	ax, ax
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_valarianDone
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_brilhastDone
+	push	ax
+	call	quest_partyHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, offset s_questValarian_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questValarian_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questValarian_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questValarian_4
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questValarian_5
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questValarian_6
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questValarian_7
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Fh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_brilhastActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, quest_brilhastDone
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	sub	ax, ax
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_questValarian endp
+
+; Attributes: bp-based frame
+review_questLanatir proc	far
+	push	bp
+	mov	bp, sp
+
+	mov	ax, 2
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_lanatirDone
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 7Bh	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 7Ch	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 7Bh	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, 7Ch	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, offset s_questLanatir_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questLanatir_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questLanatir_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questLanatir_4
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Fh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_lanatirActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	sub	ax, ax
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_questLanatir endp
+
+; Attributes: bp-based frame
+review_questAlliria proc	far
+	push	bp
+	mov	bp, sp
+
+	mov	ax, quest_alliriaDone
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_alliriaActive
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 73h	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 74h	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 73h	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, 74h	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, offset s_questAlliria_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questAlliria_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questAlliria_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Fh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_lanatirActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, quest_alliriaActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_questAlliria endp
+
+; Attributes: bp-based frame
+
+review_questFerofist proc far
+	push	bp
+	mov	bp, sp
+
+	mov	ax, quest_ferofistDone
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_ferofistActive
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 87h	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 88h	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 87h	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, 88h	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, offset s_questFerofist_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questFerofist_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questFerofist_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questFerofist_4
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Fh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_ferofistActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, quest_alliriaActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_questFerofist endp
+
+; Attributes: bp-based frame
+
+review_questSceadu proc far
+	push	bp
+	mov	bp, sp
+
+	mov	ax, quest_sceaduActive
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_sceaduDone
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 98h	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 99h	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 98h	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, 99h	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, offset s_questSceadu_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questSceadu_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questSceadu_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questSceadu_4
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Fh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_ferofistActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, quest_sceaduActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_questSceadu endp
+
+; Attributes: bp-based frame
+
+review_questWerra proc far
+	push	bp
+	mov	bp, sp
+
+	mov	ax, quest_werraDone
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_werraActive
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 9Ch	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 9Dh	
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	short l_returnZero
+
+	mov	ax, 9Ch	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, 9Dh	
+	push	ax
+	call	vm_removeItem
+	add	sp, 2
+
+	mov	ax, offset s_questWerra_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questWerra_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questWerra_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questWerra_4
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Fh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_werraActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, quest_sceaduActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_questWerra endp
+
+; Attributes: bp-based frame
+
+review_questTarjan proc far
+
+	loopCounter= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Eh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, quest_tarjanDone
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, quest_tarjanActive
+	push	ax
+	call	quest_partyNotHasFlagSet
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	sub	ax, ax
+	push	ax
+	mov	ax, 3Eh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, 0A0h 
+	push	ax
+	call	vm_findItem
+	add	sp, 2
+	or	ax, ax
+	jz	l_returnZero
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 3Eh	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	ax, offset s_questTarjan_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questTarjan_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questTarjan_3
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questTarjan_4
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, 4Ah	
+	push	ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+
+	mov	ax, offset s_questTarjan_5
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	ax, quest_werraActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, quest_tarjanActive
+	push	ax
+	call	quest_setFlag
+	add	sp, 2
+
+	mov	ax, 0FFh
+	push	ax
+	mov	ax, 46h	
+	push	ax
+	call	_updateFlags
+	add	sp, 4
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+loopCounter]
+	mov	si, ax
+	cmp	byte ptr gs:party._name[si], 0
+	jz	short l_next
+	cmp	gs:party.class[si], class_chronomancer
+	jnz	short l_next
+	mov	ax, 68h	
+	push	ax
+	push	[bp+loopCounter]
+	call	character_learnSpell
+	add	sp, 4
+
+	mov	ax, 69h	
+	push	ax
+	push	[bp+loopCounter]
+	call	character_learnSpell
+	add	sp, 4
+
+l_next:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jge	short l_returnOne
+
+l_returnOne:
+	mov	ax, 1
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_questTarjan endp
+
+; Attributes: bp-based frame
+
+review_quest proc far
+
+	loopCounter= word ptr -2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+
+	mov	[bp+loopCounter], 0
+
+l_loop:
+	mov	bx, [bp+loopCounter]
+	shl	bx, 1
+	shl	bx, 1
+	call	questFuncs[bx]
+	or	ax, ax
+	jz	short l_next
+
+	push	[bp+loopCounter]
+	push	cs
+	call	near ptr review_questPartySetFlag
+	add	sp, 2
+
+	cmp	[bp+loopCounter], 2
+	jl	short l_next
+	cmp	[bp+loopCounter], 7
+	jge	short l_next
+	call	review_questAwardXp
+l_next:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 8
+	jl	short l_loop
+
+l_return:
+	mov	sp, bp
+	pop	bp
+	retf
+review_quest endp
+
+; Attributes: bp-based frame
+
+review_questAwardXp proc far
+
+	slotNumber= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	ax, offset s_questAwardXp_1
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+	mov	ax, offset s_questAwardXp_2
+	push	ds
+	push	ax
+	call	printStringWithWait
+	add	sp, 4
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	gs:party.class[si], class_monster
+	jnb	short l_next
+	test	gs:party.status[si], 4
+	jnz	short l_next
+	mov	ax, word ptr gs:party.experience[si]
+	mov	dx, word ptr gs:(party.experience+2)[si]
+	add	ax, 27C0h
+	adc	dx, 9
+
+	; Comment out the maximum check for Xp. It sets Xp
+	; to 16 million which is too low for a maximum.
+;	push	dx
+;	push	ax
+;	push	cs
+;	call	near ptr lib_maxFFFFFF
+;	add	sp, 4
+
+	mov	word ptr gs:party.experience[si], ax
+	mov	word ptr gs:(party.experience+2)[si], dx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	ax, gs:party.maxSppt[si]
+	mov	gs:party.currentSppt[si], ax
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
+	mov	byte ptr g_printPartyFlag,	0
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_questAwardXp endp
+
+; Attributes: bp-based frame
+
+review_questPartySetFlag proc far
+
+	questDataP= dword ptr -6
+	slotNumber= word ptr	-2
+	questIndex= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	di
+	push	si
+
+	mov	[bp+slotNumber], 0
+l_loop:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	gs:party.class[si], class_monster
+	jz	short l_next
+
+	mov	bx, [bp+questIndex]
+	mov	al, g_questByteList[bx]
+	sub	ah, ah
+	add	ax, si
+	add	ax, offset party.chronoQuest
+	mov	word ptr [bp+questDataP], ax
+	mov	word ptr [bp+questDataP+2], seg seg027
+	mov	al, g_questMaskList[bx]
+	sub	ah, ah
+	lfs	bx, [bp+questDataP]
+	mov	cl, fs:[bx]
+	sub	ch, ch
+	test	ax, cx
+	jnz	short l_next
+	mov	di, [bp+questIndex]
+	mov	al, g_questMaskList[di]
+	or	fs:[bx], al
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+review_questPartySetFlag endp
+
+; Attributes: bp-based frame
+
+review_removeAgeStatus proc far
+
+	savedStatus= word ptr	-2
+	slotNumber= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 2
+	call	someStackOperation
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	al, gs:party.status[si]
+	sub	ah, ah
+	and	ax, 2
+	mov	[bp+savedStatus], ax
+	or	ax, ax
+	jz	short l_return
+	mov	ax, 5
+	push	ax
+	lea	ax, party.strength[si]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	lea	ax, party.savedST[si]
+	push	dx
+	push	ax
+	call	character_applyAgeStatus
+	add	sp, 0Ah
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	and	gs:party.status[bx], 0FDh
+
+l_return:
+	mov	ax, [bp+savedStatus]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_removeAgeStatus endp
+
+; Attributes: bp-based frame
+
+review_resetAgeStatus proc far
+
+	slotNumber=	word ptr  6
+
+	push	bp
+	mov	bp, sp
+	push	si
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	mov	ax, 5
+	push	ax
+	lea	ax, party.savedST[si]
+	mov	dx, seg	seg027
+	push	dx
+	push	ax
+	lea	ax, party.strength[si]
+	push	dx
+	push	ax
+	call	character_applyAgeStatus
+	add	sp, 0Ah
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	or	gs:party.status[bx], stat_old
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+review_resetAgeStatus endp
+
+; Attributes: bp-based frame
+wizardHall_enter proc	far
+
+	loopCounter= word ptr	-6
+	inKey= word ptr	-4
+	mouseMask= word ptr	-2
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+
+	mov	ax, offset s_guild
+	push	ds
+	push	ax
+	call	setTitle
+	add	sp, 4
+
+	mov	ax, 36h	
+	push	ax
+	call	bigpic_drawPictureNumber
+	add	sp, 2
+
+l_hallLoop:
+	mov	ax, offset s_hallOfWizards
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+
+	mov	[bp+mouseMask], 0
+	mov	[bp+loopCounter], 0
+l_mouseLoop:
+	mov	bl, gs:txt_numLines
+	sub	bh, bh
+	sub	bx, [bp+loopCounter]
+	shl	bx, 1
+	mov	ax, bitMask16bit[bx]
+	or	[bp+mouseMask], ax
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 4
+	jl	short l_mouseLoop
+
+	push	[bp+mouseMask]
+	call	getKey
+	add	sp, 2
+	add	sp, 2
+	mov	[bp+inKey], ax
+	cmp	ax, 10Eh
+	jl	short l_keySwitch
+	cmp	ax, 119h
+	jg	short l_keySwitch
+	mov	al, gs:txt_numLines
+	sub	ah, ah
+	sub	ax, 3
+	sub	[bp+inKey], ax
+
+l_keySwitch:
+	mov	ax, [bp+inKey]
+	cmp	ax, 'A'	
+	jz	short l_advance
+	cmp	ax, 'B'	
+	jz	short l_buySpell
+	cmp	ax, 'S'	
+	jz	short l_acquireSpell
+	cmp	ax, 10Eh
+	jz	short l_advance
+	cmp	ax, 10Fh
+	jz	short l_acquireSpell
+	cmp	ax, 110h
+	jz	short l_buySpell
+	cmp	[bp+inKey], 'E'	
+	jz	short l_return
+	cmp	[bp+inKey], 111h
+	jz	short l_return
+	jmp	l_hallLoop
+
+l_advance:
+	mov	ax, 1
+	push	ax
+	push	cs
+	call	near ptr review_checkXp
+	add	sp, 2
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	l_hallLoop
+
+l_acquireSpell:
+	mov	ax, 1
+	push	ax
+	push	cs
+	call	near ptr review_learnSpells
+	add	sp, 2
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	l_hallLoop
+
+l_buySpell:
+	push	cs
+	call	near ptr wizardHall_buySpell
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	l_hallLoop
+
+l_return:
+	sub	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+wizardHall_enter endp
+
+; Attributes: bp-based frame
+;
+; DWORD var_104 & var_106
+
+wizardHall_buySpell proc far
+
+	var_10A= word ptr -10Ah
+	payeeSlotNumber= word ptr -108h
+	var_106= word ptr -106h
+	var_104= word ptr -104h
+	slotNumber= word ptr -102h
+	stringBuffer= word ptr -100h
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 10Ah
+	call	someStackOperation
+	push	si
+
+	mov	ax, offset s_buySpellPrompt
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+slotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
+	mov	bl, gs:party.class[bx]
+	sub	bh, bh
+	cmp	mageSpellIndex[bx], 0FFh
+	jnz	short l_isSpellcaster
+	mov	ax, offset s_thouArtNotASpellcaster
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	l_return
+
+l_isSpellcaster:
+	mov	ax, g_locationNumber
+	cmp	ax, 3
+	jz	short loc_24C1A
+	cmp	ax, 6
+	jz	short loc_24C22
+	jmp	short loc_24C2A
+
+loc_24C1A:
+	mov	[bp+var_10A], 0
+	jmp	short loc_24C3E
+
+loc_24C22:
+	mov	[bp+var_10A], 1
+	jmp	short loc_24C3E
+
+loc_24C2A:
+	mov	[bp+var_10A], 2
+	jmp	short loc_24C3E
+
+loc_24C3E:
+	mov	ax, offset s_thouMayLearn
+	push	ds
+	push	ax
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	mov	bx, [bp+var_10A]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_spellsForSaleList+2)[bx]
+	push	word ptr g_spellsForSaleList[bx]
+	push	dx
+	push	ax
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	sub	ax, ax
+	push	ax
+	mov	bx, [bp+var_10A]
+	shl	bx, 1
+	shl	bx, 1
+	push	word ptr (g_spellsForSalePrice+2)[bx]
+	push	word ptr g_spellsForSalePrice[bx]
+	push	dx
+	push	[bp+var_106]
+	call	itoa
+	add	sp, 0Ah
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	mov	ax, offset s_inGoldWhoWillPay
+	push	ds
+	push	ax
+	push	dx
+	push	[bp+var_106]
+	call	strcat
+	add	sp, 8
+	mov	[bp+var_106], ax
+	mov	[bp+var_104], dx
+	lea	ax, [bp+stringBuffer]
+	push	ss
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	call	readSlotNumber
+	mov	[bp+payeeSlotNumber], ax
+	or	ax, ax
+	jl	l_return
+
+	mov	bx, [bp+var_10A]
+	shl	bx, 1
+	shl	bx, 1
+	mov	ax, word ptr g_spellsForSalePrice[bx]
+	mov	dx, word ptr (g_spellsForSalePrice+2)[bx]
+	mov	cx, ax
+	mov	bx, dx
+	mov	ax, charSize
+	imul	[bp+payeeSlotNumber]
+	mov	si, ax
+	cmp	word ptr gs:(party.gold+2)[si], bx
+	ja	short l_pay
+	jb	short l_notEnoughGold
+	cmp	word ptr gs:party.gold[si], cx
+	jnb	short l_pay
+
+l_notEnoughGold:
+	mov	ax, offset s_notEnoughGoldNl
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
+	jmp	short l_return
+
+l_pay:
+	mov	bx, [bp+var_10A]
+	shl	bx, 1
+	shl	bx, 1
+	mov	ax, word ptr g_spellsForSalePrice[bx]
+	mov	dx, word ptr (g_spellsForSalePrice+2)[bx]
+	mov	cx, ax
+	mov	bx, dx
+	mov	ax, charSize
+	imul	[bp+payeeSlotNumber]
+	mov	si, ax
+	sub	word ptr gs:party.gold[si], cx
+	sbb	word ptr gs:(party.gold+2)[si], bx
+	mov	ax, [bp+var_10A]
+	add	ax, 7Ah	
+	push	ax
+	push	[bp+slotNumber]
+	call	character_learnSpell
+	add	sp, 4
+	mov	ax, offset s_eldersTeachLore
+	push	ds
+	push	ax
+	call	printStringWClear
+	add	sp, 4
+	mov	ax, 5
+	push	ax
+	call	text_delayNoTable
+	add	sp, 2
+
+l_return:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+wizardHall_buySpell endp
+
+
+seg012 ends
 
 ; Segment type: Pure code
 seg013 segment byte public 'CODE' use16
@@ -28822,7 +37006,7 @@ loc_24DCB:
 	cmp	ax, 3
 	jz	short loc_24DCB
 
-	mov	al, levelNoMaybe
+	mov	al, g_levelNumber
 	sub	ah, ah
 	and	ax, 7
 	shl	ax, 1
@@ -28862,7 +37046,7 @@ loc_24DCB:
 	mov	al, byte_4B258[bx]
 	cbw
 	push	ax
-	call	dice_doYDX
+	call	randomYdX
 	add	sp, 2
 	mov	[bp+var_10C], ax
 
@@ -28941,7 +37125,7 @@ trap_doDamage proc far
 	mov	[bp+var_2], ax
 	sar	gs:damageAmount, 1
 	push	[bp+arg_0]
-	call	bat_doHPDamage
+	call	bat_damageHp
 	add	sp, 2
 l_return:
 	pop	si
@@ -29024,7 +37208,7 @@ l_loop:
 	mov	ax, itemEff_noSpin
 	push	ax
 	push	[bp+slotNumber]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jz	short l_returnOne
@@ -29103,7 +37287,7 @@ l_loop:
 	mov	si, ax
 	test	gs:party.status[si], stat_dead	or stat_stoned
 	jnz	short l_next
-	mov	al, levelNoMaybe
+	mov	al, g_levelNumber
 	sub	ah, ah
 	mov	di, ax
 	cmp	gs:party.currentHP[si], di
@@ -29124,7 +37308,7 @@ l_next:
 	call	party_getLastSlot
 	cmp	ax, 7
 	jle	short l_return
-	mov	buildingRvalMaybe, 5
+	mov	g_mapRval, 5
 l_return:
 	mov	byte ptr g_printPartyFlag, 0
 	sub	ax, ax
@@ -29146,7 +37330,7 @@ l_loop:
 	mov	bx, ax
 	test		gs:party.status[si], stat_dead or stat_stoned
 	jnz		l_next
-	mov		al, levelNoMaybe
+	mov		al, g_levelNumber
 	sub		ah, ah
 	add		gs:party.currentHP[bx], ax
 	mov		ax, gs:party.maxHP[bx]
@@ -29225,7 +37409,7 @@ dunsq_drainSppt	proc far
 l_loop:
 	call	random
 	and	ax, 3
-	mov	cl, levelNoMaybe
+	mov	cl, g_levelNumber
 	sub	ch, ch
 	add	ax, cx
 	mov	cx, ax
@@ -29276,7 +37460,7 @@ l_checkEffectLoop:
 	mov	ax, itemEff_calmMonster
 	push	ax
 	push	[bp+var_2]
-	call	hasEffectEquipped
+	call	character_isEffectEquipped
 	add	sp, 4
 	or	ax, ax
 	jz	short l_returnOne
@@ -29586,7 +37770,7 @@ brilhasti_levelMagicUser proc far
 l_loop:
 	push	[bp+spellIndex]
 	push	[bp+slotNumber]
-	call	mage_learnSpell
+	call	character_learnSpell
 	add	sp, 4
 	inc	[bp+spellIndex]
 	cmp	[bp+spellIndex], 74
@@ -29706,17 +37890,17 @@ geomancer_convert proc	far
 	mov	ax, 106
 	push	ax
 	push	[bp+slotNumber]
-	call	mage_learnSpell
+	call	character_learnSpell
 	add	sp, 4
 	mov	ax, 107
 	push	ax
 	push	[bp+slotNumber]
-	call	mage_learnSpell
+	call	character_learnSpell
 	add	sp, 4
 	mov	ax, 108
 	push	ax
 	push	[bp+slotNumber]
-	call	mage_learnSpell
+	call	character_learnSpell
 	add	sp, 4
 	mov	byte ptr g_printPartyFlag,	0
 
@@ -29987,7 +38171,7 @@ dun_ascendPortal proc far
 	jz	short l_return
 	cmp	levitationDuration, 0
 	jz	short l_return
-	test	levFlags, 10h
+	test	g_levelFlags, 10h
 	jz	short loc_25878
 	push	cs
 	call	near ptr portal_incrementLevel
@@ -30034,7 +38218,7 @@ dun_descendPortal proc far
 	jnz	short loc_258CF
 	call	dunsq_drainHp
 loc_258CF:
-	test	levFlags, 10h
+	test	g_levelFlags, 10h
 	jz	short loc_258E1
 	call	portal_decrementLevel
 	jmp	short loc_258E5
@@ -30051,7 +38235,7 @@ dun_descendPortal endp
 portal_decrementLevel proc far
 	push	bp
 	mov	bp, sp
-	dec	dunLevelNum
+	dec	g_dunLevelNum
 	jns	short l_changeLevel
 	call	dun_setExitLocation
 	jmp	short l_return
@@ -30068,7 +38252,7 @@ portal_decrementLevel endp
 portal_incrementLevel proc far
 	push	bp
 	mov	bp, sp
-	inc	dunLevelNum
+	inc	g_dunLevelNum
 	call	dun_changeLevels
 	mov	sp, bp
 	pop	bp
@@ -30384,7 +38568,7 @@ bards_listen proc far
 	lea	ax, [bp+var_C]
 	push	ss
 	push	ax
-	cmp	currentLocationMaybe, 9
+	cmp	g_locationNumber, 9
 	jnz	short loc_25BCC
 	mov	ax, 1
 	jmp	short loc_25BCE
@@ -30562,7 +38746,7 @@ bards_learnSong	proc far
 	add	sp, 0Ah
 	mov	[bp+var_4], ax
 	mov	[bp+var_2], dx
-	mov	ax, offset s_bardInGold
+	mov	ax, offset s_inGoldWhoWillPay
 	push	ds
 	push	ax
 	push	dx
@@ -30636,7 +38820,7 @@ l_playSong:
 	mov	ax, offset s_bardPlaysSong
 	push	ds
 	push	ax
-	call	printString
+	call	printStringWClear
 	add	sp, 4
 l_waitAndReturn:
 	mov	ax, 4000h
@@ -30980,7 +39164,7 @@ loc_2607B:
 	mov	al, gs:monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
-	call	dice_doYDX
+	call	randomYdX
 	add	sp, 2
 	mov	cx, gs:monGroups.hpBase[si]
 	add	cx, ax
@@ -32074,7 +40258,7 @@ loc_269F5:
 	call	close
 	add	sp, 2
 loc_26A01:
-	call	sub_27C4A
+	call	findNextFile
 	or	ax, ax
 	jnz	loc_2696B
 
@@ -32166,7 +40350,7 @@ loc_26AB8:
 	push	[bp+var_4]
 	mov	ax, 7
 	push	ax
-	call	mage_learnSpellLevel
+	call	character_learnSpellLevel
 	add	sp, 6
 	inc	[bp+var_4]
 	jmp	short loc_26AB8
@@ -33055,15 +41239,7695 @@ cp_compareStrings endp
 
 seg018 ends
 
-include seg019.asm
-include seg020.asm
+; Segment type: Pure code
+seg019 segment word public 'CODE' use16
+        assume cs:seg019
+;org 3
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+
+byte_27433 db 90h, 10h dup(0)
+
+huf_init proc far
+
+	fileHandle= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	ds
+	push	si
+	push	di
+	push	es
+	mov	ax, seg	seg020
+	mov	ds, ax
+	assume ds:seg020
+	mov	bx, [bp+fileHandle]
+	mov	huf_fileHandle, bx
+	mov	ah, 3Fh	
+	mov	dx, offset huf_fileBuffer
+	mov	cx, 200h
+	int	21h		; BX = file handle, CX = number	of bytes to read
+				; DS:DX	-> buffer
+	mov	si, offset huf_fileBuffer
+	lodsw
+	mov	dx, ax
+	lodsw
+	xchg	al, ah
+	xchg	dl, dh
+	mov	word ptr huf_dataSize, ax
+	mov	word ptr huf_dataSize+2, dx
+	mov	huf_nodeListTail, 0
+	add	si, 4
+	lodsb
+	mov	huf_fileBufferIndex, si
+	mov	huf_bitMask, 80h
+	mov	huf_currentByte, al
+	mov	ax, offset huf_treeData
+	push	ax
+	call	huf_expandTree
+	add	sp, 2
+	pop	es
+	pop	di
+	pop	si
+	pop	ds
+	assume ds:dseg
+	pop	bp
+	retf
+huf_init endp
+
+huf_flate	proc far
+
+	bufferP= dword ptr  6
+	maxSize= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	push	es
+	push	ds
+	mov	ax, seg	seg020
+	mov	ds, ax
+	assume ds:seg020
+	push	si
+	push	di
+
+	les	di, [bp+bufferP]
+	mov	huf_bufferP, di
+	mov	bx, [bp+maxSize]
+	mov	huf_flateSize, bx
+	mov	ax, word ptr huf_dataSize
+	mov	dx, word ptr huf_dataSize+2
+	sub	cx, cx
+	sub	bx, ax
+	sbb	cx, dx
+	jl	short l_skipFixSize
+	mov	huf_flateSize, ax		; Set flateSize to huf_dataSize 
+						; if huf_dataSize < huf_flateSize
+l_skipFixSize:
+	mov	huf_flateByteCount, 0
+
+loc_274CA:
+	mov	ax, huf_flateSize
+	cmp	ax, huf_flateByteCount
+	jz	short l_return
+
+	mov	di, offset huf_treeData
+
+loc_274D6:
+	cmp	word ptr [di], 0
+	jz	short loc_274F8
+
+	mov	ax, word ptr huf_bitMask
+	or	al, al
+	jz	short l_getNextByte
+
+loc_274E2:
+	and	ah, al
+	shr	al, 1
+	mov	huf_bitMask, al
+	mov	al, ah
+	or	al, al
+	jnz	short loc_274F3
+
+	mov	di, [di]
+	jmp	short loc_274D6
+
+loc_274F3:
+	mov	di, [di+2]
+	jmp	short loc_274D6
+
+loc_274F8:
+	mov	al, [di+4]
+	mov	di, huf_bufferP
+	stosb
+	mov	huf_bufferP, di
+	inc	huf_flateByteCount
+	jmp	short loc_274CA
+
+l_return:
+	sub	word ptr huf_dataSize, ax
+	sbb	word ptr huf_dataSize+2, 0
+	pop	di
+	pop	si
+	pop	ds
+	assume ds:dseg
+	pop	es
+	pop	bp
+	retf
+
+l_getNextByte:
+	mov	si, ds:huf_fileBufferIndex
+	cmp	si, offset huf_fileBufferIndex
+	jz	short l_nextFileBuffer
+	lodsb
+	mov	ds:huf_currentByte, al
+	mov	ds:huf_fileBufferIndex, si
+	mov	ah, 80h
+	xchg	al, ah
+	jmp	short loc_274E2
+
+l_nextFileBuffer:
+	mov	ah, 3Fh	
+	mov	bx, ds:huf_fileHandle
+	mov	cx, 200h
+	mov	dx, offset huf_fileBuffer
+	int	21h	; DOS -	2+ - call(read) FROM FILE WITH HANDLE
+			; BX = file handle, CX = number	of bytes to read
+			; DS:DX	-> buffer
+	mov	si, dx
+	lodsb
+	mov	ah, 80h
+	mov	ds:huf_fileBufferIndex, si
+	mov	ds:huf_currentByte, al
+	xchg	al, ah
+	jmp	short loc_274E2
+huf_flate	endp
+
+; Attributes: bp-based frame
+;
+; Recursively reconstruct the Huffman tree
+;
+huf_expandTree	proc near
+
+	arg_0= word ptr	 2
+
+	call	huf_getNextBit
+	jnz	short loc_27576
+
+	call	huf_newNode
+	mov	di, ax
+	call	huf_newNode
+	mov	bp, sp
+	mov	si, [bp+arg_0]
+	mov	[si], di
+	mov	[si+2],	ax
+	push	ax
+	push	di
+	call	huf_expandTree
+	add	sp, 2
+	call	huf_getNextBit
+	call	huf_expandTree
+	add	sp, 2
+	retn
+
+loc_27576:
+	call	huf_extractByte
+	mov	bp, sp
+	mov	si, [bp+arg_0]
+	mov	[si+4],	al
+	retn
+huf_expandTree	endp
+
+huf_getNextBit	proc near
+	mov	ax, word ptr ds:huf_bitMask
+	or	al, al
+	jz	short l_getNextByte
+
+l_return:
+	and	ah, al
+	shr	al, 1
+	mov	ds:huf_bitMask, al
+	mov	al, ah
+	or	al, al
+	retn
+
+l_getNextByte:
+	mov	si, ds:huf_fileBufferIndex
+	cmp	si, offset huf_fileBufferIndex
+	jz	short l_readMoreData
+	lodsb
+	mov	byte ptr ds:huf_currentByte, al
+	mov	ds:huf_fileBufferIndex, si
+	mov	ah, 80h
+	xchg	al, ah
+	jmp	short l_return
+
+l_readMoreData:
+	mov	ah, 3Fh	
+	mov	bx, ds:huf_fileHandle
+	mov	cx, 200h
+	mov	dx, offset huf_fileBuffer
+	int	21h	; DOS -	2+ - call(read) FROM FILE WITH HANDLE
+			; BX = file handle, CX = number	of bytes to read
+			; DS:DX	-> buffer
+	mov	si, dx
+	lodsb
+	mov	ah, 80h
+	mov	ds:huf_fileBufferIndex, si
+	mov	byte ptr ds:huf_currentByte, al
+	xchg	al, ah
+	jmp	short l_return
+huf_getNextBit	endp
+
+; Returns the address of the new node
+;
+; Returns 0 on failure
+;
+huf_newNode proc near
+	mov	ax, ds:huf_nodeListTail
+	cmp	ax, 300h
+	jge	short l_returnFail
+
+	mov	bx, ax
+	inc	ax
+	mov	ds:huf_nodeListTail, ax
+	mov	ax, bx
+	shl	ax, 1
+	shl	ax, 1
+	add	ax, bx
+	add	ax, (offset huf_treeData+5)
+	mov	bx, ax
+	mov	word ptr [bx], 0
+	retn
+
+l_returnFail:
+	sub	ax, ax
+	retn
+huf_newNode endp
+
+huf_extractByte proc near
+	mov	bp, 8
+
+loc_275CE:
+	shl	di, 1
+	call	huf_getNextBit
+	jz	short loc_275D8
+	or	di, 1
+
+loc_275D8:
+	dec	bp
+
+	jnz	short loc_275CE
+	mov	ax, di
+	retn
+huf_extractByte endp
+
+; Read 64 words from the source and write to the work buffer
+;
+; Resets d3cmp_workBufIndex
+;
+d3cmp_readData proc near
+	push	es
+	push	di
+	push	cx
+	push	si
+	push	ax
+	cld
+	mov	ax, ds
+	mov	es, ax
+	assume es:dseg
+	mov	di, offset d3cmp_workBuf
+	mov	si, word ptr d3cmp_srcP
+	add	word ptr d3cmp_srcP, 80h
+	mov	ds, word ptr d3cmp_srcP+2
+	mov	cx, 64
+	rep movsw
+	mov	ax, es
+	mov	ds, ax
+	mov	d3cmp_workBufIndex, 0
+	pop	ax
+	pop	si
+	pop	cx
+	pop	di
+	pop	es
+	assume es:nothing
+	retn
+d3cmp_readData endp
+
+sub_27632 proc near
+	mov	si, d3cmp_workBufIndex
+	xor	ax, ax
+	test	si, 80h
+	jnz	short loc_27647
+loc_2763E:
+	mov	al, byte ptr d3cmp_workBuf[si]
+	inc	d3cmp_workBufIndex
+	retn
+loc_27647:
+	call	d3cmp_readData
+	xor	si, si
+	jmp	short loc_2763E
+sub_27632 endp
+
+; Copy a number of bytes from d3comp_outputBuffer to the 
+; destination buffer at d3cmp_destP
+;
+; bp has the number of bytes to copy
+;
+d3cmp_outputToBuffer proc near
+	push	es
+	push	di
+	push	si
+	cld
+	mov	ax, word ptr d3cmp_destP
+	mov	es, ax
+	mov	di, word ptr d3cmp_destP+2
+	mov	si, offset d3comp_outputBuffer
+	mov	cx, bp
+	rep movsb
+	add	word ptr d3cmp_destP+2, bp
+	jb	short loc_2766C
+
+loc_27668:
+	pop	si
+	pop	di
+	pop	es
+	retn
+
+loc_2766C:
+	add	word ptr d3cmp_destP, 1000h
+	add	word_4EE46, 1
+	jmp	short loc_27668
+d3cmp_outputToBuffer endp
+
+d3cmp_updateMemory proc	near
+	push	bp
+	push	ax
+	push	di
+	cmp	word_4D12F, 8000h
+	jnz	short loc_27699
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+	push	si
+	push	di
+	push	ds
+	push	es
+	push	bp
+	call	sub_27980
+	pop	bp
+	pop	es
+	pop	ds
+	pop	di
+	pop	si
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+loc_27699:
+	mov	si, ax
+	shl	si, 1
+	mov	bp, word_4D619[si]
+loc_276A1:
+	mov	cx, bp
+	shl	bp, 1
+	inc	ds:word_4CC4B[bp]
+	mov	si, ds:word_4CC4B[bp]
+	mov	bx, cx
+	inc	bx
+	shl	bx, 1
+	cmp	word_4CC4B[bx],	si
+	jb	short loc_276BE
+	mov	bx, bp
+	jmp	short loc_27716
+loc_276BE:
+	add	bx, 2
+	cmp	si, word_4CC4B[bx]
+	ja	short loc_276BE
+	sub	bx, 2
+	mov	ax, word_4CC4B[bx]
+	mov	di, cx
+	shl	di, 1
+	mov	word_4CC4B[di],	ax
+	mov	word_4CC4B[bx],	si
+	mov	si, word_4D88D[di]
+	shl	si, 1
+	shr	bx, 1
+	mov	word_4D133[si], bx
+	cmp	si, 1254
+	jge	short loc_276F0
+	mov	word_4D133[si+2], bx
+loc_276F0:
+	shl	bx, 1
+	mov	di, word_4D88D[bx]
+	shl	di, 1
+	shr	si, 1
+	mov	word_4D88D[bx],	si
+	mov	word_4D133[di], cx
+	cmp	di, 4E6h
+	jge	short loc_2770C
+	mov	word_4D133[di+2], cx
+loc_2770C:
+	mov	si, cx
+	shl	si, 1
+	shr	di, 1
+	mov	word_4D88D[si],	di
+loc_27716:
+	mov	bp, word_4D133[bx]
+	or	bp, bp
+	jz	short loc_27720
+	jmp	short loc_276A1
+loc_27720:
+	pop	di
+	pop	ax
+	pop	bp
+	retn
+d3cmp_updateMemory endp
+
+
+
+sub_27724 proc near
+	cmp	dl, 8
+	jbe	short loc_27733
+loc_27729:
+	xor	ax, ax
+	shl	di, 1
+	adc	ax, 0
+	dec	dl
+	retn
+loc_27733:
+	mov	si, d3cmp_workBufIndex
+	xor	ax, ax
+	test	si, 80h
+	jnz	short loc_27759
+loc_2773F:
+	mov	al, byte ptr d3cmp_workBuf[si]
+	inc	d3cmp_workBufIndex
+	mov	cl, 8
+	sub	cl, dl
+	shl	ax, cl
+	or	di, ax
+	add	dl, 8
+	test	cl, 8
+	jz	short loc_27729
+	jmp	short loc_27733
+loc_27759:
+	call	d3cmp_readData
+	xor	si, si
+	jmp	short loc_2773F
+sub_27724 endp
+
+; This function extracts the next data element from the source
+; buffer.
+;
+d3cmp_getNextWord proc near
+	mov	bx, word_4DD71
+
+loc_27791:
+	shl	bx, 1
+	cmp	bx, 1254
+	jnb	short loc_277B1
+
+	cmp	dl, 8
+	jbe	short l_updateDataWord
+
+loc_2779E:
+	xor	ax, ax
+	shl	di, 1
+	adc	ax, 0
+	dec	dl
+	shl	ax, 1
+	add	bx, ax
+	mov	bx, word_4D88D[bx]
+	jmp	short loc_27791
+
+; ==============================================
+; updateDataWord()
+; ==============================================
+l_updateDataWord:
+	mov	si, d3cmp_workBufIndex
+	xor	ax, ax
+	test	si, 80h
+	jnz	short loc_27786
+
+loc_2776C:
+	mov	al, byte ptr d3cmp_workBuf[si]
+	inc	d3cmp_workBufIndex
+	mov	cl, 8
+	sub	cl, dl
+	shl	ax, cl
+	or	di, ax
+	add	dl, 8
+	test	cl, 8
+	jz	short loc_2779E
+	jmp	short l_updateDataWord
+
+loc_27786:
+	CALL(d3cmp_readData)
+	xor	si, si
+	jmp	short loc_2776C
+; ==============================================
+; updateDataWord() end
+; ==============================================
+
+loc_277B1:
+	mov	ax, bx
+	shr	ax, 1
+	sub	ax, 627
+	CALL(d3cmp_updateMemory)
+	retn
+d3cmp_getNextWord endp
+
+; This function uses the high byte of the current data
+; word to determine the offset of the sequence that is
+; to be repeated in d3cmp_outputBuffer
+;
+; A return value of 0 indicates that the previous
+; byte is repeated
+;
+
+d3cmp_readCopyOffset proc near
+
+; This section is common to several functions
+; and updates the current data word stored in di
+; ==============================================
+; updateDataWord()
+; ==============================================
+	cmp	dl, 8
+	ja	short loc_277EE
+loc_277C1:
+	mov	si, d3cmp_workBufIndex
+	xor	ax, ax
+	test	si, 80h
+	jnz	short l_readData
+loc_277CD:
+	mov	al, byte ptr d3cmp_workBuf[si]
+	inc	d3cmp_workBufIndex
+	mov	cl, 8
+	sub	cl, dl
+	shl	ax, cl
+	or	di, ax
+	add	dl, 8
+	test	cl, 8
+	jz	short loc_277EE
+	jmp	short loc_277C1
+l_readData:
+	CALL(d3cmp_readData)
+	xor	si, si
+	jmp	short loc_277CD
+; ==============================================
+; updateDataWord() end
+; ==============================================
+
+loc_277EE:
+	; Extract 8 bits to index into byte_4CB3F
+	sub	dl, 8			; subtract 8 from dataShift value
+	mov	bx, di			; save original dataWord value
+	xor	ax, ax			; clear ax
+	xchg	bl, ah			; 
+	mov	di, ax			; dataWord = (dataWord << 8)
+	xchg	bh, bl			; bx = low 8 bits of original dataWord 
+					; bx = index into byte_4CB3F & byte_4CA3F
+					; arrays
+
+	xor	cx, cx
+	mov	ch, byte_4CB3F[bx]	; write byte_4CB3F value to high 8 bits
+	shr	cx, 1
+	shr	cx, 1
+	push	cx			; Equivalent to cx = (byte_4CB3F[index] << 6)
+
+	xor	cx, cx
+	mov	cl, byte_4CA3F[bx]
+	dec	cl
+	dec	cl			; cx = (byte_4CA3F[index] - 2)
+	jcxz	short l_return
+
+loc_27812:
+	shl	bx, 1
+	xchg	dh, cl
+	cmp	dl, 8
+	jbe	short l_updateDataWord
+
+loc_2781B:
+	xor	ax, ax
+	shl	di, 1
+	adc	ax, 0
+	dec	dl
+	xchg	cl, dh
+	add	bx, ax
+	loop	loc_27812
+
+l_return:
+	pop	cx
+	and	bx, 3Fh
+	or	cx, bx
+	mov	ax, cx
+	retn
+
+; ==============================================
+; updateDataWord()
+; ==============================================
+l_updateDataWord:
+	mov	si, d3cmp_workBufIndex
+	xor	ax, ax
+	test	si, 80h
+	jnz	short loc_27859
+loc_2783F:
+	mov	al, byte ptr d3cmp_workBuf[si]
+	inc	d3cmp_workBufIndex
+	mov	cl, 8
+	sub	cl, dl
+	shl	ax, cl
+	or	di, ax
+	add	dl, 8
+	test	cl, 8
+	jz	short loc_2781B
+	jmp	short l_updateDataWord
+
+loc_27859:
+	CALL(d3cmp_readData)
+	xor	si, si
+	jmp	short loc_2783F
+; ==============================================
+; updateDataWord() end
+; ==============================================
+d3cmp_readCopyOffset endp
+
+d3cmp_init proc	near
+	push	bp
+	push	di
+	push	si
+	xor	si, si				
+	mov	bp, 2
+
+loc_27868:					 
+	mov	cx, si				; for (i = 0; i < 314; i++) {
+	shr	cx, 1				;
+	mov	word_4CC4B[si],	1		;	word_4CC4B[i] = 1
+	mov	di, cx
+	add	di, 627				;
+	mov	word_4D88D[si],	di		; 	word_4D88D[i] = i + 627
+	shl	di, 1
+	mov	word_4D133[di], cx		;	word_4D133[i+627] = i
+	add	si, bp
+	cmp	si, 628
+	jl	short loc_27868
+
+	xor	di, di
+	mov	bx, 628
+loc_2788F:
+	mov	ax, word_4CC4B[di]
+	add	ax, word_4CC4B[di+2]
+	mov	word_4CC4B[bx],	ax
+	shr	di, 1
+	mov	word_4D88D[bx],	di
+	shl	di, 1
+	shr	bx, 1
+	mov	word_4D133[di], bx
+	mov	word_4D133[di+2], bx
+	shl	bx, 1
+	add	di, 4
+	add	bx, bp
+	cmp	bx, 1252
+	jle	short loc_2788F
+	mov	word_4D131, 0FFFFh
+	mov	word_4D617, 0
+	pop	si
+	pop	di
+	pop	bp
+	retn
+d3cmp_init endp
+
+
+d3cmp_doDecomp proc near
+	push	bp
+	mov	ax, word ptr dataHeader		; Return if dataHeader == 0
+	or	ax, word ptr dataHeader+2
+	jz	l_return
+
+	CALL(d3cmp_init)
+	xor	bp, bp
+	sub	ax, ax
+	mov	word ptr countMaybe+2, ax
+	mov	word ptr countMaybe, ax
+	sub	dx, dx
+
+loc_278E6:
+	mov	ax, word ptr dataHeader
+	mov	cx, word ptr dataHeader+2
+	cmp	word ptr countMaybe+2, cx
+	ja	l_output
+
+loc_278F6:
+	jb	short loc_27901
+	cmp	word ptr countMaybe, ax
+	jnb	short l_output
+
+loc_27901:
+	CALL(d3cmp_getNextWord)
+	cmp	ax, 256				; Just output the value if less than 256
+	jge	short l_repeatSequence
+	mov	ds:d3comp_outputBuffer[bp], al
+	inc	bp
+	test	bp, 4096
+	jz	short loc_2791B
+	CALL(d3cmp_outputToBuffer)
+	mov	bp, 0
+
+loc_2791B:
+	add	word ptr countMaybe, 1
+	adc	word ptr countMaybe+2, 0
+	jmp	short loc_27978
+
+l_repeatSequence:				; A value greater than 256 indicates a repeat copy
+	sub	ax, 253				; number of repeats is value - 3
+	mov	d3cmp_repeatCount, ax
+	CALL(d3cmp_readCopyOffset)
+	mov	cx, bp				; bp is the work buffer index
+	sub	cx, ax
+	dec	cx
+	mov	_d3cmp_baseAddr, cx		; Copy address is buffer - 1 - value from d3cmp_readCopyOffset
+	mov	_d3cmp_offset, 0
+	jmp	short loc_2796F
+
+loc_27941:
+	mov	bx, _d3cmp_baseAddr
+	add	bx, _d3cmp_offset
+	and	bh, 0Fh
+	mov	al, d3comp_outputBuffer[bx]
+	mov	ds:d3comp_outputBuffer[bp], al
+	inc	bp
+	test	bp, 1000h
+	jz	short loc_27961
+	CALL(d3cmp_outputToBuffer)
+	xor	bp, bp
+
+loc_27961:
+	add	word ptr countMaybe, 1
+	adc	word ptr countMaybe+2, 0
+	inc	_d3cmp_offset
+
+loc_2796F:
+	mov	ax, d3cmp_repeatCount
+	cmp	_d3cmp_offset, ax
+	jl	short loc_27941
+
+loc_27978:
+	jmp	loc_278E6
+
+l_output:
+	CALL(d3cmp_outputToBuffer)
+
+l_return:
+	pop	bp
+	retn
+d3cmp_doDecomp endp
+
+sub_27980 proc near
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+	push	si
+	push	di
+	push	ds
+	push	es
+	push	bp
+	mov	word_4EE4A, 0
+	mov	word_4EE48, 0
+loc_27995:
+	mov	si, word_4EE48
+	shl	si, 1
+	cmp	word_4D88D[si],	273h
+	jl	short loc_279C0
+	mov	di, word_4EE4A
+	shl	di, 1
+	mov	ax, word_4CC4B[si]
+	inc	ax
+	shr	ax, 1
+	mov	word_4CC4B[di],	ax
+	mov	ax, word_4D88D[si]
+	mov	word_4D88D[di],	ax
+	inc	word_4EE4A
+loc_279C0:
+	inc	word_4EE48
+	cmp	word_4EE48, 273h
+	jl	short loc_27995
+	mov	word_4EE48, 0
+	mov	word_4EE4A, 13Ah
+	jmp	short loc_27A52
+loc_279DA:
+	dec	word_4EE4C
+loc_279DE:
+	mov	bx, word_4EE4C
+	shl	bx, 1
+	mov	ax, word_4EE4E
+	cmp	word_4CC4B[bx],	ax
+	ja	short loc_279DA
+	inc	word_4EE4C
+	mov	cx, word_4EE4A
+	sub	cx, word_4EE4C
+	shl	cx, 1
+	mov	word_4EE50, cx
+	std
+	mov	di, word_4EE4C
+	shl	di, 1
+	add	di, offset word_4CC4B
+	add	di, cx
+	shr	cx, 1
+	mov	si, di
+	sub	si, 2
+	rep movsw
+	mov	si, word_4EE4C
+	shl	si, 1
+	mov	ax, word_4EE4E
+	mov	word_4CC4B[si],	ax
+	mov	cx, word_4EE50
+	mov	di, word_4EE4C
+	shl	di, 1
+	add	di, word_4D88D
+	add	di, cx
+	shr	cx, 1
+	mov	si, di
+	sub	si, 2
+	rep movsw
+	cld
+	mov	bx, word_4EE4C
+	shl	bx, 1
+	mov	ax, word_4EE48
+	mov	word_4D88D[bx],	ax
+	add	word_4EE48, 2
+	inc	word_4EE4A
+loc_27A52:
+	cmp	word_4EE4A, 273h
+	jge	short loc_27A8C
+	mov	ax, word_4EE48
+	inc	ax
+	mov	word_4EE4C, ax
+	mov	bx, word_4EE4A
+	shl	bx, 1
+	mov	si, word_4EE48
+	shl	si, 1
+	mov	ax, word_4CC4B[si]
+	mov	si, word_4EE4C
+	shl	si, 1
+	add	ax, word_4CC4B[si]
+	mov	word_4CC4B[bx],	ax
+	mov	word_4EE4E, ax
+	mov	ax, word_4EE4A
+	dec	ax
+	mov	word_4EE4C, ax
+	jmp	loc_279DE
+loc_27A8C:
+	mov	word_4EE48, 0
+	jmp	short loc_27AA9
+loc_27A94:
+	mov	si, word_4EE4C
+	shl	si, 1
+	mov	ax, word_4EE48
+	mov	word_4D133[si+2], ax
+	mov	word_4D133[si], ax
+loc_27AA5:
+	inc	word_4EE48
+loc_27AA9:
+	cmp	word_4EE48, 273h
+	jge	short loc_27AD0
+	mov	bx, word_4EE48
+	shl	bx, 1
+	mov	ax, word_4D88D[bx]
+	mov	word_4EE4C, ax
+	cmp	ax, 273h
+	jl	short loc_27A94
+	mov	bx, ax
+	shl	bx, 1
+	mov	ax, word_4EE48
+	mov	word_4D133[bx], ax
+	jmp	short loc_27AA5
+loc_27AD0:
+	pop	bp
+	pop	es
+	pop	ds
+	pop	di
+	pop	si
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+	retn
+sub_27980 endp
+
+; Attributes: bp-based frame
+
+d3cmp_flate proc far
+
+	srcP	= dword ptr 6
+	destP	= dword ptr 0Ah
+
+	push	bp
+	mov	bp, sp
+	push	di
+	push	si
+	push	ds
+	push	es
+	mov	ax, seg	dseg
+	mov	ds, ax
+
+	mov	ax, word ptr [bp+srcP]
+	mov	word ptr d3cmp_srcP, ax
+
+	mov	ax, word ptr [bp+srcP+2]
+	mov	word ptr d3cmp_srcP+2,	ax
+
+	mov	ax, word ptr [bp+destP]
+	mov	word ptr d3cmp_destP+2, ax
+
+	mov	ax, word ptr [bp+destP+2]
+	mov	word ptr d3cmp_destP, ax
+
+	mov	ax, word ptr d3cmp_srcP+2
+	mov	es, ax
+	mov	di, word ptr d3cmp_srcP
+	mov	ax, es:[di]
+	mov	word ptr dataHeader, ax
+	mov	ax, es:[di+2]
+	mov	word ptr dataHeader+2, ax
+	add	word ptr d3cmp_srcP, 4
+
+	; Initialize d3comp_outputBuffer array to ' '
+	mov	ax, ds
+	mov	es, ax
+	assume es:dseg
+	mov	di, offset d3comp_outputBuffer
+	mov	cx, 4155
+	mov	al, 20h	
+	rep stosb
+
+	xor	di, di
+	CALL(d3cmp_readData)
+	CALL(d3cmp_doDecomp)
+	pop	es
+	assume es:nothing
+	pop	ds
+	pop	si
+	pop	di
+	pop	bp
+	retf
+d3cmp_flate endp
+
+_readChFromKeyboard proc far
+	sub	ax, ax
+	int	16h		; KEYBOARD - call(read) CHAR FROM BUFFER, WAIT IF EMPTY
+				; Return: AH = scan code, AL = character
+	retf
+_readChFromKeyboard endp
+
+random	proc far
+	cli
+	in	al, 40h		; Timer	8253-5 (AT: 8254.2).
+	mov	ah, al
+	in	al, 40h		; Timer	8253-5 (AT: 8254.2).
+	add	al, ah
+	sti
+	add	ax, randomSeed
+	mov	randomSeed, ax
+	retf
+random	endp
+
+; Attributes: bp-based frame
+
+open proc far
+
+	fileName= dword ptr  6
+	fileMode= byte ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	push	ds
+	lds	dx, [bp+fileName]
+	mov	al, [bp+fileMode]
+	mov	ah, 3Dh
+	int	21h		; DS:DX	-> ASCIZ filename
+				; AL = access mode
+				; 0 - read, 1 -	write, 2 - read	& write
+	jnb	short l_return
+	sub	ax, ax
+	dec	ax
+
+l_return:
+	pop	ds
+	pop	bp
+	retf
+open endp
+
+; Attributes: bp-based frame
+
+close proc far
+
+	fileHandle= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	mov	bx, [bp+fileHandle]
+	mov	ah, 3Eh
+	int	21h		; DOS -	2+ - call(close) A FILE WITH HANDLE
+				; BX = file handle
+	jnb	short l_return
+	sub	ax, ax
+	dec	ax
+
+l_return:
+	pop	bp
+	retf
+close endp
+
+
+
+
+; Attributes: bp-based frame
+
+read proc far
+
+	fileHandle= word ptr  6
+	destBuffer=	dword ptr  8
+	numBytes= word ptr  0Ch
+
+	push	bp
+	mov	bp, sp
+	push	ds
+	mov	bx, [bp+fileHandle]
+	lds	dx, [bp+destBuffer]
+	mov	cx, [bp+numBytes]
+	mov	ah, 3Fh
+	int	21h		; DOS -	2+ - call(read) FROM FILE WITH HANDLE
+				; BX = file handle, CX = number	of bytes to read
+				; DS:DX	-> buffer
+	jnb	short l_return
+	sub	ax, ax
+	dec	ax
+
+l_return:
+	pop	ds
+	pop	bp
+	retf
+read endp
+
+write proc far
+
+	fileHandle= word ptr	 6
+	sourceP= dword ptr  8
+	writeLength= word ptr	 0Ch
+
+	push	bp
+	mov	bp, sp
+	push	ds
+	mov	bx, [bp+fileHandle]
+	lds	dx, [bp+sourceP]
+	mov	cx, [bp+writeLength]
+	mov	ah, 40h
+	int	21h		; DOS -	2+ - call(write) TO FILE WITH	HANDLE
+				; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
+	jnb	short l_return
+	sub	ax, ax
+	dec	ax
+
+l_return:
+	pop	ds
+	pop	bp
+	retf
+write endp
+
+lseek proc far
+
+	fileHandle= word ptr	 6
+	offsetLo= word ptr	 8
+	offsetHi= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	push	ds
+	mov	bx, [bp+fileHandle]
+	mov	cx, [bp+offsetHi]
+	mov	dx, [bp+offsetLo]
+	mov	ax, 4200h
+	int	21h		; DOS -	2+ - MOVE FILE call(read)/call(write) POINTER (LSEEK)
+				; AL = method: offset from beginning of	file
+	jnb	short l_return
+	sub	ax, ax
+	dec	ax
+
+l_return:
+	pop	ds
+	pop	bp
+	retf
+lseek endp
+
+; Attributes: bp-based frame
+
+findFirstFile proc far
+
+	pathGlob= dword ptr  6
+	bufferP= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	push	ds
+	lds	dx, [bp+bufferP]
+	mov	ah, 1Ah
+	int	21h		; DOS -	SET DISK TRANSFER AREA ADDRESS
+				; DS:DX	-> disk	transfer buffer
+	lds	dx, [bp+pathGlob]
+	mov	cx, 7
+	mov	ah, 4Eh
+	int	21h		; DOS -	2+ - FIND FIRST	ASCIZ (FINDFIRST)
+				; CX = search attributes
+				; DS:DX	-> ASCIZ filespec
+				; (drive, path,	and wildcards allowed)
+	mov	ax, 0
+	jb	short l_return
+	inc	ax
+
+l_return:
+	pop	ds
+	pop	bp
+	retf
+findFirstFile endp
+
+findNextFile proc far
+	push	bp
+	mov	ah, 4Fh
+	int	21h		; DOS -	2+ - FIND NEXT ASCIZ (FINDNEXT)
+				; [DTA]	= data block from
+				; last AH = 4Eh/4Fh call
+	mov	ax, 0
+	jb	short l_return
+	inc	ax
+
+l_return:
+	pop	bp
+	retf
+findNextFile endp
+
+checkKeyboard proc far
+	mov	ah, 1
+	int	16h		; KEYBOARD - CHECK BUFFER, DO NOT CLEAR
+				; Return: ZF clear if character	in buffer
+				; AH = scan code, AL = character
+				; ZF set if no character in buffer
+	jnz	short l_haveKey
+
+	sub	ax, ax
+	jmp	short l_return
+
+l_haveKey:
+	or	ax, ax
+	jnz	short l_return
+	inc	ax
+
+l_return:
+	retf
+checkKeyboard endp
+
+; Attributes: bp-based frame
+bigpic_initBuffers proc	far
+
+	backgroundValue= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	ds
+	mov	ax, seg	seg021
+	mov	ds, ax
+	assume ds:seg021
+	mov	dx, [bp+backgroundValue]
+	mov	dh, dl
+	and	dx, 0F00Fh
+	mov	cl, 4
+	mov	bx, 0FFh
+
+loc_27C7F:
+	xor	ah, ah
+	mov	al, bl
+	and	al, 0Fh
+	mov	g_tile_lowNibble[bx],	al
+	cmp	dl, al
+	jnz	short loc_27C8F
+	mov	ah, 0Fh
+
+loc_27C8F:
+	shl	al, cl
+	mov	g_tile_lowNibbleSwapped[bx],	al
+	mov	al, bl
+	and	al, 0F0h
+	mov	g_tile_highNibble[bx],	al
+	cmp	dh, al
+	jnz	short loc_27CA4
+	or	ah, 0F0h
+
+loc_27CA4:
+	shr	al, cl
+	mov	g_tile_highNibbleSwapped[bx],	al
+	mov	g_tile_backgroundMask[bx],	ah
+	dec	bx
+	jns	short loc_27C7F
+	pop	ds
+	assume ds:dseg
+	pop	bp
+	retf
+bigpic_initBuffers endp
+
+; Attributes: bp-based frame
+
+_bigpic_copyTopoElem proc far
+
+	graphicsBufferP= dword ptr	 6
+	destBaseColumn=	word ptr  0Ah
+	destBaseRow= word ptr  0Ch
+	arg_8= word ptr	 0Eh
+	srcSkip= word ptr	 10h
+	height=	word ptr  12h
+	scaleFactor= word ptr	 14h
+	rightFlag= word	ptr  16h
+
+	push	bp
+	mov	bp, sp
+	push	di
+	push	si
+	push	ds
+	push	es
+
+	mov	ax, seg	seg021
+	mov	ds, ax
+	assume ds:seg021
+	mov	es, ax
+	assume es:seg021
+	mov	g_tile_currentScaleValue, 0
+	mov	g_tile_currentCount, 0
+
+loc_27CCE:
+	mov	ax, g_tile_currentScaleValue
+	sub	ax, [bp+scaleFactor]
+	mov	g_tile_currentScaleValue, ax
+	jge	short loc_27D1D
+
+	add	ax, 64
+	mov	g_tile_currentScaleValue, ax
+	mov	dx, [bp+destBaseRow]
+	mov	ax, 56
+	mul	dx
+	add	ax, [bp+destBaseColumn]
+	add	ax, offset bigpicBuf
+	mov	si, ax
+
+	mov	cx, [bp+arg_8]
+	or	cx, cx
+	jz	short l_return
+	les	di, [bp+graphicsBufferP]
+	assume es:nothing
+	add	di, g_tile_currentCount
+	mov	dx, [bp+scaleFactor]
+	mov	dh, dl
+	xor	dl, dl
+	xor	bx, bx
+	mov	ax, [bp+rightFlag]
+	or	ax, ax
+	jz	short l_copyLeft
+	add	di, [bp+srcSkip]
+	dec	di
+	CALL(_bigpic_copyRightTopo)
+	jmp	short l_nextRow
+
+l_copyLeft:
+	CALL(_bigpic_copyLeftTopo)
+
+l_nextRow:
+	inc	[bp+destBaseRow]
+
+loc_27D1D:
+	mov	ax, [bp+srcSkip]
+	add	g_tile_currentCount, ax
+	dec	[bp+height]
+	jnz	short loc_27CCE
+
+l_return:
+	pop	es
+	pop	ds
+	assume ds:dseg
+	pop	si
+	pop	di
+	pop	bp
+	retf
+_bigpic_copyTopoElem endp
+
+_bigpic_copyLeftTopo proc near
+	assume ds:seg021
+	mov	bl, es:[di]
+	inc	di
+	sub	dl, dh
+	jge	short loc_27D5A
+	add	dl, 64
+	mov	al, g_tile_highNibble[bx]
+loc_27D3E:
+	sub	dl, dh
+	jge	short loc_27D65
+	add	dl, 64
+	or	al, g_tile_lowNibble[bx]
+	mov	bl, al
+	xor	al, [si]
+	and	al, g_tile_backgroundMask[bx]
+	xor	al, bl
+	mov	[si], al
+	inc	si
+	dec	cx
+	jns	short _bigpic_copyLeftTopo
+	retn
+loc_27D5A:
+	sub	dl, dh
+	jge	short _bigpic_copyLeftTopo
+	add	dl, 40h	
+	mov	al, g_tile_lowNibbleSwapped[bx]
+loc_27D65:
+	mov	bl, es:[di]
+	inc	di
+	sub	dl, dh
+	jge	short loc_27D3E
+	add	dl, 40h	
+	or	al, g_tile_highNibbleSwapped[bx]
+	push	bx
+	mov	bl, al
+	xor	al, [si]
+	and	al, g_tile_backgroundMask[bx]
+	xor	al, bl
+	pop	bx
+	mov	[si], al
+	inc	si
+	dec	cx
+	jns	short loc_27D5A
+	retn
+_bigpic_copyLeftTopo endp
+
+_bigpic_copyRightTopo proc near
+	assume ds:seg021
+	mov	bl, es:[di]
+	mov	bl, [bx+0]
+	dec	di
+	sub	dl, dh
+	jge	short loc_27DB6
+	add	dl, 64
+	mov	al, g_tile_highNibble[bx]
+
+loc_27D9A:
+	sub	dl, dh
+	jge	short loc_27DC3
+	add	dl, 64
+	or	al, g_tile_lowNibble[bx]
+	mov	bl, al
+	xor	al, [si]
+	and	al, g_tile_backgroundMask[bx]
+	xor	al, bl
+	mov	[si], al
+	inc	si
+	dec	cx
+	jns	short _bigpic_copyRightTopo
+	retn
+
+loc_27DB6:
+	sub	dl, dh
+	jge	short _bigpic_copyRightTopo
+	add	dl, 64
+	shl	ah, 1
+	mov	al, g_tile_lowNibbleSwapped[bx]
+
+loc_27DC3:
+	mov	bl, es:[di]
+	mov	bl, [bx+0]
+	dec	di
+	sub	dl, dh
+	jge	short loc_27D9A
+	add	dl, 64
+	or	al, g_tile_highNibbleSwapped[bx]
+	push	bx
+	mov	bl, al
+	xor	al, [si]
+	and	al, g_tile_backgroundMask[bx]
+	xor	al, bl
+	pop	bx
+	mov	[si], al
+	inc	si
+	dec	cx
+	jns	short loc_27DB6
+	retn
+_bigpic_copyRightTopo endp
+
+
+
+
+; Attributes: bp-based frame
+
+song_initSound proc far
+
+	_segment= word ptr  8
+	arg_4= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	cx, [bp+_segment]
+	mov	ax, [bp+arg_4]
+	and	al, 3
+	mov	ah, 1
+	call	music_driver
+	pop	bp
+	retf
+song_initSound endp
+
+
+song_endMusic proc far
+	mov	ah, 2
+	call	music_driver
+	retf
+song_endMusic endp
+
+
+sub_27E05 proc far
+	mov	ah, al
+	and	ah, 1
+	add	ah, 3
+	call	music_driver
+	retf
+sub_27E05 endp
+
+; Attributes: bp-based frame
+
+dungeon_getWallInDirection proc far
+
+	walls= word ptr	 6
+	direction= word ptr  8
+
+	push	bp
+	mov	bp, sp
+	mov	ax, [bp+direction]
+	and	al, 3
+	mov	cl, 2
+	shl	ax, cl
+	mov	cl, al
+	mov	ax, [bp+walls]
+	rol	ax, cl
+	xor	dx, dx
+	pop	bp
+	retf
+dungeon_getWallInDirection endp
+
+; Attributes: bp-based frame
+
+minimap_clearSquare proc far
+
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	push	es
+	push	di
+	les	di, [bp+arg_0]
+	xor	ax, ax
+	mov	cx, 8
+	rep stosb
+	pop	di
+	pop	es
+	pop	bp
+	retf
+minimap_clearSquare endp
+
+; Attributes: bp-based frame
+
+minimap_setSquare proc far
+
+	arg_0= dword ptr  6
+	arg_4= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	push	di
+	push	si
+	push	ds
+	push	es
+	mov	si, offset minimapWallBitmasks
+	les	di, [bp+arg_0]
+	mov	ax, [bp+arg_4]
+	shl	ax, 1
+	shl	ax, 1
+	shl	ax, 1
+	add	si, ax
+	mov	cx, 8
+loc_27E58:
+	lodsb
+	or	al, es:[di]
+	stosb
+	dec	cx
+	jnz	short loc_27E58
+	pop	es
+	pop	ds
+	assume ds:dseg
+	pop	si
+	pop	di
+	pop	bp
+	retf
+minimap_setSquare endp
+
+; Attributes: bp-based frame
+
+bigpic_memcpy proc far
+
+	arg_0= dword ptr  6
+	skyColor= word ptr  0Ah
+	grndColor= word	ptr  0Ch
+
+	push	bp
+	mov	bp, sp
+	push	di
+	push	es
+	les	di, [bp+arg_0]
+	mov	cx, 1288
+	mov	ax, [bp+skyColor]
+	mov	ah, al
+	rep stosw
+	mov	cx, 498h
+	mov	ax, [bp+grndColor]
+	mov	ah, al
+	rep stosw
+	pop	es
+	pop	di
+	pop	bp
+	retf
+bigpic_memcpy endp
+
+byte_27E86 db 0, 1, 2, 3, 4, 5,	6, 7; 0
+db 8, 9, 0Ah, 0, 0Ch, 0Dh, 0Eh,	0Fh; 8
+byte_27E96 db 0, 10h, 20h, 30h,	40h, 50h, 60h, 70h; 0
+db 80h,	90h, 0A0h, 0, 0C0h, 0D0h, 0E0h,	0F0h; 8
+; Attributes: bp-based frame
+
+bigpic_makeNight proc far
+
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	push	di
+	push	ds
+	push	es
+	les	di, [bp+arg_0]
+	mov	ax, cs
+	mov	ds, ax
+	assume ds:seg019
+	sub	bx, bx
+	mov	cx, 0F04h
+	mov	dx, 1340h
+	cld
+loc_27EBC:
+	mov	ah, es:[di]
+	mov	bl, ah
+	and	bl, ch
+	mov	al, byte_27E86[bx]
+	shr	ah, cl
+	mov	bl, ah
+	or	al, byte_27E96[bx]
+	stosb
+	dec	dx
+	jnz	short loc_27EBC
+	pop	es
+	pop	ds
+	assume ds:dseg
+	pop	di
+	pop	bp
+	retf
+bigpic_makeNight endp
+
+
+sub_27ED8 proc far
+	push	bp
+	push	si
+	push	di
+	push	es
+	int	11h		; EQUIPMENT DETERMINATION
+			; Return: AX = equipment flag bits
+	and	ax, 0C0h
+	pop	es
+	pop	di
+	pop	si
+	pop	bp
+	cld
+	retf
+sub_27ED8 endp
+
+; Attributes: bp-based frame
+
+sub_27EE7 proc far
+
+	arg_0= byte ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	si
+	push	di
+	push	es
+	mov	dl, [bp+arg_0]
+	mov	ah, 0Eh
+	int	21h		; DOS -	SELECT DISK
+			; DL = new default drive number	(0 = A,	1 = B, etc.)
+			; Return: AL = number of logical drives
+	pop	es
+	pop	di
+	pop	si
+	pop	bp
+	cld
+	retf
+sub_27EE7 endp
+
+
+sub_27EFA proc far
+	push	bp
+	mov	ah, 19h
+	int	21h		; DOS -	GET DEFAULT DISK NUMBER
+	sub	ah, ah
+	pop	bp
+	retf
+sub_27EFA endp
+
+db    0
+db    0
+word_27F05 dw 0
+dword_27F07 dd 0
+word_27F0B dw 0
+word_27F0D dw 0
+align 2
+
+timerIntHandler proc far
+	push	es
+	push	ds
+	push	ax
+	mov	ds, cs:word_27F05
+	xor	ax, ax
+	call	music_driver
+	mov	al, 20h	
+	out	20h, al		; Interrupt controller,	8259A.
+	mov	ds, cs:word_27F05
+	inc	word_4EF49
+	mov	ax, word_4EF49
+	and	ax, 3
+	jnz	short loc_27F40
+	inc	_clockTicks
+	pop	ax
+	pop	ds
+	pop	es
+	jmp	cs:dword_27F07
+loc_27F40:
+	pop	ax
+	pop	ds
+	pop	es
+	iret
+timerIntHandler endp
+
+
+errorHandler	proc far
+                push    ds
+                push    es
+                push    bx
+                push    cx
+                push    dx
+                push    si
+                push    di
+                push    bp
+                mov     ds, cs:word_27F05
+                pop     bp
+                pop     di
+                pop     si
+                pop     dx
+                pop     cx
+                pop     bx
+                pop     es
+                pop     ds
+                iret
+errorHandler       endp
+
+; Attributes: bp-based frame
+
+sub_27F63 proc far
+	push	bp
+	mov	bp, sp
+	push	es
+	sub	ax, ax
+	mov	es, ax
+	assume es:nothing
+	cli
+	mov	ax, es:20h
+	mov	word ptr cs:dword_27F07, ax
+	mov	ax, es:22h
+	mov	word ptr cs:dword_27F07+2, ax
+	mov	word ptr es:20h, offset	timerIntHandler
+	mov	word ptr es:22h, cs
+	mov	cs:word_27F05, ds
+	mov	al, 36h	
+	out	43h, al		; Timer	8253-5 (AT: 8254.2).
+	mov	ax, 4DA7h
+	out	40h, al		; Timer	8253-5 (AT: 8254.2).
+	xchg	al, ah
+	out	40h, al		; Timer	8253-5 (AT: 8254.2).
+	sti
+	mov	di, 90h	
+	cli
+	mov	ax, es:[di]
+	mov	cs:word_27F0B, ax
+	mov	ax, es:[di+2]
+	mov	cs:word_27F0D, ax
+	mov	word ptr es:[di], offset errorHandler
+	mov	word ptr es:[di+2], cs
+	sti
+	sub	ax, ax
+	mov	es, ax
+	cmp	word ptr es:0CCh, 0
+	jz	short loc_27FD6
+	int	33h		; - MS MOUSE - RESET DRIVER AND	CALL(read) STATUS
+			; Return: AX = status
+			; BX = number of buttons
+	or	ax, ax
+	jz	short loc_27FD6
+	mov	byte_4EF4B, 1
+	mov	byte_4EF5E, 1
+	jmp	short loc_28008
+loc_27FD6:
+	mov	byte_4EF4C, 0
+	cmp	byte_4EF4C, 0
+	jz	short loc_28008
+	cmp	ax, 0FFFFh
+	jnz	short loc_27FEF
+	mov	byte_4EF4C, 0
+	jmp	short loc_28008
+db 90h
+loc_27FEF:
+	mov	byte_4EF5E, 1
+	mov	bl, ah
+	sub	ah, ah
+	inc	ax
+	mov	word_4EF59, ax
+	sub	bh, bh
+	inc	bx
+	mov	word_4EF5B, bx
+loc_28008:
+	pop	es
+	assume es:nothing
+	pop	bp
+	retf
+sub_27F63 endp
+
+
+sub_2800B proc far
+	push	es
+	sub	ax, ax
+	mov	es, ax
+	assume es:nothing
+	cli
+	mov	ax, word ptr cs:dword_27F07
+	mov	es:20h,	ax
+	mov	ax, word ptr cs:dword_27F07+2
+	mov	es:22h,	ax
+	mov	al, 36h	
+	out	43h, al		; Timer	8253-5 (AT: 8254.2).
+	mov	ax, 0
+	out	40h, al		; Timer	8253-5 (AT: 8254.2).
+	xchg	al, ah
+	out	40h, al		; Timer	8253-5 (AT: 8254.2).
+	mov	di, 90h	
+	mov	ax, cs:word_27F0B
+	mov	es:[di], ax
+	mov	ax, cs:word_27F0D
+	mov	es:[di+2], ax
+	sti
+	pop	es
+	assume es:nothing
+	retf
+sub_2800B endp
+
+checkMouse proc	far
+	push	bp
+	push	si
+	push	di
+	push	ds
+	push	es
+	cmp	byte_4EF4B, 0
+	jz	short loc_280C0
+	mov	byte_4EF50, 0
+	mov	ax, 5
+	sub	bx, bx
+	int	33h		; - MS MOUSE - RETURN BUTTON PRESS DATA
+			; BX = button
+			; Return: AX = button states
+			; BX = number of times specified button	has been pressed
+			; CX = column at time specified	button was last	pressed
+			; DX = row at time specified button was	last pressed
+	test	al, 3
+	jz	short loc_28077
+	mov	byte_4EF50, 1
+	cmp	byte_4EF4D, 0
+	jnz	short loc_2807C
+	mov	byte_4EF52, 1
+	mov	byte_4EF4D, 1
+	jmp	short loc_2807C
+loc_28077:
+	mov	byte_4EF4D, 0
+loc_2807C:
+	mov	ax, 0Bh
+	int	33h		; - MS MOUSE - CALL(read) MOTION COUNTERS
+			; Return: CX = number of mickeys mouse moved horizontally since	last call
+			; DX = number of mickeys mouse moved vertically
+	or	cx, cx
+	jnz	short loc_2808C
+	or	dx, dx
+	jnz	short loc_2808C
+	jmp	loc_2810F
+loc_2808C:
+	add	cx, mouse_x
+	test	ch, 80h
+	jz	short loc_28098
+	mov	cx, 1
+loc_28098:
+	cmp	cx, 130h
+	jbe	short loc_280A1
+	mov	cx, 130h
+loc_280A1:
+	mov	mouse_x, cx
+	add	dx, mouse_y
+	test	dh, 80h
+	jz	short loc_280B1
+	mov	dx, 1
+loc_280B1:
+	cmp	dx, 0C2h 
+	jbe	short loc_280BA
+	mov	dx, 0C2h 
+loc_280BA:
+	mov	mouse_y, dx
+	jmp	short loc_2810A
+loc_280C0:
+	cmp	byte_4EF5E, 0
+	jz	short loc_2810F
+	cmp	byte_4EF4C, 0
+	jz	short loc_2810F
+	sti
+	call	sub_28115
+	or	ax, ax
+	jz	short loc_2810F
+	mov	ax, mouse_x
+	cmp	ax, 130h
+	jbe	short loc_280E6
+	mov	ax, 130h
+	jmp	short loc_280EE
+align 2
+loc_280E6:
+	cmp	ax, 1
+	jnb	short loc_280EE
+	mov	ax, 1
+loc_280EE:
+	mov	mouse_x, ax
+	mov	ax, mouse_y
+	cmp	ax, 0C2h 
+	jbe	short loc_280FF
+	mov	ax, 0C2h 
+	jmp	short loc_28107
+db 90h
+loc_280FF:
+	cmp	ax, 1
+	jnb	short loc_28107
+	mov	ax, 1
+loc_28107:
+	mov	mouse_y, ax
+loc_2810A:
+	mov	mouse_moved, 1
+loc_2810F:
+	pop	es
+	pop	ds
+	pop	di
+	pop	si
+	pop	bp
+	retf
+checkMouse endp
+
+
+sub_28115 proc far
+	mov	byte_4EF5D, 0
+	cmp	byte_4EF4C, 0
+	jz	short loc_28183
+	cmp	byte_4EF4B, 0
+	jnz	short loc_28183
+	call	sub_2821E
+	mov	bl, ah
+	sub	ah, ah
+	sub	bh, bh
+	mov	cx, word_4EF59
+	sub	cx, ax
+	mov	ax, cx
+	sar	ax, 1
+	sar	ax, 1
+	or	ax, ax
+	jz	short loc_2815A
+	add	mouse_x, ax
+	mov	byte_4EF5D, 1
+	test	mouse_x, 8000h
+	jz	short loc_2815A
+	mov	mouse_x, 0
+loc_2815A:
+	mov	ax, bx
+	mov	cx, word_4EF5B
+	sub	cx, ax
+	mov	ax, cx
+	sar	ax, 1
+	sar	ax, 1
+	or	ax, ax
+	jz	short loc_28183
+	add	mouse_y, ax
+	mov	byte_4EF5D, 1
+	test	mouse_y, 8000h
+	jz	short loc_28183
+	mov	mouse_y, 0
+loc_28183:
+	mov	al, byte_4EF5D
+	sub	ah, ah
+	retf
+sub_28115 endp
+
+checkGamePort proc far
+	xor	ax, ax
+	cmp	byte_4EF52, al
+	jz	short loc_281B1
+	mov	byte_4EF52, al
+	inc	ax
+	jmp	short locret_281DE
+db 90h
+loc_281B1:
+	cmp	byte_4EF4C, al
+	jz	short loc_281CF
+	mov	dx, 201h
+	in	al, dx		; Game I/O port
+			; bits 0-3: Coordinates	(resistive, time-dependent inputs)
+			; bits 4-7: Buttons/Triggers (digital inputs)
+	cmp	byte_4EF50, 0
+	jz	short loc_281D2
+	test	al, 10h
+	mov	ax, 0
+	jz	short locret_281DE
+	mov	byte_4EF50, al
+	jmp	short locret_281DE
+db 90h
+loc_281CF:
+	jmp	short locret_281DE
+align 2
+loc_281D2:
+	test	al, 10h
+	mov	ax, 0
+	jnz	short locret_281DE
+	inc	al
+	mov	byte_4EF50, al
+locret_281DE:
+	retf
+checkGamePort endp
+
+checkOtherGamePort proc	far
+	xor	ax, ax
+	cmp	byte_4EF53, 0
+	jz	short loc_281EF
+	mov	byte_4EF53, al
+	inc	ax
+	jmp	short locret_2821D
+db 90h
+loc_281EF:
+	cmp	byte_4EF4C, 0
+	jz	short loc_2820E
+	mov	dx, 201h
+	in	al, dx		; Game I/O port
+			; bits 0-3: Coordinates	(resistive, time-dependent inputs)
+			; bits 4-7: Buttons/Triggers (digital inputs)
+	cmp	byte_4EF51, 0
+	jz	short loc_28211
+	test	al, 20h
+	mov	ax, 0
+	jz	short locret_2821D
+	mov	byte_4EF51, al
+	jmp	short locret_2821D
+align 2
+loc_2820E:
+	jmp	short locret_2821D
+db 90h
+loc_28211:
+	test	al, 20h
+	mov	ax, 0
+	jnz	short locret_2821D
+	inc	al
+	mov	byte_4EF51, al
+locret_2821D:
+	retf
+checkOtherGamePort endp
+
+
+sub_2821E proc far
+	cli
+	sub	cx, cx
+	cmp	byte_4EF4C, 0
+	jz	short loc_2824E
+	dec	cx
+	xor	bx, bx
+	mov	dx, 201h
+	out	dx, al		; Game I/O port
+			; bits 0-3: Coordinates	(resistive, time-dependent inputs)
+			; bits 4-7: Buttons/Triggers (digital inputs)
+	sub	ax, ax
+loc_28231:		; Game I/O port
+	in	al, dx		; bits 0-3: Coordinates	(resistive, time-dependent inputs)
+			; bits 4-7: Buttons/Triggers (digital inputs)
+	mov	bl, al
+	and	bl, 1
+	sub	cl, bl
+	mov	bl, al
+	shr	bl, 1
+	and	bl, 1
+	sub	ch, bl
+	test	al, 3
+	jz	short loc_2824E
+	inc	ah
+	jnz	short loc_28231
+	mov	byte_4EF4C, ah
+loc_2824E:
+	mov	ax, cx
+	sti
+	retf
+sub_2821E endp
+
+assume ss:seg029, ds:nothing
+public start
+
+start proc far
+	mov	ah, 30h
+	int	21h		; DOS -	GET DOS	VERSION
+			; Return: AL = major version number (00h for DOS 1.x)
+	cmp	al, 2
+	jnb	short loc_2829C
+	int	20h		; DOS -	PROGRAM	TERMINATION
+			; returns to DOS--identical to INT 21/AH=00h
+loc_2829C:
+	mov	di, seg	dseg
+	mov	si, ds:2
+	sub	si, di
+	cmp	si, 1000h
+	jb	short loc_282AE
+	mov	si, 1000h
+loc_282AE:
+	cli
+	mov	ss, di
+	assume ss:dseg
+	add	sp, offset dseg_end
+	sti
+	jnb	short loc_282CC
+	push	ss
+	pop	ds
+	assume ds:dseg
+	call	sub_284C2
+	xor	ax, ax
+	push	ax
+	call	sub_28785
+	mov	ax, 4CFFh
+	int	21h		; DOS -	2+ - QUIT WITH EXIT CODE (EXIT)
+			; AL = exit code
+loc_282CC:
+	assume ds:nothing
+	and	sp, 0FFFEh
+	mov	ss:word_4EF82, sp
+	mov	ss:word_4EF7E, sp
+	mov	ax, si
+	mov	cl, 4
+	shl	ax, cl
+	dec	ax
+	mov	ss:word_4EF7C, ax
+	add	si, di
+	mov	ds:2, si
+	mov	bx, es
+	sub	bx, si
+	neg	bx
+	mov	ah, 4Ah
+	int	21h		; DOS -	2+ - ADJUST MEMORY BLOCK SIZE (SETBLOCK)
+			; ES = segment address of block	to change
+			; BX = new size	in paragraphs
+	mov	ss:word_4EFF3, ds
+	push	ss
+	pop	es
+	assume es:dseg
+	cld
+	mov	di, offset tavern_sayingBase
+	mov	cx, offset dseg_end+2
+	sub	cx, di
+	xor	ax, ax
+	rep stosb
+	push	ss
+	pop	ds
+	call 	far ptr loc_28360
+	push	ss
+	pop	ds
+	call	far ptr sub_286DE
+	call	far ptr	sub_28536
+	xor	bp, bp
+	push	ds:word_4F018
+	push	ds:word_4F016
+	push	ds:word_4F014
+	push	ds:word_4F012
+	push	ds:word_4F010
+	call	_main
+	push	ax
+	call	far ptr	sub_28424
+
+loc_2833C:
+	mov	ax, seg	dseg
+	mov	ds, ax
+	mov	ax, 3
+	mov	ss:off_4EF80, offset sub_28424
+loc_2834B::
+	push	ax
+	call	sub_284C2
+	call	sub_28785
+	mov	ax, 0FFh
+	push	ax
+	push	cs
+	call	off_4EF80
+
+	db 0
+
+loc_28360:
+	mov	ah, 30h
+	int	21h
+	mov	ds:word_4EFF5, ax
+	mov	ax, 3500h
+	int	21h		; DOS -	2+ - GET INTERRUPT VECTOR
+			; AL = interrupt number
+			; Return: ES:BX	= value	of interrupt vector
+	mov	word ptr ds:dword_4EFE1, bx
+	mov	word ptr ds:dword_4EFE1+2,	es
+	push	cs
+	pop	ds
+	assume ds:seg019
+	mov	ax, 2500h
+	mov	dx, offset loc_2833C
+	int	21h		; DOS -	SET INTERRUPT VECTOR
+			; AL = interrupt number
+			; DS:DX	= new vector to	be used	for specified interrupt
+	push	ss
+	pop	ds
+	assume ds:dseg
+	mov	cx, word_4F906
+	jcxz	short loc_283B4
+	mov	es, word_4EFF3
+	assume es:nothing
+	mov	si, es:2Ch
+	lds	ax, dword_4F908
+	mov	dx, ds
+	xor	bx, bx
+	call	dword ptr ss:unk_4F904
+	jnb	short loc_283A3
+	push	ss
+	pop	ds
+	jmp	sub_284E6
+loc_283A3:
+	lds	ax, ss:dword_4F90C
+	mov	dx, ds
+	mov	bx, 3
+	call	dword ptr ss:unk_4F904
+	push	ss
+	pop	ds
+loc_283B4:
+	mov	es, word_4EFF3
+	mov	cx, es:2Ch
+	jcxz	short loc_283F5
+	mov	es, cx
+	xor	di, di
+loc_283C3:
+	cmp	byte ptr es:[di], 0
+	jz	short loc_283F5
+	mov	cx, 0Ch
+	mov	si, offset aC_file_info
+	repe cmpsb
+	jz	short loc_283DE
+	mov	cx, 7FFFh
+	xor	ax, ax
+	repne scasb
+	jnz	short loc_283F5
+	jmp	short loc_283C3
+loc_283DE:
+	push	es
+	push	ds
+	pop	es
+	assume es:dseg
+	pop	ds
+	mov	si, di
+	mov	di, offset byte_4EFFC
+	lodsb
+	cbw
+	xchg	ax, cx
+loc_283EA:
+	lodsb
+	inc	al
+	jz	short loc_283F0
+	dec	ax
+loc_283F0:
+	stosb
+	loop	loc_283EA
+	push	ss
+	pop	ds
+loc_283F5:
+	mov	bx, 4
+loc_283F8:
+	and	byte_4EFFC[bx],	0BFh
+	mov	ax, 4400h
+	int	21h		; DOS -	2+ - IOCTL - GET DEVICE	INFORMATION
+			; BX = file or device handle
+	jb	short loc_2840E
+	test	dl, 80h
+	jz	short loc_2840E
+	or	byte_4EFFC[bx],	40h
+loc_2840E:
+	dec	bx
+	jns	short loc_283F8
+	mov	si, offset off_4F910
+	mov	di, offset off_4F910
+	call	sub_284AF
+	mov	si, offset off_4F910
+	mov	di, offset off_4F910
+	call	sub_284AF
+	retf
+start endp
+
+; Attributes: bp-based frame
+sub_28424 proc near
+	push	bp
+	mov	bp, sp
+	mov	si, offset byte_5006A
+	mov	di, offset byte_5006A
+	call	sub_284AF
+	mov	si, offset off_4F910
+	mov	di, offset seg027_41
+	call	sub_284AF
+	jmp	short loc_2843E
+sub_28424 endp
+
+; Attributes: bp-based frame
+sub_2843B proc near
+arg_2= word ptr	 6
+	push	bp
+	mov	bp, sp
+loc_2843E::
+	mov	si, offset seg027_41
+	mov	di, offset seg027_41
+	call	sub_284AF
+	mov	si, offset seg027_41
+	mov	di, offset seg027_41
+	call	sub_284AF
+	call	sub_28510
+	or	ax, ax
+	jz	short loc_28464
+	cmp	[bp+arg_2], 0
+	jnz	short loc_28464
+	mov	[bp+arg_2], 0FFh
+loc_28464:
+	mov	cx, 0Fh
+	mov	bx, 5
+loc_2846A:
+	test	byte_4EFFC[bx],	1
+	jz	short loc_28475
+	mov	ah, 3Eh
+	int	21h		; DOS -	2+ - CALL(close) A FILE WITH HANDLE
+			; BX = file handle
+loc_28475:
+	inc	bx
+	loop	loc_2846A
+	call	sub_28482
+	mov	ax, [bp+arg_2]
+	mov	ah, 4Ch
+	int	21h		; DOS -	2+ - QUIT WITH EXIT CODE (EXIT)
+sub_2843B endp		; AL = exit code
+sub_28482 proc near
+	mov	cx, word_4F906
+	jcxz	short loc_2848F
+	mov	bx, 2
+	call	dword ptr unk_4F904
+loc_2848F:
+	push	ds
+	lds	dx, dword_4EFE1
+	mov	ax, 2500h
+	int	21h		; DOS -	SET INTERRUPT VECTOR
+			; AL = interrupt number
+			; DS:DX	= new vector to	be used	for specified interrupt
+	pop	ds
+	cmp	byte_4F022, 0
+	jz	short locret_284AE
+	push	ds
+	mov	al, byte_4F023
+	lds	dx, dword_4F024
+	mov	ah, 25h
+	int	21h		; DOS -	SET INTERRUPT VECTOR
+			; AL = interrupt number
+			; DS:DX	= new vector to	be used	for specified interrupt
+	pop	ds
+locret_284AE:
+	retn
+sub_28482 endp
+
+sub_284AF proc near
+	cmp	si, di
+	jnb	short locret_284C1
+	sub	di, 4
+	mov	ax, [di]
+	or	ax, [di+2]
+	jz	short sub_284AF
+	call	dword ptr [di]
+	jmp	short sub_284AF
+locret_284C1:
+	retn
+sub_284AF endp
+
+; Attributes: bp-based frame
+
+sub_284C2 proc far
+	push	bp
+	mov	bp, sp
+	mov	ax, 0FCh 
+	push	ax
+	call	sub_28785
+	cmp	word_4F02A, 0
+	jz	short loc_284D9
+	call	dword ptr unk_4F028
+loc_284D9:
+	mov	ax, 0FFh
+	push	ax
+	call	sub_28785
+	mov	sp, bp
+	pop	bp
+	retf
+sub_284C2 endp
+
+sub_284E6 proc near
+	mov	ax, 2
+	jmp	loc_2834B
+sub_284E6 endp
+
+someStackOperation proc	far
+	pop	cx
+	pop	dx
+	mov	bx, sp
+	sub	bx, ax
+	jb	short loc_284FF
+	cmp	bx, word_4F030
+	jb	short loc_284FF
+	mov	sp, bx
+	push	dx
+	push	cx
+	retf
+loc_284FF:
+	mov	ax, word ptr dword_4F02C
+	inc	ax
+	jnz	short loc_2850A
+	xor	ax, ax
+	jmp	loc_2834B
+loc_2850A:
+	push	dx
+	push	cx
+	jmp	dword_4F02C
+someStackOperation endp
+
+
+sub_28510 proc far
+	push	si
+	mov	si, offset word_42670
+	mov	cx, 42h	
+	xor	ah, ah
+	cld
+loc_28519:
+	lodsb
+	xor	ah, al
+	loop	loc_28519
+	xor	ah, 55h
+	jz	short loc_28534
+	call	sub_284C2
+	mov	ax, 1
+	push	ax
+	call	sub_28785
+	mov	ax, 1
+loc_28534:
+	pop	si
+	retf
+sub_28510 endp
+
+sub_28536 proc near
+	pop	word ptr dword_4F032
+	pop	word ptr dword_4F032+2
+	mov	dx, 2
+	cmp	byte ptr word_4EFF5, dl
+	jz	short loc_28570
+	mov	es, word_4EFF3
+	assume es:nothing
+	mov	es, word ptr es:2Ch
+	mov	word ptr off_4F01A+2, es
+	xor	ax, ax
+	cwd
+	mov	cx, 8000h
+	xor	di, di
+loc_2855C:
+	repne scasb
+	scasb
+	jnz	short loc_2855C
+	inc	di
+	inc	di
+	mov	word ptr off_4F01A, di
+	mov	cx, 0FFFFh
+	repne scasb
+	not	cx
+	mov	dx, cx
+loc_28570:
+	mov	di, 1
+	mov	si, 81h	
+	mov	ds, word_4EFF3
+loc_2857A:
+	lodsb
+	cmp	al, 20h	
+	jz	short loc_2857A
+	cmp	al, 9
+	jz	short loc_2857A
+	cmp	al, 0Dh
+	jz	short loc_285F6
+	or	al, al
+	jz	short loc_285F6
+	inc	di
+loc_2858C:
+	dec	si
+loc_2858D:
+	lodsb
+	cmp	al, 20h	
+	jz	short loc_2857A
+	cmp	al, 9
+	jz	short loc_2857A
+	cmp	al, 0Dh
+	jz	short loc_285F6
+	or	al, al
+	jz	short loc_285F6
+	cmp	al, 22h	
+	jz	short loc_285C6
+	cmp	al, 5Ch	
+	jz	short loc_285A9
+	inc	dx
+	jmp	short loc_2858D
+loc_285A9:
+	xor	cx, cx
+loc_285AB:
+	inc	cx
+	lodsb
+	cmp	al, 5Ch	
+	jz	short loc_285AB
+	cmp	al, 22h	
+	jz	short loc_285B9
+	add	dx, cx
+	jmp	short loc_2858C
+loc_285B9:
+	mov	ax, cx
+	shr	cx, 1
+	adc	dx, cx
+	test	al, 1
+	jnz	short loc_2858D
+	jmp	short loc_285C6
+loc_285C5:
+	dec	si
+loc_285C6:
+	lodsb
+	cmp	al, 0Dh
+	jz	short loc_285F6
+	or	al, al
+	jz	short loc_285F6
+	cmp	al, 22h	
+	jz	short loc_2858D
+	cmp	al, 5Ch	
+	jz	short loc_285DA
+	inc	dx
+	jmp	short loc_285C6
+loc_285DA:
+	xor	cx, cx
+loc_285DC:
+	inc	cx
+	lodsb
+	cmp	al, 5Ch	
+	jz	short loc_285DC
+	cmp	al, 22h	
+	jz	short loc_285EA
+	add	dx, cx
+	jmp	short loc_285C5
+loc_285EA:
+	mov	ax, cx
+	shr	cx, 1
+	adc	dx, cx
+	test	al, 1
+	jnz	short loc_285C6
+	jmp	short loc_2858D
+loc_285F6:
+	push	ss
+	pop	ds
+	mov	word_4F010, di
+	add	dx, di
+	inc	di
+	shl	di, 1
+	shl	di, 1
+	add	dx, di
+	and	dl, 0FEh
+	sub	sp, dx
+	mov	ax, sp
+	mov	word_4F012, ax
+	mov	word_4F014, ds
+	mov	bx, ax
+	add	di, bx
+	push	ss
+	pop	es
+	assume es:dseg
+	mov	ss:[bx], di
+	mov	word ptr ss:[bx+2], ss
+	add	bx, 4
+	lds	si, off_4F01A
+loc_28627:
+	lodsb
+	stosb
+	or	al, al
+	jnz	short loc_28627
+	mov	si, 81h	
+	mov	ds, ss:word_4EFF3
+	jmp	short loc_2863A
+loc_28637:
+	xor	ax, ax
+	stosb
+loc_2863A:
+	lodsb
+	cmp	al, 20h	
+	jz	short loc_2863A
+	cmp	al, 9
+	jz	short loc_2863A
+	cmp	al, 0Dh
+	jnz	short loc_2864A
+	jmp	loc_286CE
+loc_2864A:
+	or	al, al
+	jnz	short loc_28651
+	jmp	short loc_286CE
+db 90h
+loc_28651:
+	mov	ss:[bx], di
+	mov	word ptr ss:[bx+2], ss
+	add	bx, 4
+loc_2865B:
+	dec	si
+loc_2865C:
+	lodsb
+	cmp	al, 20h	
+	jz	short loc_28637
+	cmp	al, 9
+	jz	short loc_28637
+	cmp	al, 0Dh
+	jz	short loc_286CB
+	or	al, al
+	jz	short loc_286CB
+	cmp	al, 22h	
+	jz	short loc_28698
+	cmp	al, 5Ch	
+	jz	short loc_28678
+	stosb
+	jmp	short loc_2865C
+loc_28678:
+	xor	cx, cx
+loc_2867A:
+	inc	cx
+	lodsb
+	cmp	al, 5Ch	
+	jz	short loc_2867A
+	cmp	al, 22h	
+	jz	short loc_2868A
+	mov	al, 5Ch	
+	rep stosb
+	jmp	short loc_2865B
+loc_2868A:
+	mov	al, 5Ch	
+	shr	cx, 1
+	rep stosb
+	jnb	short loc_28698
+	mov	al, 22h	
+	stosb
+	jmp	short loc_2865C
+loc_28697:
+	dec	si
+loc_28698:
+	lodsb
+	cmp	al, 0Dh
+	jz	short loc_286CB
+	or	al, al
+	jz	short loc_286CB
+	cmp	al, 22h	
+	jz	short loc_2865C
+	cmp	al, 5Ch	
+	jz	short loc_286AC
+	stosb
+	jmp	short loc_28698
+loc_286AC:
+	xor	cx, cx
+loc_286AE:
+	inc	cx
+	lodsb
+	cmp	al, 5Ch	
+	jz	short loc_286AE
+	cmp	al, 22h	
+	jz	short loc_286BE
+	mov	al, 5Ch	
+	rep stosb
+	jmp	short loc_28697
+loc_286BE:
+	mov	al, 5Ch	
+	shr	cx, 1
+	rep stosb
+	jnb	short loc_2865C
+	mov	al, 22h	
+	stosb
+	jmp	short loc_28698
+loc_286CB:
+	xor	ax, ax
+	stosb
+loc_286CE:
+	push	ss
+	pop	ds
+	mov	word ptr [bx], 0
+	mov	word ptr [bx+2], 0
+	jmp	dword_4F032
+sub_28536 endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_286DE proc far
+	push	bp
+	mov	bp, sp
+	push	bp
+	mov	ds, word_4EFF3
+	assume ds:nothing
+	xor	cx, cx
+	mov	ax, cx
+	mov	bp, cx
+	mov	di, cx
+	dec	cx
+	mov	si, ds:2Ch
+	or	si, si
+	jz	short loc_28707
+	mov	es, si
+	assume es:nothing
+	cmp	byte ptr es:0, 0
+	jz	short loc_28707
+loc_28701:
+	repne scasb
+	inc	bp
+	scasb
+	jnz	short loc_28701
+loc_28707:
+	inc	bp
+	xchg	ax, di
+	inc	ax
+	and	al, 0FEh
+	mov	di, bp
+	shl	bp, 1
+	shl	bp, 1
+	add	ax, bp
+	push	ss
+	pop	ds
+	push	di
+	mov	di, 9
+	call	sub_287B0
+	pop	di
+	mov	cx, di
+	mov	di, bp
+	add	di, ax
+	mov	ds:word_4F016, bp
+	mov	ds:word_4F018, ds
+	push	ds
+	pop	es
+	assume es:dseg
+	mov	ds, si
+	xor	si, si
+	dec	cx
+	jcxz	short loc_2874C
+loc_28735:
+	cmp	word ptr [si], 433Bh
+	jz	short loc_28744
+	mov	[bp+0],	di
+	mov	word ptr [bp+2], es
+	add	bp, 4
+loc_28744:
+	lodsb
+	stosb
+	or	al, al
+	jnz	short loc_28744
+	loop	loc_28735
+loc_2874C:
+	mov	[bp+0],	cx
+	mov	[bp+2],	cx
+	push	ss
+	pop	ds
+	pop	bp
+	mov	sp, bp
+	pop	bp
+	retf
+sub_286DE endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_2875A proc far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	si
+	push	di
+	push	ds
+	pop	es
+	mov	dx, [bp+arg_0]
+	mov	si, (offset aNmsg+8)
+loc_28767:
+	lodsw
+	cmp	ax, dx
+	jz	short loc_2877C
+	inc	ax
+	xchg	ax, si
+	jz	short loc_2877C
+	xchg	ax, di
+	xor	ax, ax
+	mov	cx, 0FFFFh
+	repne scasb
+	mov	si, di
+	jmp	short loc_28767
+loc_2877C:
+	xchg	ax, si
+	pop	di
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf	2
+sub_2875A endp
+
+; Attributes: bp-based frame
+
+sub_28785 proc far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	di
+	push	[bp+arg_0]
+	call	sub_2875A
+	or	ax, ax
+	jz	short loc_287A9
+	xchg	ax, dx
+	mov	di, dx
+	xor	ax, ax
+	mov	cx, 0FFFFh
+	repne scasb
+	not	cx
+	dec	cx
+	mov	bx, 2
+	mov	ah, 40h
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
+			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
+loc_287A9:
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf	2
+sub_28785 endp
+
+sub_287B0 proc near
+	mov	dx, ax
+	add	ax, ds:word_4EF82
+	jb	short loc_287ED
+	cmp	ds:word_4EF7C, ax
+	jnb	short loc_287E3
+	add	ax, 0Fh
+	push	ax
+	rcr	ax, 1
+	mov	cl, 3
+	shr	ax, cl
+	mov	cx, ds
+	mov	bx, ds:word_4EFF3
+	sub	cx, bx
+	add	ax, cx
+	mov	es, bx
+	assume es:nothing
+	mov	bx, ax
+	mov	ah, 4Ah
+	int	21h		; DOS -	2+ - ADJUST MEMORY BLOCK SIZE (SETBLOCK)
+			; ES = segment address of block	to change
+			; BX = new size	in paragraphs
+	pop	ax
+	jb	short loc_287ED
+	and	al, 0F0h
+	dec	ax
+	mov	ds:word_4EF7C, ax
+loc_287E3:
+	xchg	ax, bp
+	mov	bp, ds:word_4EF82
+	add	ds:word_4EF82, dx
+	retn
+loc_287ED:
+	mov	ax, di
+	jmp	loc_2834B
+sub_287B0 endp
+
+	jb	short loc_28807
+loc_287F4:
+	xor	ax, ax
+	mov	sp, bp
+	pop	bp
+	retf
+	jnb	short loc_287F4
+	push	ax
+	call	sub_28818
+	pop	ax
+	mov	sp, bp
+	pop	bp
+	retf
+; START	OF FUNCTION CHUNK FOR sub_2A2F6
+loc_28805:
+	jnb	short loc_2880E
+loc_28807:
+	call	sub_28818
+	mov	ax, 0FFFFh
+	cwd
+loc_2880E:
+	mov	sp, bp
+	pop	bp
+	retf
+; END OF FUNCTION CHUNK	FOR sub_2A2F6
+	xor	ah, ah
+	call	sub_28818
+	retf
+
+sub_28818 proc near
+	mov	ds:byte_4EFF8, al
+	or	ah, ah
+	jnz	short loc_28842
+	cmp	ds:word_4EFF5, 3
+	jb	short loc_28833
+	cmp	al, 22h	
+	jnb	short loc_28837
+	cmp	al, 20h	
+	jb	short loc_28833
+	mov	al, 5
+	jmp	short loc_28839
+db 90h
+loc_28833:
+	cmp	al, 13h
+	jbe	short loc_28839
+loc_28837:
+	mov	al, 13h
+loc_28839:
+	mov	bx, offset byte_4F036
+	xlat
+loc_2883D:
+	cbw
+	mov	ds:word_4EFED, ax
+	retn
+loc_28842:
+	mov	al, ah
+	jmp	short loc_2883D
+sub_28818 endp
+
+sub_28846	proc far
+
+	var_6 = dword ptr -6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 6
+	push	si
+	mov	ax, offset off_4F64C
+	mov	[bp-6],	ax
+	mov	word ptr [bp-4], ds
+	sub	si, si
+	jmp	short loc_28876
+loc_2885A:
+	les	bx, [bp-6]
+	test	byte ptr es:[bx+0Ah], 83h
+	jz	short loc_28872
+	push	es
+	push	bx
+	call	sub_28DC2
+	add	sp, 4
+	inc	ax
+	jz	short loc_28872
+	inc	si
+loc_28872:
+	add	word ptr [bp-6], 0Ch
+loc_28876:
+	mov	ax, ds:word_4F7B4
+	mov	dx, ds:seg_4F7B6
+	cmp	[bp-6],	ax
+	jbe	short loc_2885A
+	mov	ax, si
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_28846	endp
+
+align 2
+; Attributes: bp-based frame
+
+printf proc far
+
+	var_C= word ptr	-0Ch
+	var_A= word ptr	-0Ah
+	var_8= word ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+	arg_4= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 0Ch
+	push	si
+	mov	ax, offset byte_4F658
+	mov	[bp+var_A], ax
+	mov	[bp+var_8], ds
+	lea	ax, [bp+arg_4]
+	mov	[bp+var_6], ax
+	mov	[bp+var_4], ss
+	push	ds
+	push	[bp+var_A]
+	call	sub_28C28
+	add	sp, 4
+	mov	si, ax
+	push	[bp+var_4]
+	push	[bp+var_6]
+	push	[bp+arg_2]
+	push	[bp+arg_0]
+	push	[bp+var_8]
+	push	[bp+var_A]
+	call	printf_doPrint
+	add	sp, 0Ch
+	mov	[bp+var_C], ax
+	push	[bp+var_8]
+	push	[bp+var_A]
+	push	si
+	call	sub_28CE2
+	add	sp, 6
+	mov	ax, [bp+var_C]
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+printf endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_288E6 proc far
+
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 2
+	push	si
+	mov	ax, [bp+arg_0]
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	shl	ax, 1
+	add	ax, offset off_4F64C
+	mov	[bp+var_2], ax
+	les	bx, dword ptr [bp+arg_0]
+	test	byte ptr es:[bx+0Ah], 83h
+	jz	short loc_28918
+	test	byte ptr es:[bx+0Ah], 40h
+	jz	short loc_2891E
+loc_28918:
+	mov	ax, 0FFFFh
+	jmp	loc_289DB
+loc_2891E:
+	les	bx, dword ptr [bp+arg_0]
+	test	byte ptr es:[bx+0Ah], 2
+	jz	short loc_28930
+	or	byte ptr es:[bx+0Ah], 20h
+	jmp	short loc_28918
+align 2
+loc_28930:
+	or	byte ptr es:[bx+0Ah], 1
+	mov	bx, [bp+var_2]
+	and	byte ptr [bx], 0FBh
+	mov	bx, [bp+arg_0]
+	test	byte ptr es:[bx+0Ah], 0Ch
+	jnz	short loc_2896C
+	mov	ax, bx
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	bx, ax
+	shl	bx, 1
+	add	bx, ax
+	shl	bx, 1
+	test	ds:byte_4F73C[bx], 1
+	jnz	short loc_2896C
+	push	es
+	push	[bp+arg_0]
+	call	sub_28B9E
+	add	sp, 4
+	jmp	short loc_2897E
+align 2
+loc_2896C:
+	les	bx, dword ptr [bp+arg_0]
+	mov	ax, es:[bx+6]
+	mov	dx, es:[bx+8]
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+loc_2897E:
+	mov	bx, [bp+var_2]
+	push	word ptr [bx+2]
+	les	bx, dword ptr [bp+arg_0]
+	push	word ptr es:[bx+8]
+	push	word ptr es:[bx+6]
+	mov	al, es:[bx+0Bh]
+	cbw
+	push	ax
+	call	sub_2A370
+	add	sp, 8
+	les	bx, dword ptr [bp+arg_0]
+	mov	es:[bx+4], ax
+	or	ax, ax
+	jz	short loc_289AD
+	cmp	ax, 0FFFFh
+	jnz	short loc_289C8
+loc_289AD:
+	cmp	word ptr es:[bx+4], 0
+	jz	short loc_289B8
+	mov	al, 20h	
+	jmp	short loc_289BA
+loc_289B8:
+	mov	al, 10h
+loc_289BA:
+	or	es:[bx+0Ah], al
+	mov	word ptr es:[bx+4], 0
+	jmp	loc_28918
+align 2
+loc_289C8:
+	dec	word ptr es:[bx+4]
+	mov	si, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	al, es:[si]
+	sub	ah, ah
+loc_289DB:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_288E6 endp
+
+; Attributes: bp-based frame
+
+sub_289E0 proc far
+
+	var_8= word ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	arg_0= word ptr	 6
+	arg_2= dword ptr  8
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 8
+	push	di
+	push	si
+	les	bx, [bp+arg_2]
+	mov	al, es:[bx+0Bh]
+	cbw
+	mov	[bp+var_6], ax
+	mov	ax, bx
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	shl	ax, 1
+	add	ax, offset off_4F64C
+	mov	[bp+var_8], ax
+	test	byte ptr es:[bx+0Ah], 83h
+	jz	short loc_28A1A
+	test	byte ptr es:[bx+0Ah], 40h
+	jz	short loc_28A28
+loc_28A1A:
+	les	bx, [bp+arg_2]
+	or	byte ptr es:[bx+0Ah], 20h
+	mov	ax, 0FFFFh
+	jmp	loc_28B98
+loc_28A28:
+	test	byte ptr es:[bx+0Ah], 1
+	jnz	short loc_28A1A
+	or	byte ptr es:[bx+0Ah], 2
+	and	byte ptr es:[bx+0Ah], 0EFh
+	sub	ax, ax
+	mov	es:[bx+4], ax
+	mov	si, ax
+	mov	[bp+var_4], si
+	test	byte ptr es:[bx+0Ah], 0Ch
+	jz	short loc_28A4E
+	jmp	loc_28AE4
+loc_28A4E:
+	mov	ax, bx
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	bx, ax
+	shl	bx, 1
+	add	bx, ax
+	shl	bx, 1
+	test	ds:byte_4F73C[bx], 1
+	jnz	short loc_28AE4
+	cmp	word ptr [bp+arg_2], offset byte_4F658
+	jnz	short loc_28A76
+	cmp	word ptr [bp+arg_2+2], seg dseg
+	jz	short loc_28A84
+loc_28A76:
+	cmp	word ptr [bp+arg_2], offset byte_4F664
+	jnz	short loc_28AD8
+	cmp	word ptr [bp+arg_2+2], seg dseg
+	jnz	short loc_28AD8
+loc_28A84:
+	push	[bp+var_6]
+	call	sub_2A9AC
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_28AE4
+	inc	word_4F04A
+	cmp	word ptr [bp+arg_2], offset byte_4F658
+	jnz	short loc_28AB2
+	cmp	word ptr [bp+arg_2+2], seg dseg
+	jnz	short loc_28AB2
+	les	bx, [bp+arg_2]
+	mov	ax, offset byte_4F24C
+	mov	dx, seg	dseg
+	jmp	short loc_28ABB
+db 2 dup(90h)
+loc_28AB2:
+	les	bx, [bp+arg_2]
+	mov	ax, offset byte_4F44C
+	mov	dx, seg	dseg
+loc_28ABB:
+	mov	es:[bx+6], ax
+	mov	es:[bx+8], dx
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	mov	bx, [bp+var_8]
+	mov	word ptr [bx+2], 200h
+	mov	byte ptr [bx], 1
+	jmp	short loc_28AE4
+align 2
+loc_28AD8:
+	push	word ptr [bp+arg_2+2]
+	push	word ptr [bp+arg_2]
+	call	sub_28B9E
+	add	sp, 4
+loc_28AE4:
+	les	bx, [bp+arg_2]
+	test	byte ptr es:[bx+0Ah], 8
+	jnz	short loc_28B08
+	mov	ax, bx
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	bx, ax
+	shl	bx, 1
+	add	bx, ax
+	shl	bx, 1
+	test	ds:byte_4F73C[bx], 1
+	jz	short loc_28B72
+loc_28B08:
+	mov	bx, word ptr [bp+arg_2]
+	mov	si, es:[bx]
+	sub	si, es:[bx+6]
+	mov	ax, es:[bx+6]
+	mov	dx, es:[bx+8]
+	inc	ax
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	mov	di, [bp+var_8]
+	mov	ax, [di+2]
+	dec	ax
+	mov	es:[bx+4], ax
+	or	si, si
+	jle	short loc_28B48
+	push	si
+	push	dx
+	push	word ptr es:[bx+6]
+	push	[bp+var_6]
+	call	sub_2A45A
+	add	sp, 8
+	mov	[bp+var_4], ax
+	jmp	short loc_28B63
+align 2
+loc_28B48:
+	mov	bx, [bp+var_6]
+	test	ds:byte_4EFFC[bx], 20h
+	jz	short loc_28B63
+	mov	ax, 2
+	push	ax
+	sub	ax, ax
+	push	ax
+	push	ax
+	push	bx
+	call	sub_2A2F6
+	add	sp, 8
+loc_28B63:
+	les	bx, [bp+arg_2]
+	les	bx, es:[bx+6]
+	mov	al, byte ptr [bp+arg_0]
+	mov	es:[bx], al
+	jmp	short loc_28B8B
+loc_28B72:
+	mov	si, 1
+	mov	ax, si
+	push	ax
+	lea	ax, [bp+arg_0]
+	push	ss
+	push	ax
+	push	[bp+var_6]
+	call	sub_2A45A
+	add	sp, 8
+	mov	[bp+var_4], ax
+loc_28B8B:
+	cmp	[bp+var_4], si
+	jz	short loc_28B93
+	jmp	loc_28A1A
+loc_28B93:
+	mov	al, byte ptr [bp+arg_0]
+	sub	ah, ah
+loc_28B98:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sub_289E0 endp
+
+; Attributes: bp-based frame
+sub_28B9E proc near
+
+	var_4= dword ptr -4
+	arg_0= word ptr	 4
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 4
+	mov	ax, [bp+arg_0]
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	shl	ax, 1
+	add	ax, offset byte_4F73C
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], ds
+	mov	ax, 200h
+	push	ax
+	call	_mallocMaybe
+	add	sp, 2
+	les	bx, dword ptr [bp+arg_0]
+	mov	es:[bx+6], ax
+	mov	es:[bx+8], dx
+	or	dx, ax
+	jz	short loc_28BEC
+	or	byte ptr es:[bx+0Ah], 8
+	les	bx, [bp+var_4]
+	mov	word ptr es:[bx+2], 200h
+	jmp	short loc_28C0C
+loc_28BEC:
+	les	bx, dword ptr [bp+arg_0]
+	or	byte ptr es:[bx+0Ah], 4
+	mov	ax, word ptr [bp+var_4]
+	mov	dx, word ptr [bp+var_4+2]
+	inc	ax
+	mov	es:[bx+6], ax
+	mov	es:[bx+8], dx
+	les	bx, [bp+var_4]
+	mov	word ptr es:[bx+2], 1
+loc_28C0C:
+	les	bx, dword ptr [bp+arg_0]
+	mov	ax, es:[bx+6]
+	mov	dx, es:[bx+8]
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	mov	word ptr es:[bx+4], 0
+	mov	sp, bp
+	pop	bp
+	retn
+sub_28B9E endp
+
+; Attributes: bp-based frame
+
+sub_28C28 proc far
+
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 6
+	push	si
+	inc	word_4F04A
+	cmp	word ptr [bp+arg_0], offset byte_4F658
+	jnz	short loc_28C4E
+	cmp	word ptr [bp+arg_0+2], seg dseg
+	jnz	short loc_28C4E
+	mov	[bp+var_4], offset byte_4F24C
+	mov	[bp+var_2], seg	dseg
+	jmp	short loc_28C66
+align 2
+loc_28C4E:
+	cmp	word ptr [bp+arg_0], offset byte_4F664
+	jnz	short loc_28C8A
+	cmp	word ptr [bp+arg_0+2], seg dseg
+	jnz	short loc_28C8A
+	mov	[bp+var_4], offset byte_4F44C
+	mov	[bp+var_2], seg	dseg
+loc_28C66:
+	les	bx, [bp+arg_0]
+	test	byte ptr es:[bx+0Ah], 0Ch
+	jnz	short loc_28C8A
+	mov	ax, bx
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	bx, ax
+	shl	bx, 1
+	add	bx, ax
+	shl	bx, 1
+	test	ds:byte_4F73C[bx],	1
+	jz	short loc_28C8E
+loc_28C8A:
+	sub	ax, ax
+	jmp	short loc_28CDD
+loc_28C8E:
+	mov	ax, word ptr [bp+arg_0]
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	shl	ax, 1
+	add	ax, offset byte_4F73C
+	mov	[bp+var_6], ax
+	les	bx, [bp+arg_0]
+	mov	ax, [bp+var_4]
+	mov	dx, [bp+var_2]
+	mov	es:[bx+6], ax
+	mov	es:[bx+8], dx
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	mov	si, [bp+var_6]
+	mov	ax, 200h
+	mov	[si+2],	ax
+	mov	es:[bx+4], ax
+	mov	bx, si
+	mov	byte ptr [bx], 1
+	mov	bx, word ptr [bp+arg_0]
+	or	byte ptr es:[bx+0Ah], 2
+	mov	ax, 1
+loc_28CDD:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_28C28 endp
+
+; Attributes: bp-based frame
+
+sub_28CE2 proc far
+
+	var_4= dword ptr -4
+	arg_0= word ptr	 6
+	arg_2= dword ptr  8
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 4
+	cmp	[bp+arg_0], 0
+	jnz	short loc_28CF1
+	jmp	loc_28D7A
+loc_28CF1:
+	cmp	word ptr [bp+arg_2], offset byte_4F658
+	jnz	short loc_28CFF
+	cmp	word ptr [bp+arg_2+2], seg dseg
+	jz	short loc_28D13
+loc_28CFF:
+	cmp	word ptr [bp+arg_2], offset byte_4F664
+	jz	short loc_28D09
+	jmp	loc_28DBD
+loc_28D09:
+	cmp	word ptr [bp+arg_2+2], seg dseg
+	jz	short loc_28D13
+	jmp	loc_28DBD
+loc_28D13:
+	les	bx, [bp+arg_2]
+	mov	al, es:[bx+0Bh]
+	cbw
+	push	ax
+	call	sub_2A9AC
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_28D2B
+	jmp	loc_28DBD
+loc_28D2B:
+	mov	ax, word ptr [bp+arg_2]
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	cx, ax
+	shl	ax, 1
+	add	ax, cx
+	shl	ax, 1
+	add	ax, offset byte_4F73C
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], ds
+	push	word ptr [bp+arg_2+2]
+	push	word ptr [bp+arg_2]
+	call	sub_28DC2
+	add	sp, 4
+	les	bx, [bp+var_4]
+	mov	byte ptr es:[bx], 0
+	mov	word ptr es:[bx+2], 0
+	les	bx, [bp+arg_2]
+	sub	ax, ax
+	cwd
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	mov	es:[bx+6], ax
+	mov	es:[bx+8], dx
+	jmp	short loc_28DBD
+loc_28D7A:
+	les	bx, [bp+arg_2]
+	cmp	word ptr es:[bx+6], offset byte_4F24C
+	jnz	short loc_28D8D
+	cmp	word ptr es:[bx+8], seg	dseg
+	jz	short loc_28D9D
+loc_28D8D:
+	cmp	word ptr es:[bx+6], offset byte_4F44C
+	jnz	short loc_28DBD
+	cmp	word ptr es:[bx+8], seg	dseg
+	jnz	short loc_28DBD
+loc_28D9D:
+	mov	al, es:[bx+0Bh]
+	cbw
+	push	ax
+	call	sub_2A9AC
+	add	sp, 2
+	or	ax, ax
+	jz	short loc_28DBD
+	push	word ptr [bp+arg_2+2]
+	push	word ptr [bp+arg_2]
+	call	sub_28DC2
+	add	sp, 4
+loc_28DBD:
+	mov	sp, bp
+	pop	bp
+	retf
+sub_28CE2 endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_28DC2 proc far
+	var_4= word ptr	-4
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 4
+	push	si
+	sub	si, si
+	les	bx, [bp+arg_0]
+	mov	al, es:[bx+0Ah]
+	and	al, 3
+	cmp	al, 2
+	jnz	short loc_28E31
+	test	byte ptr es:[bx+0Ah], 8
+	jnz	short loc_28DF9
+	mov	ax, bx
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	bx, ax
+	shl	bx, 1
+	add	bx, ax
+	shl	bx, 1
+	test	ds:byte_4F73C[bx], 1
+	jz	short loc_28E31
+loc_28DF9:
+	mov	bx, word ptr [bp+arg_0]
+	mov	ax, es:[bx]
+	sub	ax, es:[bx+6]
+	mov	[bp+var_4], ax
+	or	ax, ax
+	jle	short loc_28E31
+	push	ax
+	push	word ptr es:[bx+8]
+	push	word ptr es:[bx+6]
+	mov	al, es:[bx+0Bh]
+	cbw
+	push	ax
+	call	sub_2A45A
+	add	sp, 8
+	cmp	ax, [bp+var_4]
+	jz	short loc_28E31
+	les	bx, [bp+arg_0]
+	or	byte ptr es:[bx+0Ah], 20h
+	mov	si, 0FFFFh
+loc_28E31:
+	les	bx, [bp+arg_0]
+	mov	ax, es:[bx+6]
+	mov	dx, es:[bx+8]
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	mov	word ptr es:[bx+4], 0
+	mov	ax, si
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_28DC2 endp
+
+; Attributes: bp-based frame
+
+_sscanf proc far
+
+	var_6= byte ptr	-6
+	var_4= byte ptr	-4
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+	arg_4= dword ptr  0Ah
+	arg_8= word ptr	 0Eh
+	arg_A= word ptr	 10h
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 6
+	call	someStackOperation
+	push	di
+	push	si
+	mov	word_4FD7A, 0
+	mov	ax, [bp+arg_0]
+	mov	dx, [bp+arg_2]
+	mov	word ptr sscanf_structP, ax
+	mov	word ptr sscanf_structP+2,	dx
+	mov	ax, offset sscanf_buf
+	mov	word ptr sscanf_bufp, ax
+	mov	word ptr sscanf_bufp+2,	ds
+	mov	word_4FE8A, 0
+	mov	word_4FE8C, 0
+	mov	ax, [bp+arg_8]
+	mov	dx, [bp+arg_A]
+	mov	word ptr dword_4FD7C, ax
+	mov	word ptr dword_4FD7C+2,	dx
+loc_28E93:
+	les	bx, [bp+arg_4]
+	mov	al, es:[bx]
+	mov	[bp+var_6], al
+	or	al, al
+	jnz	short loc_28EA3
+	jmp	loc_2927E
+loc_28EA3:
+	cbw
+	mov	bx, ax
+	test	sscanf_charFlags[bx],	8
+	jz	short loc_28EC4
+	push	cs
+	call	near ptr _sscanf_skipWhitespace
+loc_28EB1:
+	inc	word ptr [bp+arg_4]
+	les	bx, [bp+arg_4]
+	mov	al, es:[bx]
+	cbw
+	mov	bx, ax
+	test	sscanf_charFlags[bx],	8
+	jnz	short loc_28EB1
+loc_28EC4:
+	mov	bx, word ptr [bp+arg_4]
+	cmp	byte ptr es:[bx], 25h ;	'%'
+	jz	short loc_28ED0
+	jmp	loc_29254
+loc_28ED0:
+	sub	ax, ax
+	mov	sscanf_noAssign, ax
+	mov	word_4FD84, ax
+	mov	sscanf_charListFlag, ax
+	mov	word_4FD72, ax
+	mov	word_4FD74, ax
+	mov	word_4FD6C, ax
+	mov	sscanf_argSizeFlag, ax
+	mov	sscanf_minWidth, ax
+	mov	[bp+var_4], al
+	inc	word ptr [bp+arg_4]
+	mov	bx, word ptr [bp+arg_4]
+	cmp	byte ptr es:[bx], 2Ah ;	'*'
+	jnz	short loc_28F00
+	inc	sscanf_noAssign
+	inc	word ptr [bp+arg_4]
+loc_28F00:
+	mov	bx, word ptr [bp+arg_4]
+	mov	al, es:[bx]
+	cbw
+	mov	bx, ax
+	test	sscanf_charFlags[bx], 4
+	jz	short loc_28F50
+	mov	di, word ptr [bp+arg_4]
+loc_28F13:
+	mov	al, es:[di]
+	cbw
+	mov	cx, sscanf_minWidth
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, sscanf_minWidth
+	shl	cx, 1
+	add	cx, ax
+	sub	cx, 30h	
+	mov	sscanf_minWidth, cx
+	inc	di
+	mov	al, es:[di]
+	cbw
+	mov	bx, ax
+	test	sscanf_charFlags[bx], 4
+	jnz	short loc_28F13
+	mov	word ptr [bp+arg_4], di
+	mov	word ptr [bp+arg_4+2], es
+	or	cx, cx
+	jz	short loc_28F4C
+	inc	word_4FD84
+	jmp	short loc_28F50
+loc_28F4C:
+	inc	word_4FD74
+loc_28F50:
+	mov	bx, word ptr [bp+arg_4]
+	mov	al, es:[bx]
+	cbw
+	cmp	ax, 46h	
+	jz	short loc_28FD0
+	cmp	ax, 4Eh	
+	jz	short loc_28FC8
+	cmp	ax, 68h	
+	jz	short loc_28F72
+	cmp	ax, 6Ch	
+	jz	short loc_28FC0
+	cmp	ax, 70h	
+	jz	short loc_28FD0
+	jmp	short loc_28F78
+loc_28F72:
+	mov	sscanf_argSizeFlag, 1
+loc_28F78:
+	cmp	sscanf_argSizeFlag, 0
+	jz	short loc_28F88
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 70h ;	'p'
+	jnz	short loc_28F91
+loc_28F88:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 4Ch ;	'L'
+	jnz	short loc_28F94
+loc_28F91:
+	inc	word ptr [bp+arg_4]
+loc_28F94:
+	mov	bx, word ptr [bp+arg_4]
+	mov	al, es:[bx]
+	cbw
+	mov	si, ax
+	test	sscanf_charFlags[si], 1
+	jz	short loc_28FD8
+	cmp	si, 45h	
+	jz	short loc_28FB9
+	cmp	si, 47h	
+	jz	short loc_28FB9
+	cmp	si, 58h	
+	jz	short loc_28FB9
+	mov	sscanf_argSizeFlag, 2
+loc_28FB9:
+	add	si, 20h	
+	jmp	loc_29040
+align 2
+loc_28FC0:
+	mov	sscanf_argSizeFlag, 2
+	jmp	short loc_28F78
+loc_28FC8:
+	mov	sscanf_argSizeFlag, 8
+	jmp	short loc_28F78
+loc_28FD0:
+	mov	sscanf_argSizeFlag, 10h
+	jmp	short loc_28F78
+loc_28FD8:
+	cmp	si, 5Bh	
+	jnz	short loc_29040
+	inc	sscanf_charListFlag
+	inc	word ptr [bp+arg_4]
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 5Eh ;	'^'
+	jnz	short loc_28FF3
+	inc	[bp+var_4]
+	inc	word ptr [bp+arg_4]
+loc_28FF3:
+	mov	ax, 100h
+	push	ax
+	mov	al, [bp+var_4]
+	cbw
+	push	ax
+	push	word ptr sscanf_bufp+2
+	push	word ptr sscanf_bufp
+	call	memset
+	add	sp, 8
+	jmp	short loc_29028
+loc_2900E:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 5Dh ;	']'
+	jz	short loc_29031
+	mov	al, es:[bx]
+	cbw
+	mov	bx, ax
+	les	di, sscanf_bufp
+	xor	byte ptr es:[bx+di], 1
+	inc	word ptr [bp+arg_4]
+loc_29028:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 0
+	jnz	short loc_2900E
+loc_29031:
+	cmp	byte ptr es:[bx], 0
+	jz	short loc_2903C
+	mov	ax, 73h	
+	jmp	short loc_2903E
+loc_2903C:
+	sub	ax, ax
+loc_2903E:
+	mov	si, ax
+loc_29040:
+	cmp	si, 69h	
+	jz	short loc_29048
+	jmp	loc_290FA
+loc_29048:
+	mov	word_4F7B8, 1
+	push	cs
+	call	near ptr _sscanf_skipWhitespace
+	inc	word_4FE8C
+	les	bx, sscanf_structP
+	dec	word ptr es:[bx+4]
+	js	short loc_29072
+	mov	di, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	al, es:[di]
+	sub	ah, ah
+	jmp	short loc_2907F
+align 2
+loc_29072:
+	push	word ptr sscanf_structP+2
+	push	bx
+	call	sub_288E6
+	add	sp, 4
+loc_2907F:
+	mov	si, ax
+	cmp	si, 30h	
+	jnz	short loc_290E2
+	inc	word_4FD72
+	inc	word_4FE8C
+	les	bx, sscanf_structP
+	dec	word ptr es:[bx+4]
+	js	short loc_290AA
+	mov	di, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	al, es:[di]
+	sub	ah, ah
+	jmp	short loc_290B7
+align 2
+loc_290AA:
+	push	word ptr sscanf_structP+2
+	push	bx
+	call	sub_288E6
+	add	sp, 4
+loc_290B7:
+	mov	si, ax
+	cmp	si, 78h	
+	jz	short loc_290C3
+	cmp	si, 58h	
+	jnz	short loc_290C8
+loc_290C3:
+	mov	si, 78h	
+	jmp	short loc_290FA
+loc_290C8:
+	dec	word_4FE8C
+	push	word ptr sscanf_structP+2
+	push	word ptr sscanf_structP
+	push	si
+	call	sscanf_segAdjust
+	add	sp, 6
+	mov	si, 6Fh	
+	jmp	short loc_290FA
+loc_290E2:
+	dec	word_4FE8C
+	push	word ptr sscanf_structP+2
+	push	word ptr sscanf_structP
+	push	si
+	call	sscanf_segAdjust
+	add	sp, 6
+	mov	si, 64h	
+loc_290FA:
+	or	si, si
+	jnz	short loc_29101
+	jmp	loc_2927E
+loc_29101:
+	mov	ax, si
+	sub	ax, 63h	
+	cmp	ax, 15h
+	jbe	short loc_2910E
+	jmp	_sscanf_parseLiteral
+loc_2910E:
+	add	ax, ax
+	xchg	ax, bx
+	jmp	cs:_sscanf_parsers[bx]
+_sscanf_parseChar:
+	cmp	word_4FD84, 0
+	jnz	short loc_29126
+	mov	ax, 1
+	mov	sscanf_minWidth, ax
+	mov	word_4FD84, ax
+loc_29126:
+	sub	ax, ax
+loc_29128:
+	push	ax
+	push	cs
+	call	near ptr sscanf_readString
+loc_2912D:
+	add	sp, 2
+	jmp	loc_29240
+align 2
+_sscanf_parseString:
+	mov	ax, 1
+	jmp	short loc_29128
+align 2
+_sscanf_parseNchars:
+	inc	word_4FD6C
+_sscanf_parseSignedInt:
+	mov	ax, 0Ah
+loc_29141:
+	push	ax
+	push	cs
+	call	near ptr sscanf_readNumber
+	jmp	short loc_2912D
+_sscanf_parseOctal:
+	mov	ax, 8
+	jmp	short loc_29141
+align 2
+_sscanf_parsePointer:
+	cmp	sscanf_argSizeFlag, 1
+	jnz	short loc_29158
+	jmp	_sscanf_parseHex
+loc_29158:
+	cmp	sscanf_argSizeFlag, 8
+	jnz	short loc_29162
+	jmp	_sscanf_parseHex
+loc_29162:
+	cmp	sscanf_argSizeFlag, 0
+	jnz	short loc_2916C
+	jmp	_sscanf_parseHex
+loc_2916C:
+	mov	ax, 10h
+	push	ax
+	push	cs
+	call	near ptr sscanf_readNumber
+	add	sp, 2
+	sub	word ptr dword_4FD7C, 4
+	les	bx, dword_4FD7C
+	les	bx, es:[bx]
+	mov	ax, es:[bx]
+	mov	dx, es:[bx+2]
+	mov	word_4FED0, ax
+	mov	word_4FED2, dx
+	inc	word_4FE8C
+	les	bx, sscanf_structP
+	dec	word ptr es:[bx+4]
+	js	short loc_291B0
+	mov	di, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	al, es:[di]
+	sub	ah, ah
+	jmp	short loc_291BD
+loc_291B0:
+	push	word ptr sscanf_structP+2
+	push	bx
+	call	sub_288E6
+	add	sp, 4
+loc_291BD:
+	mov	si, ax
+	cmp	si, 3Ah	
+	jnz	short loc_291EC
+	inc	word_4FE8A
+	mov	ax, 10h
+	push	ax
+	push	cs
+	call	near ptr sscanf_readNumber
+	add	sp, 2
+	sub	word ptr dword_4FD7C, 4
+	les	bx, dword_4FD7C
+	les	bx, es:[bx]
+	mov	dx, word_4FED0
+	sub	ax, ax
+	or	es:[bx+2], dx
+	jmp	short loc_29201
+align 2
+loc_291EC:
+	dec	word_4FE8C
+	push	word ptr sscanf_structP+2
+	push	word ptr sscanf_structP
+	push	si
+	call	sscanf_segAdjust
+	add	sp, 6
+loc_29201:
+	add	word ptr dword_4FD7C, 4
+	jmp	short loc_29240
+_sscanf_parseHex:
+	mov	ax, 10h
+	jmp	loc_29141
+_sscanf_parseFloat:
+	push	cs
+	call	near ptr sscanf_readFloat
+	jmp	short loc_29240
+_sscanf_parsers dw offset _sscanf_parseChar
+dw offset _sscanf_parseSignedInt
+dw offset _sscanf_parseFloat
+dw offset _sscanf_parseFloat
+dw offset _sscanf_parseFloat
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseNchars
+dw offset _sscanf_parseOctal
+dw offset _sscanf_parsePointer
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseString
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseSignedInt
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseLiteral
+dw offset _sscanf_parseHex
+loc_29240:
+	cmp	word_4FD7A, 0
+	jz	short loc_29284
+	cmp	word_4FE8A, 0
+	jnz	short loc_2927E
+loc_2924E:
+	mov	ax, 0FFFFh
+	jmp	short loc_2928A
+align 2
+loc_29254:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 0
+	jz	short loc_2927E
+_sscanf_parseLiteral:
+	les	bx, [bp+arg_4]
+	mov	al, es:[bx]
+	cbw
+	push	ax
+	push	cs
+	call	near ptr sscanf_readLiteral
+	add	sp, 2
+	mov	si, ax
+	or	si, si
+	jz	short loc_29284
+	cmp	si, 1
+	jz	short loc_2927E
+	cmp	word_4FE8A, 0
+	jz	short loc_2924E
+loc_2927E:
+	mov	ax, word_4FE8A
+	jmp	short loc_2928A
+align 2
+loc_29284:
+	inc	word ptr [bp+arg_4]
+	jmp	loc_28E93
+loc_2928A:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+_sscanf endp
+
+; Attributes: bp-based frame
+
+sscanf_readString proc far
+
+	var_A= word ptr	-0Ah
+	var_8= word ptr	-8
+	var_4= dword ptr -4
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 0Ah
+	push	di
+	push	si
+	les	bx, dword_4FD7C
+	mov	ax, es:[bx]
+	mov	dx, es:[bx+2]
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], dx
+	mov	[bp+var_A], ax
+	mov	[bp+var_8], dx
+	cmp	sscanf_noAssign, 0
+	jnz	short loc_292BB
+	add	word ptr dword_4FD7C, 4
+loc_292BB:
+	cmp	word_4FD74, 0
+	jz	short loc_292C5
+	jmp	loc_293A8
+loc_292C5:
+	cmp	[bp+arg_0], 0
+	jz	short loc_292D6
+	cmp	sscanf_charListFlag, 0
+	jnz	short loc_292D6
+	push	cs
+	call	near ptr _sscanf_skipWhitespace
+loc_292D6:
+	mov	di, [bp+arg_0]
+	jmp	short loc_29301
+align 2
+loc_292DC:
+	mov	al, sscanf_charFlags[si]
+	and	al, 8
+	mov	cx, ax
+	cmp	cl, 1
+	sbb	ax, ax
+	neg	ax
+loc_292EB:
+	or	ax, ax
+	jz	short loc_29328
+loc_292EF:
+	cmp	sscanf_noAssign, 0
+	jnz	short loc_29301
+	les	bx, [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+	inc	word ptr [bp+var_4]
+loc_29301:
+	push	cs
+	call	near ptr sub_297F0
+	or	ax, ax
+	jz	short loc_29328
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+	inc	ax
+	jz	short loc_29328
+	or	di, di
+	jz	short loc_292EF
+	cmp	sscanf_charListFlag, 0
+	jz	short loc_292DC
+	les	bx, sscanf_bufp
+	mov	al, es:[bx+si]
+	cbw
+	jmp	short loc_292EB
+align 2
+loc_29328:
+	cmp	si, 0FFFFh
+	jnz	short loc_29334
+	inc	word_4FD7A
+	jmp	short loc_29380
+align 2
+loc_29334:
+	cmp	[bp+arg_0], 0
+	jz	short loc_29380
+	cmp	word_4FD84, 0
+	jz	short loc_2936B
+	cmp	sscanf_minWidth, 0
+	jnz	short loc_2936B
+	cmp	sscanf_charListFlag, 0
+	jz	short loc_2935E
+	les	bx, sscanf_bufp
+	cmp	byte ptr es:[bx+si], 1
+	sbb	ax, ax
+	neg	ax
+	jmp	short loc_29367
+align 2
+loc_2935E:
+	mov	al, sscanf_charFlags[si]
+	sub	ah, ah
+	and	ax, 8
+loc_29367:
+	or	ax, ax
+	jz	short loc_29380
+loc_2936B:
+	dec	word_4FE8C
+	push	word ptr sscanf_structP+2
+	push	word ptr sscanf_structP
+	push	si
+	call	sscanf_segAdjust
+	add	sp, 6
+loc_29380:
+	cmp	sscanf_noAssign, 0
+	jnz	short loc_293A8
+	cmp	[bp+arg_0], 0
+	jz	short loc_29394
+	les	bx, [bp+var_4]
+	mov	byte ptr es:[bx], 0
+loc_29394:
+	mov	ax, word ptr [bp+var_4]
+	mov	dx, word ptr [bp+var_4+2]
+	cmp	[bp+var_A], ax
+	jnz	short loc_293A4
+	cmp	[bp+var_8], dx
+	jz	short loc_293A8
+loc_293A4:
+	inc	word_4FE8A
+loc_293A8:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sscanf_readString endp
+
+; Attributes: bp-based frame
+
+sscanf_readNumber proc far
+
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 8
+	push	di
+	push	si
+	mov	si, [bp+arg_0]
+	sub	ax, ax
+	mov	[bp+var_2], ax
+	cwd
+	mov	[bp+var_6], ax
+	mov	[bp+var_4], dx
+	cmp	word_4FD6C, ax
+	jz	short loc_293CE
+	jmp	loc_294EE
+loc_293CE:
+	cmp	word_4FD74, ax
+	jz	short loc_293E0
+	cmp	sscanf_noAssign, ax
+	jz	short loc_293DD
+	jmp	loc_2954F
+loc_293DD:
+	jmp	loc_2954A
+loc_293E0:
+	cmp	word_4F7B8, 0
+	jnz	short loc_293EB
+	push	cs
+	call	near ptr _sscanf_skipWhitespace
+loc_293EB:
+	push	cs
+	call	near ptr sscanf_getc
+	mov	di, ax
+	cmp	di, 2Dh	
+	jz	short loc_293FE
+	cmp	di, 2Bh	
+	jz	short loc_293FE
+	jmp	loc_294A5
+loc_293FE:
+	cmp	di, 2Dh	
+	jnz	short loc_29406
+	inc	[bp+var_2]
+loc_29406:
+	dec	sscanf_minWidth
+	jmp	loc_2949F
+align 2
+loc_2940E:
+	mov	ax, 30h	
+loc_29411:
+	sub	di, ax
+	jmp	short loc_29492
+align 2
+loc_29416:
+	cmp	si, 8
+	jnz	short loc_29468
+	cmp	di, 38h	
+	jge	short loc_2942E
+	mov	al, 3
+	push	ax
+	lea	ax, [bp+var_6]
+	push	ax
+	call	sub_2ACF6
+	jmp	short loc_2948F
+loc_2942E:
+	cmp	di, 0FFFFh
+	jz	short loc_29448
+	dec	word_4FE8C
+	push	word ptr ds:sscanf_structP+2
+	push	word ptr ds:sscanf_structP
+	push	di
+	call	sscanf_segAdjust
+	add	sp, 6
+loc_29448:
+	cmp	[bp+var_2], 0
+	jnz	short loc_29451
+	jmp	loc_294F9
+loc_29451:
+	mov	ax, [bp+var_6]
+	mov	dx, [bp+var_4]
+	neg	ax
+	adc	dx, 0
+	neg	dx
+	mov	[bp+var_6], ax
+	mov	[bp+var_4], dx
+	jmp	loc_294F9
+align 2
+loc_29468:
+	test	ds:sscanf_charFlags[di], 4
+	jz	short loc_2942E
+	mov	ax, [bp+var_6]
+	mov	dx, [bp+var_4]
+	mov	cl, 2
+loc_29477:
+	shl	ax, 1
+	rcl	dx, 1
+	dec	cl
+	jnz	short loc_29477
+	add	ax, [bp+var_6]
+	adc	dx, [bp+var_4]
+	shl	ax, 1
+	rcl	dx, 1
+	mov	[bp+var_6], ax
+	mov	[bp+var_4], dx
+loc_2948F:
+	sub	di, 30h	
+loc_29492:
+	mov	ax, di
+	cwd
+	add	[bp+var_6], ax
+	adc	[bp+var_4], dx
+	inc	word_4FD72
+loc_2949F:
+	push	cs
+	call	near ptr sscanf_getc
+	mov	di, ax
+loc_294A5:
+	push	cs
+	call	near ptr sub_297F0
+	or	ax, ax
+	jz	short loc_2942E
+	cmp	di, 0FFFFh
+	jnz	short loc_294B5
+	jmp	loc_2942E
+loc_294B5:
+	test	ds:sscanf_charFlags[di], 80h
+	jnz	short loc_294BF
+	jmp	loc_2942E
+loc_294BF:
+	cmp	si, 10h
+	jz	short loc_294C7
+	jmp	loc_29416
+loc_294C7:
+	mov	al, 4
+	push	ax
+	lea	ax, [bp+var_6]
+	push	ax
+	call	sub_2ACF6
+	test	sscanf_charFlags[di], 1
+	jz	short loc_294DD
+	add	di, 20h	
+loc_294DD:
+	test	sscanf_charFlags[di], 2
+	jnz	short loc_294E7
+	jmp	loc_2940E
+loc_294E7:
+	mov	ax, 57h	
+	jmp	loc_29411
+align 2
+loc_294EE:
+	mov	ax, word_4FE8C
+	mov	[bp+var_6], ax
+	mov	[bp+var_4], 0
+loc_294F9:
+	cmp	sscanf_noAssign, 0
+	jnz	short loc_2954F
+	cmp	word_4FD72, 0
+	jnz	short loc_2950E
+	cmp	word_4FD6C, 0
+	jz	short loc_2954A
+loc_2950E:
+	cmp	sscanf_argSizeFlag, 2
+	jz	short loc_2951C
+	cmp	sscanf_argSizeFlag, 10h
+	jnz	short loc_29532
+loc_2951C:
+	les	bx, dword_4FD7C
+	les	bx, es:[bx]
+	mov	ax, [bp+var_6]
+	mov	dx, [bp+var_4]
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	jmp	short loc_2953F
+loc_29532:
+	les	bx, dword_4FD7C
+	les	bx, es:[bx]
+	mov	ax, [bp+var_6]
+	mov	es:[bx], ax
+loc_2953F:
+	cmp	word_4FD6C, 0
+	jnz	short loc_2954A
+	inc	word_4FE8A
+loc_2954A:
+	add	word ptr dword_4FD7C, 4
+loc_2954F:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sscanf_readNumber endp
+
+align 2
+; Attributes: bp-based frame
+
+sscanf_readFloat proc far
+
+	var_C= word ptr	-0Ch
+	var_A= word ptr	-0Ah
+	var_6= word ptr	-6
+	var_4= dword ptr -4
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 0Ch
+	push	di
+	push	si
+	mov	[bp+var_6], 0
+	cmp	word_4FD74, 0
+	jz	short loc_29578
+	cmp	sscanf_noAssign, 0
+	jz	short loc_29574
+	jmp	loc_2971E
+loc_29574:
+	jmp	loc_29719
+align 2
+loc_29578:
+	push	cs
+	call	near ptr _sscanf_skipWhitespace
+	mov	ax, offset _sscanf_floatBuf
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], ds
+	mov	dx, ds
+	add	ax, 40h	
+	mov	[bp+var_C], ax
+	mov	[bp+var_A], dx
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+	cmp	si, 2Bh	
+	jz	short loc_295A0
+	cmp	si, 2Dh	
+	jnz	short loc_295BA
+loc_295A0:
+	cmp	si, 2Dh	
+	jnz	short loc_295B0
+	les	bx, [bp+var_4]
+	inc	word ptr [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+loc_295B0:
+	dec	sscanf_minWidth
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+loc_295BA:
+	mov	di, [bp+var_6]
+	jmp	short loc_295DD
+align 2
+loc_295C0:
+	mov	ax, [bp+var_C]
+	mov	dx, [bp+var_A]
+	cmp	word ptr [bp+var_4], ax
+	jnb	short loc_295E9
+	inc	di
+	les	bx, [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+	inc	word ptr [bp+var_4]
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+loc_295DD:
+	push	si
+	push	cs
+	call	near ptr sub_29724
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_295C0
+loc_295E9:
+	mov	[bp+var_6], di
+	cmp	si, 2Eh	
+	jnz	short loc_2963E
+	push	cs
+	call	near ptr sub_297F0
+	or	ax, ax
+	jz	short loc_2963E
+	mov	ax, [bp+var_C]
+	mov	dx, [bp+var_A]
+	cmp	word ptr [bp+var_4], ax
+	jnb	short loc_2963E
+	les	bx, [bp+var_4]
+	inc	word ptr [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+	jmp	short loc_29629
+align 2
+loc_29612:
+	mov	ax, [bp+var_C]
+	mov	dx, [bp+var_A]
+	cmp	word ptr [bp+var_4], ax
+	jnb	short loc_2963B
+	inc	di
+	les	bx, [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+	inc	word ptr [bp+var_4]
+loc_29629:
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+	push	si
+	push	cs
+	call	near ptr sub_29724
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_29612
+loc_2963B:
+	mov	[bp+var_6], di
+loc_2963E:
+	cmp	[bp+var_6], 0
+	jnz	short loc_29647
+	jmp	loc_296CC
+loc_29647:
+	cmp	si, 65h	
+	jz	short loc_29651
+	cmp	si, 45h	
+	jnz	short loc_296CC
+loc_29651:
+	push	cs
+	call	near ptr sub_297F0
+	or	ax, ax
+	jz	short loc_296CC
+	mov	ax, [bp+var_C]
+	mov	dx, [bp+var_A]
+	cmp	word ptr [bp+var_4], ax
+	jnb	short loc_296CC
+	les	bx, [bp+var_4]
+	inc	word ptr [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+	cmp	si, 2Dh	
+	jz	short loc_2967F
+	cmp	si, 2Bh	
+	jnz	short loc_296C0
+loc_2967F:
+	push	cs
+	call	near ptr sub_297F0
+	or	ax, ax
+	jz	short loc_296C0
+	cmp	si, 2Dh	
+	jnz	short loc_296BA
+	mov	ax, [bp+var_C]
+	mov	dx, [bp+var_A]
+	cmp	word ptr [bp+var_4], ax
+	jnb	short loc_296BA
+	les	bx, [bp+var_4]
+	inc	word ptr [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+	jmp	short loc_296BA
+loc_296A4:
+	mov	ax, [bp+var_C]
+	mov	dx, [bp+var_A]
+	cmp	word ptr [bp+var_4], ax
+	jnb	short loc_296CC
+	les	bx, [bp+var_4]
+	mov	ax, si
+	mov	es:[bx], al
+	inc	word ptr [bp+var_4]
+loc_296BA:
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+loc_296C0:
+	push	si
+	push	cs
+	call	near ptr sub_29724
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_296A4
+loc_296CC:
+	dec	word_4FE8C
+	push	word ptr sscanf_structP+2
+	push	word ptr sscanf_structP
+	push	si
+	call	sscanf_segAdjust
+	add	sp, 6
+	cmp	sscanf_noAssign, 0
+	jnz	short loc_2971E
+	cmp	[bp+var_6], 0
+	jz	short loc_29719
+	les	bx, [bp+var_4]
+	mov	byte ptr es:[bx], 0
+	mov	ax, offset _sscanf_floatBuf
+	push	ds
+	push	ax
+	push	word ptr dword_4FD7C+2
+	push	word ptr dword_4FD7C
+	mov	ax, sscanf_argSizeFlag
+	and	ax, 2
+	push	ax
+	call	off_4F7EC
+	add	sp, 0Ah
+	inc	word_4FE8A
+loc_29719:
+	add	word ptr dword_4FD7C, 4
+loc_2971E:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sscanf_readFloat endp
+
+; Attributes: bp-based frame
+
+sub_29724 proc far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	cmp	[bp+arg_0], 0FFFFh
+	jz	short loc_29744
+	mov	bx, [bp+arg_0]
+	test	sscanf_charFlags[bx], 4
+	jz	short loc_29744
+	push	cs
+	call	near ptr sub_297F0
+	or	ax, ax
+	jz	short loc_29744
+	mov	ax, 1
+	jmp	short loc_29746
+loc_29744:
+	sub	ax, ax
+loc_29746:
+	pop	bp
+	retf
+sub_29724 endp
+
+; Attributes: bp-based frame
+
+sscanf_readLiteral proc far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 2
+	push	si
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+	cmp	si, [bp+arg_0]
+	jnz	short loc_2975E
+	sub	ax, ax
+	jmp	short loc_29780
+loc_2975E:
+	cmp	si, 0FFFFh
+	jnz	short loc_29768
+	mov	ax, 0FFFFh
+	jmp	short loc_29780
+loc_29768:
+	dec	word_4FE8C
+	push	word ptr sscanf_structP+2
+	push	word ptr sscanf_structP
+	push	si
+	call	sscanf_segAdjust
+	add	sp, 6
+	mov	ax, 1
+loc_29780:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sscanf_readLiteral endp
+
+align 2
+
+sscanf_getc proc far
+	push	si
+	inc	word_4FE8C
+	les	bx, sscanf_structP
+	assume es:nothing
+	dec	word ptr es:[bx+4]
+	js	short loc_297A6
+	mov	si, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	al, es:[si]
+	sub	ah, ah
+	jmp	short loc_297B3
+loc_297A6:
+	push	word ptr sscanf_structP+2
+	push	bx
+	call	sub_288E6
+	add	sp, 4
+loc_297B3:
+	pop	si
+	retf
+sscanf_getc endp
+
+align 2
+; Attributes: bp-based frame
+
+_sscanf_skipWhitespace proc far
+	push	bp
+	mov	bp, sp
+	sub	sp, 2
+	push	si
+loc_297BD:
+	push	cs
+	call	near ptr sscanf_getc
+	mov	si, ax
+	test	sscanf_charFlags[si], 8
+	jnz	short loc_297BD
+	cmp	si, 0FFFFh
+	jnz	short loc_297D6
+	inc	word_4FD7A
+	jmp	short loc_297EB
+align 2
+loc_297D6:
+	dec	word_4FE8C
+	push	word ptr sscanf_structP+2
+	push	word ptr sscanf_structP
+	push	si
+	call	sscanf_segAdjust
+	add	sp, 6
+loc_297EB:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+_sscanf_skipWhitespace endp
+
+
+sub_297F0 proc far
+	cmp	word_4FD84, 0
+	jnz	short loc_297FC
+loc_297F7:
+	mov	ax, 1
+	jmp	short locret_2980C
+loc_297FC:
+	cmp	sscanf_minWidth, 0
+	jle	short loc_2980A
+	dec	sscanf_minWidth
+	jmp	short loc_297F7
+align 2
+loc_2980A:
+	sub	ax, ax
+locret_2980C:
+	retf
+sub_297F0 endp
+
+align 2
+; Attributes: bp-based frame
+
+printf_doPrint proc far
+
+	var_A= byte ptr	-0Ah
+	var_8= word ptr	-8
+	var_6= word ptr	-6
+	var_4= dword ptr -4
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+	arg_4= dword ptr  0Ah
+	arg_8= word ptr	 0Eh
+	arg_A= word ptr	 10h
+
+	push	bp
+	mov	bp, sp
+	mov	ax, 0Ah
+	call	someStackOperation
+	mov	ax, offset byte_4FF08
+	mov	word_4FF02, ax
+	mov	word_4FF04, ds
+	mov	ax, [bp+arg_8]
+	mov	dx, [bp+arg_A]
+	mov	word ptr dword_4FEF0, ax
+	mov	word ptr dword_4FEF0+2,	dx
+	mov	ax, [bp+arg_0]
+	mov	dx, [bp+arg_2]
+	mov	word ptr dword_4FED6, ax
+	mov	word ptr dword_4FED6+2,	dx
+	mov	word_4FEFC, 0
+	mov	word_4FEFA, 0
+	jmp	loc_29B8D
+loc_2984C:
+	cmp	[bp+var_A], 25h	
+	jz	short loc_29855
+	jmp	loc_29AFC
+loc_29855:
+	mov	word_4FEFE, 1
+	sub	ax, ax
+	mov	word_4FEE0, ax
+	mov	word_4FEDC, ax
+	mov	word_4FEF8, ax
+	mov	word_4FEDE, ax
+	mov	word_4FEF6, ax
+	mov	word_4FEF4, ax
+	mov	word_4FEDA, ax
+	mov	word_4FED4, ax
+	mov	word_4FEEE, ax
+	mov	word_50068, 20h	
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx+1], 30h	
+	jnz	short loc_298D1
+	inc	word ptr [bp+arg_4]
+	mov	word_50068, 30h	
+	jmp	short loc_298D1
+align 2
+loc_29894:
+	mov	bx, word ptr [bp+arg_4]
+	cmp	byte ptr es:[bx], 2Bh ;	'+'
+	jnz	short loc_298AA
+	inc	word_4FEE0
+	mov	word_4FEF4, 0
+	jmp	short loc_298D1
+align 2
+loc_298AA:
+	cmp	byte ptr es:[bx], 20h ;	' '
+	jnz	short loc_298BE
+	cmp	word_4FEE0, 0
+	jnz	short loc_298D1
+	inc	word_4FEF4
+	jmp	short loc_298D1
+align 2
+loc_298BE:
+	inc	word_4FED4
+	jmp	short loc_298D1
+loc_298C4:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 2Dh ;	'-'
+	jnz	short loc_29894
+	inc	word_4FEEE
+loc_298D1:
+	inc	word ptr [bp+arg_4]
+	mov	bx, word ptr [bp+arg_4]
+	mov	al, es:[bx]
+	cbw
+	push	ax
+	push	cs
+	call	near ptr sub_2A22A
+	add	sp, 2
+	or	ax, ax
+	jnz	short loc_298C4
+	push	word ptr [bp+arg_4+2]
+	push	word ptr [bp+arg_4]
+	mov	ax, offset word_4FF06
+	push	ds
+	push	ax
+	push	cs
+	call	near ptr sub_2A188
+	add	sp, 8
+	mov	word ptr [bp+arg_4], ax
+	mov	word ptr [bp+arg_4+2], dx
+	cmp	word_4FF06, 0
+	jge	short loc_29912
+	inc	word_4FEEE
+	mov	ax, word_4FF06
+	neg	ax
+	mov	word_4FF06, ax
+loc_29912:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 2Eh ;	'.'
+	jnz	short loc_29949
+	inc	word_4FEF6
+	inc	word ptr [bp+arg_4]
+	push	es
+	push	word ptr [bp+arg_4]
+	mov	ax, word_4FEFE
+	push	ds
+	push	ax
+	push	cs
+	call	near ptr sub_2A188
+	add	sp, 8
+	mov	word ptr [bp+arg_4], ax
+	mov	word ptr [bp+arg_4+2], dx
+	cmp	word_4FEFE, 0
+	jge	short loc_29949
+	mov	word_4FEFE, 1
+	dec	word_4FEF6
+loc_29949:
+	les	bx, [bp+arg_4]
+	mov	al, es:[bx]
+	cbw
+	cmp	ax, 46h	
+	jz	short loc_29992
+	cmp	ax, 4Eh	
+	jz	short loc_2999A
+	cmp	ax, 68h	
+	jz	short loc_2998A
+	cmp	ax, 6Ch	
+	jnz	short loc_2996A
+	mov	word_4FEDE, 2
+loc_2996A:
+	cmp	word_4FEDE, 0
+	jnz	short loc_2997A
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 4Ch ;	'L'
+	jnz	short loc_2997D
+loc_2997A:
+	inc	word ptr [bp+arg_4]
+loc_2997D:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 0
+	jnz	short loc_299A2
+	jmp	loc_29B9D
+align 2
+loc_2998A:
+	mov	word_4FEDE, 1
+	jmp	short loc_2996A
+loc_29992:
+	mov	word_4FEDE, 10h
+	jmp	short loc_2996A
+loc_2999A:
+	mov	word_4FEDE, 8
+	jmp	short loc_2996A
+loc_299A2:
+	mov	al, es:[bx]
+	cbw
+	mov	[bp+var_8], ax
+	cmp	ax, 45h	
+	jz	short loc_299B8
+	cmp	ax, 47h	
+	jz	short loc_299B8
+	cmp	ax, 58h	
+	jnz	short loc_299C0
+loc_299B8:
+	inc	word_4FEDC
+	add	[bp+var_8], 20h	
+loc_299C0:
+	mov	ax, [bp+var_8]
+	sub	ax, 63h	
+	cmp	ax, 15h
+	jbe	short loc_299CE
+	jmp	loc_29AEC
+loc_299CE:
+	add	ax, ax
+	xchg	ax, bx
+	jmp	cs:off_29B0C[bx]
+loc_299D6:
+	les	bx, dword_4FEF0
+	les	bx, es:[bx]
+	mov	ax, word_4FEFA
+	mov	es:[bx], ax
+	add	word ptr dword_4FEF0, 4
+	jmp	loc_29B38
+align 2
+loc_299EC:
+	inc	word_4FEF8
+loc_299F0:
+	mov	word_4FED4, 0
+	mov	ax, 0Ah
+loc_299F9:
+	push	ax
+	push	cs
+	call	near ptr sub_29BBC
+loc_299FE:
+	add	sp, 2
+	jmp	loc_29B38
+loc_29A04:
+	mov	ax, 8
+	jmp	short loc_299F9
+align 2
+loc_29A0A:
+	inc	word_4FEDA
+	inc	word_4FEDC
+	cmp	word_4FEF6, 0
+	jnz	short loc_29A22
+	mov	word_4FF00, 1
+	jmp	short loc_29A28
+align 2
+loc_29A22:
+	mov	word_4FF00, 0
+loc_29A28:
+	inc	word_4FEF6
+	mov	word_4FEFE, 4
+	cmp	word_4FEDE, 8
+	jnz	short loc_29A3C
+	jmp	loc_29ACC
+loc_29A3C:
+	sub	ax, ax
+	mov	word_4FEDE, ax
+	mov	[bp+var_6], ax
+	cmp	word_4FF06, ax
+	jz	short loc_29A71
+	mov	ax, word_4FF06
+	mov	[bp+var_6], ax
+	cmp	word_4FEEE, 0
+	jz	short loc_29A60
+	mov	word_4FF06, 0
+	jmp	short loc_29A71
+align 2
+loc_29A60:
+	sub	word_4FF06, 5
+	mov	ax, word_4FF06
+	or	ax, ax
+	jge	short loc_29A6E
+	sub	ax, ax
+loc_29A6E:
+	mov	word_4FF06, ax
+loc_29A71:
+	add	word ptr dword_4FEF0, 2
+	mov	ax, 10h
+	push	ax
+	push	cs
+	call	near ptr sub_29BBC
+	add	sp, 2
+	mov	ax, 3Ah	
+	push	ax
+	push	cs
+	call	near ptr sub_29F12
+	add	sp, 2
+	cmp	[bp+var_6], 0
+	jz	short loc_29AB4
+	cmp	word_4FEEE, 0
+	jz	short loc_29AAE
+	mov	ax, [bp+var_6]
+	sub	ax, 5
+	mov	word_4FF06, ax
+	or	ax, ax
+	jge	short loc_29AA8
+	sub	ax, ax
+loc_29AA8:
+	mov	word_4FF06, ax
+	jmp	short loc_29AB4
+align 2
+loc_29AAE:
+	mov	word_4FF06, 0
+loc_29AB4:
+	sub	word ptr dword_4FEF0, 4
+	mov	ax, 10h
+	push	ax
+	push	cs
+	call	near ptr sub_29BBC
+	add	sp, 2
+	add	word ptr dword_4FEF0, 2
+	jmp	short loc_29B38
+align 2
+loc_29ACC:
+	mov	ax, 10h
+	jmp	loc_299F9
+loc_29AD2:
+	sub	ax, ax
+loc_29AD4:
+	push	ax
+	push	cs
+	call	near ptr sub_29D32
+	jmp	loc_299FE
+loc_29ADC:
+	mov	ax, 1
+	jmp	short loc_29AD4
+align 2
+loc_29AE2:
+	push	[bp+var_8]
+	push	cs
+	call	near ptr sub_29E26
+	jmp	loc_299FE
+loc_29AEC:
+	cmp	word_4FEDE, 0
+	jz	short loc_29AFC
+	mov	ax, word ptr [bp+arg_4]
+	mov	dx, word ptr [bp+arg_4+2]
+	dec	word ptr [bp+arg_4]
+loc_29AFC:
+	mov	ax, word ptr [bp+arg_4]
+	mov	dx, word ptr [bp+arg_4+2]
+	inc	ax
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], dx
+	jmp	short loc_29B5D
+align 2
+off_29B0C dw offset loc_29ADC
+dw offset loc_299F0
+dw offset loc_29AE2
+dw offset loc_29AE2
+dw offset loc_29AE2
+dw offset loc_29AEC
+dw offset loc_299F0
+dw offset loc_29AEC
+dw offset loc_29AEC
+dw offset loc_29AEC
+dw offset loc_29AEC
+dw offset loc_299D6
+dw offset loc_29A04
+dw offset loc_29A0A
+dw offset loc_29AEC
+dw offset loc_29AEC
+dw offset loc_29AD2
+dw offset loc_29AEC
+dw offset loc_299EC
+dw offset loc_29AEC
+dw offset loc_29AEC
+dw offset loc_29ACC
+loc_29B38:
+	cmp	word_4FEFC, 0
+	jz	short loc_29B54
+	cmp	word_4FEFA, 0
+	jnz	short loc_29BB4
+	les	bx, dword_4FED6
+	test	byte ptr es:[bx+0Ah], 20h
+	jnz	short loc_29BAF
+	jmp	short loc_29BB4
+align 2
+loc_29B54:
+	inc	word ptr [bp+arg_4]
+	jmp	short loc_29B8D
+align 2
+loc_29B5A:
+	inc	word ptr [bp+var_4]
+loc_29B5D:
+	les	bx, [bp+var_4]
+	mov	al, es:[bx]
+	mov	[bp+var_A], al
+	or	al, al
+	jz	short loc_29B6E
+	cmp	al, 25h	
+	jnz	short loc_29B5A
+loc_29B6E:
+	mov	ax, bx
+	sub	ax, word ptr [bp+arg_4]
+	push	ax
+	push	word ptr [bp+arg_4+2]
+	push	word ptr [bp+arg_4]
+	push	cs
+	call	near ptr sub_29FCA
+	add	sp, 6
+	mov	ax, word ptr [bp+var_4]
+	mov	dx, word ptr [bp+var_4+2]
+	mov	word ptr [bp+arg_4], ax
+	mov	word ptr [bp+arg_4+2], dx
+loc_29B8D:
+	les	bx, [bp+arg_4]
+	mov	al, es:[bx]
+	mov	[bp+var_A], al
+	or	al, al
+	jz	short loc_29B9D
+	jmp	loc_2984C
+loc_29B9D:
+	cmp	word_4FEFA, 0
+	jnz	short loc_29BB4
+	les	bx, dword_4FED6
+	test	byte ptr es:[bx+0Ah], 20h
+	jz	short loc_29BB4
+loc_29BAF:
+	mov	ax, 0FFFFh
+	jmp	short loc_29BB7
+loc_29BB4:
+	mov	ax, word_4FEFA
+loc_29BB7:
+	mov	sp, bp
+	pop	bp
+	retf
+printf_doPrint endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_29BBC proc far
+
+	var_12=	word ptr -12h
+	var_10=	word ptr -10h
+	var_E= dword ptr -0Eh
+	var_A= word ptr	-0Ah
+	var_8= dword ptr -8
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 12h
+	push	di
+	push	si
+	cmp	[bp+arg_0], 0Ah
+	jz	short loc_29BCE
+	inc	word_4FEF8
+loc_29BCE:
+	cmp	word_4FEDE, 2
+	jz	short loc_29BDC
+	cmp	word_4FEDE, 10h
+	jnz	short loc_29BF4
+loc_29BDC:
+	les	bx, dword_4FEF0
+	mov	ax, es:[bx]
+	mov	dx, es:[bx+2]
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	add	word ptr dword_4FEF0, 4
+	jmp	short loc_29C1F
+loc_29BF4:
+	cmp	word_4FEF8, 0
+	jz	short loc_29C0C
+	les	bx, dword_4FEF0
+	mov	ax, es:[bx]
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], 0
+	jmp	short loc_29C1A
+loc_29C0C:
+	les	bx, dword_4FEF0
+	mov	ax, es:[bx]
+	cwd
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+loc_29C1A:
+	add	word ptr dword_4FEF0, 2
+loc_29C1F:
+	cmp	word_4FED4, 0
+	jz	short loc_29C34
+	mov	ax, [bp+var_4]
+	or	ax, [bp+var_2]
+	jz	short loc_29C34
+	mov	ax, [bp+arg_0]
+	jmp	short loc_29C36
+align 2
+loc_29C34:
+	sub	ax, ax
+loc_29C36:
+	mov	word_50066, ax
+	mov	ax, word_4FF02
+	mov	dx, word_4FF04
+	mov	word ptr [bp+var_E], ax
+	mov	word ptr [bp+var_E+2], dx
+	cmp	word_4FEF8, 0
+	jnz	short loc_29C7E
+	cmp	[bp+var_2], 0
+	jge	short loc_29C7E
+	cmp	[bp+arg_0], 0Ah
+	jnz	short loc_29C76
+	les	bx, [bp+var_E]
+	inc	word ptr [bp+var_E]
+	mov	byte ptr es:[bx], 2Dh ;	'-'
+	mov	ax, [bp+var_4]
+	mov	dx, [bp+var_2]
+	neg	ax
+	adc	dx, 0
+	neg	dx
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+loc_29C76:
+	mov	[bp+var_A], 1
+	jmp	short loc_29C83
+align 2
+loc_29C7E:
+	mov	[bp+var_A], 0
+loc_29C83:
+	mov	ax, offset byte_4FEE2
+	mov	word ptr [bp+var_8], ax
+	mov	word ptr [bp+var_8+2], ds
+	push	[bp+arg_0]
+	push	ds
+	push	ax
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	sub_2A98A
+	add	sp, 0Ah
+	cmp	word_4FEF6, 0
+	jz	short loc_29CD7
+	push	word ptr [bp+var_8+2]
+	push	word ptr [bp+var_8]
+	call	_strlen
+	add	sp, 4
+	mov	cx, word_4FEFE
+	sub	cx, ax
+	mov	[bp+var_10], cx
+	les	di, [bp+var_E]
+	jmp	short loc_29CC7
+loc_29CC2:
+	mov	byte ptr es:[di], 30h ;	'0'
+	inc	di
+loc_29CC7:
+	mov	ax, cx
+	dec	cx
+	or	ax, ax
+	jg	short loc_29CC2
+	mov	word ptr [bp+var_E], di
+	mov	word ptr [bp+var_E+2], es
+	mov	[bp+var_10], cx
+loc_29CD7:
+	mov	cx, word_4FEDC
+	mov	[bp+var_12], ds
+	lds	si, [bp+var_E]
+loc_29CE1:
+	les	bx, [bp+var_8]
+	mov	al, es:[bx]
+	mov	[si], al
+	or	cx, cx
+	jz	short loc_29CF4
+	cmp	al, 61h	
+	jl	short loc_29CF4
+	sub	byte ptr [si], 20h 
+loc_29CF4:
+	inc	si
+	inc	word ptr [bp+var_8]
+	cmp	byte ptr es:[bx], 0
+	jnz	short loc_29CE1
+	mov	word ptr [bp+var_E], si
+	mov	word ptr [bp+var_E+2], ds
+	mov	ds, [bp+var_12]
+	cmp	word_4FEF8, 0
+	jnz	short loc_29D22
+	mov	ax, word_4FEE0
+	or	ax, word_4FEF4
+	jz	short loc_29D22
+	cmp	[bp+var_A], 0
+	jnz	short loc_29D22
+	mov	ax, 1
+	jmp	short loc_29D24
+loc_29D22:
+	sub	ax, ax
+loc_29D24:
+	push	ax
+	push	cs
+	call	near ptr sub_2A040
+	add	sp, 2
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sub_29BBC endp
+
+; Attributes: bp-based frame
+
+sub_29D32 proc far
+
+	var_E= dword ptr -0Eh
+	var_8= word ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 10h
+	push	di
+	push	si
+	cmp	[bp+arg_0], 0
+	jz	short loc_29D58
+	mov	si, 1
+	mov	ax, word ptr dword_4FEF0
+	mov	dx, word ptr dword_4FEF0+2
+	mov	[bp+var_8], ax
+	mov	[bp+var_6], dx
+	add	word ptr dword_4FEF0, 2
+	jmp	loc_29DED
+loc_29D58:
+	cmp	word_4FEDE, 8
+	jz	short loc_29D78
+	les	bx, dword_4FEF0
+	mov	ax, es:[bx]
+	mov	dx, es:[bx+2]
+	mov	[bp+var_8], ax
+	mov	[bp+var_6], dx
+	add	word ptr dword_4FEF0, 4
+	jmp	short loc_29D8D
+align 2
+loc_29D78:
+	les	bx, dword_4FEF0
+	mov	ax, es:[bx]
+	mov	[bp+var_4], ax
+	mov	[bp+var_8], ax
+	mov	[bp+var_6], ds
+	add	word ptr dword_4FEF0, 2
+loc_29D8D:
+	cmp	word_4FEDE, 8
+	jz	short loc_29DA2
+	mov	ax, [bp+var_8]
+	or	ax, [bp+var_6]
+	jnz	short loc_29DB1
+	mov	ax, offset aNull
+	jmp	short loc_29DAB
+align 2
+loc_29DA2:
+	cmp	[bp+var_4], 0
+	jnz	short loc_29DB1
+	mov	ax, offset aNull_0
+loc_29DAB:
+	mov	[bp+var_8], ax
+	mov	[bp+var_6], ds
+loc_29DB1:
+	mov	ax, [bp+var_8]
+	mov	dx, [bp+var_6]
+	mov	word ptr [bp+var_E], ax
+	mov	word ptr [bp+var_E+2], dx
+	sub	si, si
+	cmp	word_4FEF6, si
+	jz	short loc_29DE1
+	mov	cx, word_4FEFE
+	jmp	short loc_29DD9
+align 2
+loc_29DCC:
+	les	bx, [bp+var_E]
+	inc	word ptr [bp+var_E]
+	cmp	byte ptr es:[bx], 0
+	jz	short loc_29DED
+	inc	si
+loc_29DD9:
+	cmp	cx, si
+	jle	short loc_29DED
+	jmp	short loc_29DCC
+align 2
+loc_29DE0:
+	inc	si
+loc_29DE1:
+	les	bx, [bp+var_E]
+	inc	word ptr [bp+var_E]
+	cmp	byte ptr es:[bx], 0
+	jnz	short loc_29DE0
+loc_29DED:
+	mov	di, word_4FF06
+	sub	di, si
+	cmp	word_4FEEE, 0
+	jnz	short loc_29E02
+	push	di
+	push	cs
+	call	near ptr sub_29F5E
+	add	sp, 2
+loc_29E02:
+	push	si
+	push	[bp+var_6]
+	push	[bp+var_8]
+	push	cs
+	call	near ptr sub_29FCA
+	add	sp, 6
+	cmp	word_4FEEE, 0
+	jz	short loc_29E1F
+	push	di
+	push	cs
+	call	near ptr sub_29F5E
+	add	sp, 2
+loc_29E1F:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sub_29D32 endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_29E26 proc far
+
+	var_6= byte ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 6
+	mov	ax, word ptr dword_4FEF0
+	mov	dx, word ptr dword_4FEF0+2
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], dx
+	cmp	[bp+arg_0], 67h	
+	jz	short loc_29E45
+	cmp	[bp+arg_0], 47h	
+	jnz	short loc_29E4A
+loc_29E45:
+	mov	al, 1
+	jmp	short loc_29E4C
+align 2
+loc_29E4A:
+	sub	al, al
+loc_29E4C:
+	mov	[bp+var_6], al
+	cmp	word_4FEF6, 0
+	jnz	short loc_29E5C
+	mov	word_4FEFE, 6
+loc_29E5C:
+	cmp	[bp+var_6], 0
+	jz	short loc_29E6F
+	cmp	word_4FEFE, 0
+	jnz	short loc_29E6F
+	mov	word_4FEFE, 1
+loc_29E6F:
+	push	word_4FEDC
+	push	word_4FEFE
+	push	[bp+arg_0]
+	push	word_4FF04
+	push	word_4FF02
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	off_4F7E4
+	add	sp, 0Eh
+	cmp	[bp+var_6], 0
+	jz	short loc_29EB5
+	cmp	word_4FED4, 0
+	jnz	short loc_29EB5
+	push	word_4FF04
+	push	word_4FF02
+	call	off_4F7E8
+	add	sp, 4
+loc_29EB5:
+	cmp	word_4FED4, 0
+	jz	short loc_29ED7
+	cmp	word_4FEFE, 0
+	jnz	short loc_29ED7
+	push	word_4FF04
+	push	word_4FF02
+	call	off_4F7F0
+	add	sp, 4
+loc_29ED7:
+	add	word ptr dword_4FEF0, 8
+	mov	word_50066, 0
+	mov	ax, word_4FEE0
+	or	ax, word_4FEF4
+	jz	short loc_29F06
+	push	[bp+var_2]
+	push	[bp+var_4]
+	call	off_4F7F4
+	add	sp, 4
+	or	ax, ax
+	jz	short loc_29F06
+	mov	ax, 1
+	jmp	short loc_29F08
+loc_29F06:
+	sub	ax, ax
+loc_29F08:
+	push	ax
+	push	cs
+	call	near ptr sub_2A040
+	mov	sp, bp
+	pop	bp
+	retf
+sub_29E26 endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_29F12 proc far
+
+	arg_0= byte ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	si
+	cmp	word_4FEFC, 0
+	jnz	short loc_29F5A
+	les	bx, dword_4FED6
+	assume es:nothing
+	dec	word ptr es:[bx+4]
+	js	short loc_29F3C
+	mov	al, [bp+arg_0]
+	mov	si, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	es:[si], al
+	sub	ah, ah
+	jmp	short loc_29F4C
+align 2
+loc_29F3C:
+	push	word ptr dword_4FED6+2
+	push	bx
+	push	word ptr [bp+arg_0]
+	call	sub_289E0
+	add	sp, 6
+loc_29F4C:
+	inc	ax
+	jnz	short loc_29F56
+	inc	word_4FEFC
+	jmp	short loc_29F5A
+align 2
+loc_29F56:
+	inc	word_4FEFA
+loc_29F5A:
+	pop	si
+	pop	bp
+	retf
+sub_29F12 endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_29F5E proc far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 2
+	push	di
+	push	si
+	cmp	word_4FEFC, 0
+	jnz	short loc_29FC4
+	mov	si, [bp+arg_0]
+	or	si, si
+	jle	short loc_29FC4
+	jmp	short loc_29F91
+loc_29F76:
+	push	word ptr dword_4FED6+2
+	push	word ptr dword_4FED6
+	push	word_50068
+	call	sub_289E0
+	add	sp, 6
+loc_29F8A:
+	inc	ax
+	jnz	short loc_29F91
+	inc	word_4FEFC
+loc_29F91:
+	mov	ax, si
+	dec	si
+	or	ax, ax
+	jle	short loc_29FB6
+	les	bx, dword_4FED6
+	dec	word ptr es:[bx+4]
+	js	short loc_29F76
+	mov	al, byte ptr word_50068
+	mov	di, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	es:[di], al
+	sub	ah, ah
+	jmp	short loc_29F8A
+loc_29FB6:
+	cmp	word_4FEFC, 0
+	jnz	short loc_29FC4
+	mov	ax, [bp+arg_0]
+	add	word_4FEFA, ax
+loc_29FC4:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sub_29F5E endp
+
+; Attributes: bp-based frame
+
+sub_29FCA proc far
+
+	arg_0= dword ptr  6
+	arg_4= word ptr	 0Ah
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 2
+	push	di
+	push	si
+	mov	si, [bp+arg_4]
+	cmp	word_4FEFC, 0
+	jnz	short loc_2A03A
+	jmp	short loc_2A000
+loc_29FDE:
+	push	word ptr dword_4FED6+2
+	push	word ptr dword_4FED6
+	les	bx, [bp+arg_0]
+	mov	al, es:[bx]
+	cbw
+	push	ax
+	call	sub_289E0
+	add	sp, 6
+loc_29FF6:
+	inc	ax
+	jnz	short loc_29FFD
+	inc	word_4FEFC
+loc_29FFD:
+	inc	word ptr [bp+arg_0]
+loc_2A000:
+	mov	ax, si
+	dec	si
+	or	ax, ax
+	jz	short loc_2A02C
+	les	bx, dword_4FED6
+	dec	word ptr es:[bx+4]
+	js	short loc_29FDE
+	les	bx, [bp+arg_0]
+	mov	al, es:[bx]
+	les	bx, dword_4FED6
+	mov	di, es:[bx]
+	inc	word ptr es:[bx]
+	mov	es, word ptr es:[bx+2]
+	mov	es:[di], al
+	sub	ah, ah
+	jmp	short loc_29FF6
+loc_2A02C:
+	cmp	word_4FEFC, 0
+	jnz	short loc_2A03A
+	mov	ax, [bp+arg_4]
+	add	word_4FEFA, ax
+loc_2A03A:
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sub_29FCA endp
+
+; Attributes: bp-based frame
+
+sub_2A040 proc far
+
+	var_C= dword ptr -0Ch
+	var_8= word ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 0Ch
+	push	si
+	mov	ax, word_4FF02
+	mov	dx, word_4FF04
+	mov	word ptr [bp+var_C], ax
+	mov	word ptr [bp+var_C+2], dx
+	sub	ax, ax
+	mov	[bp+var_4], ax
+	mov	[bp+var_6], ax
+	cmp	word_50068, 30h	
+	jnz	short loc_2A07B
+	cmp	word_4FEF6, ax
+	jz	short loc_2A07B
+	cmp	word_4FEDA, ax
+	jz	short loc_2A075
+	cmp	word_4FF00, ax
+	jnz	short loc_2A07B
+loc_2A075:
+	mov	word_50068, 20h	
+loc_2A07B:
+	mov	si, word_4FF06
+	push	word ptr [bp+var_C+2]
+	push	word ptr [bp+var_C]
+	call	_strlen
+	add	sp, 4
+	mov	[bp+var_8], ax
+	sub	si, ax
+	sub	si, [bp+arg_0]
+	cmp	word_4FEEE, 0
+	jnz	short loc_2A0BE
+	les	bx, [bp+var_C]
+	cmp	byte ptr es:[bx], 2Dh ;	'-'
+	jnz	short loc_2A0BE
+	cmp	word_50068, 30h	
+	jnz	short loc_2A0BE
+	inc	word ptr [bp+var_C]
+	mov	al, es:[bx]
+	cbw
+	push	ax
+	push	cs
+	call	near ptr sub_29F12
+	add	sp, 2
+	dec	[bp+var_8]
+loc_2A0BE:
+	cmp	word_50068, 30h	
+	jz	short loc_2A0D0
+	or	si, si
+	jle	short loc_2A0D0
+	cmp	word_4FEEE, 0
+	jz	short loc_2A0EB
+loc_2A0D0:
+	cmp	[bp+arg_0], 0
+	jz	short loc_2A0DD
+	inc	[bp+var_6]
+	push	cs
+	call	near ptr sub_2A146
+loc_2A0DD:
+	cmp	word_50066, 0
+	jz	short loc_2A0EB
+	inc	[bp+var_4]
+	push	cs
+	call	near ptr sub_2A15E
+loc_2A0EB:
+	cmp	word_4FEEE, 0
+	jnz	short loc_2A11B
+	push	si
+	push	cs
+	call	near ptr sub_29F5E
+	add	sp, 2
+	cmp	[bp+arg_0], 0
+	jz	short loc_2A10A
+	cmp	[bp+var_6], 0
+	jnz	short loc_2A10A
+	push	cs
+	call	near ptr sub_2A146
+loc_2A10A:
+	cmp	word_50066, 0
+	jz	short loc_2A11B
+	cmp	[bp+var_4], 0
+	jnz	short loc_2A11B
+	push	cs
+	call	near ptr sub_2A15E
+loc_2A11B:
+	push	[bp+var_8]
+	push	word ptr [bp+var_C+2]
+	push	word ptr [bp+var_C]
+	push	cs
+	call	near ptr sub_29FCA
+	add	sp, 6
+	cmp	word_4FEEE, 0
+	jz	short loc_2A140
+	mov	word_50068, 20h	
+	push	si
+	push	cs
+	call	near ptr sub_29F5E
+	add	sp, 2
+loc_2A140:
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_2A040 endp
+
+align 2
+
+sub_2A146 proc far
+	cmp	word_4FEE0, 0
+	jz	short loc_2A152
+	mov	ax, 2Bh	
+	jmp	short loc_2A155
+loc_2A152:
+	mov	ax, 20h	
+loc_2A155:
+	push	ax
+	push	cs
+	call	near ptr sub_29F12
+	add	sp, 2
+	retf
+sub_2A146 endp
+
+
+sub_2A15E proc far
+	mov	ax, 30h	
+	push	ax
+	push	cs
+	call	near ptr sub_29F12
+	add	sp, 2
+	cmp	word_50066, 10h
+	jnz	short locret_2A187
+	cmp	word_4FEDC, 0
+	jz	short loc_2A17C
+	mov	ax, 58h	
+	jmp	short loc_2A17F
+loc_2A17C:
+	mov	ax, 78h	
+loc_2A17F:
+	push	ax
+	push	cs
+	call	near ptr sub_29F12
+	add	sp, 2
+locret_2A187:
+	retf
+sub_2A15E endp
+
+; Attributes: bp-based frame
+
+sub_2A188 proc far
+
+	var_6= byte ptr	-6
+	var_2= word ptr	-2
+	arg_0= dword ptr  6
+	arg_4= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 6
+	push	di
+	push	si
+	mov	[bp+var_2], 1
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 2Ah ;	'*'
+	jnz	short loc_2A1B0
+	les	bx, dword_4FEF0
+	mov	si, es:[bx]
+	add	word ptr dword_4FEF0, 2
+	inc	word ptr [bp+arg_4]
+	jmp	short loc_2A210
+align 2
+loc_2A1B0:
+	les	bx, [bp+arg_4]
+	cmp	byte ptr es:[bx], 2Dh ;	'-'
+	jnz	short loc_2A1C1
+	mov	[bp+var_2], 0FFFFh
+	inc	word ptr [bp+arg_4]
+loc_2A1C1:
+	sub	si, si
+	mov	bx, word ptr [bp+arg_4]
+	mov	al, es:[bx]
+	mov	[bp+var_6], al
+	cmp	al, 30h	
+	jl	short loc_2A210
+	cmp	al, 39h	
+	jg	short loc_2A210
+	cmp	word_4FEF6, si
+	jnz	short loc_2A1E4
+	cmp	al, 30h	
+	jnz	short loc_2A1E4
+	mov	word_50068, 30h	
+loc_2A1E4:
+	mov	di, bx
+	jmp	short loc_2A1EE
+loc_2A1E8:
+	cmp	byte ptr es:[di], 39h ;	'9'
+	jg	short loc_2A20A
+loc_2A1EE:
+	mov	al, es:[di]
+	cbw
+	mov	cx, si
+	shl	cx, 1
+	shl	cx, 1
+	add	cx, si
+	shl	cx, 1
+	add	cx, ax
+	sub	cx, 30h	
+	mov	si, cx
+	inc	di
+	cmp	byte ptr es:[di], 30h ;	'0'
+	jge	short loc_2A1E8
+loc_2A20A:
+	mov	word ptr [bp+arg_4], di
+	mov	word ptr [bp+arg_4+2], es
+loc_2A210:
+	mov	ax, [bp+var_2]
+	imul	si
+	mov	si, ax
+	les	bx, [bp+arg_0]
+	mov	es:[bx], si
+	mov	ax, word ptr [bp+arg_4]
+	mov	dx, word ptr [bp+arg_4+2]
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sub_2A188 endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_2A22A proc far
+
+	var_4= dword ptr -4
+	arg_0= byte ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 4
+	push	di
+	mov	ax, offset asc_4F7C8
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], ds
+	mov	cl, [bp+arg_0]
+	les	di, [bp+var_4]
+	jmp	short loc_2A243
+loc_2A242:
+	inc	di
+loc_2A243:
+	cmp	byte ptr es:[di], 0
+	jz	short loc_2A25A
+	cmp	es:[di], cl
+	jnz	short loc_2A242
+	mov	ax, 1
+	mov	word ptr [bp+var_4], di
+	mov	word ptr [bp+var_4+2], es
+	jmp	short loc_2A262
+align 2
+loc_2A25A:
+	mov	word ptr [bp+var_4], di
+	mov	word ptr [bp+var_4+2], es
+	sub	ax, ax
+loc_2A262:
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf
+sub_2A22A endp
+
+align 2
+; Attributes: bp-based frame
+
+sscanf_segAdjust proc far
+
+	arg_0= word ptr	 6
+	arg_2= dword ptr  8
+
+	push	bp
+	mov	bp, sp
+	push	si
+	mov	si, [bp+arg_0]
+	les	bx, [bp+arg_2]
+	test	byte ptr es:[bx+0Ah], 1
+	jz	short loc_2A27E
+	cmp	si, 0FFFFh
+	jnz	short loc_2A284
+loc_2A27E:
+	mov	ax, 0FFFFh
+	jmp	short loc_2A2F3
+align 2
+loc_2A284:
+	les	bx, [bp+arg_2]
+	mov	ax, es:[bx+6]
+	or	ax, es:[bx+8]
+	jnz	short loc_2A299
+	push	es
+	push	bx
+	call	sub_28B9E
+	add	sp, 4
+loc_2A299:
+	les	bx, [bp+arg_2]
+	mov	ax, es:[bx]
+	mov	dx, es:[bx+2]
+	cmp	es:[bx+6], ax
+	jnz	short loc_2A2B9
+	cmp	es:[bx+8], dx
+	jnz	short loc_2A2B9
+	cmp	word ptr es:[bx+4], 0
+	jnz	short loc_2A27E
+	inc	word ptr es:[bx]
+loc_2A2B9:
+	inc	word ptr es:[bx+4]
+	dec	word ptr es:[bx]
+	les	bx, es:[bx]
+	mov	ax, si
+	mov	es:[bx], al
+	les	bx, [bp+arg_2]
+	and	byte ptr es:[bx+0Ah], 0EFh
+	test	byte ptr es:[bx+0Ah], 40h
+	jnz	short loc_2A2EF
+	mov	ax, bx
+	sub	ax, offset off_4F64C
+	cwd
+	mov	cx, 0Ch
+	idiv	cx
+	mov	bx, ax
+	shl	bx, 1
+	add	bx, ax
+	shl	bx, 1
+	or	byte_4F73C[bx], 4
+loc_2A2EF:
+	mov	ax, si
+	sub	ah, ah
+loc_2A2F3:
+	pop	si
+	pop	bp
+	retf
+sscanf_segAdjust endp
+
+; Attributes: bp-based frame
+
+sub_2A2F6 proc far
+
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_2= word ptr	 6
+	arg_4= word ptr	 8
+	arg_6= word ptr	 0Ah
+	arg_8= word ptr	 0Ch
+
+; FUNCTION CHUNK AT 13D5 SIZE 0000000D BYTES
+	push	bp
+	mov	bp, sp
+	sub	sp, 4
+	mov	bx, [bp+arg_2]
+	cmp	bx, word_4EFFA
+	jb	short loc_2A30A
+	mov	ax, 900h
+	jmp	short loc_2A334
+loc_2A30A:
+	test	[bp+arg_6], 8000h
+	jz	short loc_2A359
+	cmp	[bp+arg_8], 0
+	jz	short loc_2A331
+	xor	cx, cx
+	mov	dx, cx
+	mov	ax, 4201h
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
+			; AL = method: offset from present location
+	jb	short loc_2A36D
+	test	[bp+arg_8], 2
+	jnz	short loc_2A337
+	add	ax, [bp+arg_4]
+	adc	dx, [bp+arg_6]
+	jns	short loc_2A359
+loc_2A331:
+	mov	ax, 1600h
+loc_2A334:
+	stc
+	jmp	short loc_2A36D
+loc_2A337:
+	mov	[bp+var_2], dx
+	mov	[bp+var_4], ax
+	mov	dx, cx
+	mov	ax, 4202h
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
+			; AL = method: offset from end of file
+	add	ax, [bp+arg_4]
+	adc	dx, [bp+arg_6]
+	jns	short loc_2A359
+	mov	cx, [bp+var_2]
+	mov	dx, [bp+var_4]
+	mov	ax, 4200h
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
+			; AL = method: offset from beginning of	file
+	jmp	short loc_2A331
+loc_2A359:
+	mov	dx, [bp+arg_4]
+	mov	cx, [bp+arg_6]
+	mov	al, byte ptr [bp+arg_8]
+	mov	ah, 42h
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
+			; AL = method:
+			; 0-from beginnig,1-from current,2-from	end
+	jb	short loc_2A36D
+	and	byte_4EFFC[bx], 0FDh
+loc_2A36D:
+	jmp	loc_28805
+sub_2A2F6 endp
+
+; Attributes: bp-based frame
+
+sub_2A370 proc far
+
+	var_1= word ptr	-1
+	arg_2= word ptr	 6
+	arg_4= dword ptr  8
+	arg_8= word ptr	 0Ch
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 2
+	mov	bx, [bp+arg_2]
+	cmp	bx, word_4EFFA
+	jb	short loc_2A385
+	stc
+	mov	ax, 900h
+	jmp	short loc_2A3EC
+loc_2A385:
+	xor	ax, ax
+	mov	cx, [bp+arg_8]
+	jcxz	short loc_2A3EC
+	test	byte_4EFFC[bx],	2
+	jnz	short loc_2A3EC
+	mov	cx, [bp+arg_8]
+	push	ds
+	lds	dx, [bp+arg_4]
+	mov	ah, 3Fh
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
+			; BX = file handle, CX = number	of bytes to read
+			; DS:DX	-> buffer
+	pop	ds
+	jnb	short loc_2A3A5
+	mov	ah, 9
+	jmp	short loc_2A3EC
+loc_2A3A5:
+	test	byte_4EFFC[bx],	80h
+	jz	short loc_2A3EC
+	and	byte_4EFFC[bx],	0FBh
+	push	si
+	push	di
+	push	ds
+	pop	es
+	assume es:dseg
+	mov	ds, word ptr [bp+arg_4+2]
+	cld
+	mov	si, dx
+	mov	di, dx
+	mov	cx, ax
+	jcxz	short loc_2A3E8
+	mov	ah, 0Dh
+	cmp	byte ptr [si], 0Ah
+	jnz	short loc_2A3CE
+	or	es:byte_4EFFC[bx], 4
+loc_2A3CE:
+	lodsb
+	cmp	al, ah
+	jz	short loc_2A3EF
+	cmp	al, 1Ah
+	jnz	short loc_2A3DF
+	or	es:byte_4EFFC[bx],	2
+	jmp	short loc_2A3E4
+loc_2A3DF:
+	mov	[di], al
+	inc	di
+loc_2A3E2:
+	loop	loc_2A3CE
+loc_2A3E4:
+	mov	ax, di
+	sub	ax, dx
+loc_2A3E8:
+	push	es
+	pop	ds
+loc_2A3EA:
+	pop	di
+	pop	si
+loc_2A3EC:
+	jmp	loc_28805
+loc_2A3EF:
+	cmp	cx, 1
+	jz	short loc_2A3FB
+	cmp	byte ptr [si], 0Ah
+	jz	short loc_2A3E2
+	jmp	short loc_2A3DF
+loc_2A3FB:
+	push	es
+	pop	ds
+	test	byte_4EFFC[bx],	40h
+	jz	short loc_2A41C
+	mov	ax, 4400h
+	int	21h		; DOS -	2+ - IOCTL - GET DEVICE	INFORMATION
+			; BX = file or device handle
+	test	dx, 20h
+	jnz	short loc_2A418
+	lea	dx, [bp-1]
+	mov	ah, 3Fh
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
+			; BX = file handle, CX = number	of bytes to read
+			; DS:DX	-> buffer
+	jb	short loc_2A3EA
+loc_2A418:
+	mov	al, 0Ah
+	jmp	short loc_2A448
+loc_2A41C:
+	mov	byte ptr [bp+var_1], 0
+	lea	dx, [bp+var_1]
+	mov	ah, 3Fh
+	int	21h		; DOS -	2+ - CALL(read) FROM FILE WITH HANDLE
+			; BX = file handle, CX = number	of bytes to read
+			; DS:DX	-> buffer
+	jb	short loc_2A3EA
+	or	ax, ax
+	jz	short loc_2A446
+	cmp	[bp+arg_8], 1
+	jz	short loc_2A452
+loc_2A433:
+	mov	cx, 0FFFFh
+	mov	dx, cx
+	mov	ax, 4201h
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
+			; AL = method: offset from present location
+	mov	cx, 1
+	cmp	byte ptr [bp+var_1], 0Ah
+	jz	short loc_2A44D
+loc_2A446:
+	mov	al, 0Dh
+loc_2A448:
+	lds	dx, [bp+arg_4]
+	jmp	short loc_2A3DF
+loc_2A44D:
+	lds	dx, [bp+arg_4]
+	jmp	short loc_2A3E2
+loc_2A452:
+	cmp	byte ptr [bp+var_1], 0Ah
+	jnz	short loc_2A433
+	jmp	short loc_2A418
+sub_2A370 endp
+
+; Attributes: bp-based frame
+
+sub_2A45A proc far
+
+	var_8= word ptr	-8
+	var_6= word ptr	-6
+	var_4= word ptr	-4
+	var_2= word ptr	-2
+	arg_2= word ptr	 6
+	arg_4= word ptr	 0Ah
+	arg_6= word ptr	 0Ch
+
+; FUNCTION CHUNK AT 313A SIZE 00000039 BYTES
+	push	bp
+	mov	bp, sp
+	sub	sp, 8
+	mov	bx, [bp+arg_2]
+	cmp	bx, word_4EFFA
+	jb	short loc_2A470
+	mov	ax, 900h
+	stc
+loc_2A46D:
+	jmp	loc_28805
+loc_2A470:
+	test	byte_4EFFC[bx], 20h
+	jz	short loc_2A482
+	mov	ax, 4202h
+	xor	cx, cx
+	mov	dx, cx
+	int	21h		; DOS -	2+ - MOVE FILE CALL(read)/CALL(write) POINTER (LSEEK)
+			; AL = method: offset from end of file
+	jb	short loc_2A46D
+loc_2A482:
+	test	byte_4EFFC[bx], 80h
+	jz	short loc_2A505
+	mov	[bp+var_6], ds
+	mov	es, [bp+arg_4]
+	assume es:nothing
+	lds	dx, [bp+8]
+	xor	ax, ax
+	mov	[bp+var_2], ax
+	mov	[bp+var_4], ax
+	cld
+	push	di
+	push	si
+	mov	di, dx
+	mov	si, dx
+	mov	[bp+var_8], sp
+	mov	cx, [bp+arg_6]
+	jcxz	short loc_2A507
+	mov	al, 0Ah
+	repne scasb
+	jnz	short loc_2A500
+	push	ds
+	mov	ds, [bp+var_6]
+	call	sub_2A5A4
+	pop	ds
+	cmp	ax, 0A8h 
+	jbe	short loc_2A509
+	sub	sp, 2
+	mov	bx, sp
+	mov	dx, 200h
+	cmp	ax, 228h
+	jnb	short loc_2A4CE
+	mov	dx, 80h
+loc_2A4CE:
+	sub	sp, dx
+	mov	dx, sp
+	mov	di, dx
+	push	ss
+	pop	es
+	assume es:dseg
+	mov	cx, [bp+arg_6]
+loc_2A4D9:
+	lodsb
+	cmp	al, 0Ah
+	jz	short loc_2A4EA
+loc_2A4DE:
+	cmp	di, bx
+	jz	short loc_2A4FB
+loc_2A4E2:
+	stosb
+	loop	loc_2A4D9
+	call	near ptr sub_2A50E
+	jmp	short loc_2A559
+loc_2A4EA:
+	mov	al, 0Dh
+	cmp	di, bx
+	jnz	short loc_2A4F3
+	call	near ptr sub_2A50E
+loc_2A4F3:
+	stosb
+	mov	al, 0Ah
+	inc	[bp+var_4]
+	jmp	short loc_2A4DE
+loc_2A4FB:
+	call	near ptr sub_2A50E
+	jmp	short loc_2A4E2
+loc_2A500:
+	pop	si
+	pop	di
+	mov	ds, [bp+var_6]
+loc_2A505:
+	jmp	short loc_2A56A
+loc_2A507:
+	jmp	short loc_2A559
+loc_2A509:
+	xor	ax, ax
+	jmp	loc_2834B
+sub_2A45A endp
+
+
+sub_2A50E proc far
+	push	ax
+	push	bx
+	push	cx
+	push	ds
+	push	es
+	pop	ds
+	mov	cx, di
+	sub	cx, dx
+	jcxz	short loc_2A52A
+	mov	bx, [bp+6]
+	mov	ah, 40h
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
+			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
+	jb	short loc_2A531
+	add	[bp-2],	ax
+	or	ax, ax
+	jz	short loc_2A531
+loc_2A52A:
+	pop	ds
+	pop	cx
+	pop	bx
+	pop	ax
+	mov	di, dx
+	retn
+loc_2A531:
+	pop	ds
+	add	sp, 8
+	jnb	short loc_2A53B
+	mov	ah, 9
+	jmp	short loc_2A55F
+loc_2A53B:
+	mov	ds, word ptr [bp-2]
+	test	byte_4EFFC[bx], 40h
+	jz	short loc_2A553
+	mov	ds, word ptr [bp+0Ah]
+	mov	bx, [bp+8]
+	cmp	byte ptr [bx], 1Ah
+	jnz	short loc_2A553
+	clc
+	jmp	short loc_2A55F
+loc_2A553:
+	stc
+	mov	ax, 1C00h
+	jmp	short loc_2A55F
+loc_2A559::
+	mov	ax, [bp-2]
+	sub	ax, [bp-4]
+loc_2A55F:
+	mov	sp, [bp-8]
+	pop	si
+	pop	di
+	mov	ds, word ptr [bp-6]
+loc_2A567::
+	jmp	loc_28805
+sub_2A50E endp
+
+; START	OF FUNCTION CHUNK FOR sub_2A45A
+loc_2A56A:
+	mov	cx, [bp+arg_6]
+	or	cx, cx
+	jnz	short loc_2A576
+	mov	ax, cx
+	jmp	loc_28805
+loc_2A576:
+	push	ds
+	lds	dx, [bp+8]
+	mov	ah, 40h
+	int	21h		; DOS -	2+ - CALL(write) TO FILE WITH	HANDLE
+			; BX = file handle, CX = number	of bytes to write, DS:DX -> buffer
+	push	ds
+	pop	es
+	pop	ds
+	jnb	short loc_2A587
+	mov	ah, 9
+	jmp	short loc_2A567
+loc_2A587:
+	or	ax, ax
+	jnz	short loc_2A567
+	test	byte_4EFFC[bx], 40h
+	jz	short loc_2A59D
+	mov	bx, dx
+	cmp	byte ptr es:[bx], 1Ah
+	jnz	short loc_2A59D
+	clc
+	jmp	short loc_2A567
+loc_2A59D:
+	stc
+	mov	ax, 1C00h
+	jmp	short loc_2A567
+; END OF FUNCTION CHUNK	FOR sub_2A45A
+align 2
+
+sub_2A5A4 proc far
+	pop	cx
+	pop	dx
+	mov	ax, word_4F030
+	cmp	ax, sp
+	jnb	short loc_2A5B4
+	sub	ax, sp
+	neg	ax
+loc_2A5B1:
+	push	dx
+	push	cx
+	retf
+loc_2A5B4:
+	xor	ax, ax
+	jmp	short loc_2A5B1
+sub_2A5A4 endp
+
+	push	bp
+	mov	bp, sp
+	mov	bx, [bp+6]
+	or	bx, bx
+	jz	short loc_2A5C6
+	or	byte ptr [bx-2], 1
+loc_2A5C6:
+	mov	sp, bp
+	pop	bp
+	retf
+; Attributes: bp-based frame
+
+sub_2A5CA proc far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	push	si
+	push	di
+	mov	bx, offset word_4F7CE
+	cmp	word ptr [bx], 0
+	jnz	short loc_2A600
+	push	ds
+	pop	es
+	mov	ax, 5
+	call	sub_2A82C
+	jnz	short loc_2A5E6
+	xor	ax, ax
+	cwd
+	jmp	short loc_2A60A
+loc_2A5E6:
+	inc	ax
+	and	al, 0FEh
+	mov	word_4F7CE, ax
+	mov	word_4F7D0, ax
+	xchg	ax, si
+	mov	word ptr [si], 1
+	add	si, 4
+	mov	word ptr [si-2], 0FFFEh
+	mov	word_4F7D4, si
+loc_2A600:
+	mov	cx, [bp+arg_0]
+	mov	ax, ds
+	mov	es, ax
+	call	sub_2A6ED
+loc_2A60A:
+	pop	di
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_2A5CA endp
+
+; Attributes: bp-based frame
+_freeMaybe proc	far
+
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	les	bx, [bp+arg_0]
+	assume es:nothing
+	mov	ax, es
+	or	ax, bx
+	jz	short loc_2A621
+	or	byte ptr es:[bx-2], 1
+loc_2A621:
+	mov	sp, bp
+	pop	bp
+	retf
+_freeMaybe endp
+
+; Attributes: bp-based frame
+
+_mallocMaybe proc far
+
+	arg_0= word ptr	 6
+
+	push	bp
+	mov	bp, sp
+	sub	sp, 2
+	push	si
+	push	di
+	mov	ax, [bp+arg_0]
+	cmp	ax, 0FFF1h
+	jnb	short loc_2A653
+	cmp	word_4F7D8, 0
+	jnz	short loc_2A644
+	call	sub_2A664
+	jz	short loc_2A653
+	mov	word_4F7D8, ax
+loc_2A644:
+	call	sub_2A6D2
+	jnz	short loc_2A65E
+	call	sub_2A664
+	jz	short loc_2A653
+	call	sub_2A6D2
+	jnz	short loc_2A65E
+loc_2A653:
+	push	[bp+arg_0]
+	call	sub_2A5CA
+	add	sp, 2
+loc_2A65E:
+	pop	di
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+_mallocMaybe endp
+
+sub_2A664 proc near
+	mov	bx, 0F0h 
+	cmp	[bp+6],	bx
+	jbe	short loc_2A673
+	mov	bx, [bp+6]
+	inc	bx
+	and	bx, 0FFFEh
+loc_2A673:
+	mov	[bp-2],	bx
+	xor	ax, ax
+	push	ds
+	push	ax
+	push	ax
+	lea	cx, [bx+0Eh]
+	push	cx
+	mov	al, 2
+	push	ax
+	call	sub_2A84E
+	add	sp, 8
+	cmp	dx, 0FFFFh
+	jz	short loc_2A6D0
+	mov	ax, dx
+	xchg	dx, word_4F7DA
+	mov	word_4F7DC, ax
+	cmp	ax, word_4F7E0
+	jbe	short loc_2A6A1
+	mov	word_4F7E0, ax
+loc_2A6A1:
+	or	dx, dx
+	jz	short loc_2A6AA
+	mov	ds, dx
+	assume ds:nothing
+	mov	ds:8,	ax
+loc_2A6AA:
+	mov	bx, [bp-2]
+	mov	ds, ax
+	assume ds:nothing
+	xor	ax, ax
+	mov	ds:8,	ax
+	dec	ax
+	dec	ax
+	mov	[bx+0Ch], ax
+	mov	ax, 0Ah
+	mov	ds:0, ax
+	mov	ds:2, ax
+	lea	ax, [bx+1]
+	mov	ds:0Ah, ax
+	add	ax, 0Dh
+	mov	ds:6, ax
+	mov	ax, ds
+loc_2A6D0:
+	pop	ds
+	retn
+sub_2A664 endp
+
+sub_2A6D2 proc near
+	mov	ax, ds
+	mov	es, ax
+	assume es:dseg
+	mov	cx, [bp+6]
+	xor	bx, bx
+	mov	ds, word_4F7DC
+	call	sub_2A6ED
+	or	dx, dx
+	mov	cx, es
+	mov	ds, cx
+	retn
+sub_2A6D2 endp
+
+align 2
+; START	OF FUNCTION CHUNK FOR sub_2A6ED
+loc_2A6EA:
+	jmp	loc_2A7BB
+; END OF FUNCTION CHUNK	FOR sub_2A6ED
+sub_2A6ED proc near
+; FUNCTION CHUNK AT 32BA SIZE 00000003 BYTES
+	inc	cx
+	jz	short loc_2A6EA
+	and	cl, 0FEh
+	cmp	cx, 0FFEEh
+	jnb	short loc_2A6EA
+	mov	si, [bx+2]
+	cld
+	lodsw
+	mov	di, si
+	test	al, 1
+	jz	short loc_2A745
+loc_2A703:
+	dec	ax
+	cmp	ax, cx
+	jnb	short loc_2A71D
+	mov	dx, ax
+	add	si, ax
+	lodsw
+	test	al, 1
+	jz	short loc_2A745
+	add	ax, dx
+	add	ax, 2
+	mov	si, di
+	mov	[si-2],	ax
+	jmp	short loc_2A703
+loc_2A71D:
+	mov	di, si
+	jz	short loc_2A72D
+	add	di, cx
+	mov	[si-2],	cx
+	sub	ax, cx
+	dec	ax
+	mov	[di], ax
+	jmp	short loc_2A732
+loc_2A72D:
+	add	di, cx
+	dec	byte ptr [si-2]
+loc_2A732:
+	mov	ax, si
+	mov	dx, ds
+	mov	cx, ss
+	cmp	dx, cx
+	jz	short loc_2A741
+	mov	es:word_4F7DC, ds
+loc_2A741:
+	mov	[bx+2],	di
+	retn
+loc_2A745:
+	mov	es:byte_4F7E2, 2
+loc_2A74B:
+	cmp	ax, 0FFFEh
+	jz	short loc_2A775
+	mov	di, si
+	add	si, ax
+loc_2A754:
+	lodsw
+	test	al, 1
+	jz	short loc_2A74B
+	mov	di, si
+loc_2A75B:
+	dec	ax
+	cmp	ax, cx
+	jnb	short loc_2A71D
+	mov	dx, ax
+	add	si, ax
+	lodsw
+	test	al, 1
+	jz	short loc_2A74B
+	add	ax, dx
+	add	ax, 2
+	mov	si, di
+	mov	[si-2],	ax
+	jmp	short loc_2A75B
+loc_2A775:
+	mov	ax, [bx+8]
+	or	ax, ax
+	jz	short loc_2A780
+	mov	ds, ax
+	jmp	short loc_2A794
+loc_2A780:
+	dec	es:byte_4F7E2
+	jz	short loc_2A798
+	mov	ax, ds
+	mov	di, ss
+	cmp	ax, di
+	jz	short loc_2A794
+	mov	ds, es:word_4F7D8
+loc_2A794:
+	mov	si, [bx]
+	jmp	short loc_2A754
+loc_2A798:
+	mov	si, [bx+6]
+	xor	ax, ax
+	call	sub_2A80A
+	cmp	ax, si
+	jz	short loc_2A7B1
+	and	al, 1
+	inc	ax
+	inc	ax
+	cbw
+	call	sub_2A80A
+	jz	short loc_2A7BB
+	dec	byte ptr [di-2]
+loc_2A7B1:
+	call	sub_2A7D0
+	jz	short loc_2A7BB
+	xchg	ax, si
+	dec	si
+	dec	si
+	jmp	short loc_2A754
+loc_2A7BB::
+	mov	ax, ds
+	mov	cx, ss
+	cmp	ax, cx
+	jz	short loc_2A7C7
+	mov	es:word_4F7DC, ax
+loc_2A7C7:
+	mov	ax, [bx]
+	mov	[bx+2],	ax
+	xor	ax, ax
+	cwd
+	retn
+sub_2A6ED endp
+
+sub_2A7D0 proc near
+	push	cx
+	mov	ax, [di-2]
+	test	al, 1
+	jz	short loc_2A7DB
+	sub	cx, ax
+	dec	cx
+loc_2A7DB:
+	inc	cx
+	inc	cx
+	mov	dx, 7FFFh
+loc_2A7E0:
+	cmp	dx, es:word_4F7DE
+	jbe	short loc_2A7EB
+	shr	dx, 1
+	jnz	short loc_2A7E0
+loc_2A7EB:
+	mov	ax, cx
+	add	ax, si
+	jb	short loc_2A806
+	add	ax, dx
+	jb	short loc_2A802
+	not	dx
+	and	ax, dx
+	sub	ax, si
+	call	sub_2A80A
+	jnz	short loc_2A808
+	not	dx
+loc_2A802:
+	shr	dx, 1
+	jnz	short loc_2A7EB
+loc_2A806:
+	xor	ax, ax
+loc_2A808:
+	pop	cx
+	retn
+sub_2A7D0 endp
+
+sub_2A80A proc near
+	push	dx
+	push	cx
+	call	sub_2A82C
+	jz	short loc_2A829
+	push	di
+	mov	di, si
+	mov	si, ax
+	add	si, dx
+	mov	word ptr [si-2], 0FFFEh
+	mov	[bx+6],	si
+	mov	dx, si
+	sub	dx, di
+	dec	dx
+	mov	[di-2],	dx
+	pop	ax
+loc_2A829:
+	pop	cx
+	pop	dx
+	retn
+sub_2A80A endp
+
+sub_2A82C proc near
+	push	bx
+	push	ax
+	xor	dx, dx
+	push	ds
+	push	dx
+	push	dx
+	push	ax
+	mov	ax, 1
+	push	ax
+	push	es
+	pop	ds
+	call	sub_2A84E
+	add	sp, 8
+	cmp	dx, 0FFFFh
+	pop	ds
+	pop	dx
+	pop	bx
+	jz	short locret_2A84C
+	or	dx, dx
+locret_2A84C:
+	retn
+sub_2A82C endp
+
+align 2
+; Attributes: bp-based frame
+
+sub_2A84E proc far
+
+	arg_0= word ptr	 6
+	arg_2= word ptr	 8
+	arg_4= word ptr	 0Ah
+	arg_8= word ptr	 0Eh
+
+	push	bp
+	mov	bp, sp
+	push	si
+	push	di
+	push	es
+	cmp	[bp+arg_4], 0
+	jnz	short loc_2A892
+	mov	di, offset word_4EF82
+	mov	dx, [bp+arg_2]
+	mov	ax, [bp+arg_0]
+	dec	ax
+	jnz	short loc_2A86D
+	call	sub_2A8BC
+	jb	short loc_2A892
+	jmp	short loc_2A8B5
+loc_2A86D:
+	mov	si, off_4EFD2
+	dec	ax
+	jz	short loc_2A885
+	cmp	si, di
+	jz	short loc_2A885
+	mov	ax, [si+2]
+	mov	[bp+arg_8], ax
+	push	si
+	call	sub_2A8BC
+	pop	si
+	jnb	short loc_2A8B5
+loc_2A885:
+	add	si, 4
+	cmp	si, offset off_4EFD2
+	jnb	short loc_2A892
+	or	dx, dx
+	jnz	short loc_2A898
+loc_2A892:
+	mov	ax, 0FFFFh
+	cwd
+	jmp	short loc_2A8B5
+loc_2A898:
+	mov	bx, dx
+	add	bx, 0Fh
+	rcr	bx, 1
+	mov	cl, 3
+	shr	bx, cl
+	mov	ah, 48h
+	int	21h		; DOS -	2+ - ALLOCATE MEMORY
+			; BX = number of 16-byte paragraphs desired
+	jb	short loc_2A892
+	xchg	ax, dx
+	mov	[si], ax
+	mov	[si+2],	dx
+	mov	off_4EFD2, si
+	xor	ax, ax
+loc_2A8B5:
+	pop	es
+	assume es:nothing
+	pop	di
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_2A84E endp
+
+sub_2A8BC proc near
+	mov	cx, [bp+0Eh]
+	mov	si, di
+loc_2A8C1:
+	cmp	[si+2],	cx
+	jz	short loc_2A8D2
+	add	si, 4
+	cmp	si, off_4EFD2
+	jnz	short loc_2A8C1
+	stc
+	jmp	short locret_2A911
+loc_2A8D2:
+	mov	bx, dx
+	add	bx, [si]
+	jb	short locret_2A911
+	mov	dx, bx
+	mov	es, cx
+	cmp	si, di
+	jnz	short loc_2A8E6
+	cmp	word_4EF7C, bx
+	jnb	short loc_2A90C
+loc_2A8E6:
+	add	bx, 0Fh
+	rcr	bx, 1
+	shr	bx, 1
+	shr	bx, 1
+	shr	bx, 1
+	cmp	si, di
+	jnz	short loc_2A8FE
+	add	bx, cx
+	mov	ax, word_4EFF3
+	sub	bx, ax
+	mov	es, ax
+loc_2A8FE:
+	mov	ah, 4Ah
+	int	21h		; DOS -	2+ - ADJUST MEMORY BLOCK SIZE (SETBLOCK)
+			; ES = segment address of block	to change
+			; BX = new size	in paragraphs
+	jb	short locret_2A911
+	cmp	si, di
+	jnz	short loc_2A90C
+	mov	word_4EF7C, dx
+loc_2A90C:
+	xchg	ax, dx
+	xchg	ax, [si]
+	mov	dx, cx
+locret_2A911:
+	retn
+sub_2A8BC endp
+
+; Attributes: bp-based frame
+
+_strcpy proc far
+
+	destString= dword ptr  6
+	srcString= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	dx, di
+	mov	bx, si
+	push	ds
+	lds	si, [bp+srcString]
+	mov	di, si
+	mov	ax, ds
+	mov	es, ax
+	assume es:dseg
+
+	xor	ax, ax
+	mov	cx, 0FFFFh
+	repne scasb			; scan srcString for '\0' 
+	not	cx			; cx has the index of '\0'
+	les	di, [bp+destString]
+	assume es:nothing
+	mov	ax, di
+	test	al, 1
+	jz	short loc_2A937
+	movsb
+	dec	cx
+loc_2A937:
+	shr	cx, 1
+	rep movsw
+	adc	cx, cx
+	rep movsb
+	mov	si, bx
+	mov	di, dx
+	pop	ds
+	mov	dx, es
+	pop	bp
+	retf
+_strcpy endp
+
+; Attributes: bp-based frame
+
+strcmp	proc far
+
+	arg_0= dword ptr  6
+	arg_4= dword ptr  0Ah
+
+	push	bp
+	mov	bp, sp
+	mov	dx, di
+	mov	bx, si
+	push	ds
+	lds	si, [bp+arg_0]
+	les	di, [bp+arg_4]
+	xor	ax, ax
+	mov	cx, 0FFFFh
+	repne scasb
+	not	cx
+	sub	di, cx
+	repe cmpsb
+	jz	short loc_2A96A
+	sbb	ax, ax
+	sbb	ax, 0FFFFh
+loc_2A96A:
+	pop	ds
+	mov	si, bx
+	mov	di, dx
+	pop	bp
+	retf
+strcmp	endp
+
+align 2
+; Attributes: bp-based frame
+
+_strlen	proc far
+
+	arg_0= dword ptr  6
+
+	push	bp
+	mov	bp, sp
+	mov	dx, di
+	les	di, [bp+arg_0]
+	xor	ax, ax
+	mov	cx, 0FFFFh
+	repne scasb
+	not	cx
+	dec	cx
+	xchg	ax, cx
+	mov	di, dx
+	pop	bp
+	retf
+_strlen	endp
+
+align 2
+; Attributes: bp-based frame
+; Attributes: bp-based frame
+
+toUpper	proc far
+arg_0= word ptr	 6
+	push	bp
+	mov	bp, sp
+	mov	bx, [bp+arg_0]
+	test	sscanf_charFlags[bx],	2
+	jz	short loc_2A9A8
+	mov	ax, bx
+	sub	ax, 20h	
+	jmp	short loc_2A9AA
+loc_2A9A8:
+	mov	ax, bx
+loc_2A9AA:
+	pop	bp
+	retf
+toUpper	endp
+
+; Attributes: bp-based frame
+
+sub_2A9AC proc far
+arg_0= word ptr	 6
+	push	bp
+	mov	bp, sp
+	mov	bx, [bp+arg_0]
+	cmp	bx, word_4EFFA
+	jge	short loc_2A9C9
+	cmp	bx, 0
+	jl	short loc_2A9C9
+	test	byte_4EFFC[bx],	40h
+	jz	short loc_2A9C9
+	mov	ax, 1
+	jmp	short loc_2A9CB
+loc_2A9C9:
+	xor	ax, ax
+loc_2A9CB:
+	mov	sp, bp
+	pop	bp
+	retf
+sub_2A9AC endp
+
+align 2
+	mov	dh, 1
+	jmp	short loc_2A9D6
+
+sub_2A9D4 proc far
+	mov	dh, 8
+loc_2A9D6::
+	mov	ax, word_4F900
+	or	ah, ah
+	jnz	short loc_2A9E5
+	mov	word_4F900, 0FFFFh
+	jmp	short locret_2A9EA
+loc_2A9E5:
+	xchg	ax, dx
+	int	21h		; DOS -
+	mov	ah, 0
+locret_2A9EA:
+	retf
+sub_2A9D4 endp
+
+align 2
+; Attributes: bp-based frame
+
+sscanf proc far
+var_14=	word ptr -14h
+var_8= dword ptr -8
+var_4= word ptr	-4
+var_2= word ptr	-2
+arg_0= word ptr	 6
+arg_2= word ptr	 8
+arg_4= word ptr	 0Ah
+arg_6= word ptr	 0Ch
+arg_8= word ptr	 0Eh
+	push	bp
+	mov	bp, sp
+	sub	sp, 14h
+	lea	ax, [bp+var_14]
+	mov	word ptr [bp+var_8], ax
+	mov	word ptr [bp+var_8+2], ss
+	lea	ax, [bp+arg_8]
+	mov	[bp+var_4], ax
+	mov	[bp+var_2], ss
+	les	bx, [bp+var_8]
+	mov	byte ptr es:[bx+0Ah], 49h 
+	mov	ax, [bp+arg_0]
+	mov	dx, [bp+arg_2]
+	mov	es:[bx+6], ax
+	mov	es:[bx+8], dx
+	mov	es:[bx], ax
+	mov	es:[bx+2], dx
+	push	dx
+	push	ax
+	call	_strlen
+	add	sp, 4
+	les	bx, [bp+var_8]
+	mov	es:[bx+4], ax
+	push	[bp+var_2]
+	push	[bp+var_4]
+	push	[bp+arg_6]
+	push	[bp+arg_4]
+	push	es
+	push	bx
+	call	_sscanf
+	mov	sp, bp
+	pop	bp
+	retf
+sscanf endp
+
+align 2
+; Attributes: bp-based frame
+
+memcpy	proc far
+arg_0= dword ptr  6
+arg_4= dword ptr  0Ah
+arg_8= word ptr	 0Eh
+	push	bp
+	mov	bp, sp
+	mov	cx, [bp+arg_8]
+	jcxz	short loc_2AAA0
+	push	ds
+	push	di
+	push	si
+	lds	si, [bp+arg_4]
+	les	di, [bp+arg_0]
+loc_2AA5B:
+	mov	ax, cx
+	dec	ax
+	mov	dx, di
+	not	dx
+	sub	ax, dx
+	sbb	bx, bx
+	and	ax, bx
+	add	ax, dx
+	mov	dx, si
+	not	dx
+	sub	ax, dx
+	sbb	bx, bx
+	and	ax, bx
+	add	ax, dx
+	inc	ax
+	xchg	ax, cx
+	sub	ax, cx
+	shr	cx, 1
+	rep movsw
+	adc	cx, cx
+	rep movsb
+	xchg	ax, cx
+	jcxz	short loc_2AA9D
+	or	si, si
+	jnz	short loc_2AA90
+	mov	ax, ds
+	add	ax, 1000h
+	mov	ds, ax
+	assume ds:nothing
+loc_2AA90:
+	or	di, di
+	jnz	short loc_2AA5B
+	mov	ax, es
+	add	ax, 1000h
+	mov	es, ax
+	assume es:nothing
+	jmp	short loc_2AA5B
+loc_2AA9D:
+	pop	si
+	pop	di
+	pop	ds
+	assume ds:dseg
+loc_2AAA0:
+	mov	ax, word ptr [bp+arg_0]
+	mov	dx, word ptr [bp+arg_0+2]
+	pop	bp
+	retf
+memcpy	endp
+
+; Attributes: bp-based frame
+
+memset	proc far
+_ptr= dword ptr	 6
+_c= word ptr  0Ah
+_size= word ptr	 0Ch
+	push	bp
+	mov	bp, sp
+	mov	cx, [bp+_size]
+	jcxz	short loc_2AAE8
+	push	di
+	les	di, [bp+_ptr]
+	assume es:nothing
+	mov	dx, di
+	neg	dx
+	jz	short loc_2AAC6
+	sub	dx, cx
+	sbb	bx, bx
+	and	dx, bx
+	add	dx, cx
+	xchg	dx, cx
+	sub	dx, cx
+loc_2AAC6:
+	mov	ax, [bp+_c]
+	mov	ah, al
+	shr	cx, 1
+	rep stosw
+	adc	cx, cx
+	rep stosb
+	xchg	dx, cx
+	jcxz	short loc_2AAE7
+	mov	bx, es
+	add	bx, 1000h
+	mov	es, bx
+	assume es:nothing
+	shr	cx, 1
+	rep stosw
+	adc	cx, cx
+	rep stosb
+loc_2AAE7:
+	pop	di
+loc_2AAE8:
+	mov	ax, word ptr [bp+_ptr]
+	mov	dx, word ptr [bp+_ptr+2]
+	pop	bp
+	retf
+memset	endp
+
+; START	OF FUNCTION CHUNK FOR sub_2A98A
+
+sub_2A98A proc far
+arg_2= word ptr	 6
+arg_4= word ptr	 8
+arg_6= dword ptr  0Ah
+arg_A= word ptr	 0Eh
+; FUNCTION CHUNK AT 36C0 SIZE 00000063 BYTES
+	push	bp
+	mov	bp, sp
+	push	si
+	push	di
+	mov	bl, 0
+	jmp	loc_2AAF0
+loc_2AAF0:
+	mov	cx, [bp+arg_A]
+	mov	ax, [bp+arg_2]
+	mov	dx, [bp+arg_4]
+	push	ds
+	lds	di, [bp+arg_6]
+	push	di
+	push	ds
+	pop	es
+	assume es:dseg
+	cld
+	xchg	ax, bx
+	or	al, al
+	jz	short loc_2AB19
+	cmp	cx, 0Ah
+	jnz	short loc_2AB19
+	or	dx, dx
+	jns	short loc_2AB19
+	mov	al, 2Dh	
+	stosb
+	neg	bx
+	adc	dx, 0
+	neg	dx
+loc_2AB19:
+	mov	si, di
+loc_2AB1B:
+	xchg	ax, dx
+	xor	dx, dx
+	or	ax, ax
+	jz	short loc_2AB24
+	div	cx
+loc_2AB24:
+	xchg	ax, bx
+	div	cx
+	xchg	ax, dx
+	xchg	dx, bx
+	add	al, 30h	
+	cmp	al, 39h	
+	jbe	short loc_2AB32
+	add	al, 27h	
+loc_2AB32:
+	stosb
+	mov	ax, dx
+	or	ax, bx
+	jnz	short loc_2AB1B
+	mov	[di], al
+loc_2AB3B:
+	dec	di
+	lodsb
+	xchg	al, [di]
+	mov	[si-1],	al
+	lea	ax, [si+1]
+	cmp	ax, di
+	jb	short loc_2AB3B
+	mov	dx, ds
+	pop	ax
+	pop	ds
+	pop	di
+	pop	si
+	mov	sp, bp
+	pop	bp
+	retf
+sub_2A98A endp
+
+; END OF FUNCTION CHUNK	FOR sub_2A98A
+align 2
+; Attributes: bp-based frame
+
+__32bitDivide proc far
+arg_0= word ptr	 6
+arg_2= word ptr	 8
+arg_4= word ptr	 0Ah
+arg_6= word ptr	 0Ch
+	push	bp
+	mov	bp, sp
+	push	di
+	push	si
+	push	bx
+	xor	di, di
+	mov	ax, [bp+arg_2]
+	or	ax, ax
+	jge	short loc_2AB74
+	inc	di
+	mov	dx, [bp+arg_0]
+	neg	ax
+	neg	dx
+	sbb	ax, 0
+	mov	[bp+arg_2], ax
+	mov	[bp+arg_0], dx
+loc_2AB74:
+	mov	ax, [bp+arg_6]
+	or	ax, ax
+	jge	short loc_2AB8C
+	inc	di
+	mov	dx, [bp+arg_4]
+	neg	ax
+	neg	dx
+	sbb	ax, 0
+	mov	[bp+arg_6], ax
+	mov	[bp+arg_4], dx
+loc_2AB8C:
+	or	ax, ax
+	jnz	short loc_2ABA5
+	mov	cx, [bp+arg_4]
+	mov	ax, [bp+arg_2]
+	xor	dx, dx
+	div	cx
+	mov	bx, ax
+	mov	ax, [bp+arg_0]
+	div	cx
+	mov	dx, bx
+	jmp	short loc_2ABDD
+loc_2ABA5:
+	mov	bx, ax
+	mov	cx, [bp+arg_4]
+	mov	dx, [bp+arg_2]
+	mov	ax, [bp+arg_0]
+loc_2ABB0:
+	shr	bx, 1
+	rcr	cx, 1
+	shr	dx, 1
+	rcr	ax, 1
+	or	bx, bx
+	jnz	short loc_2ABB0
+	div	cx
+	mov	si, ax
+	mul	[bp+arg_6]
+	xchg	ax, cx
+	mov	ax, [bp+arg_4]
+	mul	si
+	add	dx, cx
+	jb	short loc_2ABD9
+	cmp	dx, [bp+arg_2]
+	ja	short loc_2ABD9
+	jb	short loc_2ABDA
+	cmp	ax, [bp+arg_0]
+	jbe	short loc_2ABDA
+loc_2ABD9:
+	dec	si
+loc_2ABDA:
+	xor	dx, dx
+	xchg	ax, si
+loc_2ABDD:
+	dec	di
+	jnz	short loc_2ABE7
+	neg	dx
+	neg	ax
+	sbb	dx, 0
+loc_2ABE7:
+	pop	bx
+	pop	si
+	pop	di
+	mov	sp, bp
+	pop	bp
+	retf	8
+__32bitDivide endp
+
+; This function	multiplies the characters level
+; times	a 32 bit number. The first argument is the
+; character level. The second is the high word of the
+; level	converted to a 32 bit double. This is always
+; going	to be zero. The	third and fourth are the lo
+; and hi words of the multiplicant
+; Attributes: bp-based frame
+
+_level32bitMult	proc far
+level= word ptr	 6
+zero= word ptr	8
+numLo= word ptr	 0Ah
+numHi= word ptr	 0Ch
+	push	bp
+	mov	bp, sp
+	mov	ax, [bp+zero]
+	mov	bx, [bp+numHi]
+	or	bx, ax
+	mov	bx, [bp+numLo]
+	jnz	short loc_2AC0B
+	mov	ax, [bp+level]
+	mul	bx
+	mov	sp, bp
+	pop	bp
+locret_2AC08:
+	retf	8
+loc_2AC0B:
+	mul	bx
+	mov	cx, ax
+	mov	ax, [bp+level]
+	mul	[bp+numHi]
+	add	cx, ax
+	mov	ax, [bp+level]
+	mul	bx
+	add	dx, cx
+	mov	sp, bp
+	pop	bp
+	retf	8
+_level32bitMult	endp
+
+; Attributes: bp-based frame
+
+_32bitMod proc far
+arg_0= word ptr	 6
+arg_2= word ptr	 8
+arg_4= word ptr	 0Ah
+arg_6= word ptr	 0Ch
+	push	bp
+	mov	bp, sp
+	push	bx
+	push	di
+	xor	di, di
+	mov	ax, [bp+arg_2]
+	or	ax, ax
+	jge	short loc_2AC43
+	inc	di
+	mov	dx, [bp+arg_0]
+	neg	ax
+	neg	dx
+	sbb	ax, 0
+	mov	[bp+arg_2], ax
+	mov	[bp+arg_0], dx
+loc_2AC43:
+	mov	ax, [bp+arg_6]
+	or	ax, ax
+	jge	short loc_2AC5A
+	mov	dx, [bp+arg_4]
+	neg	ax
+	neg	dx
+	sbb	ax, 0
+	mov	[bp+arg_6], ax
+	mov	[bp+arg_4], dx
+loc_2AC5A:
+	or	ax, ax
+	jnz	short loc_2AC76
+	mov	cx, [bp+arg_4]
+	mov	ax, [bp+arg_2]
+	xor	dx, dx
+	div	cx
+	mov	ax, [bp+arg_0]
+	div	cx
+	mov	ax, dx
+	xor	dx, dx
+	dec	di
+	jns	short loc_2ACB7
+	jmp	short loc_2ACBE
+loc_2AC76:
+	mov	bx, ax
+	mov	cx, [bp+arg_4]
+	mov	dx, [bp+arg_2]
+	mov	ax, [bp+arg_0]
+loc_2AC81:
+	shr	bx, 1
+	rcr	cx, 1
+	shr	dx, 1
+	rcr	ax, 1
+	or	bx, bx
+	jnz	short loc_2AC81
+	div	cx
+	mov	cx, ax
+	mul	[bp+arg_6]
+	xchg	ax, cx
+	mul	[bp+arg_4]
+	add	dx, cx
+	jb	short loc_2ACA8
+	cmp	dx, [bp+arg_2]
+	ja	short loc_2ACA8
+	jb	short loc_2ACAE
+	cmp	ax, [bp+arg_0]
+	jbe	short loc_2ACAE
+loc_2ACA8:
+	sub	ax, [bp+arg_4]
+	sbb	dx, [bp+arg_6]
+loc_2ACAE:
+	sub	ax, [bp+arg_0]
+	sbb	dx, [bp+arg_2]
+	dec	di
+	jns	short loc_2ACBE
+loc_2ACB7:
+	neg	dx
+	neg	ax
+	sbb	dx, 0
+loc_2ACBE:
+	pop	di
+	pop	bx
+	mov	sp, bp
+	pop	bp
+	retf	8
+_32bitMod endp
+
+
+sub_2ACC6 proc far
+	xor	ch, ch
+	jcxz	short locret_2ACD0
+loc_2ACCA:
+	shl	ax, 1
+	rcl	dx, 1
+	loop	loc_2ACCA
+locret_2ACD0:
+	retf
+sub_2ACC6 endp
+
+align 2
+; Attributes: bp-based frame
+
+_32bitDivide proc far
+arg_0= word ptr	 6
+arg_2= word ptr	 8
+arg_4= word ptr	 0Ah
+	push	bp
+	mov	bp, sp
+	mov	bx, [bp+arg_0]
+	push	[bp+arg_4]
+	push	[bp+arg_2]
+	push	word ptr [bx+2]
+	push	word ptr [bx]
+	call	__32bitDivide
+	mov	bx, [bp+arg_0]
+	mov	[bx+2],	dx
+	mov	[bx], ax
+	mov	sp, bp
+	pop	bp
+	retf	6
+_32bitDivide endp
+
+; Attributes: bp-based frame
+
+sub_2ACF6 proc far
+arg_0= word ptr	 6
+arg_2= word ptr	 8
+	push	bp
+	mov	bp, sp
+	mov	bx, [bp+arg_0]
+	mov	ax, [bx]
+	mov	dx, [bx+2]
+	mov	cx, [bp+arg_2]
+	call	sub_2ACC6
+	mov	bx, [bp+arg_0]
+	mov	[bx], ax
+	mov	[bx+2],	dx
+	mov	sp, bp
+	pop	bp
+locret_2AD14:
+	retf	4
+sub_2ACF6 endp
+
+
+
+seg019 ends
+
+; Segment type: Regular
+seg020 segment word public 'DATA' use16
+        assume cs:seg020
+;org 7
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+algn_2AD17:
+align 2
+
+huf_dataSize		dd 0
+huf_nodeListTail	dw 0
+huf_fileHandle		dw 0
+huf_fileBuffer		db 200h dup(0)
+huf_fileBufferIndex	dw 0
+huf_bitMask		db 0
+huf_currentByte		db 0
+huf_treeData		db 0F05h dup(0)
+huf_bufferP		dw 0
+huf_flateSize		dw 0
+huf_flateByteCount	dw 0
+
+
+seg020 ends
+
 include seg021.asm
 include seg022.asm
 ; Segment type:	Regular
 seg023 segment para public 'DATA' use16
 	assume cs:seg023
 	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
-graphicsBuf db 4A38h dup(0)	    ; 0
+
+graphicsBuf db 4A38h dup(0) 
+
 monsterBuf db 480h dup(0)	   ; 0
 byte_3BA68 db 11C4h dup(0)	   ; 0
 iconLight db 474h dup(0)	  ; 0
@@ -33218,5 +49082,5364 @@ include seg024.asm
 include seg025.asm
 include seg026.asm
 include seg027.asm
-include dseg.asm
-include seg029.asm
+
+; Segment type: Pure data
+dseg segment para public 'DATA' use16
+        assume cs:dseg
+
+word_42670	dw 0
+word_42672	dw 0
+byte_42674	db 0
+byte_42675	db 0
+word_42676	dw 0
+aMsRunTimeLibraryCopy db 'MS Run-Time Library - Copyright (c) 1988, Microsoft Corp'
+		db  11h
+byte_426B1	db 0
+aComp		db 'comp',0
+aRgb		db	'rgb',0
+aEga		db	'ega',0
+aTdy		db	'tdy',0
+s_thiefCfg	db 'thief.cfg',0
+s_firstTitle		db 'tit0',0
+s_titleScreen		db 'title',0
+s_musicAll	db 'music.all',0
+s_stuckEllipsis	db 'Stuck....',0
+graphicsDrivers	dd aComp, aRgb,	aEga, aTdy; 0
+s_facing		db 'facing ',0
+byte_42716	db 0, 2, 20h, 22h
+aEarlyMorning_	db 'early morning.',0
+aMidMorning_	db	'mid morning.',0
+aNoon_		db 'noon.',0
+aAfternoon_	db 'afternoon.',0
+aDusk_		db 'dusk.',0
+aEvening_	db 'evening.',0
+aMidnight_	db 'midnight.',0
+aAfterMidnight_	db 'after midnight.',0
+aRefugeeCampOfS	db ' refugee camp of Skara Brae.',0
+aCityGates_	db ' city gates.',0
+aEntranceToTheC	db ' entrance to the city.',0
+aGreatIceKeep_	db ' great ice keep.',0
+aEntranceOfTheF	db ' entrance of the forest.',0
+s_pausing	db 'pausing',0
+		db    0
+s_whoToDrop db 'Who will you drop?',0
+		db    0
+s_cantDropCharacter db 'You can',27h,'t drop a party member.',0
+		db    0
+s_youreIn db 'You',27h,'re in ',0
+		db    0
+s_spAndsp		db ' and ',0
+		db    0
+s_itsNow		db 0Ah,0Ah, 'It',27h,'s now ',0
+timeOfDay	dd aEarlyMorning_, aMidMorning_, aNoon_, aAfternoon_,	aDusk_,	aEvening_, aMidnight_, aAfterMidnight_
+s_ofAtThe	db ' /of\at\ the',0
+		db    0
+locationString	dd aRefugeeCampOfS, aCityGates_,	aEntranceToTheC, aGreatIceKeep_, aEntranceOfTheF; 0
+byte_428A6	db 0Ch, 0Ah,	7, 0Fh,	6, 6, 7, 9; 0
+		db 0Ah,	0Fh		; 8
+byte_428B0	db 0Fh, 0, 6, 8, 0Ah, 9, 0, 8; 0
+		db 5, 1			; 8
+byte_428BA	db 0, 1, 2, 1, 3, 2,	1, 2; 0
+		db 4, 1			; 8
+byte_428C4	db 7, 7, 7, 7, 0, 0,	0, 1; 0
+		db 1, 1, 1, 2, 2, 2, 3,	3; 8
+		db 4, 4, 4, 5, 5, 5, 6,	6; 16
+s_whoUsesItem db 'Who will use an item?',0
+s_UseOn		db 'Use on ',0
+s_powerless	db 'Powerless.',0
+		db    0
+s_confirmRestore db 'Do you wish to restore your last saved game?',0
+		db    0
+s_confirmSave db 'Do you wish to save your game?',0
+		db    0
+s_savingTheGame	db 'Saving the game.',0
+		db    0
+s_gameHasBeenSaved	db 'Your game has been saved to disk.',0Ah, 0Ah
+			db 'Do you wish to exit to DOS?',0
+s_helpMessage1	db 'HELP for those in need:',0Ah, 0Ah
+			db '1-7 = Player info',0Ah
+			db 'Arrows = Move, turn',0Ah
+			db '? = Where are we',0Ah
+			db 'N = New march order',0Ah
+			db 'S = Save the game',0Ah
+			db 'T = Time out',0Ah
+			db 'V = Sound on/off',0Ah,0
+s_helpMessage2	db 'More HELP:',0Ah, 0Ah
+			db 'B = Play a Bard tune',0Ah
+			db 'C = Cast a spell',0Ah
+			db 'F1-F7 = Cast a spell',0Ah
+			db 'E = Ascend portal',0Ah
+			db 'W = Descend portal',0Ah
+			db 'P = Party combat',0Ah
+			db 'D = Drop special party member',0Ah
+			db 'U = Use an item',0Ah,0
+s_newOrder	db 'New Order:',0Ah,0Ah,0
+		db    0
+s_gtChar		db '>'
+byte_42AF5	db 78h				; XXX - Doesn't seem to be used
+		db 20h
+		db 0
+s_useThisOrder	db 0Ah,'Use this order?',0
+s_gameSav	db 'game.sav',0
+s_cantOpenGameSave	db 'Can',27h,'t open game save file',0
+			db    0
+g_soundActiveFlag	dw 1
+s_confirmQuit	db 'Quit the game?',0
+s_loseProgressConfirm	db 'You will lose your game status.',0Ah
+		db 0Ah, 0Ah, 0Ah
+		db '  Do you wish to quit?',0
+align 2
+aWarrior	db 'Warrior',0
+aWizard		db 'Wizard',0
+aSorcerer	db 'Sorcerer',0
+aConjurer	db 'Conjurer',0
+aMagician	db 'Magician',0
+aRogue		db 'Rogue',0
+aBard		db 'Bard',0
+aPaladin	db 'Paladin',0
+aHunter		db 'Hunter',0
+aMonk		db 'Monk',0
+aArchmage	db 'Archmage',0
+aChronomancer	db 'Chronomancer',0
+aGeomancer	db 'Geomancer',0
+aMonster	db 'Monster',0
+aIllusion	db 'Illusion',0
+s_campMenuString	db 'Thou art in the Camp of Skara Brae.'
+		db 0Ah
+		db 0Ah
+		db '@Add a member',0Ah
+		db '@Remove a member',0Ah
+		db '@Rename a member',0Ah
+		db '@Create a member',0Ah
+		db '@Transfer characters',0Ah
+		db '@Delete a member',0Ah
+		db '@Save the party',0Ah
+		db '@Leave the game',0Ah
+		db '@Enter wilderness',0
+s_saveAndExit	db 'Press <RETURN> to save off all char'
+		db 'acters and end game play. Or press '
+		db 'ESC to go back.',0
+s_genderOptions	db 'Do you wish your character to be',0Ah
+		db 'Male or',0Ah
+		db 'Female?',0
+align 2
+s_raceOptions	db 'Select a race for your new character:',0Ah,0Ah
+		db '1) Human',0Ah
+		db '2) Elf',0Ah
+		db '3) Dwarf',0Ah
+		db '4) Hobbit',0Ah
+		db '5) Half-Elf',0Ah
+		db '6) Half-Orc',0Ah
+		db '7) Gnome',0
+align 2
+s_nameYourCharacter	db 'Name your new character --',0
+align 2
+s_whichPartyMemberToRemove	db 'Select which party member to remove or...',0
+s_removeAll	db 'Remove them all!',0
+align 2
+s_askPartyName	db 'Name to save party under?',0
+s_deleteWho	db 'Delete Who?',0
+s_currentlyInParty	db ' is currently in the party. Remove from the party first.',0
+align 2
+s_confirmDelete	db 'Are you sure you want to delete ',0
+align 2
+s_noCharsOnDisk	db 'There are no characters on this disk.',0
+s_whoJoins	db 'Who shall join?',0
+s_alreadyInParty	db ' is already in the party.',0
+s_nameAlreadyExists	db 'There is already a character with that name in the party.',0
+align 2
+s_rosterIsFull	db 'The roster is full.',0
+s_noOneHereNamedThat	db 'There',27h,'s no one here named that!',0
+s_renameWho	db 'Rename Who?',0
+aYouCanTRenameA	db 'You can',27h,'t rename a party list!',0
+align 2
+s_whatIs		db 'What is ',0
+align 2
+s_newName	db 27h,'s new name?',0
+align 2
+; Class bigpic index. The pictures are in male, female pairs
+g_classPictureNumber	db 33, 48
+			db 54, 79
+			db 54, 79
+			db 54, 79
+			db 54, 79
+			db 33, 48
+			db 33, 48
+			db 33, 48
+			db 33, 48
+			db 33, 48
+			db 54, 79
+baseAttributes	startingAttrBase <10, 6,	8, 8, 5, 10, 6, 8, 8,	5>
+		startingAttrBase <8, 9,	9, 6, 6, 8, 9, 9, 6, 6>
+		startingAttrBase <12, 6, 7, 10,	3, 12, 6, 7, 10, 3>
+		startingAttrBase <4, 6,	12, 5, 10, 4, 6, 12, 5, 10>
+		startingAttrBase <9, 8,	9, 7, 6, 9, 8, 9, 7, 6>
+		startingAttrBase <11, 3, 8, 11,	4, 11, 3, 8, 11, 4>
+		startingAttrBase <9, 10, 7, 3, 4, 9, 10, 7, 3, 4>
+startingClasses	startingClass_t	<1, 0, 0, 1, 1,	1, 1, 1, 1, 1>	; 0
+		startingClass_t	<1, 0, 0, 1, 1,	1, 1, 1, 0, 1>	; 1
+		startingClass_t	<1, 0, 0, 0, 0,	1, 1, 1, 1, 1>	; 2
+		startingClass_t	2 dup(<1, 0, 0,	1, 1, 1, 1, 0, 0, 1>); 3
+		startingClass_t	<1, 0, 0, 1, 1,	1, 0, 0, 1, 0>	; 5
+		startingClass_t	<1, 0, 0, 1, 1,	1, 0, 0, 1, 1>	; 6
+byte_4302E	db 6, 42, 42, 42, 42, 32, 0,	6, 6, 22, 2Ah
+		db    0
+startingInventory	db 1,	14h, 0FFh, 4, 76h, 0Ah,	1, 3, 0FFh, 1, 0Eh; 0
+			db 0FFh, 1, 0Ah, 0FFh, 1, 11h, 0FFh, 1,	12h, 0FFh, 0FEh; 11
+			db 1, 4, 0FFh, 1, 0Ch, 0FFh, 0,	7Dh, 0Ah, 0FEh,	1; 22
+			db 4, 0FFh, 1, 0Ch, 0FFh, 1, 0Ah, 0FFh,	0FEh, 1, 10h; 33
+			db 0FFh, 1, 9, 0FFh, 1,	2, 1, 0FEh; 44
+g_classString	dd aWarrior		    ; 0
+		dd aWizard		; 1
+		dd aSorcerer		; 2
+		dd aConjurer		; 3
+		dd aMagician		; 4
+		dd aRogue		; 5
+		dd aBard		; 6
+		dd aPaladin		; 7
+		dd aHunter		; 8
+		dd aMonk		; 9
+		dd aArchmage		; 10
+		dd aChronomancer	; 11
+		dd aGeomancer		; 12
+		dd aMonster		; 13
+		dd aIllusion		; 14
+s_ruinTitle	db 'The Ruin',0
+g_campActionFunctions	dd camp_addMember
+		dd camp_removeMember
+		dd camp_renameMember
+		dd camp_createMember
+		dd transferCharacter
+		dd camp_deleteMember
+		dd camp_saveParty
+		dd camp_saveAndExit
+		dd camp_exit
+s_thievesInf	db	'thieves.inf',0
+s_partiesInf	db	'parties.inf',0
+s_tavernGreeting	db 'Hail, travelers! Step to the bar and I',27h,'ll draw you a tankard.',0Ah
+		db 'You can:',0Ah
+		db 'Order a drink',0Ah
+		db 'Talk to barkeep',0Ah
+		db 'Exit the tavern',0
+align 2
+s_whoWillOrder	db 'Who will order a drink?',0
+s_seatThyself	db	'Seat thyself,',0Ah,0
+align 2
+s_drinkOptions	db 'What',27h,'ll it be?',0Ah
+		db 'Ale',0Ah
+		db 'Beer',0Ah
+		db 'Mead',0Ah
+		db 'Foul spirits',0Ah
+		db 'Ginger Ale',0
+align 2
+s_cantOrder	db 'Thou are in no condition to order anything.',0
+s_partyIsDisgrace	db 'In fact, thy party is a disgrace..',0Ah
+		db 'Bouncers!!!',0
+align 2
+s_hereOrToGo	db 'Will you have it...',0Ah
+		db 'Here or',0Ah
+		db 'To go?',0
+align 2
+s_burpNotBad	db '(Burp!) Not too bad.',0
+align 2
+s_goodStuff	db 'My goodness, that',27h,'s good stuff.',0
+s_thirstQuencher	db 'Now that',27h,'s a real thirst quencher!',0
+align 2
+aButYouFeelALit	db 'But you feel a little light-headed.'
+		db 0
+aYouStartHiccup	db 'You start hiccuping',0
+aYouBeginToSing	db 'You begin to sing 99 bottles of beer on the wall.',0
+aYouSeemToHaveA	db 'You seem to have a hard time staying on the bar stool.',0
+align 2
+aYouCollapseOnT	db 'You collapse on the floor.',0
+align 2
+s_sorryBut	db 'Sorry but ',0
+align 2
+s_cantCarryAnyMore	db ' can',27h,'t carry any more items.',0
+align 2
+s_barkeepFillsWineskin	db 'The bartender fills a wineskin with your order and hands it to you.',0
+s_whoTalksToBarkeep	db 'Who will talk to the barkeep?',0
+s_noConditionToTalk	db 'You are in no condition to talk.',0
+align 2
+s_talkAintCheap db '"Talk ain',27h,'t cheap,',0
+align 2
+s_beerBreath	db ' Beer Breath',0
+align 2
+s_barkeepSays	db '" the barkeep says.',0
+s_howMuchWillTip	db 'How much will you tip him?',0
+align 2
+s_moneyTalks	db '"Money talks, friend," he says.',0
+aThereSABuildin	db '"There',27h,'s a building in Skara Brae where some of the survivors stashed their goods. It may be helpful," smiles the bartender',0
+aBeOnTheLookout	db '"Be on the lookout for the magic gems, your spellcasters will need them."',0
+aThereLiesAnoth	db '"There lies another bar in Celaria Bree, seek it. It exists only in the dimension called Lucencia."',0
+aSeekOutTheOldM	db '"Seek out the old man in the Review Board. He keeps watch over everything."',0
+aGoToTheBardSHa	db '"Go to the bard',27h,'s hall and listen to the songs they sing. They contain useful information."',0
+aThereIsSaidToB	db '"There is said to be a key existing in the Violet Mountains, this will gain access to Cyanis',27h,'s Tower."', 0
+align 2
+aAckItSNotJustA	db '"Ack! It',27h,'s not just a word, but a state of mind."',0
+aTheKeyToFindin	db '"The key to finding Sceadu is finding the lock."',0
+align 2
+aSceaduCanBeFou	db '"Sceadu can be found in the middle of Nowhere."',0
+aSeekWerraInTar	db '"Seek Werra in Tarmitia."',0
+s_notEnoughGold	db 'Not enough gold.',0
+align 2
+barkeepSayings	dd aThereSABuildin      ; 0
+		dd aBeOnTheLookout	; 1
+		dd aThereLiesAnoth	; 2
+		dd aSeekOutTheOldM	; 3
+		dd aSeekOutTheOldM	; 4
+		dd aAckItSNotJustA	; 5
+		dd aBeOnTheLookout	; 6
+		dd aThereLiesAnoth	; 7
+		dd aGoToTheBardSHa	; 8
+		dd aThereIsSaidToB	; 9
+		dd aBeOnTheLookout	; 10
+		dd aSeekOutTheOldM	; 11
+		dd aSeekWerraInTar	; 12
+		dd aTheKeyToFindin	; 13
+		dd aSceaduCanBeFou	; 14
+s_drinkOptionKeys		db 'ABMFG',0
+g_drinkPriceList	db 3, 2, 4, 6, 1, 3	   ; 0
+nullDrunkValue	dw 0
+drunkString	dd nullDrunkValue	    ; 0
+		dd nullDrunkValue	; 1
+		dd nullDrunkValue	; 2
+		dd nullDrunkValue	; 3
+		dd aButYouFeelALit	; 4
+		dd aButYouFeelALit	; 5
+		dd aYouStartHiccup	; 6
+		dd aYouStartHiccup	; 7
+		dd aYouBeginToSing	; 8
+		dd aYouSeemToHaveA	; 9
+		dd aYouSeemToHaveA	; 10
+		dd aYouCollapseOnT	; 11
+		dd aYouCollapseOnT	; 12
+tavern_drinkStrength db 1,	2, 3, 4, 0, 0	  ; 0
+s_scrapwood	db 'Scrapwood',0
+s_staggerInn	db 'Stagger Inn',0
+s_hicHaven	db 'Hic Haven',0
+s_cheers	db 'Cheers',0
+s_tavern	db 'Tavern',0
+tavCoords	tavernLoc_t <12, 17, 0, 0, 0>; 0
+		tavernLoc_t <7,	12, 3, 2, 5>; 1
+		tavernLoc_t <2,	3, 3, 4, 5>; 2
+		tavernLoc_t <13, 7, 6, 6, 5>; 3
+		tavernLoc_t <99, 99, 99, 8, 10>; 4
+		db    0
+tavernNames	dd s_scrapwood	    ; 0
+		dd s_staggerInn		; 1
+		dd s_hicHaven		; 2
+		dd s_cheers		; 3
+		dd s_tavern		; 4
+byte_43876	db 0, 50, 250, 244, 232 ; 0
+		db    0
+s_templeGreeting	db 'Welcome, oh weary ones, to our humble temple.',0Ah
+			db 'Dost thou wish to...',0Ah
+			db 'Heal a character',0Ah
+			db 'Pool thy gold',0Ah
+			db 'Exit temple',0
+s_whomGathersGold	db 'Whom shall gather thy gold?',0
+s_hathAllTheGold	db ' now hath all the gold.',0
+s_whoNeedsHealing	db 'Who needeth healing?',0
+			db    0
+s_isInBadShape	db	' is in bad shape, indeed. ',0
+			db    0
+s_templeGoldForfeit	db ' in gold. Who will forfeit the gold?',0
+			db    0
+s_sorryButWithoutProper	db 'Sorry, but without proper sacrifice the prayer will fail.',0
+s_layHands	db 'The priests lay hands on ',0
+s_elipsis		db '...',0
+s_elipsisAnd		db '...and ',0
+s_isHealed		db ' is healed!',0
+s_drainedOfLife	db ' hath been drained of life force. ',0
+			db    0
+s_thouMustSacrifice	db	'Thou must sacrifice ',0
+			db    0
+s_dontNeedHealing	db ' does not require any healing.',0
+			db    0
+s_hasWounds	db ' has wounds which need tending. ',0
+			db    0
+s_donationWillBe	db 'The donation will be ',0
+temple_healPrice	dw 0, 400, 300, 900, 1120, 220, 500, 600, 900			; 8
+aHe		db 'he',0
+aShe		db 'she',0
+aIt		db 'it',0
+aHim		db 'him',0
+aHer		db 'her',0
+aHis		db 'his',0
+aIts		db 'its',0
+pronounString	dd aHe, aShe, aIt, aHim, aHer, aIt, aHis, aHer, aIts		; 7
+s_shrine		db 'Shrine',0
+s_forestLawn	db 'Forest Lawn',0
+s_alliria	db 'Alliria',0
+s_twilightTemple	db 'Twilight Tmp',0
+templeLoc	templeLoc_t <8, 1, 0,	0>; 0
+		templeLoc_t <10, 4, 3, 2>; 1
+		templeLoc_t <2,	7, 6, 4>; 2
+		templeLoc_t <255, 255, 255, 6>;	3
+templeTitles	dd s_shrine, s_forestLawn, s_alliria,	s_twilightTemple; 0
+templeStatusBitmasks	db 2, 1, 10h, 40h, 20h, 8, 4, 0; 0
+templeHealPriceIndex	db 2, 1, 5, 7, 6, 4,	3, 0; 0
+statusHealMask	db 0FFh,	0FEh, 0FDh, 3, 3, 0EFh,	0DFh, 0BFh, 0FFh, 0		; 8
+fgtrXPReq	dd 2000, 4000, 7000, 10000, 15000, 20000; 0
+		dd 30000, 50000, 80000,	110000,	150000,	200000;	6
+wizdXPReq	dd 20000, 50000, 80000, 120000, 160000, 200000; 0
+		dd 250000, 300000, 400000, 600000, 900000; 6
+		dd 1300000		; 11
+sorcXPReq	dd 7000, 15000, 25000, 40000,	60000, 80000; 0
+		dd 100000, 130000, 170000, 220000, 300000; 6
+		dd 400000		; 11
+magiXPReq	dd 1800, 4000, 6000, 10000, 14000, 19000; 0
+		dd 29000, 50000, 90000,	120000,	170000,	230000;	6
+archXPReq	dd 70000, 140000, 240000, 340000, 540000; 0
+		dd 740000, 1000000, 1400000, 1800000, 2200000; 5
+		dd 2600000, 3000000	; 10
+geomXPReq	dd 100000, 225000, 400000, 650000, 950000; 0
+		dd 1400000, 1800000, 2200000, 2600000, 3000000;	5
+		dd 3400000, 3800000	; 10
+classXPReqs	dd fgtrXPReq, wizdXPReq, sorcXPReq,	magiXPReq; 0
+		dd magiXPReq, fgtrXPReq, fgtrXPReq, fgtrXPReq; 4
+		dd fgtrXPReq, magiXPReq, archXPReq, archXPReq; 8
+		dd geomXPReq		; 12
+s_emptyBuilding	db 'You are in an empty building.',0
+s_building	db 'Building',0
+align 2
+s_storageMenu	db 'The party is inside a storage building.',0Ah
+		db 'Who wishes to inspect?',0Ah
+		db 0Ah, 0Ah, 0Ah
+		db 'ESC to exit building',0
+align 2
+s_would		db 'Would ',0
+align 2
+s_likeToPickup	db ' like to pickup...',0
+align 2
+s_buildingIsEmpty	db 'The building is empty.',0
+align 2
+aPickUp___	db 'Pick up...',0
+align 2
+s_allFull	db 'All full!',0
+s_youPickUpItem	db 'You pick up the item.',0
+
+a_inventoryStf	db 'inventor.stf',0
+align 2
+aWildwal_grp	db	'wildwal.grp',0
+aSkara_grp	db 'skara.grp',0
+aGdung_grp	db 'gdung.grp',0
+aDisk1		db 'Disk 1',0
+s_diskTwo		db 'Disk 2',0
+aDisk3		db 'Disk 3',0
+aMaps_lo	db 'maps.lo',0
+aMaps_hi	db 'maps.hi',0
+aMonsterl	db 'monsterl',0
+aMonsterh	db 'monsterh',0
+aLow_pic	db 'low.pic',0
+aHi_pic		db 'hi.pic',0
+align 2
+s_insertDisk	db 'Please insert disk ',0
+minimap_bitmaskOffsetList	db 0FFh, 0, 4, 8, 4, 0, 0, 4; 0
+		db 0, 0, 4, 8, 4, 0, 0,	4; 8
+s_statusAbbreviations	db 'Old PsndNutsPossParaDeadSton',0
+			db    0
+statusBitmaskList	db stat_old, stat_poisoned, stat_nuts, stat_possessed; 0
+		db stat_paralyzed, stat_dead, stat_stoned, 0; 4
+classAbbreviations	db 'WaWiSoCoMaRoBaPaHuMoArChGeMnIl',0
+			db    0
+word_43F12	dw 0
+mouseBoxes	mouseBox_t < 0Fh,  0Ah,  6Ah,  7Ah>	; Bigpic Window
+		mouseBox_t <   6, 0A8h,  66h, 132h>	; Text Window
+		mouseBox_t < 90h,  0Ch, 0C7h, 132h>	; Roster Area
+		db    0
+		db    0
+map_graphicsTable	dd aWildwal_grp, aSkara_grp; 0
+		dd aSkara_grp, aGdung_grp; 2
+		dd aGdung_grp, aGdung_grp; 4
+byte_43F4A	db 8 dup(0)
+disk1		dw offset aDisk1
+dseg_0		dw seg dseg
+disk2		dd s_diskTwo
+disk3		dd aDisk3
+mapFiles	dd aMaps_lo, aMaps_hi
+monsterFiles	dd	aMonsterl, aMonsterh
+levelPathTable	levelFile_t	<lev_monsterl, 0>; 0
+		levelFile_t <lev_monsterl, 1>;	1
+		levelFile_t <lev_monsterl, 2>;	2
+		levelFile_t <lev_monsterl, 3>;	3
+		levelFile_t <lev_monsterl, 4>;	4
+		levelFile_t <lev_monsterh, 0>;	5
+		levelFile_t <lev_monsterh, 1>;	6
+		levelFile_t <lev_monsterh, 2>;	7
+		levelFile_t <lev_monsterh, 3>;	8
+		levelFile_t <lev_monsterh, 4>;	9
+		levelFile_t <lev_monsterl, 5>;	10
+		levelFile_t <lev_monsterl, 6>;	11
+		levelFile_t <lev_monsterl, 7>;	12
+		levelFile_t <lev_monsterl, 8>;	13
+		levelFile_t <lev_monsterl, 9>;	14
+		levelFile_t <lev_monsterl, 10>; 15
+		levelFile_t <lev_monsterl, 11>; 16
+		levelFile_t <lev_monsterl, 12>; 17
+		levelFile_t <lev_monsterl, 13>; 18
+		levelFile_t <lev_monsterl, 14>; 19
+		levelFile_t <lev_monsterl, 15>; 20
+		levelFile_t <lev_monsterl, 16>; 21
+		levelFile_t <lev_monsterl, 17>; 22
+		levelFile_t <lev_monsterl, 18>; 23
+		levelFile_t <lev_monsterl, 19>; 24
+		levelFile_t <lev_monsterl, 20>; 25
+		levelFile_t <lev_monsterl, 21>; 26
+		levelFile_t <lev_monsterl, 22>; 27
+		levelFile_t <lev_monsterl, 23>; 28
+		levelFile_t <lev_monsterl, 24>; 29
+		levelFile_t <lev_monsterl, 25>; 30
+		levelFile_t <lev_monsterl, 26>; 31
+		levelFile_t <lev_monsterl, 27>; 32
+		levelFile_t <lev_monsterl, 28>; 33
+		levelFile_t <lev_monsterh, 5>;	34
+		levelFile_t <lev_monsterh, 6>;	35
+		levelFile_t <lev_monsterh, 7>;	36
+		levelFile_t <lev_monsterh, 8>;	37
+		levelFile_t <lev_monsterh, 9>;	38
+		levelFile_t <lev_monsterh, 10>; 39
+		levelFile_t <lev_monsterh, 11>; 40
+		levelFile_t <lev_monsterh, 12>; 41
+		levelFile_t <lev_monsterh, 13>; 42
+		levelFile_t <lev_monsterh, 14>; 43
+		levelFile_t <lev_monsterh, 15>; 44
+		levelFile_t <lev_monsterh, 16>; 45
+		levelFile_t <lev_monsterh, 17>; 46
+		levelFile_t <lev_monsterh, 18>; 47
+		levelFile_t <lev_monsterh, 19>; 48
+		levelFile_t <lev_monsterh, 20>; 49
+		levelFile_t <lev_monsterl, 29>; 50
+		levelFile_t <lev_monsterl, 30>; 51
+		levelFile_t <lev_monsterh, 21>; 52
+		levelFile_t <lev_monsterh, 22>; 53
+		levelFile_t <lev_monsterh, 23>; 54
+		levelFile_t <lev_monsterh, 24>; 55
+		levelFile_t <lev_monsterh, 25>; 56
+		levelFile_t <lev_monsterh, 26>; 57
+		levelFile_t <lev_monsterh, 27>; 58
+		levelFile_t <lev_monsterh, 28>; 59
+		levelFile_t <lev_monsterh, 29>; 60
+		levelFile_t <lev_monsterh, 30>; 61
+		levelFile_t <lev_monsterl, 31>; 62
+		levelFile_t <lev_monsterl, 32>; 63
+		levelFile_t <lev_monsterl, 33>; 64
+		levelFile_t <lev_monsterl, 34>; 65
+		levelFile_t <lev_monsterh, 31>; 66
+		levelFile_t <lev_monsterh, 32>; 67
+		levelFile_t <lev_monsterh, 33>; 68
+		levelFile_t <lev_monsterh, 34>; 69
+		levelFile_t <lev_monsterh, 35>; 70
+lowPic		dd aLow_pic
+		dd aHi_pic
+bigpicIndex	db 0, 1, 2, 3	    ; 0
+		db 4, 5, 6, 7		; 4
+		db 8, 9, 10, 11		; 8
+		db 12, 13, 14, 15	; 12
+		db 16, 17, 18, 19	; 16
+		db 20, 21, 255,	255	; 20
+		db 22, 255, 23,	255	; 24
+		db 255,	24, 25,	255	; 28
+		db 26, 27, 255,	255	; 32
+		db 255,	255, 28, 29	; 36
+		db 255,	255, 255, 30	; 40
+		db 255,	255, 31, 32	; 44
+		db 33, 34, 35, 36	; 48
+		db 37, 38, 39, 40	; 52
+		db 41, 42, 43, 44	; 56
+		db 255,	45, 255, 46	; 60
+		db 255,	255, 255, 255	; 64
+		db 255,	47, 48,	49	; 68
+		db 255,	255, 50, 255	; 72
+		db 255,	255, 51, 52	; 76
+		db 255,	255, 255, 53	; 80
+		db 255,	255, 255, 255	; 84
+		db 255,	255, 255, 0	; 88
+		db 255,	1, 255,	2	; 92
+		db 255,	3, 4, 255	; 96
+		db 255,	255, 5,	6	; 100
+		db 255,	255, 255, 255	; 104
+		db 255,	7, 8, 9		; 108
+		db 255,	10, 255, 255	; 112
+		db 11, 255, 255, 12	; 116
+		db 13, 255, 14,	15	; 120
+		db 16, 17, 18, 255	; 124
+		db 19, 20, 21, 255	; 128
+		db 22, 23, 255,	255	; 132
+		db 24, 255, 255, 25	; 136
+		db 26, 27, 28, 29	; 140
+		db 255,	255, 255, 255	; 144
+		db 30, 31, 32, 255	; 148
+		db 33, 34, 35, 36	; 152
+		db 37, 255, 255, 255	; 156
+		db 38, 39, 255,	40	; 160
+		db 41, 42, 43, 44	; 164
+		db 45, 255, 46,	255	; 168
+		db 47, 48, 255,	49	; 172
+s_yesNo		db 'Yes',0Ah,'No',0
+		db    0
+word_440BC	dw 0
+_str_Loalphabet	db ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g'; 0
+		db 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p'; 8
+		db 'r', 's', 't', 'u', 'v', 'w', 'y', '.'; 16
+		db '"', 27h, ',', '!', 0Ah, 0; 24
+_str_Hialphabet	db 'j', 'q', 'x', 'z', '0', '1', '2', '3'; 0
+		db '4', '5', '6', '7', '8', '9', '0', '1'; 8
+		db '2', '3', '4', '5', '6', '7', '8', '9'; 16
+		db 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'; 24
+		db 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'; 32
+		db 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'; 40
+		db 'Y', 'Z', '(', ')', '/', '\', '#', '*'; 48
+		db '?', '<', '>', ':', ';', '-', '%', 0; 56
+s_esc		db 'ESC',0
+s_u		db '%U',0
+s_victory		db 'vict',0
+s_bardscr	db 'bardscr',0
+s_iconFilePath	db 'icons.bin',0
+s_getPictureError	db 'picture get error',0
+bigpicIndexMultiplier	dw 2
+word_4414E	dw 0FFh
+aNorth		db 'north',0
+aEast		db 'east',0
+aSouth		db 'south',0
+aWest		db 'west',0
+g_printPartyFlag	dw 1
+bitMask16bit	dw 1		; 0
+		dw 2		; 1
+		dw 4		; 2
+		dw 8		; 3
+		dw 10h		; 4
+		dw 20h		; 5
+		dw 40h		; 6
+		dw 80h		; 7
+		dw 100h		; 8
+		dw 200h		; 9
+		dw 400h		; 10
+		dw 800h		; 11
+		dw 1000h	; 12
+		dw 2000h	; 13
+		dw 4000h	; 14
+		dw 8000h	; 15
+byteMaskList	db 80h, 40h, 20h, 10h   ; 0
+		db 8, 4, 2, 1		; 4
+flagMaskList	db 7Fh, 0BFh, 0DFh, 0EFh; 0
+		db 0F7h, 0FBh, 0FDh, 0FEh; 4
+diceMaskList	db 1, 3		     ; 0
+		db 7, 15		; 2
+		db 31, 63		; 4
+		db 127,	255		; 6
+dirStringList	dd aNorth, aEast, aSouth,	aWest
+dirDeltaN	dw 0FFFFh, 0,	1, 0	  ; 0
+dirDeltaE	dw 0,	1, 0, 0FFFFh	  ; 0
+northDelta	viewStruct <253, 3>	   ; 0
+		viewStruct <254, 3>	; 1
+		viewStruct <255, 3>	; 2
+		viewStruct <0, 3>	; 3
+		viewStruct <1, 3>	; 4
+		viewStruct <2, 3>	; 5
+		viewStruct <3, 3>	; 6
+		viewStruct <253, 2>	; 7
+		viewStruct <254, 2>	; 8
+		viewStruct <255, 2>	; 9
+		viewStruct <0, 2>	; 10
+		viewStruct <1, 2>	; 11
+		viewStruct <2, 2>	; 12
+		viewStruct <3, 2>	; 13
+		viewStruct <254, 1>	; 14
+		viewStruct <255, 1>	; 15
+		viewStruct <0, 1>	; 16
+		viewStruct <1, 1>	; 17
+		viewStruct <2, 1>	; 18
+		viewStruct <255, 0>	; 19
+		viewStruct <1, 0>	; 20
+southDelta	viewStruct <3, 253>	   ; 0
+		viewStruct <2, 253>	; 1
+		viewStruct <1, 253>	; 2
+		viewStruct <0, 253>	; 3
+		viewStruct <255, 253>	; 4
+		viewStruct <254, 253>	; 5
+		viewStruct <253, 253>	; 6
+		viewStruct <3, 254>	; 7
+		viewStruct <2, 254>	; 8
+		viewStruct <1, 254>	; 9
+		viewStruct <0, 254>	; 10
+		viewStruct <255, 254>	; 11
+		viewStruct <254, 254>	; 12
+		viewStruct <253, 254>	; 13
+		viewStruct <2, 255>	; 14
+		viewStruct <1, 255>	; 15
+		viewStruct <0, 255>	; 16
+		viewStruct <255, 255>	; 17
+		viewStruct <254, 255>	; 18
+		viewStruct <1, 0>	; 19
+		viewStruct <255, 0>	; 20
+eastDelta	viewStruct <3, 3>	  ; 0
+		viewStruct <3, 2>	; 1
+		viewStruct <3, 1>	; 2
+		viewStruct <3, 0>	; 3
+		viewStruct <3, 255>	; 4
+		viewStruct <3, 254>	; 5
+		viewStruct <3, 253>	; 6
+		viewStruct <2, 3>	; 7
+		viewStruct <2, 2>	; 8
+		viewStruct <2, 1>	; 9
+		viewStruct <2, 0>	; 10
+		viewStruct <2, 255>	; 11
+		viewStruct <2, 254>	; 12
+		viewStruct <2, 253>	; 13
+		viewStruct <1, 2>	; 14
+		viewStruct <1, 1>	; 15
+		viewStruct <1, 0>	; 16
+		viewStruct <1, 255>	; 17
+		viewStruct <1, 254>	; 18
+		viewStruct <0, 1>	; 19
+		viewStruct <0, 255>	; 20
+westDelta	viewStruct <253, 253>	  ; 0
+		viewStruct <253, 254>	; 1
+		viewStruct <253, 255>	; 2
+		viewStruct <253, 0>	; 3
+		viewStruct <253, 1>	; 4
+		viewStruct <253, 2>	; 5
+		viewStruct <253, 3>	; 6
+		viewStruct <254, 253>	; 7
+		viewStruct <254, 254>	; 8
+		viewStruct <254, 255>	; 9
+		viewStruct <254, 0>	; 10
+		viewStruct <254, 1>	; 11
+		viewStruct <254, 2>	; 12
+		viewStruct <254, 3>	; 13
+		viewStruct <255, 254>	; 14
+		viewStruct <255, 255>	; 15
+		viewStruct <255, 0>	; 16
+		viewStruct <255, 1>	; 17
+		viewStruct <255, 2>	; 18
+		viewStruct <0, 255>	; 19
+		viewStruct <0, 1>	; 20
+g_wild_deltaList	dd northDelta, eastDelta, southDelta,	westDelta; 0
+g_tile_quadrantWidthList	db 3, 3, 3, 3, 3, 3,	3, 1, 1, 1; 0
+		db 1, 1, 1, 6, 6, 6, 6,	6, 6, 6; 10
+		db 10, 10, 10, 10, 10, 10, 2, 2, 2, 2; 20
+		db 10, 10, 10, 10, 10, 10, 10, 10, 10, 10; 30
+		db 10, 3, 3, 3,	3, 18, 18, 18, 10, 10; 40
+		db 10, 10, 10, 10, 6, 6, 32, 32, 32, 11; 50
+		db 11, 0		; 60
+g_tile_quadrantScaleFactor	db 6, 6, 6, 6, 6, 6,	6, 6
+		db 6, 6, 6, 6, 6, 12, 12, 12
+		db 12, 12, 12, 12, 64, 64, 64, 64
+		db 64, 64, 14, 14, 14, 14, 20, 20
+		db 20, 20, 20, 64, 64, 64, 64, 64
+		db 64, 20, 20, 20, 20, 36, 36, 36
+		db 64, 64, 64, 64, 64, 64, 36, 36
+		db 64, 64, 64, 64, 64, 0
+g_tile_quadrantAspectOffsetList	db 2, 2, 2, 2, 2 	; 0
+		db 2, 2, 0, 0, 0 	; 5
+		db 0, 0, 0, 2, 2	; 10
+		db 2, 2, 2, 2, 2	; 15
+		db 0, 0, 0, 2, 2	; 20
+		db 2, 0, 0, 0, 0	; 25
+		db 2, 2, 2, 2, 2	; 30
+		db 0, 0, 0, 2, 2	; 35
+		db 2, 0, 0, 0, 0	; 40
+		db 2, 2, 2, 0, 0	; 45
+		db 0, 2, 2, 2, 0	; 50
+		db 0, 2, 2, 2, 0	; 55
+		db 0, 0			; 60
+g_wild_viewSquareIndexList	db 1, 2, 3, 4
+		db 5, 9, 11, 9
+		db 10, 11, 15, 17
+		db 15, 16, 17, 19
+		db 20, 0
+byte_44344	db 0, 255, 1, 1	   ; 0
+		db 2, 255, 255,	1	; 4
+		db 3, 255, 1, 1		; 8
+		db 2, 255, 255,	1	; 12
+byte_44354	db 0, 0FFh, 0FFh, 0FFh  ; 0
+		db 0FFh, 0, 0FFh, 0FFh	; 4
+		db 0FFh, 0FFh, 0FFh, 0FFh; 8
+		db 0FFh, 0, 0FFh, 0FFh	; 12
+dun_deltaNorth	viewStruct <253,	4>     ; 0
+		viewStruct <254, 4>	; 1
+		viewStruct <255, 4>	; 2
+		viewStruct <0, 4>	; 3
+		viewStruct <1, 4>	; 4
+		viewStruct <2, 4>	; 5
+		viewStruct <3, 4>	; 6
+		viewStruct <253, 3>	; 7
+		viewStruct <254, 3>	; 8
+		viewStruct <255, 3>	; 9
+		viewStruct <0, 3>	; 10
+		viewStruct <1, 3>	; 11
+		viewStruct <2, 3>	; 12
+		viewStruct <3, 3>	; 13
+		viewStruct <254, 2>	; 14
+		viewStruct <255, 2>	; 15
+		viewStruct <0, 2>	; 16
+		viewStruct <1, 2>	; 17
+		viewStruct <2, 2>	; 18
+		viewStruct <255, 1>	; 19
+		viewStruct <0, 1>	; 20
+		viewStruct <1, 1>	; 21
+		viewStruct <255, 0>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <1, 0>	; 24
+		viewStruct <255, 3>	; 25
+		viewStruct <0, 3>	; 26
+		viewStruct <1, 3>	; 27
+		viewStruct <255, 2>	; 28
+		viewStruct <0, 2>	; 29
+		viewStruct <1, 2>	; 30
+		viewStruct <255, 1>	; 31
+		viewStruct <0, 1>	; 32
+		viewStruct <1, 1>	; 33
+dun_deltaSouth	viewStruct <3, 252>     ; 0
+		viewStruct <2, 252>	; 1
+		viewStruct <1, 252>	; 2
+		viewStruct <0, 252>	; 3
+		viewStruct <255, 252>	; 4
+		viewStruct <254, 252>	; 5
+		viewStruct <253, 252>	; 6
+		viewStruct <3, 253>	; 7
+		viewStruct <2, 253>	; 8
+		viewStruct <1, 253>	; 9
+		viewStruct <0, 253>	; 10
+		viewStruct <255, 253>	; 11
+		viewStruct <254, 253>	; 12
+		viewStruct <253, 253>	; 13
+		viewStruct <2, 254>	; 14
+		viewStruct <1, 254>	; 15
+		viewStruct <0, 254>	; 16
+		viewStruct <255, 254>	; 17
+		viewStruct <254, 254>	; 18
+		viewStruct <1, 255>	; 19
+		viewStruct <0, 255>	; 20
+		viewStruct <255, 255>	; 21
+		viewStruct <1, 0>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <255, 0>	; 24
+		viewStruct <1, 253>	; 25
+		viewStruct <0, 253>	; 26
+		viewStruct <255, 253>	; 27
+		viewStruct <1, 254>	; 28
+		viewStruct <0, 254>	; 29
+		viewStruct <255, 254>	; 30
+		viewStruct <1, 255>	; 31
+		viewStruct <0, 255>	; 32
+		viewStruct <255, 255>	; 33
+dun_deltaEast	viewStruct <4, 3>	      ;	0
+		viewStruct <4, 2>	; 1
+		viewStruct <4, 1>	; 2
+		viewStruct <4, 0>	; 3
+		viewStruct <4, 255>	; 4
+		viewStruct <4, 254>	; 5
+		viewStruct <4, 253>	; 6
+		viewStruct <3, 3>	; 7
+		viewStruct <3, 2>	; 8
+		viewStruct <3, 1>	; 9
+		viewStruct <3, 0>	; 10
+		viewStruct <3, 255>	; 11
+		viewStruct <3, 254>	; 12
+		viewStruct <3, 253>	; 13
+		viewStruct <2, 2>	; 14
+		viewStruct <2, 1>	; 15
+		viewStruct <2, 0>	; 16
+		viewStruct <2, 255>	; 17
+		viewStruct <2, 254>	; 18
+		viewStruct <1, 1>	; 19
+		viewStruct <1, 0>	; 20
+		viewStruct <1, 255>	; 21
+		viewStruct <0, 1>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <0, 255>	; 24
+		viewStruct <3, 1>	; 25
+		viewStruct <3, 0>	; 26
+		viewStruct <3, 255>	; 27
+		viewStruct <2, 1>	; 28
+		viewStruct <2, 0>	; 29
+		viewStruct <2, 255>	; 30
+		viewStruct <1, 1>	; 31
+		viewStruct <1, 0>	; 32
+		viewStruct <1, 255>	; 33
+dun_deltaWest	viewStruct <252, 253>   ;	0
+		viewStruct <252, 254>	; 1
+		viewStruct <252, 255>	; 2
+		viewStruct <252, 0>	; 3
+		viewStruct <252, 1>	; 4
+		viewStruct <252, 2>	; 5
+		viewStruct <252, 3>	; 6
+		viewStruct <253, 253>	; 7
+		viewStruct <253, 254>	; 8
+		viewStruct <253, 255>	; 9
+		viewStruct <253, 0>	; 10
+		viewStruct <253, 1>	; 11
+		viewStruct <253, 2>	; 12
+		viewStruct <253, 3>	; 13
+		viewStruct <254, 254>	; 14
+		viewStruct <254, 255>	; 15
+		viewStruct <254, 0>	; 16
+		viewStruct <254, 1>	; 17
+		viewStruct <254, 2>	; 18
+		viewStruct <255, 255>	; 19
+		viewStruct <255, 0>	; 20
+		viewStruct <255, 1>	; 21
+		viewStruct <0, 255>	; 22
+		viewStruct <0, 0>	; 23
+		viewStruct <0, 1>	; 24
+		viewStruct <253, 255>	; 25
+		viewStruct <253, 0>	; 26
+		viewStruct <253, 1>	; 27
+		viewStruct <254, 255>	; 28
+		viewStruct <254, 0>	; 29
+		viewStruct <254, 1>	; 30
+		viewStruct <255, 255>	; 31
+		viewStruct <255, 0>	; 32
+		viewStruct <255, 1>	; 33
+g_dun_deltaList	dd dun_deltaNorth, dun_deltaEast, dun_deltaSouth, dun_deltaWest	; 3
+byte_44484	db 0, 1, 2, 2, 2, 0,	3, 4; 0
+		db 3, 3, 4, 4, 4, 0, 3,	4; 8
+byte_44494	db 3Dh, 38h,	2Dh, 1Eh, 0Dh, 0, 2, 2,	2, 2; 0
+		db 2, 2, 2, 16h, 16h, 4, 4, 16h, 16h, 6; 10
+		db 6, 6, 6, 6, 6, 6, 2Ch, 2Ah, 2Ch, 38h; 20
+		db 36h,	38h, 18h, 8, 8,	18h, 0Ah, 0Ah, 0Ah; 30
+		db 0Ah,	0Ah, 30h, 2Eh, 30h, 3Ch, 3Ah, 3Ch; 39
+		db 0Ch,	0Ch, 0Ch, 0Ch, 0Eh, 0Eh, 0Eh, 34h; 47
+		db 32h,	34h, 40h, 3Eh, 40h, 10h, 10h, 12h; 55
+		db 12h,	12h, 14h, 14h, 0; 63
+g_quadrantRightFlagList	db 0, 0, 0, 0	   ; 0
+		db 0, 0, 0, 0		; 4
+		db 0, 0, -1, -1		; 8
+		db -1, 0, 0, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 0, -1, 0		; 20
+		db 0, -1, 0, 0		; 24
+		db -1, -1, 0, 0		; 28
+		db 0, 0, 0, 0		; 32
+		db 0, -1, 0, 0		; 36
+		db -1, 0, 0, -1		; 40
+		db -1, 0, 0, 0		; 44
+		db 0, 0, -1, 0		; 48
+		db 0, -1, 0, -1		; 52
+		db 0, 0, 0, 0		; 56
+		db -1, 0		; 60
+byte_44516	db 0, 1, 2, 3, 4, 5,	6, 1, 2, 3, 3, 4, 5; 0
+		db 7, 8, 9, 0Ah, 0Bh, 0Ch, 0Dh,	19h, 1Ah; 13
+		db 1Bh,	19h, 1Ah, 1Bh, 9, 0Ah, 0Ah, 0Bh; 22
+		db 0Eh,	0Fh, 10h, 11h, 12h, 1Ch, 1Dh, 1Eh; 30
+		db 1Ch,	1Dh, 1Eh, 0Fh, 10h, 10h, 11h, 13h; 38
+		db 14h,	15h, 1Fh, 20h, 21h, 1Fh, 20h, 21h; 46
+		db 14h,	14h, 16h, 17h, 18h, 17h, 17h, 0; 54
+byte_44554	db 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 0, 0, 0; 0
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 0, 0, 0; 13
+		db 8, 8, 0, 0, 4, 4, 4,	4, 4, 4, 4, 4, 0; 26
+		db 0, 0, 8, 8, 0, 0, 4,	4, 4, 4, 4, 4, 0; 39
+		db 0, 0, 8, 0, 4, 4, 4,	8, 0, 0; 52
+g_tile_quadrantCoordinates	coordinate_t <12, 42>	   ; 0
+		coordinate_t <15, 42>	; 1
+		coordinate_t <18, 42>	; 2
+		coordinate_t <21, 42>	; 3
+		coordinate_t <24, 42>	; 4
+		coordinate_t <27, 42>	; 5
+		coordinate_t <30, 42>	; 6
+		coordinate_t <5, 38>	; 7
+		coordinate_t <12, 38>	; 8
+		coordinate_t <26, 38>	; 9
+		coordinate_t <29, 38>	; 10
+		coordinate_t <31, 38>	; 11
+		coordinate_t <39, 38>	; 12
+		coordinate_t <254, 38>	; 13
+		coordinate_t <5, 38>	; 14
+		coordinate_t <17, 44>	; 15
+		coordinate_t <24, 44>	; 16
+		coordinate_t <31, 44>	; 17
+		coordinate_t <33, 38>	; 18
+		coordinate_t <40, 38>	; 19
+		coordinate_t <13, 33>	; 20
+		coordinate_t <21, 33>	; 21
+		coordinate_t <31, 33>	; 22
+		coordinate_t <13, 55>	; 23
+		coordinate_t <21, 55>	; 24
+		coordinate_t <31, 55>	; 25
+		coordinate_t <255,	38>	; 26
+		coordinate_t <23, 38>	; 27
+		coordinate_t <31, 38>	; 28
+		coordinate_t <42, 38>	; 29
+		coordinate_t <2, 42>	; 30
+		coordinate_t <12, 42>	; 31
+		coordinate_t <23, 42>	; 32
+		coordinate_t <34, 42>	; 33
+		coordinate_t <45, 42>	; 34
+		coordinate_t <4, 21>	; 35
+		coordinate_t <20, 21>	; 36
+		coordinate_t <34, 21>	; 37
+		coordinate_t <4, 63>	; 38
+		coordinate_t <20, 63>	; 39
+		coordinate_t <34, 63>	; 40
+		coordinate_t <3, 35>	; 41
+		coordinate_t <19, 35>	; 42
+		coordinate_t <33, 35>	; 43
+		coordinate_t <48, 35>	; 44
+		coordinate_t <0, 35>	; 45
+		coordinate_t <18, 35>	; 46
+		coordinate_t <37, 35>	; 47
+		coordinate_t <0, 8>	; 48
+		coordinate_t <17, 4>	; 49
+		coordinate_t <44, 8>	; 50
+		coordinate_t <0, 77>	; 51
+		coordinate_t <17, 77>	; 52
+		coordinate_t <44, 77>	; 53
+		coordinate_t <12, 22>	; 54
+		coordinate_t <37, 22>	; 55
+		coordinate_t <235, 22>	; 56
+		coordinate_t <11, 22>	; 57
+		coordinate_t <43, 22>	; 58
+		coordinate_t <0, 0>	; 59
+		coordinate_t <44, 0>	; 60
+byte_4460C	db 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0; 0
+		db 0, 0, 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0; 13
+		db 0, 0, 0, 0, 0FFh, 0FFh, 0, 0, 0FFh, 0FFh; 23
+		db 0FFh, 0, 0, 0, 0, 0,	0, 0, 0, 0FFh, 0FFh; 33
+		db 0, 0FFh, 0FFh, 0FFh,	0, 0, 0, 0, 0, 0; 44
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 54
+		db 0			; 61
+g_wild_squareTopologyIndex	db 30, 31, 32, 33
+		db 34, 42, 43, 45
+		db 46, 47, 54, 55
+		db 56, 57, 58, 59
+		db 60, 0
+strg_inventory	db 0C3h, 0, 1, 0C3h, 0, 1, 0C3h, 0, 1, 0C3h; 0
+		db 0, 1, 0Fh, 0, 0FFh, 0Fh, 0, 0FFh, 7,	0; 10
+		db 0FFh, 7, 0, 0FFh, 8,	0, 0FFh, 8, 0, 0FFh; 20
+		db 16h,	0, 18h,	16h, 0,	18h, 76h, 0, 0Ah; 30
+		db 2, 0, 1, 2, 0, 1, 1Eh, 0, 50h, 0CAh,	0; 39
+		db 5, 0DFh, 0, 0Ah, 7Bh, 0, 0FFh, 7Ch, 0; 50
+		db 18h,	73h, 0,	0FFh, 74h, 0, 0FFh, 87h; 59
+		db 0, 0FFh, 88h, 0, 0FFh, 98h, 0, 0FFh,	99h; 67
+		db 0, 0FFh, 9Ch, 0, 0FFh, 9Dh, 0, 0FFh;	76
+bigpicLightOffset dw 0,	460h, 818h, 9A0h, 8C0h;	0
+bigpicLightSize	dw 1340h, 0A80h, 620h, 348h, 1C0h; 0
+iconXOffset	db 80, 92, 108, 124, 136, 0; 0
+iconHeight	db 19, 26, 17, 20, 16, 0; 0
+iconWidth	db 12, 16, 16, 12, 20, 0; 0
+iconDataList	dd	iconLight, iconCompass,	iconAreaEnchant, iconShield, iconLevitation; 0
+word_4470E	dw 0E4h, 1A0h, 110h,	0F0h, 140h; 0
+byte_44718	db 0, 0, 0, 0, 0, 0	   ; 0
+iconAnimationDelay	db 2, 0, 4, 0, 3, 0	   ; 0
+iconCurrentDelay db 0, 0, 0,	0, 0, 0	    ; 0
+iconClearIndex	db 4, 4, 4, 1, 4, 0	   ; 0
+iconCurrentCell	db 0, 0, 0, 0, 0, 0
+aMafl		db 'MAFL',0
+aMageFlame	db 'Mage Flame',0
+aArfi		db 'ARFI',0
+aArcFire	db 'Arc Fire',0
+aTrzp		db 'TRZP',0
+aTrapZap	db 'Trap Zap',0
+aFrfo		db 'FRFO',0
+aFreezeFoes	db 'Freeze Foes',0
+aMaco		db 'MACO',0
+aKielSCompass	db 'Kiel',27h,'s Compass',0
+aWohl		db 'WOHL',0
+aWordOfHealing	db 'Word of Healing',0
+aLere		db 'LERE',0
+aLesserRev_	db 'Lesser Rev.',0
+aLevi		db 'LEVI',0
+aLevitation	db 'Levitation',0
+aWast		db 'WAST',0
+aWarstrike	db 'Warstrike',0
+aInwo		db 'INWO',0
+aInstantWolf	db 'Instant Wolf',0
+aFlre		db 'FLRE',0
+aFleshRestore	db 'Flesh Restore',0
+aGrre		db 'GRRE',0
+aGreaterRev_	db 'Greater Rev.',0
+aShsp		db 'SHSP',0
+aShockSphere	db 'Shock-Sphere',0
+aFlan		db 'FLAN',0
+aFleshAnew	db 'Flesh Anew',0
+aMale		db 'MALE',0
+aMajorLev_	db 'Major Lev.',0
+aRegn		db 'REGN',0
+aRegeneration	db 'Regeneration',0
+aApar		db 'APAR',0
+aApportArcane	db 'Apport Arcane',0
+aFafo		db 'FAFO',0
+aFarFoe		db 'Far Foe',0
+aInsl		db 'INSL',0
+aInstantSlayer	db 'Instant Slayer',0
+aVopl		db 'VOPL',0
+aVorpalPlating	db 'Vorpal Plating',0
+aQufi		db 'QUFI',0
+aQuickFix	db 'Quick Fix',0
+aScsi		db 'SCSI',0
+aScrySight	db 'Scry Sight',0
+aHowa		db 'HOWA',0
+aHolyWater	db 'Holy Water',0
+aMaga		db 'MAGA',0
+aMageGauntlets	db 'Mage Gauntlets',0
+aAren		db 'AREN',0
+aAreaEnchant	db 'Area Enchant',0
+aMysh		db 'MYSH',0
+aMysticShield	db 'Mystic Shield',0
+aOgst		db 'OGST',0
+aOgreStrength	db 'Ogre Strength',0
+aStfl		db 'STFL',0
+aStarflare	db 'Starflare',0
+aSpto		db 'SPTO',0
+aSpectreTouch	db 'Spectre Touch',0
+aDrbr		db 'DRBR',0
+aDragonBreath	db 'Dragon Breath',0
+aAnma		db 'ANMA',0
+aAntiMagic	db 'Anti-Magic',0
+aGist		db 'GIST',0
+aGiantStrength	db 'Giant Strength',0
+aPhdo		db 'PHDO',0
+aPhaseDoor	db 'Phase Door',0
+aYmca		db 'YMCA',0
+aMysticalArmor	db 'Mystical Armor',0
+aRest		db 'REST',0
+aRestoration	db 'Restoration',0
+aDest		db 'DEST',0
+aDeathStrike	db 'Death Strike',0
+aIces		db 'ICES',0
+aIceStorm	db 'Ice Storm',0
+aSton		db 'STON',0
+aStoneToFlesh	db 'Stone to Flesh',0
+aMija		db 'MIJA',0
+aMindJab	db 'Mind Jab',0
+aPhbl		db 'PHBL',0
+aPhaseBlur	db 'Phase Blur',0
+aLotr		db 'LOTR',0
+aLocateTraps	db 'Locate Traps',0
+aDisb		db 'DISB',0
+aDisbelieve	db 'Disbelieve',0
+aWiwa		db 'WIWA',0
+aWindWarrior	db 'Wind Warrior',0
+aFear		db 'FEAR',0
+aWordOfFear	db 'Word of Fear',0
+aWiog		db 'WIOG',0
+aWindOgre	db 'Wind Ogre',0
+aInvi		db 'INVI',0
+aInvisibility	db 'Invisibility',0
+aSesi		db 'SESI',0
+aSecondSight	db 'Second Sight',0
+aCaey		db 'CAEY',0
+aCatEyes	db 'Cat Eyes',0
+aWidr		db 'WIDR',0
+aWindDragon	db 'Wind Dragon',0
+aDiil		db 'DIIL',0
+aDisruptIll_	db 'Disrupt Ill.',0
+aMibl		db 'MIBL',0
+aMindBlade	db 'Mind Blade',0
+aWigi		db 'WIGI',0
+aWindGiant	db 'Wind Giant',0
+aSosi		db 'SOSI',0
+aSorcerorSight	db 'Sorceror Sight',0
+aRime		db 'RIME',0
+aRimefang	db 'Rimefang',0
+aWihe		db 'WIHE',0
+aWindHero	db 'Wind Hero',0
+aMagm		db 'MAGM',0
+aMageMaelstrom	db 'Mage Maelstrom',0
+aPrec		db 'PREC',0
+aPreclusion	db 'Preclusion',0
+aSuel		db 'SUEL',0
+aSummonElementa	db 'Summon Elemental',0
+aFofo		db 'FOFO',0
+aForceFocus	db 'Force Focus',0
+aPrsu		db 'PRSU',0
+aPrimeSummoning	db 'Prime Summoning',0
+aDeba		db 'DEBA',0
+aDemonBane	db 'Demon Bane',0
+aFlco		db 'FLCO',0
+aFlameColumn	db 'Flame Column',0
+aDisp		db 'DISP',0
+aDispossess	db 'Dispossess',0
+aHerb		db 'HERB',0
+aSummonHerb	db 'Summon Herb',0
+aAnde		db 'ANDE',0
+aAnimateDead	db 'Animate Dead',0
+aSpbi		db 'SPBI',0
+aSpellBind	db 'Spell Bind',0
+aSowh		db 'SOWH',0
+aSoulWhip	db 'Soul Whip',0
+aGrsu		db 'GRSU',0
+aGreaterSummon	db 'Greater Summon',0
+aBede		db 'BEDE',0
+aBeyondDeath	db 'Beyond Death',0
+aWizw		db 'WIZW',0
+aWizardWar	db 'Wizard War',0
+aDmst		db 'DMST',0
+aDemonStrike	db 'Demon Strike',0
+aHafo		db 'HAFO',0
+aHaltfoe	db 'Haltfoe',0
+aMeme		db 'MEME',0
+aMeleeMen	db 'Melee Men',0
+aBasp		db 'BASP',0
+aBatchspell	db 'Batchspell',0
+aCamr		db 'CAMR',0
+aCamaraderie	db 'Camaraderie',0
+aNila		db 'NILA',0
+aNightLance	db 'Night Lance',0
+aHeal		db 'HEAL',0
+aHealAll	db 'Heal All',0
+aBrkr		db 'BRKR',0
+aKringleBros_	db 'Kringle Bros.',0
+aMama		db 'MAMA',0
+aMangarSMallet	db 'Mangar',27h,'s Mallet',0
+aVitl		db 'VITL',0
+aVitality	db 'Vitality',0
+aArbo		db 'ARBO',0
+aArbo_0		db 'Arbo',0
+aEnik		db 'ENIK',0
+aEnik_0		db 'Enik',0
+aWifi		db 'WIFI',0
+aWitherfist	db 'Witherfist',0
+aCold		db 'COLD',0
+aFrostForce	db 'Frost Force',0
+aGeli		db 'GELI',0
+aGeli_0		db 'Geli',0
+aEcul		db 'ECUL',0
+aEcul_0		db 'Ecul',0
+aGofi		db 'GOFI',0
+aGodFire	db 'God Fire',0
+aStun		db 'STUN',0
+aStunForce	db 'Stun Force',0
+aLuce		db 'LUCE',0
+aLuce_0		db 'Luce',0
+aIleg		db 'ILEG',0
+aIleg_0		db 'Ileg',0
+aLuck		db 'LUCK',0
+aLuckChant	db 'Luck Chant',0
+aFade		db 'FADE',0
+aFarDeath	db 'Far Death',0
+aKine		db 'KINE',0
+aKine_0		db 'Kine',0
+aObra		db 'OBRA',0
+aObra_0		db 'Obra',0
+aWhat		db 'WHAT',0
+aIdentify	db 'Identify',0
+aOlay		db 'OLAY',0
+aYouth		db 'Youth',0
+aOluk		db 'OLUK',0
+aOluk_0		db 'Oluk',0
+aEcea		db 'ECEA',0
+aEcea_0		db 'Ecea',0
+aGrro		db 'GRRO',0
+aGraveRobber	db 'Grave Robber',0
+aFota		db 'FOTA',0
+aForceOfTarjan	db 'Force of Tarjan',0
+aAece		db 'AECE',0
+aAece_0		db 'Aece',0
+aKulo		db 'KULO',0
+aKulo_0		db 'Kulo',0
+aShsh		db 'SHSH',0
+aShadowShield	db 'Shadow Shield',0
+aFafi		db 'FAFI',0
+aFatalFist	db 'Fatal Fist',0
+aEvil		db 'EVIL',0
+aEvil_0		db 'Evil',0
+aLive		db 'LIVE',0
+aLive_0		db 'Live',0
+aEada		db 'EADA',0
+aEarthDagger	db 'Earth Dagger',0
+aEaso		db 'EASO',0
+aEarthSong	db 'Earth Song',0
+aEawa		db 'EAWA',0
+aEarthWard	db 'Earth Ward',0
+aTreb		db 'TREB',0
+aTrebuchet	db 'Trebuchet',0
+aEael		db 'EAEL',0
+aEarthElemental	db 'Earth Elemental',0
+aWawa		db 'WAWA',0
+aWallWarp	db 'Wall Warp',0
+aRock		db 'ROCK',0
+aPetrify	db 'Petrify',0
+aRoal		db 'ROAL',0
+aRoscoeSAlert	db 'Roscoe',27h,'s Alert',0
+aSuso		db 'SUSO',0
+aSuccorSong	db 'Succor Song',0
+aSast		db 'SAST',0
+aSandstorm	db 'Sandstorm',0
+aSant		db 'SANT',0
+aSanctuary	db 'Sanctuary',0
+aGlst		db 'GLST',0
+aGlacierStrike	db 'Glacier Strike',0
+aPath		db 'PATH',0
+aPathfinder	db 'Pathfinder',0
+aMaba		db 'MABA',0
+aMagmaBlast	db 'Magma Blast',0
+aJobo		db 'JOBO',0
+aJoltBolt	db 'Jolt Bolt',0
+aEama		db 'EAMA',0
+aEarthMaw	db 'Earth Maw',0
+aGill		db 'GILL',0
+aGillesGills	db 'Gilles Gills',0
+aDiva		db 'DIVA',0
+aDivineInt_	db 'Divine Int.',0
+aNuke		db 'NUKE',0
+aGotterdamurung	db 'Gotterdamurung',0
+aItem		db 'Item',0
+aWeapon		db 'Weapon',0
+aShield		db 'Shield',0
+aArmor		db 'Armor',0
+aHelm		db 'Helm',0
+aGloves		db 'Gloves',0
+aInstrument	db 'Instrument',0
+aFigurine	db 'Figurine',0
+aRing		db 'Ring',0
+aWand		db 'Wand',0
+aBow		db 'Bow',0
+aQuiver		db 'Quiver',0
+aContainer	db 'Container',0
+aNothing	db 'Nothing',0
+aTorch		db 'Torch',0
+aLamp		db 'Lamp',0
+aBroadsword	db 'Broadsword',0
+aShortSword	db 'Short Sword',0
+aDagger		db 'Dagger',0
+aWarAxe		db 'War Axe',0
+aHalbard	db 'Halbard',0
+aLongBow	db 'Long Bow',0
+aStaff		db 'Staff',0
+aBuckler	db 'Buckler',0
+aTowerShield	db 'Tower Shield',0
+aLeatherArmor	db 'Leather Armor',0
+aChainMail	db 'Chain Mail',0
+aScaleArmor	db 'Scale Armor',0
+aPlateArmor	db 'Plate Armor',0
+aRobes		db 'Robes',0
+aLeatherGloves	db 'Leather Gloves',0
+aGauntlets	db 'Gauntlets',0
+aMandolin	db 'Mandolin',0
+aSpear		db 'Spear',0
+aArrows		db 'Arrows',0
+aMthrSword	db 'Mthr Sword',0
+aMthrShield	db 'Mthr Shield',0
+aMthrChain	db 'Mthr Chain',0
+aMthrScale	db 'Mthr Scale',0
+aGiantFgn	db 'Giant Fgn',0
+aMthrBracers	db 'Mthr Bracers',0
+aBardsword	db 'Bardsword',0
+aFireHorn	db 'Fire Horn',0
+aLitewand	db 'Litewand',0
+aMthrDagger	db 'Mthr Dagger',0
+aMthrHelm	db 'Mthr Helm',0
+aMthrGloves	db 'Mthr Gloves',0
+aMthrAxe	db 'Mthr Axe',0
+aShuriken	db 'Shuriken',0
+aMthrPlate	db 'Mthr Plate',0
+aMoltenFgn	db 'Molten Fgn',0
+aSpellSpear	db 'Spell Spear',0
+aShieldRing	db 'Shield Ring',0
+aFinSFlute	db 'Fin',27h,'s Flute',0
+aKaelSAxe	db 'Kael',27h,'s Axe',0
+aMthrArrows	db 'Mthr Arrows',0
+aDayblade	db 'Dayblade',0
+aShieldStaff	db 'Shield Staff',0
+aElfCloak	db 'Elf Cloak',0
+aHawkblade	db 'Hawkblade',0
+aAdmtSword	db 'Admt Sword',0
+aAdmtShield	db 'Admt Shield',0
+aAdmtHelm	db 'Admt Helm',0
+aAdmtGloves	db 'Admt Gloves',0
+aPureblade	db 'Pureblade',0
+aBoomerang	db 'Boomerang',0
+aAliSCarpet	db 'Ali',27h,'s Carpet',0
+aLuckshield	db 'Luckshield',0
+aDozerFgn	db 'Dozer Fgn',0
+aAdmtChain	db 'Admt Chain',0
+aDeathStars	db 'Death Stars',0
+aAdmtPlate	db 'Admt Plate',0
+aAdmtBracers	db 'Admt Bracers',0
+aSlayerFgn	db 'Slayer Fgn',0
+aPureShield	db 'Pure Shield',0
+aMageStaff	db 'Mage Staff',0
+aWarStaff	db 'War Staff',0
+aThiefDagger	db 'Thief Dagger',0
+aSoulMace	db 'Soul Mace',0
+aOgrewand	db 'Ogrewand',0
+aKatoSBracer	db 'Kato',27h,'s bracer',0
+aSorcerstaff	db 'Sorcerstaff',0
+aGaltSFlute	db 'Galt',27h,'s Flute',0
+aFrostHorn	db 'Frost Horn',0
+aAgSArrows	db 'Ag',27h,'s Arrows',0
+aDmndShield	db 'Dmnd Shield',0
+aBardBow	db 'Bard Bow',0
+aDmndHelm	db 'Dmnd Helm',0
+aElfBoots	db 'Elf Boots',0
+aVanquisherFgn	db 'Vanquisher Fgn',0
+aConjurstaff	db 'Conjurstaff',0
+aStaffOfLor	db 'Staff of Lor',0
+aFlameSword	db 'Flame Sword',0
+aPowerstaff	db 'Powerstaff',0
+aBreathRing 	db 'Breath Ring',0
+aDragonshield	db 'Dragonshield',0
+aDmndPlate	db 'Dmnd Plate',0
+aWargloves	db 'Wargloves',0
+aWizhelm	db 'Wizhelm',0
+aDragonwand	db 'Dragonwand',0
+aDeathring	db 'Deathring',0
+aCrystalSword	db 'Crystal Sword',0
+aSpeedboots	db 'Speedboots',0
+aFlameHorn	db 'Flame Horn',0
+aZenArrows	db 'Zen Arrows',0
+aDeathdrum	db 'Deathdrum',0
+aPipesOfPan	db 'Pipes of Pan',0
+aPowerRing	db 'Power Ring',0
+aSongAxe	db 'Song Axe',0
+aTrickBrick	db 'Trick Brick',0
+aDragonFgn	db 'Dragon Fgn',0
+aMageFgn	db 'Mage Fgn',0
+aTrollRing	db 'Troll Ring',0
+aAramSKnife	db 'Aram',27h,'s Knife',0
+aAngraSEye	db 'Angra',27h,'s Eye',0
+aHerbFgn	db 'Herb Fgn',0
+aMasterWand	db 'Master Wand',0
+aBrothersFgn	db 'Brothers Fgn',0
+aDynamite	db 'Dynamite',0
+aThorSHammer	db 'Thor',27h,'s Hammer',0
+aStoneblade	db 'Stoneblade',0
+aHolyHandgrenad	db 'Holy Handgrenade',0
+aMasterkey	db 'Masterkey',0
+aNospinRing	db 'Nospin Ring',0
+aCrystalLens	db 'Crystal Lens',0
+aSmokeyLens	db 'Smokey Lens',0
+aBlackLens	db 'Black Lens',0
+aSphereOfLanati	db 'Sphere of Lanatir',0
+aWandOfPower	db 'Wand of Power',0
+aAcorn		db 'Acorn',0
+aWineskin	db 'Wineskin',0
+aNightspear	db 'Nightspear',0
+aTslothaSHead	db 'Tslotha',27h,'s Head',0
+aTslothaSHeart	db 'Tslotha',27h,'s Heart',0
+aArefolia	db 'Arefolia',0
+aValarianSBow	db 'Valarian',27h,'s Bow',0
+aArwsOfLife	db 'Arws of Life',0
+aCanteen	db 'Canteen',0
+aTitanPlate	db 'Titan Plate',0
+aTitanShield	db 'Titan Shield',0
+aTitanHelm	db 'Titan Helm',0
+aFireSpear	db 'Fire Spear',0
+aWillowFlute	db 'Willow Flute',0
+aFirebrand	db 'Firebrand',0
+aHolySword	db 'Holy Sword',0
+aWandOfFury	db 'Wand of Fury',0
+aLightstar	db 'Lightstar',0
+aCrownOfTruth	db 'Crown of Truth',0
+aBeltOfAlliria	db 'Belt of Alliria',0
+aCrystalKey	db 'Crystal Key',0
+aTaoRing	db 'Tao Ring',0
+aStealthArrows	db 'Stealth Arrows',0
+aYellowStaff	db 'Yellow Staff',0
+aSteadyEye	db 'Steady Eye',0
+aDivineHalbard	db 'Divine Halbard',0
+aIncense	db 'Incense',0
+aIChing		db 'I-ching',0
+aWhiteRose	db 'White Rose',0
+aBlueRose	db 'Blue Rose',0
+aRedRose	db 'Red Rose',0
+aYellowRose	db 'Yellow Rose',0
+aRainbowRose	db 'Rainbow Rose',0
+aMagicTriangle	db 'Magic Triangle',0
+aXChar		db 'x', 0
+aHammerOfWrath	db 'Hammer of Wrath',0
+aFerofistSHelm	db 'Ferofist',27h,'s Helm',0
+aHelmOfJustice	db 'Helm of Justice',0
+aSceaduSCloak	db 'Sceadu',27h,'s Cloak',0
+aShadelance	db 'Shadelance',0
+aBlackArrows	db 'Black Arrows',0
+aWerraSShield	db 'Werra',27h,'s Shield',0
+aStrifespear	db 'Strifespear',0
+aSheetmusic	db 'Sheetmusic',0
+aRightKey	db 'Right Key',0
+aLeftKey	db 'Left Key',0
+aLever		db 'Lever',0
+aNut		db 'Nut',0
+aBolt		db 'Bolt',0
+aSpanner	db 'Spanner',0
+aShadowLock	db 'Shadow Lock',0
+aShadowDoor	db 'Shadow Door',0
+aMisericorde	db 'Misericorde',0
+aHolyAvenger	db 'Holy Avenger',0
+aShadowshiv	db 'Shadowshiv',0
+aKaliSGarrote	db 'Kali',27h,'s Garrote',0
+aFlameKnife	db 'Flame Knife',0
+aRedSStiletto	db 'Red',27h,'s Stiletto',0
+aHeartseeker	db 'Heartseeker',0
+aDmndScale	db 'Dmnd Scale',0
+aHolyTnt	db 'Holy TNT',0
+aEternalTorch	db 'Eternal Torch',0
+aOsconSStaff	db 'Oscon',27h,'s Staff',0
+aAngelSRing	db 'Angel',27h,'s Ring',0
+aDeathhorn	db 'Deathhorn',0
+aStaffOfMangar	db 'Staff of Mangar',0
+aTeslaRing	db 'Tesla Ring',0
+aDmndBracers	db 'Dmnd Bracers',0
+aDeathFgn	db 'Death Fgn',0
+aThunderSword	db 'Thunder Sword',0
+aPoisonDagger	db 'Poison Dagger',0
+aSparkBlade	db 'Spark Blade',0
+aGalvanicOboe	db 'Galvanic Oboe',0
+aHarmonicGem	db 'Harmonic Gem',0
+aTungShield	db 'Tung Shield',0
+aTungPlate	db 'Tung Plate',0
+aMinstrelsGlove	db 'Minstrels Glove',0
+aHuntersCloak	db 'Hunters Cloak',0
+aDeathHammer	db 'Death Hammer',0
+aBloodMeshRobe	db 'Blood Mesh Robe',0
+aSoothingBalm	db 'Soothing Balm',0
+aMagesCloak	db 'Mages Cloak',0
+aFamiliarFgn	db 'Familiar Fgn',0
+aHourglass	db 'Hourglass',0
+aThievesHood	db 'Thieves Hood',0
+aSurehandAmulet	db 'Surehand Amulet',0
+aThievesDart	db 'Thieves Dart',0
+aShrillFlute	db 'Shrill Flute',0
+aAngelSHarp	db 'Angel',27h,'s Harp',0
+aTheBook	db 'The Book',0
+aTrothLance	db 'Troth Lance',0
+aDmndSuit	db 'Dmnd Suit',0
+aDmndFlail	db 'Dmnd Flail',0
+aPurpleHeart	db 'Purple Heart',0
+aTitanBracers	db 'Titan Bracers',0
+aEelskinTunic	db 'Eelskin Tunic',0
+aSorcererSHood	db 'Sorcerer',27h,'s Hood',0
+aDmndStaff	db 'Dmnd Staff',0
+aCrystalGem	db 'Crystal Gem',0
+aWandOfForce	db 'Wand of Force',0
+aCliLyre	db 'Cli Lyre',0
+aYouthPotion	db 'Youth Potion',0
+aMthrSuit	db 'Mthr Suit',0
+aTitanSuit	db 'Titan Suit',0
+aMagesGlove	db 'Mages Glove',0
+aFlareCrystal	db 'Flare Crystal',0
+aHolyMissile	db 'Holy Missile',0
+aGodsBlade	db 'Gods',27h,' Blade',0
+aHunterBlade	db 'Hunter Blade',0
+aStaffOfGods	db 'Staff of Gods',0
+aHornOfGods	db 'Horn of Gods',0
+aWater		db 'Water',0
+aSpirits	db 'Spirits',0
+aWaterOfLife	db 'Water of Life',0
+aDragonBlood	db 'Dragon Blood',0
+aMoltenTar	db 'Molten Tar',0
+aHuman		db 'Human',0
+aElf		db 'Elf',0
+aDwarf		db 'Dwarf',0
+aHobbit		db 'Hobbit',0
+aHalfElf	db 'Half-Elf',0
+aHalfOrc	db 'Half-Orc',0
+aGnome		db 'Gnome',0
+aMale_0		db 'Male',0
+aFemale		db 'Female',0
+nullStr		db 0
+		db    0
+spellString 	spellString_t <aMafl, aMageFlame>; 0
+		spellString_t <aArfi, aArcFire>; 1
+		spellString_t <aTrzp, aTrapZap>; 2
+		spellString_t <aFrfo, aFreezeFoes>; 3
+		spellString_t <aMaco, aKielSCompass>; 4
+		spellString_t <aWohl, aWordOfHealing>; 5
+		spellString_t <aLere, aLesserRev_>; 6
+		spellString_t <aLevi, aLevitation>; 7
+		spellString_t <aWast, aWarstrike>; 8
+		spellString_t <aInwo, aInstantWolf>; 9
+		spellString_t <aFlre, aFleshRestore>; 10
+		spellString_t <aGrre, aGreaterRev_>; 11
+		spellString_t <aShsp, aShockSphere>; 12
+		spellString_t <aFlan, aFleshAnew>; 13
+		spellString_t <aMale, aMajorLev_>; 14
+		spellString_t <aRegn, aRegeneration>; 15
+		spellString_t <aApar, aApportArcane>; 16
+		spellString_t <aFafo, aFarFoe>;	17
+		spellString_t <aInsl, aInstantSlayer>; 18
+		spellString_t <aVopl, aVorpalPlating>; 19
+		spellString_t <aQufi, aQuickFix>; 20
+		spellString_t <aScsi, aScrySight>; 21
+		spellString_t <aHowa, aHolyWater>; 22
+		spellString_t <aMaga, aMageGauntlets>; 23
+		spellString_t <aAren, aAreaEnchant>; 24
+		spellString_t <aMysh, aMysticShield>; 25
+		spellString_t <aOgst, aOgreStrength>; 26
+		spellString_t <aStfl, aStarflare>; 27
+		spellString_t <aSpto, aSpectreTouch>; 28
+		spellString_t <aDrbr, aDragonBreath>; 29
+		spellString_t <aAnma, aAntiMagic>; 30
+		spellString_t <aGist, aGiantStrength>; 31
+		spellString_t <aPhdo, aPhaseDoor>; 32
+		spellString_t <aYmca, aMysticalArmor>; 33
+		spellString_t <aRest, aRestoration>; 34
+		spellString_t <aDest, aDeathStrike>; 35
+		spellString_t <aIces, aIceStorm>; 36
+		spellString_t <aSton, aStoneToFlesh>; 37
+		spellString_t <aMija, aMindJab>; 38
+		spellString_t <aPhbl, aPhaseBlur>; 39
+		spellString_t <aLotr, aLocateTraps>; 40
+		spellString_t <aDisb, aDisbelieve>; 41
+		spellString_t <aWiwa, aWindWarrior>; 42
+		spellString_t <aFear, aWordOfFear>; 43
+		spellString_t <aWiog, aWindOgre>; 44
+		spellString_t <aInvi, aInvisibility>; 45
+		spellString_t <aSesi, aSecondSight>; 46
+		spellString_t <aCaey, aCatEyes>; 47
+		spellString_t <aWidr, aWindDragon>; 48
+		spellString_t <aDiil, aDisruptIll_>; 49
+		spellString_t <aMibl, aMindBlade>; 50
+		spellString_t <aWigi, aWindGiant>; 51
+		spellString_t <aSosi, aSorcerorSight>; 52
+		spellString_t <aRime, aRimefang>; 53
+		spellString_t <aWihe, aWindHero>; 54
+		spellString_t <aMagm, aMageMaelstrom>; 55
+		spellString_t <aPrec, aPreclusion>; 56
+		spellString_t <aSuel, aSummonElementa>;	57
+		spellString_t <aFofo, aForceFocus>; 58
+		spellString_t <aPrsu, aPrimeSummoning>;	59
+		spellString_t <aDeba, aDemonBane>; 60
+		spellString_t <aFlco, aFlameColumn>; 61
+		spellString_t <aDisp, aDispossess>; 62
+		spellString_t <aHerb, aSummonHerb>; 63
+		spellString_t <aAnde, aAnimateDead>; 64
+		spellString_t <aSpbi, aSpellBind>; 65
+		spellString_t <aSowh, aSoulWhip>; 66
+		spellString_t <aGrsu, aGreaterSummon>; 67
+		spellString_t <aBede, aBeyondDeath>; 68
+		spellString_t <aWizw, aWizardWar>; 69
+		spellString_t <aDmst, aDemonStrike>; 70
+		spellString_t <aHafo, aHaltfoe>; 71
+		spellString_t <aMeme, aMeleeMen>; 72
+		spellString_t <aBasp, aBatchspell>; 73
+		spellString_t <aCamr, aCamaraderie>; 74
+		spellString_t <aNila, aNightLance>; 75
+		spellString_t <aHeal, aHealAll>; 76
+		spellString_t <aBrkr, aKringleBros_>; 77
+		spellString_t <aMama, aMangarSMallet>; 78
+		spellString_t <aVitl, aVitality>; 79
+		spellString_t <aArbo, aArbo_0>; 80
+		spellString_t <aEnik, aEnik_0>; 81
+		spellString_t <aWifi, aWitherfist>; 82
+		spellString_t <aCold, aFrostForce>; 83
+		spellString_t <aGeli, aGeli_0>; 84
+		spellString_t <aEcul, aEcul_0>; 85
+		spellString_t <aGofi, aGodFire>; 86
+		spellString_t <aStun, aStunForce>; 87
+		spellString_t <aLuce, aLuce_0>; 88
+		spellString_t <aIleg, aIleg_0>; 89
+		spellString_t <aLuck, aLuckChant>; 90
+		spellString_t <aFade, aFarDeath>; 91
+		spellString_t <aKine, aKine_0>; 92
+		spellString_t <aObra, aObra_0>; 93
+		spellString_t <aWhat, aIdentify>; 94
+		spellString_t <aOlay, aYouth>; 95
+		spellString_t <aOluk, aOluk_0>; 96
+		spellString_t <aEcea, aEcea_0>; 97
+		spellString_t <aGrro, aGraveRobber>; 98
+		spellString_t <aFota, aForceOfTarjan>; 99
+		spellString_t <aAece, aAece_0>; 100
+		spellString_t <aKulo, aKulo_0>; 101
+		spellString_t <aShsh, aShadowShield>; 102
+		spellString_t <aFafi, aFatalFist>; 103
+		spellString_t <aEvil, aEvil_0>; 104
+		spellString_t <aLive, aLive_0>; 105
+		spellString_t <aEada, aEarthDagger>; 106
+		spellString_t <aEaso, aEarthSong>; 107
+		spellString_t <aEawa, aEarthWard>; 108
+		spellString_t <aTreb, aTrebuchet>; 109
+		spellString_t <aEael, aEarthElemental>;	110
+		spellString_t <aWawa, aWallWarp>; 111
+		spellString_t <aRock, aPetrify>; 112
+		spellString_t <aRoal, aRoscoeSAlert>; 113
+		spellString_t <aSuso, aSuccorSong>; 114
+		spellString_t <aSast, aSandstorm>; 115
+		spellString_t <aSant, aSanctuary>; 116
+		spellString_t <aGlst, aGlacierStrike>; 117
+		spellString_t <aPath, aPathfinder>; 118
+		spellString_t <aMaba, aMagmaBlast>; 119
+		spellString_t <aJobo, aJoltBolt>; 120
+		spellString_t <aEama, aEarthMaw>; 121
+		spellString_t <aGill, aGillesGills>; 122
+		spellString_t <aDiva, aDivineInt_>; 123
+		spellString_t <aNuke, aGotterdamurung>;	124
+s_spellPoints	db 'Spell Points:',0
+s_expr		db 'Expr:',0
+s_gold		db 'Gold:',0
+s_poolGold	db 0Ah,0Ah
+		db '     Pool  gold',0Ah
+		db '     Trade gold',0
+s_tradeGoldToWhom	db 'Trade gold to whom?',0
+s_howMuchGoldToTrade	db 'How much gold will you trade?',0
+align 2
+s_done		db 'Done!',0
+s_inventory	db 'Inventory',0
+s_inventoryVarString	db ' Do you wish to:',0Ah
+		db 0Ah,0Ah,0Ah
+		db '@Trade the item',0Ah
+		db '@Discard the item',0Ah
+		db '@Equip the item',0Ah
+		db '@Unequip the item',0Ah
+		db '@Identify the item',0
+align 2
+s_itsFilledWith	db 'It',27h,'s filled with ',0
+s_triesToIdentify	db ' tries to identify the item...',0Ah
+		db 'and /succeed\fail\s!!',0
+align 2
+s_whoDoes	db 'Who does ',0
+s_wantToGiveItTo	db ' want to give it to?',0
+align 2
+s_dontKnowAnySpells	db 'You don',27h,'t know any spells.',0
+align 2
+s_knownSpells	db 'Known spells',0
+align 2
+s_rogueAbilities	db 'Rogue abilities',0
+s_disarmTraps	db 'Disarm traps ',0
+s_identifyChest	db 'Identify chest ',0
+s_identifyItem	db 'Identify item ',0
+align 2
+s_hideInShadows	db 'Hide in shadows ',0
+align 2
+s_criticalHit	db 'Critical hit ',0
+s_bardAbilities	db 'Bard abilities',0
+align 2
+s_tunesLeft	db 'Number of tunes left: ',0
+align 2
+s_hunterAbilities	db 'Hunter abilities',0
+align 2
+s_pocketsAreEmpty db 'Your pockets are empty.',0
+s_attributeAbbreviations	db 'StIQDxCnLkHP',0
+align 2
+g_itemGenericStringList	dd aItem, aWeapon, aShield, aArmor, aHelm, aGloves, aInstrument, aFigurine; 0
+		dd aRing, aWand, aItem, aBow,	aQuiver, aContainer, aArmor; 8
+g_itemStringList		dd aNothing, aTorch, aLamp, aBroadsword; 0
+		dd aShortSword,	aDagger, aWarAxe, aHalbard; 4
+		dd aLongBow, aStaff, aBuckler, aTowerShield; 8
+		dd aLeatherArmor, aChainMail, aScaleArmor, aPlateArmor;	12
+		dd aRobes, aHelm, aLeatherGloves, aGauntlets;	16
+		dd aMandolin, aSpear, aArrows, aMthrSword; 20
+		dd aMthrShield,	aMthrChain, aMthrScale,	aGiantFgn; 24
+		dd aMthrBracers, aBardsword, aFireHorn,	aLitewand; 28
+		dd aMthrDagger,	aMthrHelm, aMthrGloves,	aMthrAxe; 32
+		dd aShuriken, aMthrPlate, aMoltenFgn, aSpellSpear; 36
+		dd aShieldRing,	aFinSFlute, aKaelSAxe, aMthrArrows; 40
+		dd aDayblade, aShieldStaff, aElfCloak, aHawkblade; 44
+		dd aAdmtSword, aAdmtShield, aAdmtHelm, aAdmtGloves; 48
+		dd aPureblade, aBoomerang, aAliSCarpet,	aLuckshield; 52
+		dd aDozerFgn, aAdmtChain, aDeathStars, aAdmtPlate; 56
+		dd aAdmtBracers, aSlayerFgn, aPureShield, aMageStaff; 60
+		dd aWarStaff, aThiefDagger, aSoulMace, aOgrewand; 64
+		dd aKatoSBracer, aSorcerstaff, aGaltSFlute, aFrostHorn;	68
+		dd aAgSArrows, aDmndShield, aBardBow, aDmndHelm; 72
+		dd aElfBoots, aVanquisherFgn, aConjurstaff, aStaffOfLor; 76
+		dd aFlameSword,	aPowerstaff, aBreathRing, aDragonshield; 80
+		dd aDmndPlate, aWargloves, aWizhelm, aDragonwand; 84
+		dd aDeathring, aCrystalSword, aSpeedboots, aFlameHorn; 88
+		dd aZenArrows, aDeathdrum, aPipesOfPan,	aPowerRing; 92
+		dd aSongAxe, aTrickBrick, aDragonFgn, aMageFgn;	96
+		dd aTrollRing, aAramSKnife, aAngraSEye,	aHerbFgn; 100
+		dd aMasterWand,	aBrothersFgn, aDynamite, aThorSHammer; 104
+		dd aStoneblade,	aHolyHandgrenad, aMasterkey, aNospinRing; 108
+		dd aCrystalLens, aSmokeyLens, aBlackLens, aSphereOfLanati; 112
+		dd aWandOfPower, aAcorn, aWineskin, aNightspear; 116
+		dd aTslothaSHead, aTslothaSHeart, aArefolia, aValarianSBow; 120
+		dd aArwsOfLife,	aCanteen, aTitanPlate, aTitanShield; 124
+		dd aTitanHelm, aFireSpear, aWillowFlute, aFirebrand; 128
+		dd aHolySword, aWandOfFury, aLightstar,	aCrownOfTruth; 132
+		dd aBeltOfAlliria, aCrystalKey,	aTaoRing, aStealthArrows; 136
+		dd aYellowStaff, aSteadyEye, aDivineHalbard, aIncense; 140
+		dd aIChing, aWhiteRose,	aBlueRose, aRedRose; 144
+		dd aYellowRose,	aRainbowRose, aMagicTriangle, aXChar; 148
+		dd aHammerOfWrath, aFerofistSHelm, aXChar, aXChar; 152
+		dd aHelmOfJustice, aSceaduSCloak, aShadelance, aBlackArrows; 156
+		dd aWerraSShield, aStrifespear,	aSheetmusic, aRightKey;	160
+		dd aLeftKey, aLever, aNut, aBolt; 164
+		dd aSpanner, aShadowLock, aShadowDoor, aMisericorde; 168
+		dd aHolyAvenger, aShadowshiv, aKaliSGarrote, aFlameKnife; 172
+		dd aRedSStiletto, aHeartseeker,	aXChar, aXChar; 176
+		dd aXChar, aDmndScale, aHolyTnt, aEternalTorch; 180
+		dd aOsconSStaff, aAngelSRing, aDeathhorn, aStaffOfMangar; 184
+		dd aTeslaRing, aDmndBracers, aDeathFgn,	aThunderSword; 188
+		dd aPoisonDagger, aSparkBlade, aGalvanicOboe, aHarmonicGem; 192
+		dd aTungShield,	aTungPlate, aMinstrelsGlove, aHuntersCloak; 196
+		dd aDeathHammer, aBloodMeshRobe, aSoothingBalm,	aMagesCloak; 200
+		dd aFamiliarFgn, aHourglass, aThievesHood, aSurehandAmulet; 204
+		dd aThievesDart, aShrillFlute, aAngelSHarp, aTheBook; 208
+		dd aTrothLance,	aDmndSuit, aDmndFlail, aPurpleHeart; 212
+		dd aTitanBracers, aEelskinTunic, aSorcererSHood, aDmndStaff; 216
+		dd aCrystalGem,	aWandOfForce, aCliLyre,	aYouthPotion; 220
+		dd aXChar, aXChar, aXChar, aXChar; 224
+		dd aXChar, aXChar, aXChar, aXChar; 228
+		dd aXChar, aXChar, aXChar, aXChar; 232
+		dd aXChar, aXChar, aXChar, aXChar; 236
+		dd aMthrSuit, aTitanSuit, aMagesGlove, aFlareCrystal; 240
+		dd aHolyMissile, aGodsBlade, aHunterBlade, aStaffOfGods; 244
+		dd aHornOfGods,	aXChar, aXChar, aXChar; 248
+		dd aXChar, aXChar, aXChar, aXChar; 252
+wineskinString	dd aWater	       ; 0
+		dd aSpirits		; 1
+		dd aWaterOfLife		; 2
+		dd aDragonBlood		; 3
+		dd aMoltenTar		; 4
+g_itemBaseCount	db 0FFh, 1, 1, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh, 0FFh; 0
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 10
+		db 0FFh, 1, 18h, 0FFh, 0FFh, 0FFh, 0FFh, 1, 0FFh, 0FFh;	20
+		db 32h,	50h, 0FFh, 0FFh, 0FFh, 1, 1, 0FFh, 1, 1; 30
+		db 0FFh, 0FFh, 1, 0Ah, 50h, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh; 40
+		db 0FFh, 0FFh, 0FFh, 0FFh, 32h,	0FFh, 1, 0FFh, 4, 0FFh;	50
+		db 0FFh, 1, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 58h, 0FFh, 50h; 60
+		db 58h,	41h, 0Ah, 0FFh,	0FFh, 0FFh, 0FFh, 1, 0FFh, 23h;	70
+		db 0FFh, 33h, 0FFh, 14h, 0FFh, 0FFh, 19h, 23h, 40h, 0FFh; 80
+		db 0FFh, 3Ch, 0Ah, 0Ah,	0FFh, 11h, 0FFh, 1Eh, 1, 1; 90
+		db 0FFh, 1Eh, 7, 1, 0Bh, 1, 1, 0FFh, 0FFh, 1; 100
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 1,	0Ah, 0FFh; 110
+		db 0FFh, 0FFh, 1, 0FFh,	18h, 0Ah, 0FFh,	0FFh, 0FFh, 1; 120
+		db 5, 0FFh, 0FFh, 0Ah, 1, 0FFh,	0FFh, 0FFh, 0FFh, 18h; 130
+		db 0FFh, 0FFh, 0FFh, 3,	19h, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 140
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 18h; 150
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 160
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 14h, 0FFh, 0FFh, 0FFh,	0FFh; 170
+		db 0FFh, 0FFh, 2, 0FFh,	0Ah, 0FFh, 1Eh,	0FFh, 19h, 0FFh; 180
+		db 1, 0FFh, 0FFh, 0FFh,	5, 1, 0FFh, 0FFh, 0FFh,	0FFh; 190
+		db 0FFh, 0FFh, 5, 0Ah, 0FFh, 2,	0FFh, 0FFh, 1, 5; 200
+		db 5, 4, 0FFh, 0FFh, 0FFh, 0Ah,	0FFh, 0FFh, 0FFh, 0FFh;	210
+		db 3, 0Ah, 0Fh,	0Ah, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 220
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 230
+		db 0FFh, 0FFh, 0FFh, 5,	1, 0FFh, 0FFh, 0Ah, 19h, 0FFh; 240
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 250
+itemDamageDice	db 0, 0, 0, 33	       ; 0
+		db 64, 0, 33, 96	; 4
+		db 0, 64, 0, 0		; 8
+		db 0, 0, 0, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 64, 0, 33		; 20
+		db 0, 0, 0, 0		; 24
+		db 0, 65, 0, 0		; 28
+		db 0, 0, 0, 33		; 32
+		db 0, 0, 0, 96		; 36
+		db 0, 0, 36, 0		; 40
+		db 66, 96, 0, 66	; 44
+		db 33, 0, 0, 0		; 48
+		db 98, 0, 0, 0		; 52
+		db 0, 0, 0, 0		; 56
+		db 0, 0, 0, 66		; 60
+		db 67, 52, 65, 0	; 64
+		db 0, 34, 0, 0		; 68
+		db 33, 0, 0, 0		; 72
+		db 0, 0, 34, 36		; 76
+		db 98, 66, 97, 0	; 80
+		db 0, 0, 0, 0		; 84
+		db 0, 98, 0, 0		; 88
+		db 0, 0, 0, 0		; 92
+		db 0, 0, 0, 0		; 96
+		db 0, 33, 0, 0		; 100
+		db 0, 0, 0, 99		; 104
+		db 0, 0, 0, 0		; 108
+		db 0, 0, 0, 0		; 112
+		db 0, 0, 0, 100		; 116
+		db 0, 0, 0, 0		; 120
+		db 0, 0, 0, 0		; 124
+		db 0, 99, 0, 72		; 128
+		db 99, 0, 0, 0		; 132
+		db 0, 0, 0, 0		; 136
+		db 38, 0, 72, 0		; 140
+		db 0, 0, 0, 0		; 144
+		db 0, 0, 0, 0		; 148
+		db 99, 0, 0, 0		; 152
+		db 0, 0, 0, 0		; 156
+		db 0, 0, 0, 0		; 160
+		db 0, 0, 0, 0		; 164
+		db 0, 0, 0, 165		; 168
+		db 135,	98, 137, 105	; 172
+		db 167,	32, 0, 0	; 176
+		db 0, 0, 0, 0		; 180
+		db 67, 0, 0, 99		; 184
+		db 0, 0, 0, 99		; 188
+		db 98, 99, 0, 0		; 192
+		db 0, 0, 0, 0		; 196
+		db 99, 0, 0, 0		; 200
+		db 0, 0, 0, 0		; 204
+		db 0, 0, 0, 0		; 208
+		db 135,	0, 129,	0	; 212
+		db 0, 0, 0, 39		; 216
+		db 0, 99, 0, 0		; 220
+		db 0, 0, 0, 0		; 224
+		db 0, 0, 0, 0		; 228
+		db 0, 0, 0, 0		; 232
+		db 0, 0, 0, 0		; 236
+		db 0, 0, 0, 0		; 240
+		db 0, 137, 169,	41	; 244
+		db 0, 0, 0, 0		; 248
+		db 0, 0, 0, 0		; 252
+item_acBonWeapDam db 0,	0, 0, 0		  ; 0
+		db 0, 0, 0, 0		; 4
+		db 0, 0, 1, 2		; 8
+		db 2, 3, 4, 5		; 12
+		db 1, 1, 1, 1		; 16
+		db 0, 0, 0, 32		; 20
+		db 3, 4, 5, 0		; 24
+		db 4, 64, 0, 0		; 28
+		db 32, 2, 2, 32		; 32
+		db 0, 6, 0, 32		; 36
+		db 2, 2, 32, 0		; 40
+		db 16, 18, 3, 16	; 44
+		db 64, 4, 3, 3		; 48
+		db 0, 0, 2, 3		; 52
+		db 0, 5, 0, 7		; 56
+		db 6, 0, 5, 2		; 60
+		db 0, 16, 48, 0		; 64
+		db 0, 50, 0, 0		; 68
+		db 96, 5, 2, 4		; 72
+		db 0, 0, 34, 16		; 76
+		db 17, 16, 16, 4	; 80
+		db 8, 4, 3, 0		; 84
+		db 1, 16, 0, 0		; 88
+		db 0, 2, 2, 0		; 92
+		db 3, 0, 0, 0		; 96
+		db 0, 64, 0, 0		; 100
+		db 0, 0, 0, 32		; 104
+		db 48, 0, 0, 0		; 108
+		db 0, 0, 0, 37		; 112
+		db 51, 0, 0, 48		; 116
+		db 0, 0, 0, 4		; 120
+		db 32, 0, 10, 22	; 124
+		db 5, 48, 2, 65		; 128
+		db 66, 17, 0, 10	; 132
+		db 0, 0, 37, 2		; 136
+		db 36, 4, 49, 0		; 140
+		db 0, 0, 0, 0		; 144
+		db 0, 0, 0, 0		; 148
+		db 0, 39, 0, 0		; 152
+		db 9, 28, 0, 0		; 156
+		db 8, 80, 0, 0		; 160
+		db 0, 0, 0, 0		; 164
+		db 0, 0, 0, 115		; 168
+		db 84, 16, 49, 33	; 172
+		db 66, 82, 0, 0		; 176
+		db 0, 7, 0, 0		; 180
+		db 51, 2, 0, 36		; 184
+		db 2, 8, 0, 66		; 188
+		db 49, 50, 0, 0		; 192
+		db 23, 12, 7, 40	; 196
+		db 81, 4, 0, 4		; 200
+		db 0, 0, 4, 0		; 204
+		db 0, 2, 2, 0		; 208
+		db 81, 15, 80, 0	; 212
+		db 10, 20, 3, 33	; 216
+		db 0, 32, 5, 0		; 220
+		db 0, 0, 0, 0		; 224
+		db 0, 0, 0, 0		; 228
+		db 0, 0, 0, 0		; 232
+		db 0, 0, 0, 0		; 236
+		db 10, 15, 4, 0		; 240
+		db 0, 85, 83, 50	; 244
+		db 0, 0, 0, 0		; 248
+		db 0, 0, 0, 0		; 252
+itemTypeList	db itType_item, itType_item, itType_item; 0
+		db itType_weapon, itType_weapon, itType_weapon;	3
+		db itType_weapon, itType_weapon, itType_bow; 6
+		db itType_weapon, itType_shield, itType_shield;	9
+		db itType_armor, itType_armor, itType_armor; 12
+		db itType_armor, itType_armor, itType_helm; 15
+		db itType_gloves, itType_gloves, itType_instrument; 18
+		db itType_weapon, itType_quiver, itType_weapon;	21
+		db itType_shield, itType_armor,	itType_armor; 24
+		db itType_figurine, itType_armor, itType_weapon; 27
+		db itType_instrument, itType_item0, itType_weapon; 30
+		db itType_helm,	itType_gloves, itType_weapon; 33
+		db itType_item0, itType_armor, itType_figurine;	36
+		db itType_weapon, itType_ring, itType_instrument; 39
+		db 11h,	itType_quiver, itType_weapon; 42
+		db itType_weapon, itType_armor0, itType_weapon;	45
+		db itType_weapon, itType_shield, itType_helm; 48
+		db itType_gloves, itType_weapon, itType_item0; 51
+		db itType_item0, itType_shield,	itType_figurine; 54
+		db itType_armor, itType_weapon,	itType_armor; 57
+		db itType_armor, itType_figurine, itType_shield; 60
+		db itType_weapon, itType_weapon, itType_weapon;	63
+		db 51h,	itType_wand, itType_item0; 66
+		db itType_weapon, itType_instrument, itType_instrument;	69
+		db itType_quiver, itType_shield, itType_bow; 72
+		db itType_helm,	itType_item0, itType_figurine; 75
+		db itType_weapon, itType_weapon, itType_weapon;	78
+		db itType_weapon, itType_ring, itType_shield; 81
+		db itType_armor, itType_gloves,	itType_helm; 84
+		db itType_wand,	itType_ring, itType_weapon; 87
+		db itType_item0, itType_instrument, itType_quiver; 90
+		db itType_instrument, itType_instrument, itType_ring; 93
+		db itType_weapon, itType_item0,	itType_figurine; 96
+		db itType_figurine, itType_ring, itType_weapon;	99
+		db itType_item0, itType_figurine, itType_wand; 102
+		db itType_figurine, itType_item0, itType_weapon; 105
+		db 61h,	itType_item0, itType_item0; 108
+		db itType_ring,	itType_item, itType_item; 111
+		db itType_item,	itType_item0, itType_wand; 114
+		db itType_item0, itType_container, itType_weapon; 117
+		db itType_item0, itType_item0, itType_item0; 120
+		db itType_bow, itType_quiver, itType_container;	123
+		db itType_armor, itType_shield,	itType_helm; 126
+		db itType_weapon, itType_instrument, 51h; 129
+		db itType_weapon, itType_wand, itType_item0; 132
+		db itType_helm,	itType_item0, itType_item0; 135
+		db itType_ring,	itType_quiver, itType_weapon; 138
+		db itType_item0, itType_weapon,	itType_item0; 141
+		db itType_item0, itType_item0, itType_item0; 144
+		db itType_item0, itType_item0, itType_item0; 147
+		db itType_item0, itType_item0, itType_weapon; 150
+		db itType_helm,	itType_item0, itType_item0; 153
+		db itType_helm,	itType_armor, itType_weapon; 156
+		db itType_item0, itType_shield,	71h; 159
+		db itType_item0, itType_item0, itType_item0; 162
+		db itType_item0, itType_item0, itType_item0; 165
+		db itType_item0, itType_item0, itType_item0; 168
+		db itType_weapon, itType_weapon, itType_weapon;	171
+		db itType_weapon, itType_weapon, itType_weapon;	174
+		db 71h,	itType_item0, itType_item0; 177
+		db itType_item0, itType_armor, itType_item0; 180
+		db itType_item0, 11h, itType_ring; 183
+		db itType_instrument, 51h, itType_ring;	186
+		db itType_armor, itType_figurine, itType_weapon; 189
+		db 11h,	itType_weapon, itType_instrument; 192
+		db itType_item0, itType_shield,	itType_armor; 195
+		db itType_gloves, itType_armor,	itType_weapon; 198
+		db itType_armor, itType_item0, itType_armor; 201
+		db itType_figurine, itType_item0, itType_helm; 204
+		db itType_item0, itType_item0, itType_instrument; 207
+		db itType_instrument, itType_item0, itType_weapon; 210
+		db itType_armor0, itType_weapon, itType_item0; 213
+		db itType_armor, itType_instrument, itType_helm; 216
+		db itType_weapon, itType_item0,	itType_wand; 219
+		db itType_instrument, itType_item0, itType_item0; 222
+		db itType_item0, itType_item0, itType_item0; 225
+		db itType_item0, itType_item0, itType_item0; 228
+		db itType_item0, itType_item0, itType_item0; 231
+		db itType_item0, itType_item0, itType_item0; 234
+		db itType_item0, itType_item0, itType_item0; 237
+		db itType_armor, itType_armor, itType_gloves; 240
+		db itType_item0, itType_weapon,	itType_weapon; 243
+		db itType_weapon, itType_weapon, itType_instrument; 246
+		db itType_item0, itType_item0, itType_item0; 249
+		db itType_item0, itType_item0, itType_item0; 252
+		db itType_item0		; 255
+classEquipMask	db 80h, 40h, 40h, 40h, 40h, 10h, 8, 4; 0
+		db 2, 1, 20h, 60h, 0E0h, 0, 0, 0; 8
+itemEquipMask	db 0, 0FFh, 0FFh, 8Fh, 9Fh, 0FFh, 8Fh, 87h; 0
+		db 9Fh,	0FFh, 9Fh, 8Eh,	9Fh, 8Fh, 8Eh, 86h; 8
+		db 0FFh, 9Fh, 0FFh, 86h, 8, 9Fh, 9Fh, 9Eh; 16
+		db 9Eh,	8Fh, 9Eh, 0FFh,	70h, 8,	8, 60h;	24
+		db 0FFh, 9Fh, 8Ch, 8Fh,	9Bh, 86h, 0FFh,	9Fh; 32
+		db 0FFh, 8, 8Eh, 9Fh, 8Eh, 0FFh, 71h, 8Eh; 40
+		db 9Eh,	9Eh, 9Eh, 84h, 4, 99h, 0FFh, 9Eh; 48
+		db 0FFh, 8Eh, 2, 86h, 70h, 0FFh, 4, 60h; 56
+		db 0FFh, 10h, 8Eh, 60h,	70h, 60h, 8, 8;	64
+		db 86h,	8Eh, 8,	86h, 0FFh, 8, 60h, 61h;	72
+		db 86h,	0FCh, 0FFh, 9Eh, 8Ch, 84h, 60h,	60h; 80
+		db 86h,	8Eh, 9Fh, 8, 9Fh, 8, 8,	62h; 88
+		db 8, 60h, 0FFh, 0FFh, 0FFh, 86h, 6Ch, 0FFh; 96
+		db 60h,	0FFh, 0FFh, 84h, 86h, 0FFh, 0FFh, 0FFh;	104
+		db 0FFh, 0FFh, 0FFh, 60h, 60h, 0FFh, 0FFh, 9Fh;	112
+		db 0FFh, 0FFh, 0FFh, 9Fh, 9Fh, 0FFh, 84h, 8Ch; 120
+		db 86h,	9Fh, 8,	9Eh, 4,	60h, 2,	86h; 128
+		db 0FFh, 0FFh, 1, 2, 60h, 2, 87h, 1; 136
+		db 1, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh;	144
+		db 84h,	86h, 0FFh, 0FFh, 10h, 10h, 86h,	9Fh; 152
+		db 8Eh,	8Eh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 160
+		db 0FFh, 0FFh, 0FFh, 10h, 4, 10h, 10h, 10h; 168
+		db 10h,	10h, 0FFh, 0FFh, 0FFh, 8Eh, 0FFh, 0FFh;	176
+		db 60h,	0FFh, 8, 20h, 60h, 70h,	0FFh, 8; 184
+		db 10h,	80h, 8,	60h, 8Ch, 84h, 8, 2; 192
+		db 80h,	60h, 0FFh, 20h,	20h, 60h, 10h, 10h; 200
+		db 10h,	8, 8, 4, 86h, 84h, 84h,	0FFh; 208
+		db 70h,	2, 60h,	20h, 60h, 60h, 8, 0FFh;	216
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 224
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 232
+		db 86h,	80h, 60h, 60h, 9Fh, 84h, 2, 60h; 240
+		db 8, 0FFh, 0FFh, 0FFh,	0FFh, 0FFh, 0FFh, 0FFh;	248
+itemEffectList	db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 0
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 4
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 8
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 12
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 16
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 20
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 24
+		db itemEff_none, itemEff_freeSinging, itemEff_none, itemEff_none; 28
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 32
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 36
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 40
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 44
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 48
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_alwaysHide; 52
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 56
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_anotherSpptRegen; 60
+		db itemEff_none, 8, itemEff_none, itemEff_none;	64
+		db itemEff_calmMonster,	itemEff_none, itemEff_none, itemEff_none; 68
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 72
+		db itemEff_none, itemEff_none, itemEff_halfSpptUsage, itemEff_none; 76
+		db itemEff_none, itemEff_none, itemEff_breathDefense, itemEff_none; 80
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 84
+		db itemEff_none, itemEff_none, itemEff_alwaysRunAway, itemEff_none; 88
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 92
+		db itemEff_freeSinging,	itemEff_none, itemEff_none, itemEff_none; 96
+		db itemEff_regenHP, itemEff_none, itemEff_none,	itemEff_none; 100
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_regenHP; 104
+		db itemEff_none, itemEff_none, 0Bh, itemEff_noSpin; 108
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 112
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 116
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 120
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 124
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 128
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 132
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 136
+		db itemEff_anotherSpptRegen, itemEff_none, itemEff_none, itemEff_none; 140
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 144
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 148
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 152
+		db 8, itemEff_none, itemEff_none, itemEff_none;	156
+		db itemEff_breathDefense, itemEff_none,	itemEff_none, itemEff_none; 160
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 164
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 168
+		db itemEff_none, itemEff_alwaysHide, 8,	itemEff_none; 172
+		db itemEff_none, itemEff_breathDefense,	itemEff_none, itemEff_none; 176
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 180
+		db itemEff_regenSppt, itemEff_resurrect, itemEff_alwaysHide, itemEff_halfSpptUsage; 184
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 188
+		db itemEff_none, itemEff_none, itemEff_freeSinging, itemEff_none; 192
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 196
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 200
+		db itemEff_regenSppt, itemEff_none, 8, itemEff_alwaysHide; 204
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 208
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 212
+		db itemEff_none, itemEff_none, itemEff_resurrect, itemEff_regenSppt; 216
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 220
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 224
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 228
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 232
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 236
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 240
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_quaterSpptUse; 244
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 248
+		db itemEff_none, itemEff_none, itemEff_none, itemEff_none; 252
+itemSpellNo	db 255, 126, 127, 255   ; 0	; This array holds the spell number to call when
+		db 255,	255, 131, 255	; 4 ; using the	particular item
+		db 255,	255, 255, 255	; 8
+		db 255,	255, 255, 255	; 12
+		db 255,	255, 255, 255	; 16
+		db 255,	131, 131, 255	; 20
+		db 255,	255, 255, 132	; 24
+		db 255,	255, 133, 6	; 28
+		db 255,	255, 255, 131	; 32
+		db 131,	255, 132, 131	; 36
+		db 255,	255, 131, 131	; 40
+		db 6, 255, 255,	255	; 44
+		db 255,	255, 255, 255	; 48
+		db 255,	131, 14, 255	; 52
+		db 132,	255, 131, 255	; 56
+		db 255,	132, 255, 255	; 60
+		db 255,	255, 255, 51	; 64
+		db 255,	49, 54,	133	; 68
+		db 131,	255, 255, 255	; 72
+		db 255,	132, 255, 34	; 76
+		db 255,	66, 255, 133	; 80
+		db 255,	255, 69, 133	; 84
+		db 64, 255, 255, 133	; 88
+		db 131,	35, 11,	55	; 92
+		db 131,	36, 132, 132	; 96
+		db 255,	131, 73, 63	; 100
+		db 75, 77, 78, 131	; 104
+		db 255,	78, 255, 255	; 108
+		db 130,	130, 130, 130	; 112
+		db 67, 128, 129, 131	; 116
+		db 255,	130, 122, 130	; 120
+		db 131,	129, 255, 255	; 124
+		db 255,	131, 69, 255	; 128
+		db 11, 133, 131, 255	; 132
+		db 130,	130, 7,	131	; 136
+		db 255,	255, 255, 15	; 140
+		db 21, 130, 130, 130	; 144
+		db 130,	130, 130, 255	; 148
+		db 130,	130, 255, 255	; 152
+		db 255,	130, 75, 131	; 156
+		db 130,	91, 130, 130	; 160
+		db 130,	130, 130, 130	; 164
+		db 130,	130, 130, 11	; 168
+		db 11, 255, 255, 61	; 172
+		db 71, 255, 255, 255	; 176
+		db 255,	255, 78, 126	; 180
+		db 37, 255, 133, 255	; 184
+		db 69, 255, 132, 11	; 188
+		db 255,	12, 69,	134	; 192
+		db 255,	255, 255, 255	; 196
+		db 255,	255, 15, 73	; 200
+		db 132,	87, 45,	255	; 204
+		db 133,	17, 15,	62	; 208
+		db 255,	255, 255, 34	; 212
+		db 255,	255, 55, 255	; 216
+		db 134,	99, 133, 95	; 220
+		db 255,	255, 255, 255	; 224
+		db 255,	255, 255, 255	; 228
+		db 255,	255, 255, 255	; 232
+		db 255,	255, 255, 255	; 236
+		db 255,	255, 255, 134	; 240
+		db 131,	255, 255, 120	; 244
+		db 133,	255, 255, 255	; 248
+		db 255,	255, 255, 255	; 252
+g_raceString	dd aHuman		   ; 0
+		dd aElf			; 1
+		dd aDwarf		; 2
+		dd aHobbit		; 3
+		dd aHalfElf		; 4
+		dd aHalfOrc		; 5
+		dd aGnome		; 6
+s_genderString	dd aMale_0		     ; 0
+		dd aFemale		; 1
+		dd nullStr
+		s_isAn db ' is a/n \ ',0
+align 2
+s_level		db 'Level',0
+g_acDexterityBonus db 1, 1, 2, 2		 ; 0
+		db 3, 3, 3, 4		; 4
+		db 4, 4, 4, 4		; 8
+		db 5, 5, 5, 5		; 12
+		db 5, 0			; 16
+g_itemFlagCharacters	db ' ', '|', '^', '?', 0, 0; 0 ; This is a list of characters used in the inventory
+			; string for flags.
+			
+			
+			
+g_inventoryActionFunctions	dd inventory_trade, inventory_discard, inventory_equip, inventory_unequip, inventory_identify;	0
+s_escToContinue	db 'ESC to continue',0
+s_thereAreStairs	db 'There are stairs here, going /up\down\. ',0Ah
+		db 'Do you wish to take them?',0
+align 2
+s_whoWantsToGetThe	db 'Who wants to get the ',0
+align 2
+s_gotThe		db ' got the ',0
+s_youDontHaveEnoughGold	db 'You don',27h,'t have enough gold',0
+s_zounds		db 'Zounds',0
+s_percentD		db '%d',0
+s_badOpcode	db 'bad opcode',0
+vm_functionList	dd mfunc_downStairs ;	0
+		dd mfunc_upStairs	; 1
+		dd mfunc_utility		; 2
+		dd mfunc_teleport	; 3
+		dd mfunc_battle		; 4
+		dd mfunc_clearPrintString ; 5
+		dd mfunc_clearSpecial		; 6
+		dd mfunc_drawBigpic	; 7
+		dd mfunc_setTitle	; 8
+		dd mfunc_waitForIo	; 9
+		dd mfunc_clearText ; a
+		dd mfunc_ifFlag		; b
+		dd mfunc_ifNotFlag	; c
+		dd mfunc_makeDoor		; d
+		dd mfunc_setFlag	; e
+		dd mfunc_clearFlag	; f
+		dd mfunc_ifCurSpellEQ	; 10
+		dd mfunc_setMapRval	; 11
+		dd mfunc_printString	; 12
+		dd mfunc_doNothing	; 13
+		dd mfunc_ifLiquid	; 14
+		dd mfunc_getItem	; 15
+		dd mfunc_ifPartyHasItem	; 16
+		dd mfunc_ifPartyNotHasItem	; 17
+		dd mfunc_ifSameSquare	; 18
+		dd mfunc_ifYesNo	; 19
+		dd mfunc_goto		; 1a
+		dd mfunc_battleNoCry	; 1b
+		dd mfunc_setSameSquareFlag	; 1c
+		dd mfunc_turnAround	; 1d
+		dd mfunc_removeItem	; 1e
+		dd mfunc_incrementRegister	; 1f
+		dd mfunc_decrementRegister	; 20
+		dd mfunc_ifRegisterClear	; 21
+		dd mfunc_ifRegisterSet	; 22
+		dd mfunc_drainHp	; 23
+		dd mfunc_ifInBox	; 24
+		dd mfunc_setLiquid	; 25
+		dd mfunc_addToContainer	; 26
+		dd mfunc_subtractFromContainer	; 27
+		dd mfunc_addToRegister	; 28
+		dd mfunc_subtractFromRegister ; 29
+		dd mfunc_setDirection	; 2a
+		dd mfunc_readString	; 2b
+		dd mfunc_ifStringEquals	; 2c
+		dd mfunc_parseNumber	; 2d
+		dd mfunc_getCharacter	; 2e
+		dd mfunc_ifGiveGold	; 2f
+		dd mfunc_addGold		; 30
+		dd mfunc_ifRegisterLt	; 31
+		dd mfunc_ifRegisterEq	; 32
+		dd mfunc_ifRegisterGe	; 33
+		dd mfunc_learnSpell	; 34
+		dd mfunc_setRegister	; 35
+		dd mfunc_ifHasItem	; 36
+		dd mfunc_packInventory	; 37
+		dd mfunc_addMonster	; 38
+		dd mfunc_ifMonsterInParty	; 39
+		dd mfunc_clearPrintOffset ; 3a
+		dd mfunc_ifIsNight	; 3b
+		dd mfunc_removeMonster	; 3c
+;		dd mfunc_buggedIfQuestFlagSet		; 3d
+		dd mfunc_notImplemented		; 3d
+		dd mfunc_ifQuestFlagNotSet		; 3e
+		dd mfunc_setQuestFlag ; 3f
+		dd mfunc_clearQuestFlag		; 40
+		dd mfunc_partyUnderLevel		; 41
+		dd mfunc_ifWildFace ; 42
+		dd mfunc_setWildFace	; 43
+		dd mfunc_ifIsClass	; 44
+		dd mfunc_printOffset ; 45
+		dd mfunc_clearTeleport	; 46
+s_notImplemented	db 'this function is not implemented',0
+align 2
+aKilling	db ', killing ',0
+aPoisoning	db ', poisoning ',0
+aDraining	db ', draining ',0
+aCrazing	db ', crazing ',0
+aWithering	db ', withering ',0
+aPossessing 	db ', possessing ',0
+aStoning	db ', stoning ',0
+aCriticallyHitt	db ', critically hitting ',0
+aStealing	db ', stealing ',0
+aPhazing	db ', phazing ',0
+aSwingsAt	db 'swings at',0
+aSlashesAt	db 'slashes at',0
+aKicksAt	db 'kicks at',0
+aPunchesAt	db 'punches at',0
+aClawsAt	db 'claws at',0
+aTearsAt	db 'tears at',0
+aBitesAt	db 'bites at',0
+aGnawsOn	db 'gnaws on',0
+aStabsAt	db 'stabs at',0
+aSlicesAt	db 'slices at',0
+aSlams		db 'slams',0
+aStrikesAt	db 'strikes at',0
+aGropesAt	db 'gropes at',0
+aReachesToward	db 'reaches toward',0
+aPeersAt	db 'peers at',0
+aStaresAt	db 'stares at',0
+aDissentionInYo	db 'Dissention in your ranks...',0Ah
+db 0Ah,0
+aWillThereEverB	db '"Will there ever be an end to them?" you shout. You see ',0
+aEnjoyYourNextL	db '"Enjoy your next life!" you snarl. You see ',0
+aYourBattlecryI	db 'Your battlecry is heard by all as you face ',0
+aYourOnslaughtI	db 'Your onslaught is greeted with laughter, you face ',0
+aNotAgainYouMoa	db '"Not again!" you moan as you face ',0
+aGimmeABreakWhe	db '"Gimme a break! Where do they come from?" You see ',0
+align 2
+specialAttString dd aKilling, aPoisoning, aDraining, aCrazing, aWithering; 0
+		dd aPossessing,	aStoning, aCriticallyHitt, aStealing, aPhazing;	5
+breathAttack	breathAtt_t <0, 0, 0, 0, 0, 41h, 1>; 0
+		db    0
+aYouStillFace	db 'You still face ',0
+s_continueQuestion	db 'Do you wish to continue?',0Ah,0
+s_butMisses	db ', but misses!',0Ah,0Ah,0
+s_periodNlNl	db '.', 0Ah, 0Ah,0
+s_exclBlankLine		db '!',0Ah, 0Ah,0
+s_jumpsIntoShadows	db ' jumps into the shadows, ',0
+s_andSucceeds	db 'and succeeds!',0Ah,0Ah,0
+s_butIsDiscovered db 'but is discovered!',0Ah,0Ah,0
+		db    0
+s_summonsHelp	db ' summons help and ',0
+		db    0
+s_noneAppears	db 'none appears...',0Ah,0Ah,0
+s_anotherJoins db	'another joins the fray!',0Ah,0Ah,0
+s_the		db	'The ',0
+		db    0
+s_advances	db ' advance/s\!',0Ah,0Ah,0
+		db    0
+s_butMisses_0	db ', but misses',0
+		db    0
+aWillYourGallantBand db	'Will your gallant band choose to:',0Ah
+		db '@Fight bravely',0Ah
+		db '@Advance ahead',0Ah
+		db '@Run away',0Ah,0
+		db    0
+aThePartyAdvances db 0Ah,0Ah,'The party advances!',0Ah,0Ah,0
+aHasTheseOptionsThisBa db ' has these options this battle round:',0Ah,0Ah
+		db '@Attack foes ',0
+		db    0
+byte_4724A	db 31h
+		db  30h	; 0
+		db  27h	
+		db    0
+a@defend@partyAttack@c db 0Ah
+		db '@Defend',0Ah
+		db '@Party attack',0Ah
+		db '@Cast a spell',0Ah
+		db '@Use an item',0Ah
+		db '@Hide in shadows',0Ah
+		db '@Bard Song',0Ah,0
+		db    0
+aSelectAnOption_ db 0Ah,0Ah,'Select an option.',0
+s_nlUseOn	db 0Ah,'Use on ',0
+		db    0
+aYouCanTUseThatItem_ db	'You can',27h,'t use that item.',0
+		db    0
+aAttack		db 0Ah,'Attack ',0
+		db    0
+s_useTheseCommands? db 'Use these commands?',0Ah,0Ah,0
+aAndHits	db ', and hits ',0
+aTimesFor	db ' times for ',0
+aAndHitsFor	db ', and hits for ',0
+s_firesBreathes	db ' /fir\breath\es ',0
+		db    0
+s_lost		db ' lost ',0
+		db    0
+s_voice		db ' voice!',0Ah,0Ah,0
+s_plays	db ' plays...',0Ah,0Ah,0
+aHostilePartyMembers db	'hostile party members!',0Ah,0Ah,0
+		db    0
+asc_473AE	db ',',0
+aAnd_1		db 'and ',0
+		db 0
+a__1		db '.',0Ah,0Ah,0
+aParty		db 'Party',0
+aSorryBud	db 'Sorry, Bud',0
+		db    0
+aAlasYourPartyHasExp db	'Alas, your party has expired, but gone to adventurer heaven.',0
+		db    0
+g_monkDamageDice	db ' ', '!', '"', '#', '$', '%', '&', 27h; 0
+		db 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'è'; 8
+monMeleeAttString dd aSwingsAt		  ; 0
+		dd aSlashesAt		; 1
+		dd aKicksAt		; 2
+		dd aPunchesAt		; 3
+		dd aClawsAt		; 4
+		dd aTearsAt		; 5
+		dd aBitesAt		; 6
+		dd aGnawsOn		; 7
+		dd aStabsAt		; 8
+		dd aSlicesAt		; 9
+		dd aSlams		; 10
+		dd aStrikesAt		; 11
+		dd aGropesAt		; 12
+		dd aReachesToward	; 13
+		dd aPeersAt		; 14
+		dd aStaresAt		; 15
+itemLevMask	db 0, 81h, 81h, 81h, 81h, 81h, 81h,	81h; 0
+		db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 8
+		db 81h,	81h, 81h, 81h, 81h, 81h, 0C1h, 41h; 16
+		db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 41h; 24
+		db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 41h; 32
+		db 41h,	41h, 41h, 41h, 41h, 41h, 41h, 31h; 40
+		db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 48
+		db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 56
+		db 31h,	31h, 31h, 31h, 31h, 31h, 31h, 31h; 64
+		db 31h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 72
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 80
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 88
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 96
+		db 19h,	19h, 19h, 19h, 19h, 19h, 19h, 19h; 104
+		db 0, 0, 0, 0, 0, 0, 0FFh, 0; 112
+		db 0, 0, 0, 0, 0, 0FFh,	9, 9; 120
+		db 9, 9, 9, 9, 9, 9, 9,	0; 128
+		db 0, 0, 9, 9, 9, 9, 9,	9; 136
+		db 9, 0, 0, 0, 0, 0, 0,	0; 144
+		db 0, 0, 0, 0, 0, 0, 5,	5; 152
+		db 0, 0, 0, 0, 0, 9, 9,	9; 160
+		db 9, 0, 0, 3, 3, 41h, 9, 11h; 168
+		db 5, 1, 0, 0, 0, 9, 9,	9; 176
+		db 9, 9, 9, 9, 9, 9, 9,	9; 184
+		db 9, 9, 9, 7Fh, 5, 5, 5, 5; 192
+		db 5, 5, 5, 5, 5, 5, 5,	5; 200
+		db 5, 5, 5, 5, 5, 3, 3,	3; 208
+		db 3, 3, 3, 3, 3, 3, 3,	1Dh; 216
+		db 0, 0, 0, 0, 0, 0, 0,	0; 224
+		db 0, 0, 0, 0, 0, 0, 0,	0; 232
+		db 1, 1, 1, 1, 1, 1, 1,	1; 240
+		db 1, 0, 0, 0, 0, 0, 0,	0; 248
+battleCryString	dd aDissentionInYo	; 0
+		dd aWillThereEverB	; 1
+		dd aEnjoyYourNextL	; 2
+		dd aYourBattlecryI	; 3
+		dd aYourOnslaughtI	; 4
+		dd aNotAgainYouMoa	; 5
+		dd aGimmeABreakWhe	; 6
+aMember17	db 'member #(1-7)',0
+aMember1	db 'member #(1)',0
+aOr		db ' or ',0
+		db    0
+vowelList	db 'A', 'E', 'I', 'O', 'U', 0               ; 4
+byte_475AE	db 5, 7, 7, 3	   ; 0
+		db 3, 0, 0, 5		; 4
+		db 5, 0Ah, 0Fh,	0Fh	; 8
+		db 16h			; 12
+aBadDiceMaskRange db 'Bad dice mask range',0
+		db    0
+off_475D0	dd bat_partyFightAction
+		dd bat_partyAdvanceAction
+		dd bat_partyRunAction
+off_475DC	dd bat_charPartyAttackActionion, bat_charDefendAction; 0
+		dd bat_charPartyAttackAction, bat_charCastAction; 2
+		dd bat_charUseAction, bat_charHideAction;	4
+		dd bat_charSingAction		; 6
+g_classToHitBonus	db 3, 1, 1, 1	   ; 0
+		db 1, 0, 0, 3		; 4
+		db 3, 4, 1, 1		; 8
+		db 4, 0			; 12
+g_monsterAcBonusList	db 3, 2, 0, 0FEh	   ; 0
+g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh,	0  ; 0
+		db 0, 0, 0, 0		; 4
+		db 1, 1			; 8
+aPoisonNeedle	db 'Poison Needle',0
+aPoisonBlades	db 'Poison Blades',0
+aBlades		db 'Blades',0
+aShockWave	db 'Shock Wave',0
+aCrazycloud	db 'Crazycloud',0
+aVortex		db 'Vortex',0
+aShocks		db 'Shocks',0
+aPoisonDarts	db 'Poison Darts',0
+aAcidBurst	db 'Acid Burst',0
+aGasCloud	db 'Gas Cloud',0
+aPoisonSpikes	db 'Poison Spikes',0
+aMindBlast	db 'Mind Blast',0
+aBasiliskSnare	db 'Basilisk Snare',0
+aDeathBlades	db 'Death Blades',0
+aCodgerBomb	db 'Codger Bomb',0
+aSwindler	db 'Swindler',0
+aHammer		db 'Hammer',0
+		db    0
+s_experiencePoinsForV db ' experience points for valor and battle knowledge, and ',0
+aTheyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
+		db    0
+aInGold_	db ' in gold.',0Ah,0Ah,0
+aFoundA		db ' found a ',0
+aEachCharacterReceive db 'Each character receives ',0
+		db    0
+aThePartyDisbelieves_ db 'The party disbelieves...',0Ah,0Ah,0
+		db    0
+aThereIsAChestHere_Wil db 'There is a chest here. Will you:',0Ah,0Ah
+		db '@Examine chest',0Ah
+		db '@Open chest',0Ah
+		db '@Disarm chest',0Ah
+		db '@Trap Zap',0Ah
+		db '@Leave chest',0
+aWhoWillCastATrzp?	db 'Who will cast a TRZP?',0
+s_dontKnowThatSpell_	db 'You don',27h,'t know that spell.',0
+		db    0
+aYouNeedAtLeast2SpellP	db 'You need at least 2 spell points.',0
+aWhoWillExamineIt?	db 'Who will examine it?',0
+		db    0
+aItLooksLikeA	db 'It looks like a ',0
+		db    0
+aThatCharacterHasAlr	db 'That character has already checked.'
+		db 0
+aYouFoundNothing_	db 'You found nothing.',0
+		db    0
+aWhoWillDisarmIt?	db 'Who will disarm it?',0
+aEnterTrapName	db 'Enter trap name:',0
+		db    0
+aDisarmFailed	db 'Disarm failed!',0
+		db    0
+aYouDisarmedIt	db 'You disarmed it!',0
+		db    0
+aWhoWillOpenIt?	db 'Who will open it?',0
+aYouSetOffA	db 'You set off a ',0
+		db    0
+trapFlags	db 1,	1, 0, 80h, 1, 1, 80h, 3; 0
+		db 1, 1, 80h, 9, 81h, 80h, 81h,	81h; 8
+		db 1, 3, 0, 6, 81h, 84h, 8, 80h; 16
+		db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 24
+trapDice	db 41h, 41h, 44h, 41h,	43h, 43h, 46h, 42h; 0
+		db 45h,	45h, 47h, 46h, 47h, 48h, 47h, 47h; 8
+		db 49h,	47h, 49h, 21h, 49h, 47h, 45h, 49h; 16
+		db 49h,	49h, 49h, 49h, 49h, 49h, 49h, 49h; 24
+stru_47938	saveStru 4 dup(<0Fh,	0Fh>); 0
+		saveStru 4 dup(<13h, 13h>); 4
+		saveStru 4 dup(<15h, 15h>); 8
+		saveStru 4 dup(<18h, 18h>); 12
+		saveStru 4 dup(<26h, 26h>); 16
+		saveStru <27h, 27h>	; 20
+		saveStru <28h, 28h>	; 21
+		saveStru <27h, 27h>	; 22
+		saveStru 9 dup(<28h, 28h>); 23
+aChest		db 'Chest!',0
+		db    0
+byte_47988	db 0, 1, 2, 3, 0, 1,	3, 4; 0
+		db 0, 1, 6, 5, 7, 8, 9,	9; 8
+		db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h; 16
+		db 0Eh,	0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh; 24
+trapName	dd aPoisonNeedle	 ; 0
+		dd aPoisonBlades	; 1
+		dd aBlades		; 2
+		dd aShockWave		; 3
+		dd aCrazycloud		; 4
+		dd aVortex		; 5
+		dd aShocks		; 6
+		dd aPoisonDarts		; 7
+		dd aAcidBurst		; 8
+		dd aGasCloud		; 9
+		dd aPoisonSpikes	; 10
+		dd aMindBlast		; 11
+		dd aMindJab		; 12
+		dd aBasiliskSnare	; 13
+		dd aDeathBlades		; 14
+		dd aCodgerBomb		; 15
+		dd aSwindler		; 16
+		dd aHammer		; 17
+poisonDmg	db 1, 2, 4, 8, 0Ah, 10h, 14h, 18h; 0
+aTreasure	db 'Treasure',0
+off_47A00	dd chest_examine, chest_open,	chest_disarm, chest_trapZap, chest_returnOne
+aFried		db 'fried',0
+aFrozen		db 'frozen',0
+aShocked	db 'shocked',0
+aDrained	db 'drained',0
+aBurnt		db 'burnt',0
+aChoked		db 'choked',0
+aSteamed	db 'steamed',0
+aBlasted	db 'blasted',0
+aHit		db 'hit',0
+aNuked		db 'nuked',0
+aLessThirsty_	db 'less thirsty.',0Ah,0Ah,0
+aHicHappier_	db '(hic) happier.',0Ah,0Ah,0
+aRefreshed	db 'refreshed!',0Ah,0Ah,0
+aTerrible_	db 'terrible.',0Ah,0Ah,0
+aTheEntryStairs	db 'the entry stairs.',0
+aTheEntryPortal	db 'the entry portal.',0
+aTheEntryway_	db 'the entryway.',0
+aTheBaseOfTheMo	db 'the base of the mountain.',0
+aAVantagePoint_	db 'a vantage point.',0
+aTheWayIn_	db 'the way in.',0
+aTheExit_	db 'the exit.',0
+align 2
+aYouCanOnlyCast	db 'You can only cast that in combat',0Ah,0Ah,0
+align 2
+s_atTheParty	db 'at the party...',0Ah,0Ah,0
+s_partyTooFarAway	db 'But the party was too far away!',0Ah,0Ah,0
+s_at		db 'at ',0
+s_some		db 'some ',0
+s_elipsisNl	db '...',0Ah,0Ah,0
+s_one		db 'One ',0
+align 2
+s_repelledAttack	db 'repelled the attack!',0Ah,0Ah,0
+align 2
+s_wasTooFarAway db 'was too far away!',0Ah,0Ah,0
+s_is		db 'is ',0
+a_for		db	' for ',0
+aPointSOfDamage	db ' point/\s\ of damage',0
+align 2
+aAnd		db	'And ',0
+align 2
+s_partyFreezes	db 'and the party freezes',0
+s_butItHadNoEffect	db 'but it had no effect!',0Ah,0Ah,0
+s_closer		db 'closer',0
+align 2
+s_fartherAway	db 'farther away',0
+align 2
+s_andTheFoesAre	db 'and the foes are ',0
+align 2
+s_theParty	db 'the party!',0
+align 2
+s_earthSwallows	db 'and the earth swallows up ',0
+align 2
+s_whichItem	db 'Which item?',0
+s_spellAborted	db 'Spell aborted.',0
+align 2
+s_itemIdentified	db 'Item has been identified!',0
+s_dopplganger	db 'Dopplganger',0
+s_ateIt		db 'ate it.',0Ah,0Ah,0
+s_drinksAndFeels	db 'drinks and feels ',0
+drinkStringList	dd aLessThirsty_, aHicHappier_, aRefreshed, aTerrible_, aTerrible_;	0
+s_cantFindUse	db 'can',27h,'t seem to find a use for the item.',0Ah,0Ah,0
+align 2
+s_invokesFigurine	db 'invokes a figurine ',0
+s_isReenergized	db 'is re-energized!',0Ah,0Ah,0
+align 2
+s_castsWeapon	db 'casts a weapon ',0
+s_breathes	db 'breathes ',0
+s_teleportMenu	db 'Teleport',0Ah
+		db '<Use arrow keys and SPC to select>',0Ah
+		db 'North:',0Ah
+		db 'East :',0Ah,0
+s_downUp		db '/Down\Up  \ :',0Ah,0
+align 2
+s_confirmTeleport	db 0Ah,'Teleport?',0Ah,0Ah,0
+align 2
+s_cancelTeleport	db 'Teleport cancelled!',0
+s_failedTeleport	db 'Teleport failed!',0
+align 2
+s_successfulTeleport	db 'Teleport successful!',0
+align 2
+s_youFace	db 'You face ',0
+s_levels		db ' level/\s',0
+s_aboveBelow	db ' /above\below\',0
+align 2
+s_paces		db ' pace/\s',0
+align 2
+s_northSouth	db ' /north\south\',0
+align 2
+s_eastWest	db ' /east\west\',0
+align 2
+s_andAreAt	db ' and are at ',0
+align 2
+s_of		db ' of ',0
+align 2
+s_andAre		db ' and /\are \',0
+align 2
+scryBaseStringList dd aTheEntryStairs, aTheEntryPortal,	aTheEntryway_
+		dd aTheBaseOfTheMo, aAVantagePoint_, aTheWayIn_
+		dd aTheExit_
+byte_47EDC	db 0, 0, 4, 2	   ; 0
+		db 2, 2, 2, 9		; 4
+		db 0, 0, 0, 0		; 8
+		db 0, 0, 0, 0		; 12
+		db 4, 4, 4, 4		; 16
+		db 8, 8, 0, 0		; 20
+		db 0, 0, 0, 0		; 24
+		db 0, 6, 6, 0		; 28
+		db 0, 0, 0, 0		; 32
+		db 0, 0, 0, 0		; 36
+		db 0, 0, 0, 0		; 40
+		db 0, 0Eh, 0, 0Ah	; 44
+		db 0, 0, 0, 3		; 48
+		db 0, 0, 0, 0		; 52
+		db 10h,	15h, 1,	1	; 56
+		db 1, 0			; 60
+byte_47F1A	db 0, 0, 0Eh, 0	   ; 0
+		db 0, 0, 0, 0		; 4
+		db 0, 0, 0, 0		; 8
+		db 4, 4, 4, 4		; 12
+		db 0, 0, 0, 0		; 16
+		db 2, 2, 1, 1		; 20
+		db 9, 9, 0, 0		; 24
+		db 0, 0, 0, 0		; 28
+		db 0, 0, 0, 0		; 32
+		db 0, 0, 0, 0		; 36
+		db 0, 0, 0Ah, 0Ah	; 40
+		db 0Ah,	0Bh, 0,	0	; 44
+		db 6, 6, 6, 0Ch		; 48
+		db 0Eh,	0Eh, 0Eh, 0Eh	; 52
+		db 0Ah,	3, 1, 1		; 56
+		db 0, 0			; 60
+byte_47F58	db 0, 0, 2, 0	   ; 0
+		db 0, 0, 0, 2		; 4
+		db 0, 0, 0, 0		; 8
+		db 0, 0, 0, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 0, 0, 0		; 20
+		db 3, 3, 0, 0		; 24
+		db 0, 0, 0, 4		; 28
+		db 4, 4, 4, 4		; 32
+		db 4, 4, 4, 4		; 36
+		db 0, 0, 5, 5		; 40
+		db 5, 6, 6, 6		; 44
+		db 6, 6, 6, 1		; 48
+		db 0, 0, 0, 0		; 52
+		db 2, 2, 1, 2		; 56
+spellCastFlags	db 1Ch		; 0
+		db 0Bh		; 1
+		db 14h		; 2
+		db 0Ah		; 3
+		db 1Ch		; 4
+		db 38h		; 5
+		db 1Ch		; 6
+		db 1Ch		; 7
+		db 0Ah		; 8
+		db 1Ch		; 9
+		db 38h		; 10
+		db 1Ch		; 11
+		db 0Ah		; 12
+		db 3Ch		; 13
+		db 1Ch		; 14
+		db 38h		; 15
+		db 14h		; 16
+		db 0Ah		; 17
+		db 1Ch		; 18
+		db 28h		; 19
+		db 38h		; 20
+		db 14h		; 21
+		db 0Bh		; 22
+		db 28h		; 23
+		db 1Ch		; 24
+		db 1Ch		; 25
+		db 28h		; 26
+		db 0Ah		; 27
+		db 0Bh		; 28
+		db 0Ah		; 29
+		db 0Ch		; 30
+		db 2Ch		; 31
+		db 14h		; 32
+		db 1Ch		; 33
+		db 3Ch		; 34
+		db 0Bh		; 35
+		db 0Ah		; 36
+		db 38h		; 37
+		db 0Bh		; 38
+		db 0Ch		; 39
+		db 1Ch		; 40
+		db 0Ch		; 41
+		db 1Ch		; 42
+		db 0Ah		; 43
+		db 1Ch		; 44
+		db 0Ch		; 45
+		db 1Ch		; 46
+		db 1Ch		; 47
+		db 1Ch		; 48
+		db 0Ch		; 49
+		db 0Ch		; 50
+		db 1Ch		; 51
+		db 1Ch		; 52
+		db 0Ch		; 53
+		db 1Ch		; 54
+		db 0Ah		; 55
+		db 0FCh		; 56
+		db 1Ch		; 57
+		db 0Ah		; 58
+		db 1Ch		; 59
+		db 0Bh		; 60
+		db 0Ah		; 61
+		db 38h		; 62
+		db 1Ch		; 63
+		db 8		; 64
+		db 0Ah		; 65
+		db 0Bh		; 66
+		db 1Ch		; 67
+		db 38h		; 68
+		db 0Ah		; 69
+		db 0Ah		; 70
+		db 0Ch		; 71
+		db 0Ah		; 72
+		db 1Ch		; 73
+		db 0Ch		; 74
+		db 0Ah		; 75
+		db 1Ch		; 76
+		db 1Ch		; 77
+		db 0Ch		; 78
+		db 38h		; 79
+		db 1Ch		; 80
+		db 1Ch		; 81
+		db 0Ah		; 82
+		db 0Ah		; 83
+		db 1Ch		; 84
+		db 1Ch		; 85
+		db 0Ah		; 86
+		db 0Ch		; 87
+		db 1Ch		; 88
+		db 1Ch		; 89
+		db 0Ch		; 90
+		db 0Bh		; 91
+		db 1Ch		; 92
+		db 1Ch		; 93
+		db 14h		; 94
+		db 38h		; 95
+		db 1Ch		; 96
+		db 1Ch		; 97
+		db 38h		; 98
+		db 0Ah		; 99
+		db 1Ch		; 100
+		db 1Ch		; 101
+		db 1Ch		; 102
+		db 0Ch		; 103
+		db 1Ch		; 104
+		db 1Ch		; 105
+		db 0Ah		; 106
+		db 14h		; 107
+		db 14h		; 108
+		db 0Ch		; 109
+		db 1Ch		; 110
+		db 14h		; 111
+		db 0Bh		; 112
+		db 14h		; 113
+		db 14h		; 114
+		db 0Ah		; 115
+		db 14h		; 116
+		db 0Bh		; 117
+		db 14h		; 118
+		db 0Ah		; 119
+		db 0Ch		; 120
+		db 0Ah		; 121
+		db 14h		; 122
+		db 0FCh		; 123
+		db 0Ch		; 124
+		db 1Ch		; 125
+		db 1Ch		; 126
+		db 1Ch		; 127
+		db 1Ch		; 128
+		db 1Ch		; 129
+		db 1Ch		; 130
+		db 0Bh		; 131
+		db 1Ch		; 132
+		db 0Ah		; 133
+		db 1Ch		; 134
+		db 0Ch		; 135
+spellEffectFlags db splf_mageflame	; 0 Mage Flame
+		db 0B6h			; 1
+		db 0			; 2
+		db 2			; 3
+		db 20h			; 4
+		db 4			; 5
+		db splf_lesserrev	; 6
+		db 4			; 7
+		db 2Ah			; 8
+		db 0			; 9
+		db 0Ah			; 10
+		db splf_greaterrev	; 11
+		db 31h			; 12
+		db 0Ah			; 13
+		db 0FFh			; 14
+		db 0FDh			; 15
+		db 0			; 16
+		db 4			; 17
+		db 1			; 18
+		db 2			; 19
+		db 0FEh			; 20
+		db 0			; 21
+		db 69h			; 22
+		db 4			; 23
+		db 4			; 24
+		db 4			; 25
+		db 7			; 26
+		db 38h			; 27
+		db 0A8h			; 28
+		db 3Fh			; 29
+		db 2			; 30
+		db 0Ah			; 31
+		db 0			; 32
+		db 0FFh			; 33
+		db 0FDh			; 34
+		db 0AFh			; 35
+		db 70h			; 36
+		db 0			; 37
+		db 0BDh			; 38
+		db 1			; 39
+		db 4			; 40
+		db disb_disbelieve	; 41
+		db 82h			; 42
+		db 1			; 43
+		db 83h			; 44
+		db 4			; 45
+		db 6			; 46
+		db splf_cateyes		; 47
+		db 84h,	disb_disruptill, 0,	85h	; 48
+		db 0FFh, 15h, 86h, 77h	; 52
+		db disb_nosummon,	7, 46h,	8	; 56
+		db 0C4h, 4Dh, 0, 9	; 60
+		db 0E0h, 0, 0CBh, 0Ah	; 64
+		db 0, 54h, 7Eh,	0	; 68
+		db 0, 0, 0, 5Bh		; 72
+		db 0FDh, 0Bh, 7, 0FFh	; 76
+		db 0, 0, 62h, 85h	; 80
+		db 0, 0, 8Ch, 0EEh	; 84
+		db 0, 0, 8, 0D2h	; 88
+		db 0, 0, 0, 0		; 92
+		db 0, 0, 6, 9		; 96
+		db 0, 0, 0FFh, 1Ch	; 100
+		db 0, 0, 93h, 6		; 104
+		db 0, 0A1h, 0Ch, 80h	; 108
+		db 0D9h, 8, 4, 6	; 112
+		db 2, 0E7h, 0Ah, 9Ah	; 116
+		db 0Eh,	0, 0, 5		; 120
+		db 23h,	0, 4, 5		; 124
+		db 0, 0, 0, 0		; 128
+		db 0, 0, 0, 0		; 132
+spellExtraFlags	db 0			; 0
+		db 1			; 1
+		db 0			; 2
+		db 0Ah			; 3
+		db 0			; 4
+		db 0			; 5
+		db 0			; 6
+		db 0			; 7
+		db 2			; 8
+		db 0			; 9
+		db 1			; 10
+		db 0			; 11
+		db 83h			; 12
+		db 81h			; 13
+		db 0			; 14
+		db 1			; 15
+		db 0, 0, 0, 0, 0, 0, 1,	0; 16
+		db 1, 2, 0, 84h, 7, 83h, 0, 1; 24
+		db 0, 2, 81h, 1, 5, 2, 84h, 0; 32
+		db 0, 0, 0, 0, 0, 0, 2,	0; 40
+		db 0, 0, 83h, 0, 2, 4, 0, 0Ah; 48
+		db 0Ah,	0, 1, 0, 3, 3, 3, 0; 56
+		db 0, 0, 7, 0, 4, 5, 85h, 0; 64
+		db 0, 0, 0, 6, 86h, 0, 0Ah, 0; 72
+		db 0, 0, 2, 8, 0, 0, 8,	5; 80
+		db 0, 0, 0, 3, 0, 0, 0,	5; 88
+		db 0, 0, 0, 0, 0, 0, 4,	0Ah; 96
+		db 0, 0, 84h, 0, 0, 0Ah, 0, 0; 104
+		db 6, 0, 0, 0, 0, 0Ah, 85h, 5; 112
+		db 0Ah,	5, 0, 0Ah, 0Ah,	0, 1, 1; 120
+		db 0, 0, 0, 0, 0, 0, 0,	0; 128
+spptRequired	db 2, 3, 2, 3, 3, 4, 5, 4;	0
+		db 5, 6, 6, 7, 7, 9, 8,	12; 8
+		db 15, 18, 12, 3, 3, 2,	4, 5; 16
+		db 5, 6, 6, 6, 8, 7, 8,	10; 24
+		db 10, 10, 25, 16, 11, 20, 3, 2; 32
+		db 2, 4, 5, 4, 6, 6, 6,	7; 40
+		db 12, 8, 10, 11, 11, 20, 16, 40; 48
+		db 50, 10, 11, 14, 11, 14, 12, 13; 56
+		db 14, 16, 13, 22, 18, 16, 25, 15; 64
+		db 20, 28, 26, 30, 50, 60, 80, 12; 72
+		db 10, 10, 20, 20, 15, 15, 25, 30; 80
+		db 20, 20, 45, 50, 25, 25, 60, 60; 88
+		db 30, 30, 65, 70, 35, 35, 60, 100; 96
+		db 50, 50, 5, 5, 8, 10,	15, 15;	104
+		db 18, 20, 20, 25, 30, 40, 40, 50; 112
+		db 60, 80, 10, 250, 150, 1; 120
+breathEffectStr	dd aFried, aFrozen, aShocked, aDrained, aBurnt; 0
+		dd aChoked, aSteamed, aBlasted, aHit, aNuked;	5
+damageSpellData	breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 1>; 0
+		breathAtt_t <0,	4, 0, 0, 38h, 0C0h, 8>;	1
+		breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 10h>	; 2
+		breathAtt_t <0,	14h, 2,	0, 58h,	0C0h, 1>; 3
+		breathAtt_t <0,	4, 10h,	0, 3Dh,	0C0h, 0Dh>	; 4
+		breathAtt_t <0,	4, 12h,	0, 5Fh,	0C0h, 10h>	; 5
+		breathAtt_t <0,	0Ch, 4,	0, 24h,	40h, 1>; 6
+		breathAtt_t <0,	0Ch, 4,	0, 2Eh,	40h, 1>; 7
+		breathAtt_t <0,	0Ch, 4,	0, 29h,	40h, 1>; 8
+		breathAtt_t <0,	84h, 8,	0, 47h,	40h, 1>; 9
+		breathAtt_t <0,	4, 10h,	0, 38h,	40h, 1>; 10
+		breathAtt_t <0,	84h, 8,	0, 35h,	40h, 1>; 11
+		breathAtt_t <0,	0Ch, 4,	0, 38h,	40h, 2>; 12
+		breathAtt_t <0,	14h, 2,	0, 38h,	40h, 4>; 13
+		breathAtt_t <4,	4, 6, 0, 1Dh, 40h, 0Ah>; 14
+		breathAtt_t <0,	24h, 6,	80h, 25h, 0, 1>; 15
+		breathAtt_t <0,	14h, 2,	0, 33h,	40h, 1>; 16
+		breathAtt_t <0,	4, 0Ah,	20h, 3Dh, 40h, 2>		; 17
+		breathAtt_t <0,	4, 10h,	40h, 13h, 40h, 0Ah>	; 18
+		breathAtt_t <0,	14h, 2,	0, 58h,	40h, 2>; 19
+		breathAtt_t <0,	24h, 0Eh, 0, 2Bh, 40h, 5>		; 20
+		breathAtt_t <0,	24h, 0,	0, 38h,	40h, 8>; 21
+		breathAtt_t <0,	84h, 8,	0, 3Dh,	40h, 0Ah>	; 22
+		breathAtt_t <0,	4, 0, 0, 2Eh, 0C0h, 0Ah>; 23
+		breathAtt_t <4,	4, 6, 0, 2Eh, 0, 1>; 24
+		breathAtt_t <7,	4, 10h,	0, 0, 0, 1>; 25
+		breathAtt_t <0,	84h, 8,	0, 20h,	0, 0>; 26
+		breathAtt_t <0,	0Ch, 4,	0, 21h,	0, 0>; 27
+		breathAtt_t <0,	84h, 8,	40h, 38h, 0, 4>; 28
+		breathAtt_t <0,	24h, 6,	0, 38h,	0, 2>; 29
+		breathAtt_t <7,	4, 10h,	0, 0, 0, 1>; 30
+		breathAtt_t <6,	4, 10h,	0, 0, 0, 1>; 31
+		breathAtt_t <5,	4, 10h,	0, 0, 0, 1>; 32
+		breathAtt_t <0,	14h, 2,	0, 38h,	0, 10h>; 33
+		breathAtt_t <0,	0Ch, 4,	0, 38h,	0C0h, 2>; 34
+		db    0
+weaponDamageList	anotherBreathAtt_t <0, 1, 25h, 2, 1,	2>; 0
+		anotherBreathAtt_t <0, 1, 24h, 2, 1, 2>; 1
+		anotherBreathAtt_t <0, 1, 22h, 2, 1, 3>; 2
+		anotherBreathAtt_t <0, 1, 26h, 2, 1, 3>; 3
+		anotherBreathAtt_t <0, 1, 23h, 2, 1, 3>; 4
+		anotherBreathAtt_t <0, 1, 27h, 2, 1, 4>; 5
+		anotherBreathAtt_t <0, 1, 28h, 2, 1, 4>; 6
+		anotherBreathAtt_t <0, 1, 28h, 2, 1, 5>; 7
+		anotherBreathAtt_t <0, 1, 2Bh, 2, 1, 4>; 8
+		anotherBreathAtt_t <0, 1, 2Fh, 2, 1, 6>; 9
+		anotherBreathAtt_t <0, 1, 37h, 2, 1, 9>; 10
+		anotherBreathAtt_t <0, 1, 33h, 2, 2, 7>; 11
+		anotherBreathAtt_t <0, 1, 2Fh, 2, 4, 8>; 12
+		anotherBreathAtt_t <0, 1, 2Fh, 2, 8, 9>; 13
+		anotherBreathAtt_t <0, 1, 2Fh, 2, 2, 7>; 14
+		anotherBreathAtt_t <0, 1, 33h, 2, 2, 7>; 15
+		anotherBreathAtt_t <0, 1, 38h, 2, 8, 5>; 16
+		anotherBreathAtt_t 2 dup(<0, 80h, 38h, 2, 4,	6>); 17
+		anotherBreathAtt_t <0, 1, 38h, 2, 8, 6>; 19
+		anotherBreathAtt_t <0, 1, 38h, 42h, 8, 9>	; 20
+		anotherBreathAtt_t <7, 1, 20h, 2, 1, 3>; 21
+		anotherBreathAtt_t <0, 20h, 2Fh, 2, 10h, 8>	; 22
+		anotherBreathAtt_t <0, 80h, 29h, 42h, 1, 3>	; 23
+		anotherBreathAtt_t <0, 10h, 37h, 42h, 1, 4>	; 24
+		anotherBreathAtt_t <0, 80h, 2Fh, 42h, 2, 6>	; 25
+		anotherBreathAtt_t <0, 80h, 2Fh, 42h, 6, 6>	; 26
+		anotherBreathAtt_t <0, 80h, 2Fh, 42h, 8, 5>	; 27
+		anotherBreathAtt_t <7, 8, 2Fh, 42h, 10h, 6>	; 28
+		anotherBreathAtt_t <0, 0, 31h, 42h, 0Ah, 7>	; 29
+		anotherBreathAtt_t <0, 20h, 2Fh, 42h, 20h, 7>; 30
+		anotherBreathAtt_t <0, 1, 25h, 2, 1, 2>; 0
+
+byte_48382	db 6, 15h, 16h, 23h, 24h, 27h, 2Ah, 2Bh; 0
+		db 35h,	3Ah, 48h, 5Ch, 60h, 65h, 6Bh, 77h; 8
+		db 7Ch,	81h, 86h, 8Bh, 9Fh, 0D0h, 0F4h,	1Eh; 16
+		db 47h,	53h, 57h, 5Bh, 0BAh, 0DEh; 24
+		db 0F8h, 85h
+		db    0
+figurineItemNo	db 27, 38	       ; 0
+		db 56, 61		; 2
+		db 77, 98		; 4
+		db 99, 190		; 6
+		db 204,	0		; 8
+byte_483AC	db 0Dh, 0Eh		   ; 0
+		db 0Fh,	1		; 2
+		db 10h,	11h		; 4
+		db 12h,	13h		; 6
+		db 14h,	0		; 8
+s_castAt		db 'Cast at ',0
+		db    0
+s_whoWillCast	db 'Who will cast a spell?',0
+		db    0
+s_dontKnowThatSpell db 'You don',27h,'t know that spell!',0
+		db    0
+s_noSpellByThatName	db 'No spell by that name.', 0
+s_notEnoughSppt	db 'Not enough spell points!',0
+		db    0
+s_spellToCast db	'Spell to cast:',0
+		db    0
+aWhichMagicArtShallYou db 'Which magic art shall you invoke?',0
+		db ') ',0
+		db    0
+s_castsASpell	db 'casts a spell',0
+s_butItFizzled	db 'but it fizzled!',0
+s_butItFizzledNl	db 'but it fizzled!',0Ah,0Ah,0
+s_makesLight	db 'makes a light',0
+mageSpellIndex	db 255, 42, 28, 0       ; 0 ; This array	is an index into another array for
+		db 14, 255, 255, 255	; 4 ; determining the spells that a magic user has.
+		db 255,	255, 56, 70	; 8
+		db 84, 255, 255, 0	; 12
+s_notSpellcaster	db 'Thou art not a spellcaster',0
+		db    0
+lightDistList	db 3			;0 splf_mageflame
+		db 4			;1 splf_lesserrev
+		db 5			;2 splf_greaterrev
+		db 5			;3 splf_cateyes
+		db 2			;4
+		db 2			;5
+
+; This is a holdover from previous games. A value of 0xFF indicates
+; that secret doors are visible.
+lightDetectList	db 0			;0 splf_mageflame
+		db 0FFh			;1 splf_lesserrev
+		db 0FFh			;2 splf_greaterrev
+		db 0			;3 splf_cateyes
+		db 0			;4
+		db 0			;5
+
+lightDurList	db 4			;0 splf_mageflame
+		db 0Ch			;1 splf_lesserrev
+		db 10h			;2 splf_greaterrev
+		db 0FFh			;3 splf_cateyes
+		db 4
+		db 8			;0
+classSavingBonus	db 0, 0Ah, 0Ah, 5	   ; 0
+		db 5, 0, 0, 5		; 4
+		db 0, 0, 11h, 11h	; 8
+		db 16h,	0		; 12
+word_484CC	dw 1Eh
+		db  1Eh
+		db    0
+		db    7
+		db    0
+batchSpellList	db 0Bh
+		db  21h	; !
+		db  34h	; 4
+		db  0Eh
+		db    4
+		db    0
+		db  44h	; D
+		db  0Fh
+		db    0
+		db 0D2h	; “
+unk_484DC	db  73h ; s
+		db    0
+geoSpMasks	geomanSp_t <3, 20h>	   ; 0
+		geomanSp_t <4, 40h>	; 1
+		geomanSp_t <3, 4>	; 2
+		geomanSp_t <3, 2>	; 3
+geoSpList	dd spGeo_removeTrap	; 0 ;	0: Earth Ward. Remove all traps	from level
+		dd dun_revealSpSquare	; 1 ; 1: Sanctuary. Reveal all mage regeneration squares
+		dd dun_revealSpSquare	; 2 ; 2: Succor	Song. Reveal party heal	squares
+		dd dun_revealSpSquare	; 3 ; 3: Roscoe's Alert. Reveal all anti-magic squares
+		dd dun_revealSpSquare	; 4 ; 4: Earth song. Reveal all	drain HP squares
+		dd spGeo_revealSquare	; 5 ; 5:
+spellFuncList	dd sp_lightSpell	      ;	0
+		dd sp_damageSpell	; 1
+		dd sp_trapZap		; 2
+		dd sp_freezeFoes	; 3
+		dd sp_compassSpell	; 4
+		dd sp_healSpell		; 5
+		dd sp_lightSpell	; 6
+		dd sp_levitation	; 7
+		dd sp_damageSpell	; 8
+		dd sp_summonSpell	; 9
+		dd sp_healSpell		; 10
+		dd sp_lightSpell	; 11
+		dd sp_damageSpell	; 12
+		dd sp_healSpell		; 13
+		dd sp_levitation	; 14
+		dd sp_healSpell		; 15
+		dd sp_teleport		; 16
+		dd sp_farFoes		; 17
+		dd sp_summonSpell	; 18
+		dd sp_vorpalPlating	; 19
+		dd sp_healSpell		; 20
+		dd sp_scrySight		; 21
+		dd sp_damageSpell	; 22
+		dd sp_vorpalPlating	; 23
+		dd sp_areaEnchant	; 24
+		dd sp_shieldSpell	; 25
+		dd sp_strengthBonus	; 26
+		dd sp_damageSpell	; 27
+		dd sp_damageSpell	; 28
+		dd sp_damageSpell	; 29
+		dd sp_antiMagic		; 30
+		dd sp_strengthBonus	; 31
+		dd sp_phaseDoor		; 32
+		dd sp_shieldSpell	; 33
+		dd sp_healSpell		; 34
+		dd sp_damageSpell	; 35
+		dd sp_damageSpell	; 36
+		dd sp_healSpell		; 37
+		dd sp_damageSpell	; 38
+		dd sp_acBonus		; 39
+		dd sp_areaEnchant	; 40
+		dd sp_disbelieve	; 41
+		dd sp_summonSpell	; 42
+		dd sp_wordOfFear	; 43
+		dd sp_summonSpell	; 44
+		dd sp_acBonus		; 45
+		dd sp_areaEnchant	; 46
+		dd sp_lightSpell	; 47
+		dd sp_summonSpell	; 48
+		dd sp_disbelieve	; 49
+		dd sp_damageSpell	; 50
+		dd sp_summonSpell	; 51
+		dd sp_areaEnchant	; 52
+		dd sp_damageSpell	; 53
+		dd sp_summonSpell	; 54
+		dd sp_damageSpell	; 55
+		dd sp_disbelieve	; 56
+		dd sp_summonSpell	; 57
+		dd sp_damageSpell	; 58
+		dd sp_summonSpell	; 59
+		dd sp_damageSpell	; 60
+		dd sp_damageSpell	; 61
+		dd sp_healSpell		; 62
+		dd sp_summonSpell	; 63
+		dd sp_possessChar	; 64
+		dd sp_spellbind		; 65
+		dd sp_damageSpell	; 66
+		dd sp_summonSpell	; 67
+		dd sp_healSpell		; 68
+		dd sp_damageSpell	; 69
+		dd sp_damageSpell	; 70
+		dd sp_haltFoe		; 71
+		dd sp_meleeMen		; 72
+		dd sp_batchspell	; 73
+		dd sp_camaraderie	; 74
+		dd sp_damageSpell	; 75
+		dd sp_healSpell		; 76
+		dd sp_summonSpell	; 77
+		dd sp_damageSpell	; 78
+		dd sp_healSpell		; 79
+		dd printSpellFizzled	; 80
+		dd printSpellFizzled	; 81
+		dd sp_damageSpell	; 82
+		dd sp_damageSpell	; 83
+		dd printSpellFizzled	; 84
+		dd printSpellFizzled	; 85
+		dd sp_damageSpell	; 86
+		dd sp_damageSpell	; 87
+		dd printSpellFizzled	; 88
+		dd printSpellFizzled	; 89
+		dd sp_luckSpell		; 90
+		dd sp_damageSpell	; 91
+		dd printSpellFizzled	; 92
+		dd printSpellFizzled	; 93
+		dd sp_identifySpell	; 94
+		dd sp_healSpell		; 95
+		dd printSpellFizzled	; 96
+		dd printSpellFizzled	; 97
+		dd sp_batchspell	; 98
+		dd sp_batchspell	; 99
+		dd printSpellFizzled	; 100
+		dd printSpellFizzled	; 101
+		dd sp_shieldSpell	; 102
+		dd sp_damageSpell	; 103
+		dd printSpellFizzled	; 104
+		dd printSpellFizzled	; 105
+		dd sp_damageSpell	; 106
+		dd sp_geomancerSpell	; 107
+		dd sp_geomancerSpell	; 108
+		dd sp_damageSpell	; 109
+		dd sp_summonSpell	; 110
+		dd sp_phaseDoor		; 111
+		dd sp_damageSpell	; 112
+		dd sp_geomancerSpell	; 113
+		dd sp_geomancerSpell	; 114
+		dd sp_farFoes		; 115
+		dd sp_geomancerSpell	; 116
+		dd sp_damageSpell	; 117
+		dd sp_geomancerSpell	; 118
+		dd sp_damageSpell	; 119
+		dd sp_damageSpell	; 120
+		dd sp_earthMaw		; 121
+		dd printNoEffect	; 122
+		dd sp_divineIntervention; 123
+		dd sp_damageSpell	; 124
+		dd printNoEffect	; 125
+		dd _sp_useLightObj	; 126
+		dd _sp_useLightObj	; 127
+		dd _sp_useAcorn		; 128
+		dd _sp_useWineskin	; 129
+		dd printCantFindUse	; 130
+		dd _sp_useWeapon	; 131
+		dd _sp_useFigurine	; 132
+		dd _sp_useWeapon	; 133
+		dd _sp_reenergizeMage	; 134
+aSirRobinSTune	db 'Sir Robin',27h,'s Tune',0
+aSafetySong	db 'Safety Song',0
+aSanctuaryScore	db 'Sanctuary Score',0
+aBringaroundBal	db 'Bringaround Ballad',0
+aRhymeOfDuotime	db 'Rhyme of Duotime',0
+aWatchwoodMelod	db 'Watchwood Melody',0
+aKielSOverture	db 'Kiel',27h,'s Overture',0
+aMinstrelShield	db 'Minstrel Shield',0
+s_whoWillPlay	db 'Who will play?',0
+align 2
+s_notBard	db 'Not a bard!',0
+s_notUsingInstrument	db 'You aren',27h,'t using an instrument!',0
+s_dryThroat	db 'Your throat is dry!',0
+songNames	dd aSirRobinSTune, aSafetySong, aSanctuaryScore, aBringaroundBal; 0
+		dd aRhymeOfDuotime, aWatchwoodMelod, aKielSOverture, aMinstrelShield; 4
+s_stopPlayingSong	db 'Stop playing a song',0
+g_instrumentType	db 14h dup(0), 1, 14h dup(0), 2, 0Ch dup(0), 2, 16h dup(0), 1
+		db 34h dup(0), 2, 4Eh dup(0), 2, 3, 6 dup(0), 1, 4 dup(0)
+		db 3, 21h dup(0)
+aGillesGillsFor	db 'Gilles Gills for ',0
+aDivineInterven	db 'Divine Intervention for ',0
+aGotterdamuru_0	db 'Gotterdamurung for ',0
+aStrength_	db 'strength.',0
+aIntelligence_	db 'intelligence.',0
+aDexterity_	db 'dexterity.',0
+aConstitution_	db 'constitution.',0
+aLuck_		db 'luck.',0
+aWizard_0	db 'Wizard',0Ah,0
+aSorcerer_0	db 'Sorcerer',0Ah,0
+aConjurer_0	db 'Conjurer',0Ah,0
+aMagician_0	db 'Magician',0Ah,0
+aArchmage_0	db 'Archmage',0Ah,0
+aChronomancer_0	db 'Chronomancer',0Ah,0
+spellLevelCost	dw 100, 1000, 2000, 4000, 7000, 10000, 20000; 0
+g_spellLevelData	spellAdvance <0, 3>	   ; 0
+		spellAdvance <3, 3>	; 1
+		spellAdvance <6, 3>	; 2
+		spellAdvance <9, 2>	; 3
+		spellAdvance <11, 2>	; 4
+		spellAdvance <13, 2>	; 5
+		spellAdvance <15, 4>	; 6
+		spellAdvance <19, 3>	; 7
+		spellAdvance <22, 3>	; 8
+		spellAdvance <25, 3>	; 9
+		spellAdvance <28, 2>	; 10
+		spellAdvance <30, 2>	; 11
+		spellAdvance <32, 2>	; 12
+		spellAdvance <34, 4>	; 13
+		spellAdvance <38, 3>	; 14
+		spellAdvance <41, 3>	; 15
+		spellAdvance <44, 3>	; 16
+		spellAdvance <47, 2>	; 17
+		spellAdvance <49, 2>	; 18
+		spellAdvance <51, 2>	; 19
+		spellAdvance <53, 4>	; 20
+		spellAdvance <57, 2>	; 21
+		spellAdvance <59, 2>	; 22
+		spellAdvance <61, 2>	; 23
+		spellAdvance <63, 2>	; 24
+		spellAdvance <65, 2>	; 25
+		spellAdvance <67, 2>	; 26
+		spellAdvance <69, 2>	; 27
+		spellAdvance <71, 2>	; 28
+		spellAdvance <73, 1>	; 29
+		spellAdvance <74, 1>	; 30
+		spellAdvance <75, 1>	; 31
+		spellAdvance <76, 1>	; 32
+		spellAdvance <77, 1>	; 33
+		spellAdvance <78, 1>	; 34
+		spellAdvance <79, 3>	; 35
+		spellAdvance <82, 2>	; 36
+		spellAdvance <86, 2>	; 37
+		spellAdvance <90, 2>	; 38
+		spellAdvance <94, 2>	; 39
+		spellAdvance <98, 2>	; 40
+		spellAdvance <102, 2>	; 41
+		spellAdvance <106, 3>	; 42
+		spellAdvance <109, 3>	; 43
+		spellAdvance <112, 2>	; 44
+		spellAdvance <114, 2>	; 45
+		spellAdvance <116, 2>	; 46
+		spellAdvance <118, 2>	; 47
+		spellAdvance <120, 2>	; 48
+g_spellsForSalePrice	dd 10000, 50000, 50000	 ; 0
+s_hallOfWizards	db	'Thou art in the hall of wizards. Would thou like...',0Ah,0Ah
+		db 'Advancement',0Ah
+		db 'Spell Acquiring',0Ah
+		db 'Buy a new spell',0Ah
+		db 'Exit the hall',0
+		db    0
+aTheGuildEldersPrepare	db 'The Guild elders prepare to weigh thy merits.',0Ah,0Ah
+		db 'Who shall be reviewed?',0
+aTheGuildEldersDeemTha	db 'The Guild elders deem that ',0
+s_cannotBeRaisedLevels_	db ' cannot be raised levels.',0
+s_eldersTeachLore	db 'The Elders teach you the lore.',0
+		db    0
+s_buySpellPrompt	db 'Who seeks the special knowledge of the mystic arts?',0
+s_thouMayLearn	db 'Thou may learn ',0
+g_spellsForSaleList	dd aGillesGillsFor, aDivineInterven; 0
+			dd aGotterdamuru_0	; 2
+s_inGoldWhoWillPay	db ' in gold. Who will pay?',0
+s_lastOfTheGuildElders	db 'The last of the guild elders is here. Would you like...',0Ah,0Ah
+		db 'Advancement',0Ah
+		db 'Spell Acquiring',0Ah
+		db 'Class Change',0Ah
+		db 'Talk to the elder',0Ah
+		db 'Exit the guild',0
+align 2
+s_elderWeighsMerits	db 'The Guild elder prepares to weigh your merits.',0Ah,0Ah
+		db 'Who shall be reviewed?',0
+align 2
+s_elderDeadCharacter	db '"Hmmm... Should I make you into a zombie perhaps?!?"',0
+align 2
+s_guildElderDeems	db 'The Guild elder deems that ',0
+s_cannotBeRaised	db ' cannot be raised levels.',0
+s_stillNeedeth	db ' still needeth ',0
+s_experiencePoints	db ' experience points prior to advancement.',0
+align 2
+s_hathEarnedLevel	db ' hath earned a level of advancement...',0
+align 2
+s_plusOneTo		db	'+1 to ',0
+align 2
+fullAttributeString	dd aStrength_, aIntelligence_, aDexterity_;	0
+			dd aConstitution_, aLuck_; 3
+s_whoSeeksKnowledge	db 'Who seeks knowledge of the mystic arts?',0
+s_learnedAllSpells	db 'Thou hath learned all the spells in thy art.',0
+align 2
+s_cannotAcquireNewSpells	db 'Thou cannot acquire new spells yet.'
+		db 0
+s_spellLevel	db ' spell level ',0
+s_willCost	db ' will cost ',0
+s_notEnoughGoldNl	db 'Not enough gold.',0Ah,0
+s_elderTeachersLore	db 'The Elder teaches you the lore.',0
+s_whichMageSeeksChange	db 'Which mage seeks to change classes?'
+		db 0
+s_cannotChangeClass	db 'Thou cannot change class.',0
+s_mustKnowThreeSpellLevels	db 'You must know at least 3 spell levels in your present art first.',0
+align 2
+s_doesntQualifyForNewClass	db 'Thee doesn',27h,'t qualify for any new class.',0
+s_newClassPrompt	db 0Ah,'Which class shall thee become?',0
+s_convertChronomancerPrompt	db 'Thee understands the sacrifice, dost thou not? Thee will be stripped of all thy spells and knowledge thereof. Thee will be more powerful than ever before, but more vulnerable as well.',0
+s_dostThouAccept	db 'Dost thou accept this sacrifice?',0Ah,0Ah,0
+align 2
+s_arboriaSpellText	db '"Know this, the spell to enter Arboria is invoked by uttering ARBO and the spell to return is ENIK. Be wary, for the spells only work in one place in the land."',0
+align 2
+s_arboriaSpellLocation	db '"There is a large grove of trees just south of Skara Brae. The spell will work there."',0
+align 2
+s_beginsNewProfession	db 'Now thou begins thy new profession.'
+		db 0
+s_desertedReviewBoard	db 'The old review board is deserted.',0
+magicUserString	dd aWizard_0, aSorcerer_0, aConjurer_0,	aMagician_0; 0
+		dd aArchmage_0,	aChronomancer_0; 4
+s_thouArtNotASpellcaster	db 'Thou art not a spell caster!',0
+align 2
+s_whoSpeaksToElder	db 'Who wishs to speak with the elder?',0
+align 2
+s_gelidiaSpellText	db '"Gelidia, the land of cold, is entered by uttering GELI and the spell to return is ECUL."',0
+s_gelidiaSpellLocation	db 'To the north is Cold Peak, your passage to Gelidia is there.',0
+align 2
+s_lucenciaSpellText	db '"Lucencia is entered by uttering LUCE and the spell to return is ILEG."',0
+s_lucenciaSpellLocation	db 'To the east is a crystal spring, your passage to Lucencia is there.',0
+s_kinestiaSpellText	db '"Kinestia, the dimension of machines, is reached by casting KINE. OBRA will bring you back."',0
+align 2
+s_kinestiaSpellLocation	db '"To the south-west is an old mine, you may reach Kinestia from there."'
+db 0
+align 2
+s_tenebrosiaSpellText	db '"Tenebrosia can be reached by uttering OLUK and the spell to return is ECEA."',0
+s_tenebrosiaSpellLocation	db '"To the southeast is Shadow Rock, your passage to Tenebrosia is there."',0
+s_tarmitiaSpellText	db '"Tarmitia is entered by uttering AECE and the spell to return is KULO."',0
+s_tarmitiaSpellLocation	db '"To the south is a vale, your passage to Tarmitia is there."',0
+align 2
+s_timeIsRunningOut	db '"Hurry! Time is running out!"',0
+s_teachOnlyChronomancer	db '"I',27h,'ll teach only a Chronomancer the special magic that you need to journey on your quest."',0
+align 2
+s_seekOutBrilhasti	db '"Seek out Brilhasti ap Tarj!"',0
+align 2
+s_questAwardXp_1	db 'The old man awards each member 600000 experience points.',0
+align 2
+s_questAwardXp_2	db 'With a wave of his hand, the old man re-energizes all magic users.',0
+align 2
+s_questBrilhasti_1	db 'The old man in the Review Board scratches his head. "Yes, you are the prophesied ones, but you have come too early. No matter."',0
+s_questBrilhasti_2	db '"Beneath Skara Brae you will find one of Tarjan',27h,'s devotees. Brilhasti ap Tarj is a foul Necromancer, and his life impedes my efforts to stave off disaster."',0
+align 2
+s_questBrilhasti_3	db '"You may enter the Catacombs under the Mad God',27h,'s Temple by uttering his master',27h,'s name... ',27h,'Tarjan"',0
+align 2
+s_questBrilhasti_4	db '"Destroy Brilhasti ap Tarj, then return to me for your true quest."',0
+s_questValarian_1	db '"Welcome ye children of the prophecy. Upon your shoulders falls a great weight, for you must embark on what will be your greatest adventure ever."',0
+align 2
+s_questValarian_2	db '"That which has laid waste to Skara Brae is an ancient evil recently released. It threatens to destroy all reality and time as it has wrought havoc on Skara Brae."',0
+s_questValarian_3	db '"If you cannot stop it, it will consume the universe. If you do stop it, you will be rewarded beyond all your dreams."',0
+align 2
+s_questValarian_4	db '"Prepare thyselves, and hasten to the place of trees, for it is most like the first dimension you must sojourn in to blunt the evil."',0
+s_questValarian_5	db '"Aboria, the home of Valarian the bold, is reached through using powerful magic that only a Chronomancer can control."',0
+align 2
+s_questValarian_6	db '"Bring to me Valarian',27h,'s Bow and The Arrows of Life if Valarian will not return here with you."',0
+align 2
+s_questValarian_7	db '"Yes, and be on the lookout for an ally, for you are not the first I have sent on this quest. Though your paths are different, they may cross, and you will do well together."',0
+align 2
+s_questLanatir_1	db 'The old man takes the news of Valarian',27h,'s death hard, but he summons a smile to his lips and breathes deeply.',0
+align 2
+s_questLanatir_2	db '"You have done well, children, and I take well the news that Hawkslayer has survived this long. Now you are bound for a place far distant."',0
+s_questLanatir_3	db '"It is the dimension of magic. It is known as Gelidia and if your Chronomancer is able, I will share the spells to get you there and back again."',0
+s_questLanatir_4	db '"Bring Lanatir with you, or, if you cannot convince him to come, coax from him the Wand of Power and the Sphere of Lanatir."',0
+align 2
+s_questAlliria_1	db 'The old man appears visibly shaken by the news of Lanatir',27h,'s death. After a long silence he stares off into space and mumbles, "Is it to be that way then?"',0
+align 2
+s_questAlliria_2	db 'His eyes focus upon you again, and a grim look washes over his features. "Now you are bound for Lucencia."',0
+align 2
+s_questAlliria_3	db '"I dare not hope Alliria lives, so I want you to recover the Crown of Truth and the Belt of Alliria. Beware, for she had a jealous consort, and he will protect her as best he can."',0
+algn_49F1F:
+align 2
+s_questFerofist_1	db 'The old man',27h,'s look of grim determination withstands news of Alliria',27h,'s death, but the information saps some of his strength.',0
+s_questFerofist_2	db '"Quickly then, my children, to distant Kinestia!"',0
+s_questFerofist_3	db '"You must return here with The Hammer of Wrath and Ferofist',27h,'s Helm. I know Ferofist yet lives, but I cannot be sure of how long he will survive."',0
+s_questFerofist_4	db '"Hurry, the pace quickens, and the outlook is horrible if you fail!"',0
+align 2
+s_questSceadu_1	db 'The old man',27h,'s eyes narrow as you tell of Ferofist',27h,'s end. "An alliance with the dark one, did he say? It is well he realized his folly in the end."',0
+align 2
+s_questSceadu_2	db 'He pauses a second, and you see utter weariness send a tremor through him. "Now to Tenebrosia for all of you."',0
+align 2
+s_questSceadu_3	db '"Remember, in the land where night is day and day is night, nothing is as you know it to be. Paradox lives there - trust no one but yourselves."',0
+align 2
+s_questSceadu_4	db '"From there I require the Helm of Justice and Sceadu',27h,'s Cloak."',0
+align 2
+s_questWerra_1	db '"No!" the old man cries out, "not Sceadu as well. The dark one is utterly mad. Still," the old man smiles, "he burns the chaff while I sow the seed."',0
+s_questWerra_2	db '"Off with you to Tarmitia, the land of unceasing warfare. A myriad of ages meld together there, and your success depends upon your ability to adapt."',0
+s_questWerra_3	db '"Bring me Werra',27h,'s Shield and the Strifespear."',0
+align 2
+s_questWerra_4	db 'His eyes lose their focus. "It is almost done, the circle is almost joined."',0
+align 2
+s_questTarjan_1	db '"I know," the old man gurgles, "Werra lies dead." Blood bubbles up on his lips and joins the dark stains on the rest of his clothing. "I, too, have been slain by the Mad One."',0
+s_questTarjan_2	db '"Gather up the prizes you have won, the special ones, those I requested. Hawkslayer has already ventured into Malefia, the land of EVIL."',0
+s_questTarjan_3	db '"I have placed the prizes in the storage building near the entrance of Skara Brae."',0
+s_questTarjan_4	db '"Get yourselves hence and help him. Destroy the Mad God Tarjan before he destroys all reality!!"',0
+align 2
+s_questTarjan_5	db 'With those final words, the old man slumps over, and his body dissolves into a mist that a slight breeze stirs and blows away.',0
+align 2
+hpLevelBonusMask db 0Fh, 7, 7, 3, 3, 7,	0Fh, 0Fh, 0Fh, 7; 0 ; This array holds the mask	for bonus hit points for
+		db 7, 7, 7, 0		; 10 ; each class at level-up time.
+g_mageConversionCheckFunctions	dd mage_convertWizardCheck, mage_convertSorcererCheck; 0
+		dd mage_convertConjurorCheck, mage_convertMagicianCheck; 2
+		dd mage_convertArchmageCheck, mage_convertChronomancerCheck; 4
+
+; Conversion table for key input to class for review_changeMageClass
+g_convertListToMageClass	db 1, 2, 3, 4, 0Ah, 0Bh ; 0
+s_reviewBoard	db 'Review Board',0
+		db    0
+questFuncs	dd review_questBrilhasti, review_questValarian; 0
+		dd review_questLanatir, review_questAlliria; 2
+		dd review_questFerofist,	review_questSceadu; 4
+		dd review_questWerra, review_questTarjan;	6
+g_questMaskList	db 0, 1, 40h, 10h, 4, 1, 40h, 10h; 0
+g_questByteList	db 1, 1, 0, 0, 0, 0,	1, 1; 0
+s_guild		db 'Guild',0
+s_victoryMessage_1	db '"Welcome, brave heroes. You have succeeded in destroying the threat to all reality. As you know, to do this, you slipped the bonds of time, and traveled forbidden routes'
+		db 'through that which has forever been. You pressed your struggle forward despite danger and death, and you accomplished that which the gods themselves were unable to do."'
+		db 0Ah,0Ah
+		db 'His praise washes over you like a warm ocean wave, and you feel strength infuse your body.',0
+s_victoryMessage_2	db '"In doing what you have done, you have proved youself worthy of nothing less than the ultimate reward." He closes his eyes and raises his hands. '
+		db '"The death of the gods tore reality asunder, but you bound it up again. The gods of old are dead, therefore I accept you as my new children. You shall be gods yourselves!"'
+		db 0Ah,0Ah,0
+s_victoryMessage_3	db 'His eyes open again and you look up on infinity. At once you see Skara Brae restored to its former beauty. You see beyond it and the Six cities of the Plains. '
+		db 'You see the whole world and each of its cultures, and you realize all of it is now your domain.',0Ah,0Ah,0
+s_victoryMessage_4	db '"And so it came to pass that eight new stars burned in the night sky. The least of these, the Companion star, was named Hawkslayer after a hero of legend. '
+		db 'The other seven, together known as the Company of Heroes, are each named for one of the New Gods. Each night they can be seen is betokened a good night, and '
+		db 'adventurers know these gods smile especially upon them..."',0Ah,'-- excerpt from The Gospel of the New Gods (Chap I, Verses 5-9)',0Ah,0Ah,0Ah,0
+s_victoryMessage_5	db 'Your party will now alter time back to the refugee camp.',0Ah
+		db 'Who knows what new challenges await you in the future!',0
+aATrapIsNear	db 'A trap is near!',0
+aThereAreStai_0	db 'There are stairs near...',0
+aSomethingSpeci	db 'Something special is near...',0
+aASpinnerIsNear	db 'A spinner is near...',0
+aYourSpellsWave	db 'Your spells waver...',0
+aSomethingAhead	db 'Something ahead...',0
+aOdd___		db 'Odd...',0
+aAwfullyQuietAh	db 'Awfully quiet ahead...',0
+s_stoneBlockTrap	db 'stone block!',0
+s_tripwireTrap	db 'tripwire!',0
+s_pitTrap		db 'pit!',0
+s_spikedPitTrap	db 'spiked pit!',0
+s_poisonGasTrap	db 'poison gas cloud!',0
+s_punjiStakeTrap	db 'punji stakes!',0
+s_crossbowTrap	db 'crossbow bolts!',0
+s_shockwaveTrap	db 'shock wave!',0
+s_acidBathTrap	db 'acid bath!',0
+s_mindZapTrap	db 'mind zap!',0
+s_poisonSprayTrap	db 'poison spray!',0
+s_poisonSpikedPitTrap	db 'poison spiked pit!',0
+s_mageZapTrap	db 'mage zap!',0
+s_decapitatorTrap	db 'decapitator!',0
+s_timedWarstrikeTrap	db 'timed warstrike!',0
+s_shockSphereTrap	db 'shock sphere!',0
+s_crushingWallsTrap	db 'crushing walls!',0
+s_rollingBallTrap	db 'rolling ball!',0
+s_basiliskSnareTrap	db 'basilisk snare!',0
+s_witherStrikeTrap	db 'wither strike!',0
+s_sledgehammerTrap	db 'sledgehammer!',0
+s_earthquakeTrap	db 'earthquake!',0
+s_deathstrikeTrap	db 'deathstrike!',0
+s_bonkersTrap	db 'bonkers!',0
+s_wandererText	db 'A wandering creature offers to join your party. You can:'
+		db 0Ah,0Ah
+		db '@Allow it to join',0Ah
+		db '@Fight it',0Ah
+		db '@Leave in peace',0
+s_titleText db 'Come hear the tale of Skara Brae - A god returned to have his way. Creatures of darkness, spawn of night, The Mad One',27h,'s kin destroyed the'
+		db ' site. Defenders fell, their bane come true, Garth, Roscoe, Kylearan too! As doom approached, the helpless fled. It did no good, the streets'
+		db ' ran red. Survivors few, they sit and mope, with but one final ray of hope: ',27h,'Cross time and space, the legends say, Heroes, at last! To steal the day! ',0
+		db    0
+victoryMessageList	dd s_victoryMessage_1	; 0
+		dd s_victoryMessage_2	; 1
+		dd s_victoryMessage_3	; 2
+		dd s_victoryMessage_4	; 3
+		dd s_victoryMessage_5	; 4
+align 2
+s_explosion	db 0Ah,'An explosion!',0
+align 2
+s_darkness	db 0Ah,'Darkness!',0
+align 2
+s_portalAbove	db 0Ah,'There is a portal above you.',0
+s_portalBelow	db 0Ah,'There is a portal below.',0
+s_soundOfSilence	db 0Ah,'The sound of silence...',0
+align 2
+detectMessages	dd aATrapIsNear	       ; 0
+		dd aThereAreStai_0	; 1
+		dd aSomethingSpeci	; 2
+		dd aASpinnerIsNear	; 3
+		dd aYourSpellsWave	; 4
+		dd aSomethingAhead	; 5
+		dd aOdd___		; 6
+		dd aAwfullyQuietAh	; 7
+s_hitTrap	db 'TRAP! You',27h,'ve hit a ',0
+trapTypeString	dd s_stoneBlockTrap, s_tripwireTrap, s_pitTrap
+		dd s_spikedPitTrap, s_poisonGasTrap, s_punjiStakeTrap
+		dd s_crossbowTrap, s_shockwaveTrap, s_acidBathTrap
+		dd s_mindZapTrap, s_poisonSprayTrap, s_poisonSpikedPitTrap
+		dd s_mageZapTrap, s_decapitatorTrap,  s_timedWarstrikeTrap
+		dd s_shockSphereTrap, s_crushingWallsTrap, s_rollingBallTrap
+		dd s_basiliskSnareTrap, s_witherStrikeTrap, s_sledgehammerTrap
+		dd s_earthquakeTrap, s_deathstrikeTrap, s_bonkersTrap
+trapSpecialAttackValue	db 0, 0, 0, 0	   ; 0
+		db 0, 1, 0, 0		; 4
+		db 0, 0, 0, 0		; 8
+		db 3, 1, 1, 0		; 12
+		db 0, 0, 0, 0		; 16
+		db 0, 0, 0, 0		; 20
+		db 6, 4, 0, 0		; 24
+		db 0, 7, 4, 0		; 28
+byte_4B258	db 20h dup(0)
+
+; Trap indices by (dungeon level & 7). 0-3 = dungeon level 1, 4-7 = 2, etc
+;
+g_trapIndexByLevel	db 0, 1, 2, 0	   ; 0
+			db 3, 4, 5, 0		; 4
+			db 6, 7, 8, 0		; 8
+			db 9, 10, 11, 0		; 12
+			db 12, 13, 14, 0	; 16
+			db 15, 16, 17, 0	; 20
+			db 18, 19, 20, 0	; 24
+			db 21, 22, 23, 0	; 28
+trapSaveList	trapSave_t < 0Fh, 0Fh	>
+		trapSave_t < 0Eh, 0	>
+		trapSave_t < 13h, 13h	>
+		trapSave_t < 13h, 0	>
+		trapSave_t < 15h, 14h	>
+		trapSave_t < 14h, 0	>
+		trapSave_t < 18h, 18h	>
+		trapSave_t < 17h, 0	>
+		trapSave_t < 26h, 26h	>
+		trapSave_t < 28h, 0	>
+		trapSave_t < 27h, 28h	>
+		trapSave_t < 28h, 0	>
+		trapSave_t < 2Ah, 29h	>
+		trapSave_t < 2Ah, 0	>
+		trapSave_t < 2Bh, 2Eh	>
+		trapSave_t < 2Bh, 0	>
+detectByteStartList	db 0, 2, 4, 0		; This array has the starting index into the detectByte
+						; array for the detect spell type
+detectByte	db 0, 0FFh, 0, 0FFh	   ; 0 ; This array holds the flag byte	to detect certain
+		db 0, 0, 0, 1		; 4 ; types of squares
+		db 1, 1, 1, 1		; 8
+		db 1, 0FFh		; 12
+detectMask	db 10h, 0, 1, 0	   ; 0 ; This array holds the bitmasks to detect certain
+		db 10h,	1, 4, 1		; 4 ; types of squares
+		db 2, 4, 8, 10h		; 8
+		db 20h,	0		; 12
+detectMsgIndex	db 0, 0, 1, 0	       ; 0
+		db 0, 1, 2, 3		; 4
+		db 4, 5, 6, 7		; 8
+		db 5, 0			; 12
+specialSquareFunctionList	dd dunsq_battleCheck,	dunsq_doTrap, dunsq_doDarkness;	0
+		dd dunsq_doSpinner, dunsq_antiMagic, dunsq_drainHp; 3
+		dd dunsq_somethingOdd, dunsq_doSilence,	dunsq_regenSppt; 6
+		dd dunsq_drainSppt, dunsq_monHostile, dunsq_doStuck; 9
+		dd dunsq_regenHP, dunsq_explosion, dunsq_portalAbove; 12
+		dd dunsq_portalBelow
+specialSquareByteIndexList	db 0, 0, 0		   ; 0
+		db 1, 1, 1		; 3
+		db 1, 1, 1		; 6
+		db 1, 1, 2		; 9
+		db 2, 2, 0		; 12
+		db 0			; 15
+specialSquareMaskList	db 80h, 10h, 8	   ; 0
+		db 1, 2, 4		; 3
+		db 8, 10h, 20h		; 6
+		db 40h,	80h, 80h	; 9
+		db 40h,	10h, 40h	; 12
+		db 20h			; 15
+g_wandererFunctionTable	dd wanderer_join
+		dd wanderer_fight
+		dd wanderer_leave
+aDragonDragonWh	db 'Dragon, dragon,',0Ah
+		db 'Why do you lair?',0Ah
+		db 'Unfurl your wings, Take to the air!',0Ah
+		db 'Soar high above, Far away fly,',0Ah
+		db 'Or is that where, You wish to die?',0
+aHawkslayerHawk	db 'Hawkslayer, Hawkslayer,',0Ah
+		db 'Why do you ask? Killing me is a difficult task. My claws are sharp, my fangs sharper yet, And my breath flames, let us not forget.',0
+aDragonDragonTh	db 'Dragon, dragon,',0Ah
+		db 'Thou art quite strong. Your scales are bright and talons are long, But a duty I have and it is clear: Whatever it takes, I will drive you from here.',0
+aHawkslayerHa_0	db 'Hawkslayer, Hawkslayer,',0Ah
+		db 'Such a brief life. Have you no wish to again see your wife? Imagine her tears and grief and despair, Walk away from this fight, you have not a prayer.',0
+aDragonDragonHo	db 'Dragon, dragon,',0Ah
+		db 'How wise thou art.',0Ah
+		db 'A massive beast with such a kind heart.',0Ah
+		db 'I do wish to kiss my wife and my heir,',0Ah
+		db '"Pray, fly to the mountains and await me there.',0
+aHawkslayerHa_1	db 'Hawkslayer, Hawkslayer,',0Ah
+		db 'I thought you were brave. Here I await you, deep in this cave. Come, little man, and I',27h,'ll eat your brain, Then ravage Lucencia again and again.',0
+aDragonDragonGr	db 'Dragon, dragon,',0Ah
+		db 'Great is your heart. Massive your body, but you are not smart. The rumble you hear and the dust in the air? I',27h,'ve closed the cave off and trapped you in there.',0
+aHawkslayerHa_2	db 'Hawkslayer, Hawkslayer,',0Ah
+		db 'Others will come.',0Ah
+		db 'I will wait but I will not succumb.',0Ah
+		db 'Hero you are, and incredibly sly,',0Ah
+		db 'But the future I know and a hero you',27h,'ll die...',0
+aHeWasBornWithT	db 'He was born with the red, red rose, Sign of his blood, was the link to the past.',0
+aInBattleHeWonT	db 'In battle, he won the blue, blue rose, Blossom of his valor, his weapons were cast.',0
+aSheWasForHimTh	db 'She was for him the yellow, yellow rose, Her spirit divine, his love would always last.',0
+aHisPledgeHeMad	db 'His pledge he made o',27h,'er the white, white rose, And she accepted it as sooth, and remained his steadfast.',0
+aSoHeMadeForHer	db 'So he made for her the rainbow rose, Like Alliria',27h,'s beauty, a blossom unsurpassed.',0
+aMadGodBadGodTh	db 'Mad god, bad god,',0Ah
+		db 'Thrust from the sky,',0Ah
+		db 'Foolish god, ghoulish god.',0Ah
+		db 'We can',27h,'t hear you cry.',0
+aRudeGodCrudeGo	db 'Rude god, crude god,',0Ah
+		db 'Why must you terrify?',0Ah
+		db 'Error god, terror god,',0Ah
+		db 'Do not your future scry.',0
+aCleverGodNever	db 'Clever god, never god,',0Ah
+		db 'Your time is nigh.',0Ah
+		db 'Dire god, liar god,',0Ah
+		db 'Why won',27h,'t you just die?',0
+aInTheLandOfNoT	db 'In the land of no time,',0Ah
+		db 'The Clock within burns like a flame,',0
+aLockingEachInH	db 'Locking each in his own crime:',0Ah
+		db 'One can only leave when he came.',0
+s_bardHallGreeting	db 'Welcome and be happy o',27h,' weary travelers! Step to the stage and listen to my tales.',0Ah,0Ah
+		db 'You can:',0Ah,0Ah
+		db 'Listen to the bard',0Ah
+		db 'Exit the hall',0
+align 2
+s_songTitleList	db 'These are the songs I know...',0Ah,0Ah
+		db '@Dragon Song',0Ah
+		db '@Flower Ballad',0Ah
+		db '@Kiel',27h,'s Overture',0Ah
+		db '@Gale of Gods',0Ah
+		db '@Evil',27h,'s Bane',0Ah
+		db '@Minstrel Shield',0
+off_4BC98	dd aDragonDragonWh
+		dd aHawkslayerHawk
+		dd aDragonDragonTh
+		dd aHawkslayerHa_0
+		dd aDragonDragonHo
+		dd aHawkslayerHa_1
+		dd aDragonDragonGr
+		dd aHawkslayerHa_2
+off_4BCB8	dd aHeWasBornWithT
+		dd aInBattleHeWonT
+		dd aSheWasForHimTh
+		dd aHisPledgeHeMad
+		dd aSoHeMadeForHer
+off_4BCCC	dd aMadGodBadGodTh
+		dd aRudeGodCrudeGo
+		dd aCleverGodNever
+off_4BCD8	dd aInTheLandOfNoT
+		dd aLockingEachInH
+s_bardSmiles	db 'The bard smiles and says, "That one will cost thee for your bards will learn the magic of my song."',0
+s_itWillCostYou	db '"It will cost you ',0
+align 2
+s_bardPlaysSong	db 'The bard plays the song and you memorize the lines.',0
+s_bardsHall	db 'Bard',27h,'s Hall',0
+bardSongLineCount	dw 8, 5, 0, 3, 2, 0    ; 0
+bardSongLyrics	dd off_4BC98	       ; 0
+		dd off_4BCB8		; 1
+		dd offset word_42670	; 2
+		dd off_4BCCC		; 3
+		dd off_4BCD8		; 4
+align 8
+bardSongPrice	dd 30000, 60000       ;	0
+byte_4BDF0	db 1, 2     ; 0
+s_noRoomForSummon db 'but no room for a summoning!',0Ah,0Ah,0
+		db    0
+s_andA		db 'and a ',0
+		db    0
+s_appears	db ' appears!',0Ah,0Ah,0
+summonData      db 'Wol/f\ves',0,0,0,0,0,0,0; _name
+summonHpDice    db 0A1h                 ; [0].hpDice
+                dw 0Ah                  ; [0].hpBase
+                db 11h                  ; [0].distance
+                db 8Ch                  ; [0].packedGenAc
+                db 0                    ; [0].groupSize
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0F0h                 ; [0].attackType._type
+                db 23h                  ; [0].attackType.damage
+                db 0                    ; [0].breathFlag
+                db 0                    ; [0].breathRange
+                db 4                    ; [0].picIndex
+                db 64h                  ; [0].rewardLo
+                db 0                    ; [0].rewardMid
+                db 0                    ; [0].rewardHi
+                db 43h                  ; [0].flags
+                db 12h                  ; [0].breathSaveLo
+                db 19h                  ; [0].breathSaveHi
+                db 37h                  ; [0].oppPriorityLo
+                db 41h                  ; [0].oppPriorityHi
+                db 0                    ; [0].strongElement
+                db 0                    ; [0].weakElement
+                db 8                    ; [0].repelFlags
+                db 0Fh                  ; [0].toHitLo
+                db 19h                  ; [0].toHitHi
+                db 17h                  ; [0].spellSaveLo
+                db 1Ch                  ; [0].spellSaveHi
+                db 'Slayer/\s',0,0,0,0,0,0,0; _name
+                db 81h                  ; [1].hpDice
+                dw 40h                  ; [1].hpBase
+                db 11h                  ; [1].distance
+                db 17h                  ; [1].packedGenAc
+                db 0                    ; [1].groupSize
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0F7h                 ; [1].attackType._type
+                db 81h                  ; [1].attackType.damage
+                db 0                    ; [1].breathFlag
+                db 0                    ; [1].breathRange
+                db 21h                  ; [1].picIndex
+                db 64h                  ; [1].rewardLo
+                db 0                    ; [1].rewardMid
+                db 0                    ; [1].rewardHi
+                db 80h                  ; [1].flags
+                db 12h                  ; [1].breathSaveLo
+                db 19h                  ; [1].breathSaveHi
+                db 37h                  ; [1].oppPriorityLo
+                db 3Dh                  ; [1].oppPriorityHi
+                db 8                    ; [1].strongElement
+                db 0                    ; [1].weakElement
+                db 4                    ; [1].repelFlags
+                db 0Fh                  ; [1].toHitLo
+                db 19h                  ; [1].toHitHi
+                db 19h                  ; [1].spellSaveLo
+                db 23h                  ; [1].spellSaveHi
+                db 'Wind Warrior/\s',0  ; _name
+                db 81h                  ; [2].hpDice
+                dw 14h                  ; [2].hpBase
+                db 11h                  ; [2].distance
+                db 17h                  ; [2].packedGenAc
+                db 0                    ; [2].groupSize
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0F0h                 ; [2].attackType._type
+                db 62h                  ; [2].attackType.damage
+                db 0                    ; [2].breathFlag
+                db 0                    ; [2].breathRange
+                db 14h                  ; [2].picIndex
+                db 64h                  ; [2].rewardLo
+                db 0                    ; [2].rewardMid
+                db 0                    ; [2].rewardHi
+                db 94h                  ; [2].flags
+                db 12h                  ; [2].breathSaveLo
+                db 19h                  ; [2].breathSaveHi
+                db 37h                  ; [2].oppPriorityLo
+                db 3Dh                  ; [2].oppPriorityHi
+                db 0                    ; [2].strongElement
+                db 0                    ; [2].weakElement
+                db 0                    ; [2].repelFlags
+                db 0Fh                  ; [2].toHitLo
+                db 19h                  ; [2].toHitHi
+                db 19h                  ; [2].spellSaveLo
+                db 23h                  ; [2].spellSaveHi
+                db 'Wind Ogre/\s',0,0,0,0; _name
+                db 0A1h                 ; [3].hpDice
+                dw 0Ah                  ; [3].hpBase
+                db 11h                  ; [3].distance
+                db 97h                  ; [3].packedGenAc
+                db 0                    ; [3].groupSize
+                db 0F0h                 ; [3].attackType._type
+                db 64h                  ; [3].attackType.damage
+                db 0F0h                 ; [3].attackType._type
+                db 64h                  ; [3].attackType.damage
+                db 0FFh                 ; [3].attackType._type
+                db 0                    ; [3].attackType.damage
+                db 0FFh                 ; [3].attackType._type
+                db 0                    ; [3].attackType.damage
+                db 0                    ; [3].breathFlag
+                db 0                    ; [3].breathRange
+                db 33h                  ; [3].picIndex
+                db 64h                  ; [3].rewardLo
+                db 0                    ; [3].rewardMid
+                db 0                    ; [3].rewardHi
+                db 95h                  ; [3].flags
+                db 12h                  ; [3].breathSaveLo
+                db 19h                  ; [3].breathSaveHi
+                db 37h                  ; [3].oppPriorityLo
+                db 3Dh                  ; [3].oppPriorityHi
+                db 0                    ; [3].strongElement
+                db 0                    ; [3].weakElement
+                db 0                    ; [3].repelFlags
+                db 0Fh                  ; [3].toHitLo
+                db 19h                  ; [3].toHitHi
+                db 19h                  ; [3].spellSaveLo
+                db 23h                  ; [3].spellSaveHi
+                db 'Wind Dragon/\s',0,0 ; _name
+                db 0A2h                 ; [4].hpDice
+                dw 28h                  ; [4].hpBase
+                db 11h                  ; [4].distance
+                db 99h                  ; [4].packedGenAc
+                db 0                    ; [4].groupSize
+                db 80h                  ; [4].attackType._type
+                db 69h                  ; [4].attackType.damage
+                db 80h                  ; [4].attackType._type
+                db 69h                  ; [4].attackType.damage
+                db 0F0h                 ; [4].attackType._type
+                db 69h                  ; [4].attackType.damage
+                db 80h                  ; [4].attackType._type
+                db 44h                  ; [4].attackType.damage
+                db 0                    ; [4].breathFlag
+                db 3                    ; [4].breathRange
+                db 3Dh                  ; [4].picIndex
+                db 64h                  ; [4].rewardLo
+                db 0                    ; [4].rewardMid
+                db 0                    ; [4].rewardHi
+                db 0D2h                 ; [4].flags
+                db 13h                  ; [4].breathSaveLo
+                db 1Eh                  ; [4].breathSaveHi
+                db 28h                  ; [4].oppPriorityLo
+                db 46h                  ; [4].oppPriorityHi
+                db 80h                  ; [4].strongElement
+                db 10h                  ; [4].weakElement
+                db 1                    ; [4].repelFlags
+                db 14h                  ; [4].toHitLo
+                db 1Eh                  ; [4].toHitHi
+                db 0Ah                  ; [4].spellSaveLo
+                db 64h                  ; [4].spellSaveHi
+                db 'Wind Giant/\s',0,0,0; _name
+                db 0A3h                 ; [5].hpDice
+                dw 0Fh                  ; [5].hpBase
+                db 11h                  ; [5].distance
+                db 19h                  ; [5].packedGenAc
+                db 0                    ; [5].groupSize
+                db 80h                  ; [5].attackType._type
+                db 6Bh                  ; [5].attackType.damage
+                db 0F0h                 ; [5].attackType._type
+                db 6Bh                  ; [5].attackType.damage
+                db 0F0h                 ; [5].attackType._type
+                db 6Bh                  ; [5].attackType.damage
+                db 23h                  ; [5].attackType._type
+                db 32h                  ; [5].attackType.damage
+                db 2                    ; [5].breathFlag
+                db 4                    ; [5].breathRange
+                db 33h                  ; [5].picIndex
+                db 64h                  ; [5].rewardLo
+                db 0                    ; [5].rewardMid
+                db 0                    ; [5].rewardHi
+                db 0D5h                 ; [5].flags
+                db 15h                  ; [5].breathSaveLo
+                db 20h                  ; [5].breathSaveHi
+                db 1Eh                  ; [5].oppPriorityLo
+                db 3Ch                  ; [5].oppPriorityHi
+                db 0                    ; [5].strongElement
+                db 0                    ; [5].weakElement
+                db 0                    ; [5].repelFlags
+                db 19h                  ; [5].toHitLo
+                db 23h                  ; [5].toHitHi
+                db 0Ah                  ; [5].spellSaveLo
+                db 1Eh                  ; [5].spellSaveHi
+                db 'Wind Her/o\oes',0,0 ; _name
+                db 0A4h                 ; [6].hpDice
+                dw 14h                  ; [6].hpBase
+                db 11h                  ; [6].distance
+                db 1Bh                  ; [6].packedGenAc
+                db 20h                  ; [6].groupSize
+                db 0F0h                 ; [6].attackType._type
+                db 6Ch                  ; [6].attackType.damage
+                db 0F0h                 ; [6].attackType._type
+                db 6Ch                  ; [6].attackType.damage
+                db 0F0h                 ; [6].attackType._type
+                db 8Ch                  ; [6].attackType.damage
+                db 0F0h                 ; [6].attackType._type
+                db 6Ch                  ; [6].attackType.damage
+                db 0                    ; [6].breathFlag
+                db 0                    ; [6].breathRange
+                db 0Ah                  ; [6].picIndex
+                db 64h                  ; [6].rewardLo
+                db 0                    ; [6].rewardMid
+                db 0                    ; [6].rewardHi
+                db 94h                  ; [6].flags
+                db 16h                  ; [6].breathSaveLo
+                db 21h                  ; [6].breathSaveHi
+                db 2Ah                  ; [6].oppPriorityLo
+                db 48h                  ; [6].oppPriorityHi
+                db 0                    ; [6].strongElement
+                db 0                    ; [6].weakElement
+                db 0                    ; [6].repelFlags
+                db 19h                  ; [6].toHitLo
+                db 23h                  ; [6].toHitHi
+                db 0Ah                  ; [6].spellSaveLo
+                db 64h                  ; [6].spellSaveHi
+                db 'Fire Elemental/',0  ; _name
+                db 81h                  ; [7].hpDice
+                dw 0Ah                  ; [7].hpBase
+                db 11h                  ; [7].distance
+                db 97h                  ; [7].packedGenAc
+                db 0                    ; [7].groupSize
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0F0h                 ; [7].attackType._type
+                db 64h                  ; [7].attackType.damage
+                db 0                    ; [7].breathFlag
+                db 0                    ; [7].breathRange
+                db 5                    ; [7].picIndex
+                db 64h                  ; [7].rewardLo
+                db 0                    ; [7].rewardMid
+                db 0                    ; [7].rewardHi
+                db 85h                  ; [7].flags
+                db 12h                  ; [7].breathSaveLo
+                db 19h                  ; [7].breathSaveHi
+                db 37h                  ; [7].oppPriorityLo
+                db 3Dh                  ; [7].oppPriorityHi
+                db 80h                  ; [7].strongElement
+                db 10h                  ; [7].weakElement
+                db 0                    ; [7].repelFlags
+                db 0Fh                  ; [7].toHitLo
+                db 19h                  ; [7].toHitHi
+                db 19h                  ; [7].spellSaveLo
+                db 23h                  ; [7].spellSaveHi
+                db 'Demon/\s',0,0,0,0,0,0,0,0; _name
+                db 0A2h                 ; [8].hpDice
+                dw 0Ch                  ; [8].hpBase
+                db 11h                  ; [8].distance
+                db 94h                  ; [8].packedGenAc
+                db 0                    ; [8].groupSize
+                db 80h                  ; [8].attackType._type
+                db 44h                  ; [8].attackType.damage
+                db 80h                  ; [8].attackType._type
+                db 44h                  ; [8].attackType.damage
+                db 0F0h                 ; [8].attackType._type
+                db 64h                  ; [8].attackType.damage
+                db 0F0h                 ; [8].attackType._type
+                db 64h                  ; [8].attackType.damage
+                db 0                    ; [8].breathFlag
+                db 4                    ; [8].breathRange
+                db 17h                  ; [8].picIndex
+                db 64h                  ; [8].rewardLo
+                db 0                    ; [8].rewardMid
+                db 0                    ; [8].rewardHi
+                db 80h                  ; [8].flags
+                db 12h                  ; [8].breathSaveLo
+                db 19h                  ; [8].breathSaveHi
+                db 37h                  ; [8].oppPriorityLo
+                db 3Dh                  ; [8].oppPriorityHi
+                db 0                    ; [8].strongElement
+                db 20h                  ; [8].weakElement
+                db 40h                  ; [8].repelFlags
+                db 0Fh                  ; [8].toHitLo
+                db 19h                  ; [8].toHitHi
+                db 19h                  ; [8].spellSaveLo
+                db 23h                  ; [8].spellSaveHi
+                db 'Herb/\s',0,0,0,0,0,0,0,0,0; _name
+                db 0E0h                 ; [9].hpDice
+                dw 28h                  ; [9].hpBase
+                db 11h                  ; [9].distance
+                db 16h                  ; [9].packedGenAc
+                db 0                    ; [9].groupSize
+                db 0F0h                 ; [9].attackType._type
+                db 69h                  ; [9].attackType.damage
+                db 0F0h                 ; [9].attackType._type
+                db 69h                  ; [9].attackType.damage
+                db 0F0h                 ; [9].attackType._type
+                db 69h                  ; [9].attackType.damage
+                db 42h                  ; [9].attackType._type
+                db 20h                  ; [9].attackType.damage
+                db 0                    ; [9].breathFlag
+                db 0                    ; [9].breathRange
+                db 5                    ; [9].picIndex
+                db 64h                  ; [9].rewardLo
+                db 0                    ; [9].rewardMid
+                db 0                    ; [9].rewardHi
+                db 82h                  ; [9].flags
+                db 13h                  ; [9].breathSaveLo
+                db 1Eh                  ; [9].breathSaveHi
+                db 28h                  ; [9].oppPriorityLo
+                db 46h                  ; [9].oppPriorityHi
+                db 0                    ; [9].strongElement
+                db 0                    ; [9].weakElement
+                db 0                    ; [9].repelFlags
+                db 14h                  ; [9].toHitLo
+                db 1Eh                  ; [9].toHitHi
+                db 0Ah                  ; [9].spellSaveLo
+                db 64h                  ; [9].spellSaveHi
+                db 'Greater Demon',0,0,0; _name
+                db 0E1h                 ; [10].hpDice
+                dw 0Ah                  ; [10].hpBase
+                db 11h                  ; [10].distance
+                db 9Ch                  ; [10].packedGenAc
+                db 0                    ; [10].groupSize
+                db 0F0h                 ; [10].attackType._type
+                db 6Ch                  ; [10].attackType.damage
+                db 0F0h                 ; [10].attackType._type
+                db 6Ch                  ; [10].attackType.damage
+                db 80h                  ; [10].attackType._type
+                db 69h                  ; [10].attackType.damage
+                db 80h                  ; [10].attackType._type
+                db 69h                  ; [10].attackType.damage
+                db 2                    ; [10].breathFlag
+                db 5                    ; [10].breathRange
+                db 5                    ; [10].picIndex
+                db 64h                  ; [10].rewardLo
+                db 0                    ; [10].rewardMid
+                db 0                    ; [10].rewardHi
+                db 0C5h                 ; [10].flags
+                db 16h                  ; [10].breathSaveLo
+                db 23h                  ; [10].breathSaveHi
+                db 20h                  ; [10].oppPriorityLo
+                db 48h                  ; [10].oppPriorityHi
+                db 0                    ; [10].strongElement
+                db 20h                  ; [10].weakElement
+                db 40h                  ; [10].repelFlags
+                db 19h                  ; [10].toHitLo
+                db 25h                  ; [10].toHitHi
+                db 0Fh                  ; [10].spellSaveLo
+                db 64h                  ; [10].spellSaveHi
+                db 'Kringle Bro',27h,0,0,0,0; _name
+                db 0E1h                 ; [11].hpDice
+                dw 0C8h                 ; [11].hpBase
+                db 11h                  ; [11].distance
+                db 1Eh                  ; [11].packedGenAc
+                db 0                    ; [11].groupSize
+                db 0F0h                 ; [11].attackType._type
+                db 73h                  ; [11].attackType.damage
+                db 0F0h                 ; [11].attackType._type
+                db 73h                  ; [11].attackType.damage
+                db 0F0h                 ; [11].attackType._type
+                db 73h                  ; [11].attackType.damage
+                db 4Bh                  ; [11].attackType._type
+                db 19h                  ; [11].attackType.damage
+                db 0                    ; [11].breathFlag
+                db 0                    ; [11].breathRange
+                db 0Ah                  ; [11].picIndex
+                db 64h                  ; [11].rewardLo
+                db 0                    ; [11].rewardMid
+                db 0                    ; [11].rewardHi
+                db 85h                  ; [11].flags
+                db 16h                  ; [11].breathSaveLo
+                db 23h                  ; [11].breathSaveHi
+                db 32h                  ; [11].oppPriorityLo
+                db 50h                  ; [11].oppPriorityHi
+                db 0                    ; [11].strongElement
+                db 0                    ; [11].weakElement
+                db 0                    ; [11].repelFlags
+                db 23h                  ; [11].toHitLo
+                db 2Dh                  ; [11].toHitHi
+                db 0Ah                  ; [11].spellSaveLo
+                db 64h                  ; [11].spellSaveHi
+                db 'Earth Elemental',0  ; _name
+                db 0E2h                 ; [12].hpDice
+                dw 12Ch                 ; [12].hpBase
+                db 11h                  ; [12].distance
+                db 9Fh                  ; [12].packedGenAc
+                db 0                    ; [12].groupSize
+                db 0F0h                 ; [12].attackType._type
+                db 8Eh                  ; [12].attackType.damage
+                db 0F0h                 ; [12].attackType._type
+                db 8Eh                  ; [12].attackType.damage
+                db 0F0h                 ; [12].attackType._type
+                db 8Eh                  ; [12].attackType.damage
+                db 6Eh                  ; [12].attackType._type
+                db 32h                  ; [12].attackType.damage
+                db 0                    ; [12].breathFlag
+                db 0                    ; [12].breathRange
+                db 5                    ; [12].picIndex
+                db 64h                  ; [12].rewardLo
+                db 0                    ; [12].rewardMid
+                db 0                    ; [12].rewardHi
+                db 0C5h                 ; [12].flags
+                db 16h                  ; [12].breathSaveLo
+                db 23h                  ; [12].breathSaveHi
+                db 32h                  ; [12].oppPriorityLo
+                db 50h                  ; [12].oppPriorityHi
+                db 0                    ; [12].strongElement
+                db 0                    ; [12].weakElement
+                db 0                    ; [12].repelFlags
+                db 23h                  ; [12].toHitLo
+                db 2Dh                  ; [12].toHitHi
+                db 0Ah                  ; [12].spellSaveLo
+                db 64h                  ; [12].spellSaveHi
+                db 'Frost Giant/\s',0,0 ; _name
+                db 0A1h                 ; [13].hpDice
+                dw 14h                  ; [13].hpBase
+                db 11h                  ; [13].distance
+                db 17h                  ; [13].packedGenAc
+                db 0                    ; [13].groupSize
+                db 0F0h                 ; [13].attackType._type
+                db 64h                  ; [13].attackType.damage
+                db 0F0h                 ; [13].attackType._type
+                db 64h                  ; [13].attackType.damage
+                db 0F0h                 ; [13].attackType._type
+                db 64h                  ; [13].attackType.damage
+                db 0FFh                 ; [13].attackType._type
+                db 0                    ; [13].attackType.damage
+                db 0                    ; [13].breathFlag
+                db 0                    ; [13].breathRange
+                db 33h                  ; [13].picIndex
+                db 64h                  ; [13].rewardLo
+                db 0                    ; [13].rewardMid
+                db 0                    ; [13].rewardHi
+                db 0C5h                 ; [13].flags
+                db 12h                  ; [13].breathSaveLo
+                db 19h                  ; [13].breathSaveHi
+                db 37h                  ; [13].oppPriorityLo
+                db 3Dh                  ; [13].oppPriorityHi
+                db 10h                  ; [13].strongElement
+                db 80h                  ; [13].weakElement
+                db 0                    ; [13].repelFlags
+                db 0Fh                  ; [13].toHitLo
+                db 19h                  ; [13].toHitHi
+                db 19h                  ; [13].spellSaveLo
+                db 23h                  ; [13].spellSaveHi
+                db 'Molten M/an\en',0,0 ; _name
+                db 0C0h                 ; [14].hpDice
+                dw 32h                  ; [14].hpBase
+                db 11h                  ; [14].distance
+                db 94h                  ; [14].packedGenAc
+                db 0                    ; [14].groupSize
+                db 80h                  ; [14].attackType._type
+                db 62h                  ; [14].attackType.damage
+                db 80h                  ; [14].attackType._type
+                db 62h                  ; [14].attackType.damage
+                db 0F0h                 ; [14].attackType._type
+                db 64h                  ; [14].attackType.damage
+                db 0F0h                 ; [14].attackType._type
+                db 64h                  ; [14].attackType.damage
+                db 4                    ; [14].breathFlag
+                db 4                    ; [14].breathRange
+                db 5                    ; [14].picIndex
+                db 64h                  ; [14].rewardLo
+                db 0                    ; [14].rewardMid
+                db 0                    ; [14].rewardHi
+                db 80h                  ; [14].flags
+                db 13h                  ; [14].breathSaveLo
+                db 1Ah                  ; [14].breathSaveHi
+                db 38h                  ; [14].oppPriorityLo
+                db 3Eh                  ; [14].oppPriorityHi
+                db 80h                  ; [14].strongElement
+                db 10h                  ; [14].weakElement
+                db 0                    ; [14].repelFlags
+                db 10h                  ; [14].toHitLo
+                db 1Ah                  ; [14].toHitHi
+                db 19h                  ; [14].spellSaveLo
+                db 24h                  ; [14].spellSaveHi
+                db 'Bulldozer/\s',0,0,0,0; _name
+                db 0E0h                 ; [15].hpDice
+                dw 30h                  ; [15].hpBase
+                db 1                    ; [15].distance
+                db 98h                  ; [15].packedGenAc
+                db 0                    ; [15].groupSize
+                db 0F0h                 ; [15].attackType._type
+                db 69h                  ; [15].attackType.damage
+                db 0F0h                 ; [15].attackType._type
+                db 69h                  ; [15].attackType.damage
+                db 0F0h                 ; [15].attackType._type
+                db 6Bh                  ; [15].attackType.damage
+                db 0F0h                 ; [15].attackType._type
+                db 6Bh                  ; [15].attackType.damage
+                db 0                    ; [15].breathFlag
+                db 0                    ; [15].breathRange
+                db 0Bh                  ; [15].picIndex
+                db 64h                  ; [15].rewardLo
+                db 0                    ; [15].rewardMid
+                db 0                    ; [15].rewardHi
+                db 0C0h                 ; [15].flags
+                db 13h                  ; [15].breathSaveLo
+                db 1Eh                  ; [15].breathSaveHi
+                db 28h                  ; [15].oppPriorityLo
+                db 46h                  ; [15].oppPriorityHi
+                db 0                    ; [15].strongElement
+                db 0                    ; [15].weakElement
+                db 0                    ; [15].repelFlags
+                db 14h                  ; [15].toHitLo
+                db 1Eh                  ; [15].toHitHi
+                db 0Ah                  ; [15].spellSaveLo
+                db 64h                  ; [15].spellSaveHi
+                db 'Vanquisher/\s',0,0,0; _name
+                db 0E1h                 ; [16].hpDice
+                dw 40h                  ; [16].hpBase
+                db 11h                  ; [16].distance
+                db 9Dh                  ; [16].packedGenAc
+                db 0                    ; [16].groupSize
+                db 32h                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 3Dh                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 32h                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 42h                  ; [16].attackType._type
+                db 1Eh                  ; [16].attackType.damage
+                db 0                    ; [16].breathFlag
+                db 0                    ; [16].breathRange
+                db 36h                  ; [16].picIndex
+                db 64h                  ; [16].rewardLo
+                db 0                    ; [16].rewardMid
+                db 0                    ; [16].rewardHi
+                db 82h                  ; [16].flags
+                db 16h                  ; [16].breathSaveLo
+                db 23h                  ; [16].breathSaveHi
+                db 32h                  ; [16].oppPriorityLo
+                db 50h                  ; [16].oppPriorityHi
+                db 0                    ; [16].strongElement
+                db 0                    ; [16].weakElement
+                db 0                    ; [16].repelFlags
+                db 23h                  ; [16].toHitLo
+                db 2Dh                  ; [16].toHitHi
+                db 0Ah                  ; [16].spellSaveLo
+                db 64h                  ; [16].spellSaveHi
+                db 'Blast Dragon/\s',0  ; _name
+                db 0E3h                 ; [17].hpDice
+                dw 20h                  ; [17].hpBase
+                db 11h                  ; [17].distance
+                db 9Dh                  ; [17].packedGenAc
+                db 0                    ; [17].groupSize
+                db 0F0h                 ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 80h                  ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 80h                  ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 0F0h                 ; [17].attackType._type
+                db 6Eh                  ; [17].attackType.damage
+                db 2                    ; [17].breathFlag
+                db 5                    ; [17].breathRange
+                db 3Dh                  ; [17].picIndex
+                db 64h                  ; [17].rewardLo
+                db 0                    ; [17].rewardMid
+                db 0                    ; [17].rewardHi
+                db 0C2h                 ; [17].flags
+                db 17h                  ; [17].breathSaveLo
+                db 24h                  ; [17].breathSaveHi
+                db 34h                  ; [17].oppPriorityLo
+                db 52h                  ; [17].oppPriorityHi
+                db 80h                  ; [17].strongElement
+                db 0                    ; [17].weakElement
+                db 1                    ; [17].repelFlags
+                db 24h                  ; [17].toHitLo
+                db 2Eh                  ; [17].toHitHi
+                db 0Ah                  ; [17].spellSaveLo
+                db 64h                  ; [17].spellSaveHi
+                db 'One-eyed Angra',0,0 ; _name
+                db 0E2h                 ; [18].hpDice
+                dw 82h                  ; [18].hpBase
+                db 11h                  ; [18].distance
+                db 0DAh                 ; [18].packedGenAc
+                db 0                    ; [18].groupSize
+                db 48h                  ; [18].attackType._type
+                db 20h                  ; [18].attackType.damage
+                db 4Bh                  ; [18].attackType._type
+                db 23h                  ; [18].attackType.damage
+                db 4Bh                  ; [18].attackType._type
+                db 23h                  ; [18].attackType.damage
+                db 2Dh                  ; [18].attackType._type
+                db 23h                  ; [18].attackType.damage
+                db 0                    ; [18].breathFlag
+                db 0                    ; [18].breathRange
+                db 36h                  ; [18].picIndex
+                db 64h                  ; [18].rewardLo
+                db 0                    ; [18].rewardMid
+                db 0                    ; [18].rewardHi
+                db 80h                  ; [18].flags
+                db 19h                  ; [18].breathSaveLo
+                db 28h                  ; [18].breathSaveHi
+                db 28h                  ; [18].oppPriorityLo
+                db 46h                  ; [18].oppPriorityHi
+                db 0                    ; [18].strongElement
+                db 0                    ; [18].weakElement
+                db 0                    ; [18].repelFlags
+                db 22h                  ; [18].toHitLo
+                db 2Eh                  ; [18].toHitHi
+                db 0Ah                  ; [18].spellSaveLo
+                db 5Ah                  ; [18].spellSaveHi
+                db 'Black Death',0,0,0,0,0; _name
+                db 0E9h                 ; [19].hpDice
+                dw 64h                  ; [19].hpBase
+                db 11h                  ; [19].distance
+                db 0A0h                 ; [19].packedGenAc
+                db 20h                  ; [19].groupSize
+                db 0F7h                 ; [19].attackType._type
+                db 0C9h                 ; [19].attackType.damage
+                db 0F7h                 ; [19].attackType._type
+                db 0E9h                 ; [19].attackType.damage
+                db 5Bh                  ; [19].attackType._type
+                db 28h                  ; [19].attackType.damage
+                db 63h                  ; [19].attackType._type
+                db 0                    ; [19].attackType.damage
+                db 0                    ; [19].breathFlag
+                db 0                    ; [19].breathRange
+                db 24h                  ; [19].picIndex
+                db 64h                  ; [19].rewardLo
+                db 0                    ; [19].rewardMid
+                db 0                    ; [19].rewardHi
+                db 80h                  ; [19].flags
+                db 1Eh                  ; [19].breathSaveLo
+                db 28h                  ; [19].breathSaveHi
+                db 3Ch                  ; [19].oppPriorityLo
+                db 5Ah                  ; [19].oppPriorityHi
+                db 0                    ; [19].strongElement
+                db 20h                  ; [19].weakElement
+                db 0                    ; [19].repelFlags
+                db 28h                  ; [19].toHitLo
+                db 2Fh                  ; [19].toHitHi
+                db 14h                  ; [19].spellSaveLo
+                db 64h                  ; [19].spellSaveHi
+                db 'Familiar/\s',0,0,0,0,0; _name
+                db 49h                  ; [20].hpDice
+                dw 32h                  ; [20].hpBase
+                db 11h                  ; [20].distance
+                db 99h                  ; [20].packedGenAc
+                db 0                    ; [20].groupSize
+                db 4Ch                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 22h                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 2Dh                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 5Ah                  ; [20].attackType._type
+                db 32h                  ; [20].attackType.damage
+                db 0                    ; [20].breathFlag
+                db 0                    ; [20].breathRange
+                db 12h                  ; [20].picIndex
+                db 64h                  ; [20].rewardLo
+                db 0                    ; [20].rewardMid
+                db 0                    ; [20].rewardHi
+                db 3                    ; [20].flags
+                db 1Eh                  ; [20].breathSaveLo
+                db 28h                  ; [20].breathSaveHi
+                db 0Ah                  ; [20].oppPriorityLo
+                db 14h                  ; [20].oppPriorityHi
+                db 4                    ; [20].strongElement
+                db 0                    ; [20].weakElement
+                db 0                    ; [20].repelFlags
+                db 0Ah                  ; [20].toHitLo
+                db 0Ah                  ; [20].toHitHi
+                db 0Ah                  ; [20].spellSaveLo
+                db 0Ah                  ; [20].spellSaveHi
+                db 'Black Slayer/\s',0  ; _name
+                db 0                    ; [21].hpDice
+                dw 0FA0h                ; [21].hpBase
+                db 12h                  ; [21].distance
+                db 0A7h                 ; [21].packedGenAc
+                db 23h                  ; [21].groupSize
+                db 0F7h                 ; [21].attackType._type
+                db 64h                  ; [21].attackType.damage
+                db 0F7h                 ; [21].attackType._type
+                db 84h                  ; [21].attackType.damage
+                db 0F7h                 ; [21].attackType._type
+                db 85h                  ; [21].attackType.damage
+                db 0F7h                 ; [21].attackType._type
+                db 65h                  ; [21].attackType.damage
+                db 0                    ; [21].breathFlag
+                db 0                    ; [21].breathRange
+                db 41h                  ; [21].picIndex
+                db 50h                  ; [21].rewardLo
+                db 0C3h                 ; [21].rewardMid
+                db 0                    ; [21].rewardHi
+                db 80h                  ; [21].flags
+                db 28h                  ; [21].breathSaveLo
+                db 32h                  ; [21].breathSaveHi
+                db 5Ah                  ; [21].oppPriorityLo
+                db 78h                  ; [21].oppPriorityHi
+                db 0                    ; [21].strongElement
+                db 20h                  ; [21].weakElement
+                db 10h                  ; [21].repelFlags
+                db 28h                  ; [21].toHitLo
+                db 3Ch                  ; [21].toHitHi
+                db 28h                  ; [21].spellSaveLo
+                db 46h                  ; [21].spellSaveHi
+s_nl	db  0Ah
+		db    0
+s_displayQuestion	db 'What type of display do you wish to use?',0
+s_videoOption1	db 0Ah,0Ah
+		db '1) Composite or TV monitor.',0
+s_videoOption2	db 0Ah,'2) RGB monitor.',0
+s_videoOption3	db 0Ah,'3) EGA monitor.',0
+s_videoOption4	db 0Ah,'4) Tandy computer with RGB monitor.',0
+s_videoQuestion	db 0Ah,0Ah
+		db 'Please enter the appropriate number for your system type:',0
+s_soundQuestion db 'What type of sound output device do you wish to use?',0
+s_soundOption1		db 0Ah,0Ah,'1) MT32.',0
+s_soundOption2	db 0Ah,'2) Ad Lib.',0
+s_soundOption3 db 0Ah,'3) Internal IBM speaker.',0
+s_soundOption4	db 0Ah,'4) Tandy.',0
+s_soundOption5		db 0Ah,'5) PS/1',0
+s_soundPrompt db 0Ah,0Ah,'Please enter the appropriate number for your system type:',0
+s_diskToTransferFrom	db 'Disk to transfer characters from?',0
+s_whoShallTransfer	db 'Who shall transfer?',0
+s_characterAlreadyExists	db 'This character already exists',0
+s_noCharactersFoundOn	db 'No characters found on',0
+		db    0
+s_noPartiesFoundOn	db 'No parties found on',0
+s_transferVersionPrompt	db 'Transfer characters from:',0Ah
+		db '1) Bards I',0Ah
+		db '2) Bards II',0Ah
+		db '3) Bards III',0Ah
+		db 'E) Exit',0
+bi_inventoryMap	db 0, 1, 2, 3, 4, 5, 6,	7, 6, 9; 0
+		db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h, 12h,	13h; 10
+		db 14h,	14h, 14h, 17h, 18h, 19h, 1Ah, 0, 1Ch, 1Dh; 20
+		db 1Eh,	1Fh, 20h, 21h, 22h, 23h, 0, 25h, 0, 0; 30
+		db 28h,	0, 29h,	2Ah, 0,	2Ch, 2Dh, 2Eh, 2Fh, 30h; 40
+		db 31h,	0, 32h,	33h, 0,	0, 34h,	0, 36h,	0; 50
+		db 37h,	1Bh, 39h, 0, 3Bh, 3Ch, 0, 3Eh, 3Fh, 40h; 60
+		db 41h,	42h, 0,	45h, 0,	0, 46h,	47h, 59h, 49h; 70
+		db 0, 4Bh, 0, 0, 4Eh, 0, 4Fh, 51h, 0, 53h; 80
+		db 54h,	55h, 0,	57h, 0,	5Ah, 5Bh, 0, 0,	5Eh; 90
+		db 5Fh,	58h, 0,	0, 0, 0, 43h, 0, 62h, 0; 100
+		db 64h,	64h, 0,	59h, 6Ch, 0, 0,	0, 0, 0; 110
+		db 0, 0, 0, 0, 0, 0, 0,	0; 120
+bii_inventoryMap db 0, 1, 2, 3,	4, 5, 6, 7, 8, 9; 0
+		db 10, 11, 12, 13, 14, 15, 16, 17, 18, 19; 10
+		db 20, 21, 22, 23, 24, 25, 26, 27, 28, 29; 20
+		db 30, 31, 32, 33, 34, 35, 36, 37, 38, 39; 30
+		db 40, 41, 42, 43, 44, 45, 46, 47, 48, 49; 40
+		db 50, 51, 52, 53, 54, 55, 56, 57, 58, 59; 50
+		db 60, 61, 62, 63, 64, 65, 66, 67, 68, 69; 60
+		db 70, 71, 72, 73, 74, 75, 76, 77, 78, 79; 70
+		db 80, 81, 82, 83, 84, 85, 86, 87, 88, 89; 80
+		db 90, 91, 92, 93, 94, 95, 96, 97, 98, 99; 90
+		db 100,	101, 102, 103, 104, 105, 106, 107, 108,	109; 100
+		db 110,	111, 0,	0, 0, 0, 0, 0, 0, 0; 110
+		db 0, 0, 0, 0, 0, 0, 0,	0; 120
+bii_classMap	db 0, 7, 5, 6, 8, 9, 3, 4,	2, 1, 0Ah; 0
+		db 0Dh,	0Eh		; 11
+s_tpw		db '*.tpw',0
+s_tw		db '*.tw',0
+oldCharFilters	dd s_tpw, s_tw	       ; 0
+aAcorns		db 'Acorns',0
+aArrowsOfLife	db 'Arrows of Life',0
+aMalefia	db 'Malefia',0
+aValarian	db 'Valarian',0
+aLanatir	db 'Lanatir',0
+aFerofist	db 'Ferofist',0
+aSceadu		db 'Sceadu',0
+aWerra		db 'Werra',0
+aTarjan		db 'Tarjan',0
+aSkaraBrae	db 'Skara Brae',0
+s_unterbrae	db 'UnterBrae',0
+aArboria	db 'Arboria',0
+aGelidia	db 'Gelidia',0
+aLucencia	db 'Lucencia',0
+aKinestia	db 'Kinestia',0
+aTenebrosia	db 'Tenebrosia',0
+aTarmitia	db 'Tarmitia',0
+aCieraBrannia	db 'Ciera Brannia',0
+aCelariaBree	db 'Celaria Bree',0
+aBlackScar	db 'Black Scar',0
+aDarkCopse	db 'Dark Copse',0
+aNowhere	db 'Nowhere',0
+aFesteringPit	db 'Festering Pit',0
+aSacredGrove	db 'Sacred Grove',0
+aIceKeep	db 'Ice Keep',0
+aShadowCanyon	db 'Shadow Canyon',0
+aTarQuarry	db 'Tar Quarry',0
+aColdPeak	db 'Cold Peak',0
+aCrystalSpring	db 'Crystal Spring',0
+aOldDwarfMine	db 'Old Dwarf Mine',0
+aShadowRock	db 'Shadow Rock',0
+aSulphurSprings	db 'Sulphur Springs',0
+aWarriorsVale	db 'Warriors Vale',0
+aBrilhasti	db 'Brilhasti',0
+s_urmech		db 'Urmech',0
+aTslotha	db 'Tslotha',0
+aCyanis		db 'Cyanis',0
+aTheOldMan	db 'The Old Man',0
+aHawkslayer	db 'Hawkslayer',0
+aVioletMountain	db 'Violet Mountains',0
+aCrystalPalace	db 'Crystal Palace',0
+aCatacombs	db 'Catacombs',0
+aTunnels	db 'Tunnels',0
+aWorkshop	db 'Workshop',0
+aWizardSGuild	db 'Wizard',27h,'s Guild',0
+align 2
+s_copyProtectIntro	db 'To traverse time and space, you must first recite the alignment value of ',0
+s_commaAnd		db ', and ',0
+align 2
+s_commaSpace	db ', ',0
+align 2
+s_period		db '.',0
+aYouHaveFailedT	db 'You have failed to recite the proper alignment pattern!',0
+g_cpLocationFour	dd aArefolia, aAcorns ; 0
+		dd aArrowsOfLife, aCrystalKey; 2
+		dd aCrownOfTruth, aStrifespear; 4
+		dd aRainbowRose, aCrystalLens; 6
+		dd aSmokeyLens, aBlackLens;	8
+		dd aShadowDoor, aShadowLock; 10
+		dd aWineskin,	aNightspear; 12
+		dd aHammerOfWrath, aWandOfPower; 14
+g_cpLocationOne	dd aMalefia, aValarian  ; 0
+		dd aLanatir, s_alliria	; 2
+		dd aFerofist, aSceadu	; 4
+		dd aWerra, aTarjan	; 6
+		dd aSkaraBrae, s_unterbrae; 8
+		dd aArboria, aGelidia	; 10
+		dd aLucencia, aKinestia	; 12
+		dd aTenebrosia,	aTarmitia; 14
+g_cpLocationTwo	dd aCieraBrannia, aCelariaBree; 0
+		dd aBlackScar, aDarkCopse; 2
+		dd aNowhere, aFesteringPit; 4
+		dd aSacredGrove, aIceKeep; 6
+		dd aShadowCanyon, aTarQuarry; 8
+		dd aColdPeak, aCrystalSpring; 10
+		dd aOldDwarfMine, aShadowRock; 12
+		dd aSulphurSprings, aWarriorsVale; 14
+g_cpLocationThree	dd aBrilhasti, s_urmech  ; 0
+		dd aTslotha, aCyanis	; 2
+		dd aTheOldMan, aHawkslayer; 4
+		dd s_scrapwood, s_bardsHall; 6
+		dd s_staggerInn, s_hicHaven; 8
+		dd aVioletMountain, aCrystalPalace; 10
+		dd aCatacombs, aTunnels	; 12
+		dd aWorkshop, aWizardSGuild; 14
+byte_4CA18	db 0, 4		   ; 0
+		db 18,	23		; 2
+		db 37,	49		; 4
+		db 51,	70		; 6
+		db 84,	98		; 8
+		db 102,	112		; 10
+		db 131,	133		; 12
+		db 145,	151		; 14
+byte_4CA28	db 0Dh			; 0
+		db 7			; 1
+		db    0			; 2
+		db    2			; 3
+		db    6			; 4
+		db    9			; 5
+		db  0Fh			; 6
+		db    3			; 7
+		db    5			; 8
+		db  0Ch			; 9
+		db  0Ah			; 10
+		db    1			; 11
+		db  0Eh			; 12
+		db    8			; 13
+		db    4			; 14
+		db  0Bh			; 15
+byte_4CA38	db 1
+		db  0Fh
+		db  7Fh
+		db 0FFh
+		db    0
+		db    0
+		db    0
+
+byte_4CA3F	db 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
+		db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
+		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
+		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
+		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
+		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
+		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
+		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
+		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
+		db 8, 8, 8, 8, 8, 8, 8,	8, 8, 8, 8, 8, 8, 8, 8,	8
+byte_4CB3F	db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0; 0
+		db 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0; 16
+		db 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,	1; 32
+		db 2, 2, 2, 2, 2, 2, 2,	2, 2, 2, 2, 2, 2, 2, 2,	2; 48
+		db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3; 64
+		db 4, 4, 4, 4, 4, 4, 4,	4, 5, 5, 5, 5, 5, 5, 5,	5; 80
+		db 6, 6, 6, 6, 6, 6, 6,	6, 7, 7, 7, 7, 7, 7, 7,	7; 96
+		db 8, 8, 8, 8, 8, 8, 8,	8, 9, 9, 9, 9, 9, 9, 9,	9; 112
+		db 0Ah,	0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Bh,	0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh; 128
+		db 0Ch,	0Ch, 0Ch, 0Ch, 0Dh, 0Dh, 0Dh, 0Dh, 0Eh,	0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh; 144
+		db 10h,	10h, 10h, 10h, 11h, 11h, 11h, 11h, 12h,	12h, 12h, 12h, 13h, 13h, 13h, 13h; 160
+		db 14h,	14h, 14h, 14h, 15h, 15h, 15h, 15h, 16h,	16h, 16h, 16h, 17h, 17h, 17h, 17h; 176
+		db 18h,	18h, 19h, 19h, 1Ah, 1Ah, 1Bh, 1Bh, 1Ch,	1Ch, 1Dh, 1Dh, 1Eh, 1Eh, 1Fh, 1Fh; 192
+		db 20h,	20h, 21h, 21h, 22h, 22h, 23h, 23h, 24h,	24h, 25h, 25h, 26h, 26h, 27h, 27h; 208
+		db 28h,	28h, 29h, 29h, 2Ah, 2Ah, 2Bh, 2Bh, 2Ch,	2Ch, 2Dh, 2Dh, 2Eh, 2Eh, 2Fh, 2Fh; 224
+		db 30h,	31h, 32h, 33h, 34h, 35h, 36h, 37h, 38h,	39h, 3Ah, 3Bh, 3Ch, 3Dh, 3Eh, 3Fh; 240
+_d3cmp_baseAddr	dw 0
+d3cmp_repeatCount	dw 0
+_d3cmp_offset	dw 0
+countMaybe	dd 0
+		db 0
+		db 0
+word_4CC4B	dw 272h dup(0)
+word_4D12F	dw 0
+word_4D131	dw 0
+word_4D133	dw 272h dup(0)
+word_4D617	dw 0
+word_4D619	dw 13Ah dup(0)
+word_4D88D	dw 272h dup(0)
+word_4DD71	dw 0
+dataHeader	dd 0
+		db    0
+		db    0
+		db    0
+		db    0
+d3comp_outputBuffer	db 103Bh dup(20h)	   ; 0
+d3cmp_workBuf	dw 40h dup(0)		; 0
+		db    0
+		db    0
+d3cmp_workBufIndex	dw	0
+d3cmp_srcP	dd 0
+		db    0
+		db    0
+		db    0
+		db    0
+d3cmp_destP	dd	0
+word_4EE46	dw 0
+word_4EE48	dw 0
+word_4EE4A	dw 0
+word_4EE4C	dw 0
+word_4EE4E	dw 0
+word_4EE50	dw 0
+
+
+randomSeed	dw 0
+g_locationNumber dw	0
+dunLevelIndex	dw 0
+g_dunLevelNum	dw 0
+sq_north	dw 0
+sq_east		dw 0
+g_direction	dw 0
+inDungeonMaybe	dw 0
+g_mapRval dw 0
+g_sameSquareFlag	dw 0
+g_curSpellNumber	dw 0
+g_gameProgressFlags	db 7 dup(0)     ; 0
+byte_4EE71	db 0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+g_vm_registers	dw 20h dup(0)	    ; 0
+g_currentHour	db 0
+lightDistance	db 0
+g_songDuration	db 0
+lightDuration		db 0
+compassDuration		db 0
+detectDuration		db 0
+shieldDuration		db 0
+levitationDuration	db 0
+g_detectType		db 0
+g_levelNumber	db 0
+g_levelFlags	db 0
+g_dunWidth	db 0
+g_dunHeight	db 0
+g_monsterGroupCount	db 0
+g_partyAttackFlag	db 0
+shieldAcBonus	db 0
+byte_4EECC	db 0
+minimapWallBitmasks db	0FFh,	0,	0,	0,	0,	0,	0,	0	; 0
+		; 11111111
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		db	1,	1,	1,	1,	1,	1,	1,	1	; 1
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		; 00000001
+		db	0,	0,	0,	0,	0,	0,	0,	0FFh	; 2
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 11111111
+		db	80h,	80h,	80h,	80h,	80h,	80h,	80h,	80h	; 3
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		; 10000000
+		db	6Bh,	8,	0,	0,	0,	0,	0,	0	; 4
+		; 01101011
+		; 00001000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		db	1,	1,	0,	6,	6,	0,	1,	1	; 5
+		; 00000001
+		; 00000001
+		; 00000000
+		; 00000110
+		; 00000110
+		; 00000000
+		; 00000001
+		; 00000001
+		db	0,	0,	0,	0,	0,	0,	8,	6Bh	; 6
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00001000
+		; 01101011
+		db	80h,	80h,	0, 	30h,	30h,	0,	80h,	80h	; 7
+		; 10000000
+		; 10000000
+		; 00000000
+		; 00110000
+		; 00110000
+		; 00000000
+		; 10000000
+		; 10000000
+		db	55h,	0,	0,	0,	0,	0,	0,	0	; 8
+		; 01010101
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		db	1,	1,	0,	1,	1,	0,	1,	1	; 9
+		; 00000001
+		; 00000001
+		; 00000000
+		; 00000001
+		; 00000001
+		; 00000000
+		; 00000001
+		; 00000001
+		db	0,	0,	0,	0,	0,	0,	0,	55h	; 10
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 00000000
+		; 01010101
+		db	80h,	80h,	0,	80h,	80h,	0,	80h,	80h	; 11
+		; 10000000
+		; 10000000
+		; 00000000
+		; 10000000
+		; 10000000
+		; 00000000
+		; 10000000
+		; 10000000
+		db	0,	0,	8,	1Ch,	1Ch,	8,	0,	0	; 12
+		; 00000000
+		; 00000000
+		; 00001000
+		; 00011100
+		; 00011100
+		; 00001000
+		; 00000000
+		; 00000000
+		db 0, 66h, 3Ch, 18h, 18h, 3Ch, 66h, 0; 13 - minimap_X
+		; 00000000
+		; 01100110
+		; 00111100
+		; 00011000
+		; 00011000
+		; 00111100
+		; 01100110
+		; 00000000
+		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh ; 14
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		; 11111111
+		db 0, 0
+s_faster		db 0Ah,'<Faster...>',0Ah,0
+s_slower		db 0Ah,'<Slower...>',0Ah,0
+txtDelayTable	db 1, 4, 7, 0Bh, 0Eh, 11h, 14h, 17h, 1Ah, 1Dh
+txtDelayIndex	db 7
+_clockTicks	dw 0
+word_4EF49	dw 0
+byte_4EF4B	db 0
+byte_4EF4C	db 0
+byte_4EF4D	db 0
+align 4
+byte_4EF50	db 0
+byte_4EF51	db 0
+byte_4EF52	db 0
+byte_4EF53	db 0
+spell_mouseClicked	db 0
+mouse_moved	db 0
+mouse_x		dw 0DCh
+mouse_y		dw 0
+word_4EF59	dw 0
+word_4EF5B	dw 0
+byte_4EF5D	db 0
+byte_4EF5E	db 0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+		db  0Ah
+		db    0
+		db    0
+		db    0
+		db    0
+		db    0
+word_4EF6F	dw 3F8h
+		db    4
+		db    0
+		db    0
+		db 0B8h	; ∏
+		db    1
+		db    0
+		db    0
+		db    0
+byte_4EF79	db 1
+byte_4EF7A	db 0
+align 2
+word_4EF7C	dw 0
+word_4EF7E	dw 0
+off_4EF80	dw offset sub_2843B
+word_4EF82	dw 0
+		dw seg dseg
+		db 4Ch dup(0)
+off_4EFD2	dw offset word_4EF82
+aC_file_info	db ';C_FILE_INFO',0
+dword_4EFE1	dd 0
+		db 8 dup(0)
+word_4EFED	dw 0
+		db 4 dup(0)
+word_4EFF3	dw 0
+word_4EFF5	dw 0
+		db 0
+byte_4EFF8	db 0
+align 2
+word_4EFFA	dw 14h
+byte_4EFFC	db 3 dup(81h), 2 dup(1), 0Fh dup(0)
+word_4F010	dw 0
+word_4F012	dw 0
+word_4F014	dw 0
+word_4F016	dw 0
+word_4F018	dw 0
+off_4F01A	dd unk_4F01E
+unk_4F01E	db  43h	; C
+		db    0
+		db    0
+		db    0
+byte_4F022	db 0
+byte_4F023	db 0
+dword_4F024	dd 0
+unk_4F028	db	0
+		db    0
+word_4F02A	dw 0
+dword_4F02C	dd 0FFFFFFFFh
+word_4F030	dw (offset dseg_end+102h)
+dword_4F032	dd 0
+byte_4F036	db 0, 16h, 2 dup(2), 18h
+		db 0Dh, 9, 3 dup(0Ch), 7; 5
+		db 8, 2 dup(16h), 0FFh, 12h; 11
+		db 0Dh, 12h, 2, 0FFh    ; 16
+word_4F04A	dw 0
+byte_4F04C	db 200h dup(0)
+byte_4F24C	db 200h dup(0)
+byte_4F44C	db 200h dup(0)
+off_4F64C	dw offset byte_4F04C
+		dw seg dseg
+		db    0
+		db    0
+		dd byte_4F04C
+		db    1
+		db    0
+byte_4F658	db 0Ah dup(0), 2, 1
+byte_4F664	db 0Ah dup(0), 2 dup(2), 0Ah dup(0), 84h, 3, 0Ah dup(0), 2, 4
+		db 0A8h dup(0)
+byte_4F730	db 0Ch dup(0)
+byte_4F73C	db 1, 2 dup(0), 2, 74h dup(0)
+word_4F7B4	dw offset byte_4F730
+seg_4F7B6	dw seg dseg
+word_4F7B8	dw 0
+aNull		db '(null)',0
+aNull_0		db '(null)',0
+asc_4F7C8	db '+- #',0
+align 2
+word_4F7CE	dw 0
+word_4F7D0	dw 0
+align 4
+word_4F7D4	dw 0
+align 4
+word_4F7D8	dw 0
+word_4F7DA	dw 0
+word_4F7DC	dw 0
+word_4F7DE	dw 2000h
+word_4F7E0	dw 0
+byte_4F7E2	db 0
+align 2
+off_4F7E4	dd sub_284E6
+off_4F7E8	dd sub_284E6
+off_4F7EC	dd sub_284E6
+off_4F7F0	dd sub_284E6
+off_4F7F4	dd sub_284E6
+		db    0
+		db    0
+		db    0
+		db    0
+		db    1
+		db    1
+		db    0
+sscanf_charFlags	db 32, 32, 32, 32, 32, 32, 32, 32
+		db 32, 40, 40, 40, 40, 40, 32, 32
+		db 32, 32, 32, 32, 32, 32, 32, 32
+		db 32, 32, 32, 32, 32, 32, 32, 32
+		db 72, 16, 16, 16, 16, 16, 16, 16
+		db 16, 16, 16, 16, 16, 16, 16, 16
+		db 132,	132, 132, 132, 132, 132, 132, 132
+		db 132,	132, 16, 16, 16, 16, 16, 16
+		db 16, 129, 129, 129, 129, 129,	129, 1
+		db 1, 1, 1, 1, 1, 1, 1,	1
+		db 1, 1, 1, 1, 1, 1, 1,	1
+		db 1, 1, 1, 16,	16, 16,	16, 16
+		db 16, 130, 130, 130, 130, 130,	130, 2
+		db 2, 2, 2, 2, 2, 2, 2,	2
+		db 2, 2, 2, 2, 2, 2, 2,	2
+		db 2, 2, 2, 16,	16, 16,	16, 32
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0, 0, 0, 0, 0, 0, 0,	0
+		db 0
+word_4F900	dw 0FFFFh
+align 4
+unk_4F904	db	0
+db    0
+word_4F906	dw 0
+dword_4F908	dd 0
+dword_4F90C	dd 0
+off_4F910	dd sub_28846
+seg027_41	dw seg seg027
+dseg_x		dw seg dseg
+seg027_x	dw seg	seg027
+seg022_x	dw seg	seg022
+seg023_x	dw seg seg023
+aNmsg		db '<<NMSG>>',0
+align 2
+aR6000StackOver	db 'R6000',0Dh,0Ah
+		db '- stack overflow',0Dh,0Ah,0
+		db    3
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  33h	; 3
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  69h	; i
+		db  6Eh	; n
+		db  74h	; t
+		db  65h	; e
+		db  67h	; g
+		db  65h	; e
+		db  72h	; r
+		db  20h
+		db  64h	; d
+		db  69h	; i
+		db  76h	; v
+		db  69h	; i
+		db  64h	; d
+		db  65h	; e
+		db  20h
+		db  62h	; b
+		db  79h	; y
+		db  20h
+		db  30h	; 0
+		db  0Dh
+		db  0Ah
+		db    0
+		db    9
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  39h	; 9
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  6Eh	; n
+		db  6Fh	; o
+		db  74h	; t
+		db  20h
+		db  65h	; e
+		db  6Eh	; n
+		db  6Fh	; o
+		db  75h	; u
+		db  67h	; g
+		db  68h	; h
+		db  20h
+		db  73h	; s
+		db  70h	; p
+		db  61h	; a
+		db  63h	; c
+		db  65h	; e
+		db  20h
+		db  66h	; f
+		db  6Fh	; o
+		db  72h	; r
+		db  20h
+		db  65h	; e
+		db  6Eh	; n
+		db  76h	; v
+		db  69h	; i
+		db  72h	; r
+		db  6Fh	; o
+		db  6Eh	; n
+		db  6Dh	; m
+		db  65h	; e
+		db  6Eh	; n
+		db  74h	; t
+		db  0Dh
+		db  0Ah
+		db    0
+		db 0FCh	; ¸
+		db    0
+		db  0Dh
+		db  0Ah
+		db    0
+		db 0FFh
+		db    0
+		db  72h	; r
+		db  75h	; u
+		db  6Eh	; n
+		db  2Dh	; -
+		db  74h	; t
+		db  69h	; i
+		db  6Dh	; m
+		db  65h	; e
+		db  20h
+		db  65h	; e
+		db  72h	; r
+		db  72h	; r
+		db  6Fh	; o
+		db  72h	; r
+		db  20h
+		db    0
+		db    2
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  32h	; 2
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  66h	; f
+		db  6Ch	; l
+		db  6Fh	; o
+		db  61h	; a
+		db  74h	; t
+		db  69h	; i
+		db  6Eh	; n
+		db  67h	; g
+		db  20h
+		db  70h	; p
+		db  6Fh	; o
+		db  69h	; i
+		db  6Eh	; n
+		db  74h	; t
+		db  20h
+		db  6Eh	; n
+		db  6Fh	; o
+		db  74h	; t
+		db  20h
+		db  6Ch	; l
+		db  6Fh	; o
+		db  61h	; a
+		db  64h	; d
+		db  65h	; e
+		db  64h	; d
+		db  0Dh
+		db  0Ah
+		db    0
+		db    1
+		db    0
+		db  52h	; R
+		db  36h	; 6
+		db  30h	; 0
+		db  30h	; 0
+		db  31h	; 1
+		db  0Dh
+		db  0Ah
+		db  2Dh	; -
+		db  20h
+		db  6Eh	; n
+		db  75h	; u
+		db  6Ch	; l
+		db  6Ch	; l
+		db  20h
+		db  70h	; p
+		db  6Fh	; o
+		db  69h	; i
+		db  6Eh	; n
+		db  74h	; t
+		db  65h	; e
+		db  72h	; r
+		db  20h
+		db  61h	; a
+		db  73h	; s
+		db  73h	; s
+		db  69h	; i
+		db  67h	; g
+		db  6Eh	; n
+		db  6Dh	; m
+		db  65h	; e
+		db  6Eh	; n
+		db  74h	; t
+		db  0Dh
+		db  0Ah
+		db    0
+		db 0FFh
+		db 0FFh
+		db 0FFh
+		db    0
+tavern_sayingBase	dw 0
+tav_drunkLevel	db 8 dup(0)	       ; 0
+curStrByte	db ?
+align 2
+dataBufOff	dw ?
+dataBufSeg	dw ?
+bitsLeft	dw ?
+_str_capFlag	dw	?
+align 4
+word_4FD6C	dw ?
+sscanf_structP	dd ?
+word_4FD72	dw ?
+word_4FD74	dw ?
+sscanf_argSizeFlag	dw ?
+sscanf_charListFlag	dw ?
+word_4FD7A	dw ?
+dword_4FD7C	dd ?
+sscanf_bufp	dd ?
+word_4FD84	dw ?
+sscanf_buf	db 100h dup(?)
+sscanf_minWidth dw ?
+sscanf_noAssign dw ?
+word_4FE8A	dw ?
+word_4FE8C	dw ?
+_sscanf_floatBuf	db 42h dup(?)
+word_4FED0	dw ?
+word_4FED2	dw ?
+word_4FED4	dw ?
+dword_4FED6	dd ?
+word_4FEDA	dw ?
+word_4FEDC	dw ?
+word_4FEDE	dw ?
+word_4FEE0	dw ?
+byte_4FEE2	db 0Ch dup(?)
+word_4FEEE	dw ?
+dword_4FEF0	dd ?
+word_4FEF4	dw ?
+word_4FEF6	dw ?
+word_4FEF8	dw ?
+word_4FEFA	dw ?
+word_4FEFC	dw ?
+word_4FEFE	dw ?
+word_4FF00	dw ?
+word_4FF02	dw ?
+word_4FF04	dw ?
+word_4FF06	dw ?
+byte_4FF08	db 15Eh dup(?)
+word_50066	dw ?
+word_50068	dw ?
+byte_5006A	db 4 dup(?)
+dseg_end	db ?
+		db ?
+align 8
+
+debug_here	db	'here',0
+debug_alt	db	'alt',0
+
+
+dseg ends
+
+; Segment type: Uninitialized
+seg029 segment word stack 'STACK' use16
+        assume cs:seg029
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+byte_50070 db 0FA0h dup(?)
+seg029 ends
+
+end start

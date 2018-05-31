@@ -9,7 +9,7 @@ sp_luckSpell proc far
 
 	mov	bx, [bp+spelIndexNumber]
 	mov	al, spellEffectFlags[bx]
-	add	gs:byte_41E70, al
+	add	gs:g_charFreezeToHitBonus, al
 	push	bx
 	push	[bp+spellCaster]
 	CALL(sp_antiMagic, near)

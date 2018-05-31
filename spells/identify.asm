@@ -15,7 +15,7 @@ sp_identifySpell proc far
 	PUSH_STACK_ADDRESS(var_32)
 	PUSH_STACK_ADDRESS(var_F4)
 	push	[bp+spellCaster]
-	CALL(sub_188E8)
+	CALL(inventory_getItemList)
 	mov	[bp+var_34], ax
 	or	ax, ax
 	jnz	short loc_22080

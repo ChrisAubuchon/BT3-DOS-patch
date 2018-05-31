@@ -141,8 +141,8 @@ loc_12AD8:
 	mov	bx, [bp+counter]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (classString+2)[bx]
-	push	word ptr classString[bx]
+	push	word ptr (g_classString+2)[bx]
+	push	word ptr g_classString[bx]
 	push	[bp+var_EA]
 	CALL(printListItem, near)
 	mov	si, [bp+var_EA]

@@ -301,7 +301,8 @@ mon_t struc ; (sizeof=0x30)
 _name db 16 dup(?)	; string(C)
 hpDice db ?
 hpBase dw ?
-distance db ?
+distance db ?				; Low 4 bits is current distance 
+					; High 4 is amount to advance
 packedGenAc db ?
 groupSize db ?
 attackType monAttackStru 4 dup({?,?})

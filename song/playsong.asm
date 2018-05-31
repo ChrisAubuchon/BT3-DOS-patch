@@ -28,12 +28,12 @@ song_playSong proc far
 	shl	bx, 1
 	push	gs:musicBufs._segment[bx]
 	push	word ptr gs:musicBufs._offset[bx]
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(inven_getTypeEqSlot)
+	CALL(character_getTypeEquippedSlot)
 	mov	[bp+var_4], ax
 	inc	ax
 	jz	short loc_22D59

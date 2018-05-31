@@ -20,7 +20,7 @@ l_partCaster:
 	mov	al, spellEffectFlags[bx]
 	mov	bl, gs:bat_curTarget
 	and	bx, 7
-	mov	gs:strengthBonus[bx], al
+	mov	gs:g_strengthSpellBonus[bx], al
 l_return:
 	FUNC_EXIT
 	retf

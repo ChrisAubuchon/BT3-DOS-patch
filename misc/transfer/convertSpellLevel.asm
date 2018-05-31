@@ -26,7 +26,7 @@ loc_26AB8:
 	push	[bp+var_4]
 	mov	ax, 7
 	push	ax
-	CALL(mage_learnSpellLevel)
+	CALL(character_learnSpellLevel)
 	inc	[bp+var_4]
 	jmp	short loc_26AB8
 l_return:

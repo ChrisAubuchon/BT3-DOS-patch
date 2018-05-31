@@ -55,7 +55,7 @@ l_spellLevelLoop:
 	push	[bp+currentClassSpellIndex]
 	push	[bp+loopCounter]
 	push	[bp+slotNumber]
-	CALL(mage_hasLearnedSpellLevel, near)
+	CALL(character_learnedSpellLevel, near)
 	or	ax, ax
 	jnz	short l_spellLevelNext
 
@@ -180,7 +180,7 @@ l_changeClass:
 	sub	ax, ax
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpellLevel, near)
+	CALL(character_learnSpellLevel, near)
 	mov	byte ptr g_printPartyFlag,	0
 	PUSH_OFFSET(s_beginsNewProfession)
 	PRINTSTRING(wait)

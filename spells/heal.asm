@@ -162,7 +162,7 @@ l_cureOld:
 	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
-	CALL(_doAgeStatus)
+	CALL(character_applyAgeStatus)
 l_cureOldReturn:
 	jmp	short l_return
 
@@ -218,7 +218,7 @@ l_notDead:
 	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
 	mov	gs:party.hostileFlag[bx], 0
 	mov	bx, [bp+partySlotNumber]
-	mov	gs:charActionList[bx], 0
+	mov	gs:g_charActionList[bx], 0
 	mov	sp, bp
 	pop	bp
 	retf

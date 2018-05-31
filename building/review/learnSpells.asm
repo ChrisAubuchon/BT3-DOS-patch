@@ -39,7 +39,7 @@ l_searchSpellLevelsLoop:
 	push	[bp+spellBase]
 	push	[bp+loopCounter]
 	push	[bp+slotNumber]
-	CALL(mage_hasLearnedSpellLevel, near)
+	CALL(character_learnedSpellLevel, near)
 	or	ax, ax
 	jz	short l_learnedAllLevelsCheck
 	inc	[bp+loopCounter]
@@ -72,8 +72,8 @@ l_ioLoop:
 	sub	bh, bh
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (classString+2)[bx]
-	push	word ptr classString[bx]
+	push	word ptr (g_classString+2)[bx]
+	push	word ptr g_classString[bx]
 	PUSH_STACK_ADDRESS(stringBuffer)
 	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_spellLevel)
@@ -142,7 +142,7 @@ l_removeGold:
 	push	[bp+spellBase]
 	push	[bp+loopCounter]
 	push	[bp+slotNumber]
-	CALL(mage_learnSpellLevel, near)
+	CALL(character_learnSpellLevel, near)
 	jmp	short l_return
 
 l_return:

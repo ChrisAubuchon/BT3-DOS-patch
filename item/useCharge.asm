@@ -38,7 +38,7 @@ loc_11EBC:
 	mov	gs:g_inventoryPackStart, ax
 	mov	ax, [bp+userSlotNumber]
 	mov	gs:g_inventoryPackTarget, ax
-	CALL(inven_pack)
+	CALL(inventory_pack)
 	mov	al, gs:g_currentSinger
 	sub	ah, ah
 	cmp	ax, [bp+userSlotNumber]
@@ -50,7 +50,7 @@ loc_11EBC:
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+userSlotNumber]
-	CALL(inven_hasTypeEquipped)
+	CALL(character_hasTypeEquipped)
 	or	ax, ax
 	jnz	short l_return
 	cmp	gs:byte_422A4, 0

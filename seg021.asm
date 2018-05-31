@@ -34,12 +34,12 @@ db 0Eh,	1Eh, 2Eh, 3Eh, 4Eh, 5Eh, 6Eh, 7Eh; 224
 db 8Eh,	9Eh, 0AEh, 0BEh, 0CEh, 0DEh, 0EEh, 0FEh; 232
 db 0Fh,	1Fh, 2Fh, 3Fh, 4Fh, 5Fh, 6Fh, 7Fh; 240
 db 8Fh,	9Fh, 0AFh, 0BFh, 0CFh, 0DFh, 0EFh, 0FFh; 248
-word_2BF30 dw 0
-word_2BF32 dw 0
-byte_2BF34 db 100h dup(0)	   ; 0
-byte_2C034 db 100h dup(0)	   ; 0
-byte_2C134 db 100h dup(0)	   ; 0
-byte_2C234 db 100h dup(0)	   ; 0
-byte_2C334 db 100h dup(0)	   ; 0
+g_tile_currentScaleValue dw 0
+g_tile_currentCount dw 0
+g_tile_highNibble db 100h dup(0)		; Table with high nibble
+g_tile_highNibbleSwapped db 100h dup(0)		; Table with high nibble in low nibble
+g_tile_lowNibbleSwapped db 100h dup(0)		; Table with low nibble in high nibble
+g_tile_lowNibble db 100h dup(0)			; Table with low nibble
+g_tile_backgroundMask db 100h dup(0)		; Table with mask for background
 bigpicBuf db 268Ch dup(0)	  ; 0
 seg021 ends

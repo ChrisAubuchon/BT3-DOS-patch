@@ -51,7 +51,7 @@ loc_1B5B0:
 	mov	al, gs:monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
-	CALL(dice_doYDX, near)
+	CALL(randomYdX, near)
 	mov	cx, gs:monGroups.hpBase[si]
 	add	cx, ax
 	mov	bl, gs:monGroups.groupSize[si]

@@ -1,6 +1,6 @@
 ; Attributes: bp-spellLevelBased frame
 
-mage_hasLearnedSpellLevel proc far
+character_learnedSpellLevel proc far
 
 	spellCount= word ptr	-4
 	baseSpellNumber= word ptr	-2
@@ -27,7 +27,7 @@ l_loop:
 	push	[bp+baseSpellNumber]
 	inc	[bp+baseSpellNumber]
 	push	[bp+slotNumber]
-	CALL(mage_hasLearnedSpell)
+	CALL(character_learnedSpell)
 	or	ax, ax
 	jnz	short l_loop
 	sub	ax, ax
@@ -39,4 +39,4 @@ l_returnOne:
 l_return:
 	FUNC_EXIT
 	retf
-mage_hasLearnedSpellLevel endp
+character_learnedSpellLevel endp

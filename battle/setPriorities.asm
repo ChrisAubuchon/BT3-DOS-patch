@@ -65,7 +65,7 @@ loc_1C696:
 	mov	al, byte_475AE[bx]
 	mov	bx, [bp+loopCounter]
 	mov	gs:bat_charPriority[bx], al
-	CALL(rnd_2d16)
+	CALL(random_2d16)
 	mov	cx, gs:party.level[si]
 	shr	cx, 1
 	mov	dl, gs:party.dexterity[si]
@@ -93,7 +93,6 @@ l_characterLoopNext:
 
 l_getMonsterPriorities:
 	mov	[bp+loopCounter], 0
-	jmp	short loc_1C711
 
 l_monsterGroupLoop:
 	MONINDEX(ax, STACKVAR(loopCounter), si)

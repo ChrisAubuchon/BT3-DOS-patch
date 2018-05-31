@@ -25,10 +25,10 @@ l_sanctuary:
 l_maxFifteen:
 	mov	al, 15
 l_setBonus:
-	mov	gs:songACBonus,	al
+	mov	gs:g_songAcBonus,	al
 	or	al, al
 	jnz	short l_setBonusIfZero
-	inc	gs:songACBonus
+	inc	gs:g_songAcBonus
 l_setBonusIfZero:
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	l_return

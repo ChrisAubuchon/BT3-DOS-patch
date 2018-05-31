@@ -47,7 +47,7 @@ loc_20FF7:
 	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	[bp+var_C], ax
-	mov	al, levFlags
+	mov	al, g_levelFlags
 	and	ax, 10h
 	push	ax
 	push	dx
@@ -142,7 +142,7 @@ loc_21104:
 	IOWAIT
 	jmp	l_return
 loc_21136:
-	mov	ax, dunLevelNum
+	mov	ax, g_dunLevelNum
 	add	ax, [bp+teleDeltaList+4]
 	push	ax
 	mov	ax, sq_east
@@ -162,8 +162,8 @@ loc_21168:
 	mov	ax, [bp+teleDeltaList+2]
 	add	sq_east, ax
 	mov	ax, [bp+teleDeltaList+4]
-	add	dunLevelNum,	ax
-	mov	di, dunLevelNum
+	add	g_dunLevelNum,	ax
+	mov	di, g_dunLevelNum
 	lfs	bx, [bp+var_16]
 	mov	al, fs:[bx+di+12h]
 	sub	ah, ah
@@ -171,7 +171,7 @@ loc_21168:
 	cmp	dunLevelIndex, si
 	jz	short loc_211F1
 	mov	dunLevelIndex, si
-	mov	buildingRvalMaybe, 4
+	mov	g_mapRval, 4
 	mov	al, fs:[bx+dun_t.deltaSqN]
 	cbw
 	add	sq_north, ax

@@ -20,7 +20,7 @@ bat_charIsAttackable proc far
 
 l_notIllusion:
 	mov	bx, [bp+slotNumber]
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jnz	l_returnZero
 
 	CHARINDEX(ax, bx, bx)

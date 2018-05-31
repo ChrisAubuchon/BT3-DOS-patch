@@ -32,7 +32,7 @@ l_revertAgeStatus:
 	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
-	CALL(_doAgeStatus)
+	CALL(character_applyAgeStatus)
 	jmp	short l_return
 
 l_dispossess:

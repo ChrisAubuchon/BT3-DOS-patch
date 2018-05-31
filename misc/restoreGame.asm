@@ -7,7 +7,7 @@ restoreGame proc far
 
 	FUNC_ENTER(4)
 
-	mov	buildingRvalMaybe, 1
+	mov	g_mapRval, 1
 	PUSH_OFFSET(s_confirmRestore)
 	PRINTSTRING(true)
 	CALL(getYesNo)
@@ -28,7 +28,7 @@ restoreGame proc far
 	CALL(read)
 
 	mov	ax, offset byte_4EECC
-	mov	cx, offset currentLocationMaybe
+	mov	cx, offset g_locationNumber
 	mov	bx, seg	dseg
 	sub	ax, cx
 	push	ax

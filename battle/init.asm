@@ -28,7 +28,7 @@ bat_init proc far
 	mov	gs:runAwayFlag,	al
 
 l_roundStart:
-	CALL(bat_sortMonGroupByDist, near)
+	CALL(bat_monSortGroups, near)
 	CALL(bat_setBigpic, near)
 	push	[bp+var_8]
 	inc	[bp+var_8]
@@ -37,7 +37,7 @@ l_roundStart:
 	cmp	gs:partyFrozenFlag, 0
 	jnz	short l_doRound
 
-	CALL(bat_getPartyOptions, near)
+	CALL(bat_partyGetActions, near)
 	cmp	gs:runAwayFlag,	0
 	jz	short l_doRound
 
@@ -63,23 +63,23 @@ l_doRound:
 	CALL(bat_monDisbelieve)
 
 l_noDisbelieve:
-	CALL(bat_doPoisonEffect)
-	CALL(doEquipmentEffect)
+	CALL(bat_partyApplyPoison)
+	CALL(party_applyEquipmentEffects)
 	mov	al, gs:songRegenHP
 	sub	ah, ah
 	push	ax
-	CALL(bat_doHPRegen)
+	CALL(bat_partyApplyHpRegen)
 	mov	al, gs:monDisbelieveFlag
 	sub	ah, ah
 	push	ax
-	CALL(bat_updatePartyAndMonG)
+	CALL(bat_postRound)
 	CALL(bat_endCombatSong, near)
 	mov	byte ptr g_printPartyFlag,	0
 	CALL(party_getLastSlot)
 	cmp	ax, 7
 	jle	short l_partyAlive
 
-partyDied:
+party_died:
 	push	[bp+currentSong]
 	push	[bp+currentSinger]
 	mov	al, gs:bat_curSong

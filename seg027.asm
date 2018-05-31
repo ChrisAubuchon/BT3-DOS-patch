@@ -13,13 +13,13 @@ antiMagicFlag	db 0
 gl_detectSecretDoorFlag	db 0
 g_currentSinger	db 0
 byte_41E63	db 0
-charActionList db 7	dup(0)		   ; 0
+g_charActionList db 7	dup(0)		   ; 0
 unk_41E6B	db	0
 word_41E6C	dw 0
 trapIndex	dw 0
-byte_41E70	db 0
+g_charFreezeToHitBonus	db 0
 byte_41E71	db 0
-strengthBonus	db 7 dup(0)	      ;	0
+g_spellStrengthBonus	db 7 dup(0)	      ;	0
 byte_41E79	db 0
 mapWidth	db 0
 align 2
@@ -66,11 +66,13 @@ byte_42276	db 0
 		db 0
 g_usedItemSlotNumber	db 0
 		db 0
-byte_42280	db 6	dup(0)		   ; 0
-byte_42286	db 0
+
+; Range that a character can execute a melee attack. Increment when
+; a rogue successfully hides 
+g_characterMeleeDistance	db 7	dup(0)
 align 2
 g_userSlotNumber	db 0
-wildWrapFlag	db	0
+g_wildWrapFlag	db	0
 		db    0
 byte_4228B	db 0
 mapRval		dw 0
@@ -146,7 +148,7 @@ g_currentVmFunction	dd 0
 word_4243A	dw 0
 word_4243C	dw 0
 word_4243E	dw 0
-byte_42440	db 0
+g_divineDamageBonus	db 0
 runAwayFlag	db 0
 songRegenHP	db 0
 db    0
@@ -172,10 +174,11 @@ word_42560	dw 0
 word_42562	dw 0
 word_42564	dw 0
 g_lastDetectDirection	db 0
-byte_42567	db 0
-songACBonus	db 0
+g_monsterWOFBonus	db 0
+g_songAcBonus	db 0
 songHalfDamage	db 0
 bat_monPriorityList dw 80h dup(0)	    ; 0
+bat_monBeenHitList dw 80h dup(0)
 		db    0
 g_currentSongPlusOne	db 0
 align 8

@@ -15,7 +15,7 @@ bat_monMeleeRoll proc far
 	mov	gs:specialAttackVal, 0
 	mov	gs:damageAmount, 0
 	mov	bx, [bp+target]
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jnz	l_returnZero
 
 	CHARINDEX(ax, bx, bx)
@@ -52,7 +52,7 @@ l_underMax:
 	mov	gs:specialAttackVal, ax
 
 	push	[bp+field_17]
-	CALL(dice_doYDX, near)
+	CALL(randomYdX, near)
 	mov	bx, [bp+monNo]
 	mov	cl, gs:monAttackBonus[bx]
 	sub	ch, ch

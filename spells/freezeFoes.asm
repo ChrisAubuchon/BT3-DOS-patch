@@ -19,7 +19,7 @@ sp_freezeFoes proc far
 	mov	bl, gs:bat_curTarget
 	and	bx, 3
 	add	gs:g_monFreezeAcPenalty[bx], al
-	add	gs:byte_41E70, 2
+	add	gs:g_charFreezeToHitBonus, 2
 	jmp	short l_return
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]

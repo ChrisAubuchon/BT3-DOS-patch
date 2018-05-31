@@ -28,7 +28,7 @@ useItem	proc far
 	PUSH_STACK_ADDRESS(var_32)
 	PUSH_STACK_ADDRESS(var_FA)
 	push	[bp+userSlotNumber]
-	CALL(sub_188E8)
+	CALL(inventory_getItemList)
 
 	or	ax, ax
 	jz	l_emptyPockets
@@ -44,7 +44,7 @@ loc_11D4B:
 
 	push	[bp+itemSlotNumber]
 	push	[bp+userSlotNumber]
-	CALL(item_canBeUsed)
+	CALL(inventory_canBeUsed)
 	or	ax, ax
 	jz	short l_powerless
 	mov	bx, g_curSpellNumber
@@ -56,7 +56,7 @@ loc_11D4B:
 	jge	short l_doUse
 	PUSH_OFFSET(s_UseOn)
 	push	[bp+targetSlotNumber]
-	CALL(getTarget)
+	CALL(bat_charGetActionTarget)
 	mov	[bp+targetSlotNumber], ax
 	or	ax, ax
 	jl	short l_return

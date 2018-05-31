@@ -36,7 +36,7 @@ l_enemyTarget:
 	jz	l_return
 
 loc_1BF3E:
-	CHARINDEX(ax, STACKVAR(attackTarget), bx)
+	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
@@ -96,7 +96,7 @@ loc_1BFBF:
 
 	push	[bp+attackTarget]
 	push	[bp+slotNumber]
-	CALL(bat_getCharDamage, near)
+	CALL(bat_charExecuteMeleeAttack, near)
 	mov	[bp+var_108], ax
 	or	ax, ax
 	jnz	short loc_1C04B
@@ -111,18 +111,18 @@ loc_1C04B:
 	push	[bp+var_108]
 	push	word ptr [bp+stringBufferP+2]
 	push	word ptr [bp+stringBufferP]
-	CALL(bat_printHitDamage, near)
+	CALL(bat_charPrintMeleeDamage, near)
 	mov	word ptr [bp+stringBufferP], ax
 	mov	word ptr [bp+stringBufferP+2], dx
 
 	push	[bp+attackTarget]
-	CALL(bat_doHPDamage, near)
+	CALL(bat_damageHp, near)
 	or	ax, ax
 	jz	short loc_1C0A7
 
 	push	word ptr [bp+stringBufferP+2]
 	push	word ptr [bp+stringBufferP]
-	CALL(bat_getKillString, near)
+	CALL(bat_appendSpecialAttackString, near)
 	mov	word ptr [bp+stringBufferP], ax
 	mov	word ptr [bp+stringBufferP+2], dx
 
@@ -150,7 +150,7 @@ loc_1C0B3:
 	PRINTSTRING
 
 	mov	bx, [bp+slotNumber]
-	mov	gs:byte_42280[bx], 0
+	mov	gs:g_characterMeleeDistance[bx], 0
 	mov	byte ptr g_printPartyFlag,	0
 
 	DELAY

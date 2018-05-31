@@ -56,8 +56,22 @@ seg000 segment byte public 'CODE' use16
         ; Attributes: bp-based frame
 
 include(`main.asm')
-
-include(`seg000.asm')
+include(`cleanupAndExit.asm')
+include(`gameLoop.asm')
+include(`map/dungeon/main.asm')
+include(`map/dungeon/setSquareField4.asm')
+include(`map/dungeon/canAdvance.asm')
+include(`map/wild/main.asm')
+include(`map/wild/canAdvance.asm')
+include(`map/wild/enterBuilding.asm')
+include(`map/wild/buildView.asm')
+include(`map/dungeon/buildView.asm')
+include(`map/dungeon/getWalls.asm')
+include(`map/dungeon/sub_1156E.asm')
+include(`map/wild/getSquare.asm')
+include(`lib/wrapNumber.asm')
+include(`map/getDataOffsetP.asm')
+include(`map/resetLocation.asm')
 
 seg000 ends
 
@@ -66,7 +80,6 @@ seg001 segment word public 'CODE' use16
         assume cs:seg001
 ;org 0Bh
         assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
-algn_1173B:
 align 2
 
 include(`io/textCastSpell.asm')
@@ -235,7 +248,7 @@ seg004 segment word public 'CODE' use16
         assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
 align 2
 
-include(`gfx/bigpic/drawTopology.asm')
+include(`gfx/bigpic/tile/drawTopology.asm')
 include(`gfx/bigpic/setBackground.asm')
 
 seg004 ends
@@ -253,7 +266,45 @@ include(`gfx/icons/draw.asm')
 
 seg005 ends
 
-include seg006.asm
+; Segment type: Pure code
+seg006 segment word public 'CODE' use16
+        assume cs:seg006
+;org 9
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+include(`party/update.asm')
+include(`character/update.asm')
+include(`character/getDexterityAcBonus.asm')
+include(`character/getEquipmentAcBonus.asm')
+include(`character/isEffectEquipped.asm')
+include(`character/inventory/pack.asm')
+include(`character/inventory/addItem.asm')
+include(`character/inventory/canBeUsed.asm')
+include(`character/hasTypeEquipped.asm')
+include(`character/itemTypeCanBeUsed.asm')
+include(`character/getTypeEquippedSlot.asm')
+include(`character/print/print.asm')
+include(`character/inventory/appendCharges.asm')
+include(`character/inventory/trade.asm')
+include(`character/inventory/discard.asm')
+include(`character/inventory/equip.asm')
+include(`character/inventory/unequip.asm')
+include(`character/inventory/identify.asm')
+include(`character/inventory/print.asm')
+include(`character/inventory/getOptions.asm')
+include(`character/inventory/getItemList.asm')
+include(`character/inventory/getItemName.asm')
+include(`character/print/printStats.asm')
+include(`io/printNumberAndString.asm')
+include(`character/print/getAttributeString.asm')
+include(`character/getGoldTradee.asm')
+include(`character/print/printAbilities.asm')
+include(`character/learnedSpell.asm')
+include(`character/learnSpell.asm')
+include(`character/hasSpecialAbilities.asm')
+
+seg006 ends
 
 ; Segment type: Pure code
 seg007 segment word public 'CODE' use16
@@ -352,15 +403,118 @@ include(`map/vm/functions/notImplemented.asm')
 
 seg007 ends
 
-include(`seg008.asm')
-include seg009.asm
+; Segment type: Pure code
+seg008 segment byte public 'CODE' use16
+        assume cs:seg008
+;org 0Ah
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+include(`battle/init.asm')
+include(`battle/doRound.asm')
+include(`battle/char/action.asm')
+include(`battle/mon/action.asm')
+include(`battle/mon/cast.asm')
+include(`battle/mon/summonHelp.asm')
+include(`battle/mon/breathe.asm')
+include(`battle/mon/melee.asm')
+include(`battle/mon/tarjan.asm')
+include(`battle/mon/getName.asm')
+include(`battle/char/getRandom.asm')
+include(`battle/mon/meleeRoll.asm')
+include(`battle/char/isAttackable.asm')
+include(`battle/summon/action.asm')
+include(`battle/summon/cast.asm')
+include(`battle/summon/melee.asm')
+include(`battle/summon/breathe.asm')
+include(`battle/char/melee.asm')
+include(`battle/getAttackerName.asm')
+include(`lib/startsWithVowel.asm')
+include(`battle/char/cast.asm')
+include(`battle/char/use.asm')
+include(`battle/char/hide.asm')
+include(`battle/char/sing.asm')
+include(`battle/char/possessedAttack.asm')
+include(`battle/char/getNextPriority.asm')
+include(`battle/mon/getNextPriority.asm')
+include(`battle/setPriorities.asm')
+include(`battle/setOpponents.asm')
+include(`battle/mon/resetGroups.asm')
+include(`battle/mon/sortGroups.asm')
+include(`battle/mon/swapGroups.asm')
+include(`battle/printOpponents.asm')
+include(`battle/mon/printGroup.asm')
+include(`battle/setBigpic.asm')
+include(`battle/mon/copyBuffer.asm')
+include(`battle/convertSongToCombat.asm')
+include(`battle/dosong.asm')
+include(`battle/endsong.asm')
+include(`battle/reset.asm')
+include(`lib/randomBetweenXandY.asm')
+include(`lib/getRndDiceMask.asm')
+include(`lib/randomYdX.asm')
+include(`battle/party/fightAction.asm')
+include(`battle/party/advanceAction.asm')
+include(`battle/party/runAction.asm')
+include(`battle/char/attackAction.asm')
+include(`battle/char/defendAction.asm')
+include(`battle/char/castAction.asm')
+include(`battle/char/useAction.asm')
+include(`battle/char/hideAction.asm')
+include(`battle/char/singAction.asm')
+include(`battle/char/partyAttackAction.asm')
+include(`battle/party/getActions.asm')
+include(`battle/party/canAdvance.asm')
+include(`battle/mon/inMeleeRange.asm')
+include(`battle/char/getAction.asm')
+include(`battle/char/getActionTarget.asm')
+include(`battle/mon/groupCount.asm')
+include(`battle/char/executeMeleeAttack.asm')
+include(`battle/char/printMeleeDamage.asm')
+include(`battle/appendSpecialAttackString.asm')
+include(`battle/damagehp.asm')
+include(`battle/mon/damagehp.asm')
+include(`battle/mon/applySpecialEffect.asm')
+include(`battle/mon/kill.asm')
+include(`battle/char/damageHp.asm')
+include(`battle/char/applySpecialEffect.asm')
+include(`character/applyAgeStatus.asm')
+include(`party/died.asm')
+
+seg008 ends
+
+; Segment type: Pure code
+seg009 segment word public 'CODE' use16
+        assume cs:seg009
+;org 9
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+align 2
+
+include(`lib/random_2d16.asm')
+include(`lib/random_2d8.asm')
+include(`lib/random_1d8.asm')
+include(`battle/giveExperience.asm')
+include(`battle/giveGold.asm')
+include(`battle/party/disbelieve.asm')
+include(`battle/mon/disbelieve.asm')
+include(`battle/party/applyPoison.asm')
+include(`party/applyEquipmentEffects.asm')
+include(`battle/party/applyHpRegen.asm')
+include(`party/applySpptRegen.asm')
+include(`battle/postRound.asm')
+include(`battle/mon/countGroups.asm')
+include(`battle/mon/moveGroup.asm')
+include(`battle/party/packBonuses.asm')
+include(`battle/mon/groupActive.asm')
+
+include(`seg009.asm')
+
+seg009 ends
 
 ; Segment type: Pure code
 seg010 segment word public 'CODE' use16
         assume cs:seg010
 ;org 9
         assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
-algn_1FC89:
 align 2
 
 include(`spells/nonCombatCast.asm')
@@ -371,9 +525,11 @@ include(`spells/light.asm')
 include(`spells/possess.asm')
 include(`spells/damage.asm')
 include(`battle/dobreath.asm')
+include(`battle/char/isBreathAttackable.asm')
 include(`spells/trapzap.asm')
 include(`spells/freezeFoes.asm')
 include(`spells/savingThrow.asm')
+include(`lib/maxFF.asm')
 include(`spells/compass.asm')
 include(`spells/heal.asm')
 include(`spells/levitate.asm')
@@ -439,7 +595,55 @@ include(`song/endnonc.asm')
 
 seg011 ends
 
-include seg012.asm
+; Segment type: Pure code
+seg012 segment byte public 'CODE' use16
+        assume cs:seg012
+;org 0Eh
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:seg027
+
+include(`lib/maxFFFF.asm')
+include(`building/review/enter.asm')
+include(`building/review/checkXp.asm')
+include(`building/review/advance.asm')
+include(`building/review/getXpDelta.asm')
+include(`building/review/learnSpells.asm')
+include(`building/review/convert/conjuror.asm')
+include(`building/review/convert/magician.asm')
+include(`building/review/convert/sorcerer.asm')
+include(`building/review/convert/wizard.asm')
+include(`building/review/convert/archmage.asm')
+include(`building/review/convert/chronomancer.asm')
+include(`building/review/changeMageClass.asm')
+include(`building/review/convert/learnSpellLevel.asm')
+include(`building/review/convert/hasLearnedSpellLevel.asm')
+include(`building/review/convert/hasBeenClass.asm')
+include(`building/review/convert/countClassesGained.asm')
+include(`building/review/convert/removeAllSpells.asm')
+include(`building/review/speakToElder.asm')
+include(`building/review/elderGelidia.asm')
+include(`building/review/elderLucencia.asm')
+include(`building/review/elderKinestia.asm')
+include(`building/review/elderTenebrosia.asm')
+include(`building/review/elderTarmitia.asm')
+include(`building/review/isQuestComplete.asm')
+include(`building/review/setTitle.asm')
+include(`building/review/questBrilhasti.asm')
+include(`building/review/questValarian.asm')
+include(`building/review/questLanatir.asm')
+include(`building/review/questAlliria.asm')
+include(`building/review/questFerofist.asm')
+include(`building/review/questSceadu.asm')
+include(`building/review/questWerra.asm')
+include(`building/review/questTarjan.asm')
+include(`building/review/quest.asm')
+include(`building/review/awardXp.asm')
+include(`building/review/partySetFlag.asm')
+include(`building/review/removeAgeStatus.asm')
+include(`building/review/resetAgeStatus.asm')
+include(`building/wizardsHall/enter.asm')
+include(`building/wizardsHall/buySpell.asm')
+
+seg012 ends
 
 ; Segment type: Pure code
 seg013 segment byte public 'CODE' use16
@@ -560,8 +764,62 @@ include(`misc/copyProtection/compareStrings.asm')
 
 seg018 ends
 
-include seg019.asm
-include seg020.asm
+; Segment type: Pure code
+seg019 segment word public 'CODE' use16
+        assume cs:seg019
+;org 3
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+
+byte_27433 db 90h, 10h dup(0)
+
+include(`lib/huffman/init.asm')
+include(`lib/huffman/flate.asm')
+include(`lib/huffman/expandTree.asm')
+include(`lib/huffman/getNextBit.asm')
+include(`lib/huffman/newNode.asm')
+include(`lib/huffman/extractByte.asm')
+include(`lib/d3cmp/readData.asm')
+include(`lib/d3cmp/sub_27632.asm')
+include(`lib/d3cmp/outputToBuffer.asm')
+include(`lib/d3cmp/updateMemory.asm')
+include(`lib/d3cmp/sub_27724.asm')
+include(`lib/d3cmp/getNextWord.asm')
+include(`lib/d3cmp/readCopyOffset.asm')
+include(`lib/d3cmp/init.asm')
+include(`lib/d3cmp/doDecomp.asm')
+include(`lib/d3cmp/sub_27980.asm')
+include(`lib/d3cmp/flate.asm')
+include(`lib/readCh.asm')
+include(`lib/random.asm')
+include(`lib/open.asm')
+include(`lib/close.asm')
+include(`lib/read.asm')
+include(`lib/write.asm')
+include(`lib/lseek.asm')
+include(`lib/findFirstFile.asm')
+include(`lib/findNextFile.asm')
+include(`lib/checkKeyboard.asm')
+include(`gfx/bigpic/tile/initBuffers.asm')
+include(`gfx/bigpic/tile/copyTopoElement.asm')
+include(`gfx/bigpic/tile/copyLeftTopo.asm')
+include(`gfx/bigpic/tile/copyRightTopo.asm')
+
+include(`seg019.asm')
+
+seg019 ends
+
+; Segment type: Regular
+seg020 segment word public 'DATA' use16
+        assume cs:seg020
+;org 7
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+algn_2AD17:
+align 2
+
+include(`lib/huffman/data.asm')
+
+seg020 ends
+
 include seg021.asm
 include seg022.asm
 include(`seg023.asm')
@@ -569,5 +827,20 @@ include seg024.asm
 include seg025.asm
 include seg026.asm
 include seg027.asm
-include dseg.asm
-include seg029.asm
+
+; Segment type: Pure data
+dseg segment para public 'DATA' use16
+        assume cs:dseg
+
+include(`dseg.asm')
+
+dseg ends
+
+; Segment type: Uninitialized
+seg029 segment word stack 'STACK' use16
+        assume cs:seg029
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+byte_50070 db 0FA0h dup(?)
+seg029 ends
+
+end start

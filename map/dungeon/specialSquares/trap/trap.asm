@@ -56,7 +56,7 @@ loc_24DCB:
 	mov	al, byte_4B258[bx]
 	cbw
 	push	ax
-	CALL(dice_doYDX)
+	CALL(randomYdX)
 	mov	[bp+var_10C], ax
 
 	mov	si, gs:trapIndex

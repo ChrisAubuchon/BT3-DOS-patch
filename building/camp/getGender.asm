@@ -1,7 +1,7 @@
 ; Attributes: bp-based frame
 getCharacterGender proc	far
 
-	func_enter
+	FUNC_ENTER
 
 loc_loop_start:
 	PUSH_OFFSET(s_genderOptions)

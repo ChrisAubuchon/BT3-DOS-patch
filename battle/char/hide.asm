@@ -39,7 +39,7 @@ l_hideSuccess:
 	mov	word ptr [bp+tmpBufferP], ax
 	mov	word ptr [bp+tmpBufferP+2], ds
 	mov	bx, [bp+arg_0]
-	inc	gs:byte_42280[bx]
+	inc	gs:g_characterMeleeDistance[bx]
 	jmp	short l_return
 
 l_hideFailed:
@@ -47,7 +47,7 @@ l_hideFailed:
 	mov	word ptr [bp+tmpBufferP], ax
 	mov	word ptr [bp+tmpBufferP+2], ds
 	mov	bx, [bp+arg_0]
-	mov	gs:byte_42280[bx], 0
+	mov	gs:g_characterMeleeDistance[bx], 0
 
 l_return:
 	push	word ptr [bp+tmpBufferP+2]

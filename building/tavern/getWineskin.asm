@@ -22,7 +22,7 @@ loc_13DF6:
 	mov	ax, 76h	
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(inven_addItem)
+	CALL(inventory_addItem)
 	or	ax, ax
 	jz	short loc_13E22
 	PUSH_OFFSET(s_barkeepFillsWineskin)

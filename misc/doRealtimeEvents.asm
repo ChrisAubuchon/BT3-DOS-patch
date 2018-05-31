@@ -32,7 +32,7 @@ loc_15256:
 
 	cmp	gs:advanceTimeFlag, 0
 	jnz	short loc_15296
-	CALL(bat_doPoisonEffect)
+	CALL(bat_partyApplyPoison)
 loc_15296:
 	cmp	gs:advanceTimeFlag, 0
 	jz	short loc_152A5
@@ -86,12 +86,12 @@ loc_15356:
 	cmp	gs:regenSpptSq,	0
 	jz	short loc_15378
 loc_15362:
-	CALL(regenSppt)
+	CALL(party_applySpptRegen)
 	cmp	gs:songRegenSppt, 0
 	jz	short loc_15378
-	CALL(regenSppt)
+	CALL(party_applySpptRegen)
 loc_15378:
-	CALL(doEquipmentEffect)
+	CALL(party_applyEquipmentEffects)
 	cmp	gs:sqRegenHPFlag, 0
 	jz	loc_doRealtimeEvents_label_1
 	CALL(party_regenHp)

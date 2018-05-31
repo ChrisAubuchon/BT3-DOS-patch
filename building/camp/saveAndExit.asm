@@ -12,7 +12,7 @@ camp_saveAndExit proc far
 	CALL(getKey)
 	cmp	ax, 0Dh
 	jnz	short loc_13412
-	mov	buildingRvalMaybe, 0FFh
+	mov	g_mapRval, 0FFh
 	CALL(roster_countCharacters, near)
 	push	ax
 	CALL(writeCharacterFile, near)

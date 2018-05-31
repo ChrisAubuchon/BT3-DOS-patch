@@ -2,7 +2,8 @@
 seg023 segment para public 'DATA' use16
 	assume cs:seg023
 	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
-graphicsBuf db 4A38h dup(0)	    ; 0
+
+include(`gfx/bigpic/graphicsData.asm')
 monsterBuf db 480h dup(0)	   ; 0
 byte_3BA68 db 11C4h dup(0)	   ; 0
 iconLight db 474h dup(0)	  ; 0

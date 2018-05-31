@@ -57,8 +57,8 @@ l_loopHead:
 	mov	bx, [bp+itemNumber]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (itemStr+2)[bx]
-	push	word ptr itemStr[bx]
+	push	word ptr (g_itemStringList+2)[bx]
+	push	word ptr g_itemStringList[bx]
 	push	word ptr [bp+itemList+2]
 	push	word ptr [bp+itemList]
 	STRCAT(itemList)

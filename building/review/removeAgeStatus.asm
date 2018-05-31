@@ -24,7 +24,7 @@ review_removeAgeStatus proc far
 	lea	ax, party.savedST[si]
 	push	dx
 	push	ax
-	CALL(_doAgeStatus)
+	CALL(character_applyAgeStatus)
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	and	gs:party.status[bx], 0FDh
 

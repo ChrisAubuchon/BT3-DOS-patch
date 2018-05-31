@@ -1,6 +1,6 @@
 ; Attributes: bp-based frame
 
-mage_learnSpellLevel proc far
+character_learnSpellLevel proc far
 
 	spellCount= word ptr	-4
 	spellNumber= word ptr	-2
@@ -27,11 +27,11 @@ l_loop:
 	push	[bp+spellNumber]
 	inc	[bp+spellNumber]
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	jmp	short l_loop
 
 l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-mage_learnSpellLevel endp
+character_learnSpellLevel endp

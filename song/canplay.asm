@@ -21,7 +21,7 @@ _charCanPlaySong proc far
 	mov	ax, itType_instrument
 	push	ax
 	push	[bp+partySlotNumber]
-	CALL(inven_hasTypeEquipped)
+	CALL(character_hasTypeEquipped)
 	jmp	short l_return
 l_returnZero:
 	sub	ax, ax

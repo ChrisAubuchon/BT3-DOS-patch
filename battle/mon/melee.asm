@@ -167,7 +167,6 @@ l_inMeleeRange:
 	mov	byte ptr fs:[bx], ' '
 	mov	ax, 3
 	push	ax
-	push	cs
 	CALL(bat_getRandomChar, near)
 	mov	gs:bat_curTarget, al
 	sub	ah, ah
@@ -200,18 +199,18 @@ l_attackSucceeds:
 	push	ax
 	push	word ptr [bp+stringBufferP+2]
 	push	word ptr [bp+stringBufferP]
-	CALL(bat_printHitDamage, near)
+	CALL(bat_charPrintMeleeDamage, near)
 	mov	word ptr [bp+stringBufferP], ax
 	mov	word ptr [bp+stringBufferP+2], dx
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	push	ax
-	CALL(bat_doHPDamage, near)
+	CALL(bat_damageHp, near)
 	or	ax, ax
 	jz	short l_noKill
 	push	word ptr [bp+stringBufferP+2]
 	push	word ptr [bp+stringBufferP]
-	CALL(bat_getKillString, near)
+	CALL(bat_appendSpecialAttackString, near)
 	mov	word ptr [bp+stringBufferP], ax
 	mov	word ptr [bp+stringBufferP+2], dx
 	mov	ax, 1

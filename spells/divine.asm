@@ -26,8 +26,8 @@ l_notIllusion:
 	cmp	gs:byte_422A4, 0
 	jz	short l_return
 	mov	al, 14h
-	mov	gs:byte_42440, al
-	mov	gs:byte_41E70, al
+	mov	gs:g_divineDamageBonus, al
+	mov	gs:g_charFreezeToHitBonus, al
 	mov	gs:antiMagicFlag, al
 	mov	gs:partySpellAcBonus, al
 	mov	gs:songExtraAttack, 8

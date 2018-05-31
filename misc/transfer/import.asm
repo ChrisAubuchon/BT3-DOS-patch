@@ -119,7 +119,7 @@ loc_269F5:
 	push	[bp+var_17C]
 	CALL(close)
 loc_26A01:
-	CALL(sub_27C4A)
+	CALL(findNextFile)
 	or	ax, ax
 	jnz	loc_2696B
 

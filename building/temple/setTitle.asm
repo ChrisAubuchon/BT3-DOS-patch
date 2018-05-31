@@ -35,7 +35,7 @@ l_loopEntry:
 	jnz	short l_loopIncrement
 
 	mov	al, templeLoc.location[si]
-	cmp	ax, currentLocationMaybe
+	cmp	ax, g_locationNumber
 	jnz	short l_loopIncrement
 
 	mov	ax, [bp+loopCounter]

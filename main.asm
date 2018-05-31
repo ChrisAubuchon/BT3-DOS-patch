@@ -167,7 +167,7 @@ loc_101E6:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -207,7 +207,7 @@ loc_10266:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -348,7 +348,7 @@ loc_1043E:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -368,10 +368,10 @@ loc_1043E:
 	CALL(_mallocMaybe)
 	mov	gs:bigpicCellData_off, ax
 	mov	gs:bigpicCellData_seg, dx
-	CALL(sub_116CC, near)
+	CALL(map_resetLocation, near)
 	CALL(restoreGame)
-	push	buildingRvalMaybe
-	CALL(sub_10560, near)
+	push	g_mapRval
+	CALL(gameLoop, near)
 	CALL(cleanupAndExit, near)
 	mov	sp, bp
 	pop	bp

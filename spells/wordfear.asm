@@ -12,8 +12,10 @@ sp_wordOfFear proc far
 	CALL(spellSavingThrowHelper, near)
 	or	ax, ax
 	jz	short l_return
+
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster
+
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	mov	si, ax
@@ -26,12 +28,13 @@ sp_wordOfFear proc far
 	; byte_41E50 isn't used anywhere else
 	mov	al, spellEffectFlags[bx]
 	add	gs:byte_41E50[si], al
-
 	jmp	short l_return
+
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
-	add	gs:byte_42567, al
+	add	gs:g_monsterWOFBonus, al
+
 l_return:
 	pop	si
 	FUNC_EXIT

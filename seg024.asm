@@ -810,16 +810,18 @@ sub_3F2C2 endp
 ; Attributes: bp-based frame
 
 _vid_drawBigpic	proc far
-arg_0= dword ptr  6
-arg_4= dword ptr  0Ah
+
+	arg_0= dword ptr  6
+	arg_4= dword ptr  0Ah
+
 	push	bp
 	mov	bp, sp
 	push	es
 	push	si
 	push	di
 	push	ds
-	lds	si, [bp+arg_0]
-	les	di, [bp+arg_4]
+	lds	si, [bp+arg_0]		; source Buffer
+	les	di, [bp+arg_4]		; destination buffer
 	mov	al, 2
 	mov	dx, 3C4h
 	out	dx, al		; EGA: sequencer address reg
@@ -910,6 +912,7 @@ loc_3F3DE:
 	assume es:nothing
 	mov	bl, 1
 	sub	ch, ch
+
 loc_3F3EA:
 	mov	dx, 3DAh
 	in	al, dx		; Video	status bits:

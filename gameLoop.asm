@@ -23,7 +23,7 @@ l_loop:
 	jz	short l_enterDungeon
 
 	cmp	ax, gameState_partyDied
-	jz	short l_partyDied
+	jz	short l_party_died
 
 	jmp	short l_return
 
@@ -44,8 +44,8 @@ l_enterDungeon:
 	mov	inDungeonMaybe, 0
 	jmp	short l_loop
 
-l_partyDied:
-	CALL(partyDied)
+l_party_died:
+	CALL(party_died)
 	mov	[bp+currentState], ax
 	jmp	short l_loop
 

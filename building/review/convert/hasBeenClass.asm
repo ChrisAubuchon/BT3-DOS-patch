@@ -14,7 +14,7 @@ l_loop:
 	push	[bp+spellBase]
 	push	[bp+loopCounter]
 	push	[bp+slotNumber]
-	CALL(mage_hasLearnedSpellLevel, near)
+	CALL(character_learnedSpellLevel, near)
 	or	ax, ax
 	jz	short l_returnZero
 	dec	[bp+loopCounter]

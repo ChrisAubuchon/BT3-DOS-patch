@@ -106,32 +106,3 @@ _chkstk		macro _size
 	mov	ax, _size
 	call	someStackOperation
 	endm
-
-; Function calls
-func_printString	macro
-	std_call	printString, 4
-	endm
-
-func_readString		macro
-	std_call	_readString, 6
-	endm
-
-func_strncpy	macro
-	std_call	_strncpy, 0Ah
-	endm
-
-func_dun_maskSquare	macro
-	std_call	dun_maskSquare, 8
-	endm
-
-func_read		macro
-	std_call	_read, 8
-	endm
-
-func_lseek		macro
-	std_call	_lseek, 8
-	endm
-
-func_close		macro
-	std_call	_close, 2
-	endm

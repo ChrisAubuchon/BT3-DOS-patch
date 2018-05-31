@@ -1,6 +1,6 @@
 ; Attributes: bp-based frame
 
-tav_enter proc far
+tavern_enter proc far
 
 	loopCounter= word ptr -6
 	lastCharNo= word ptr -4
@@ -76,4 +76,4 @@ l_waitAndLoop:
 l_return:
 	FUNC_EXIT
 	retf
-tav_enter endp
+tavern_enter endp

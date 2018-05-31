@@ -1,6 +1,3 @@
-; Segment type:	Pure data
-dseg segment para public 'DATA' use16
-	assume cs:dseg
 word_42670	dw 0
 word_42672	dw 0
 byte_42674	db 0
@@ -17,9 +14,9 @@ s_thiefCfg	db 'thief.cfg',0
 s_firstTitle		db 'tit0',0
 s_titleScreen		db 'title',0
 s_musicAll	db 'music.all',0
-aStuckElipsis	db 'Stuck....',0
+s_stuckEllipsis	db 'Stuck....',0
 graphicsDrivers	dd aComp, aRgb,	aEga, aTdy; 0
-aFacing		db 'facing ',0
+s_facing		db 'facing ',0
 byte_42716	db 0, 2, 20h, 22h
 aEarlyMorning_	db 'early morning.',0
 aMidMorning_	db	'mid morning.',0
@@ -203,7 +200,7 @@ startingInventory	db 1,	14h, 0FFh, 4, 76h, 0Ah,	1, 3, 0FFh, 1, 0Eh; 0
 			db 1, 4, 0FFh, 1, 0Ch, 0FFh, 0,	7Dh, 0Ah, 0FEh,	1; 22
 			db 4, 0FFh, 1, 0Ch, 0FFh, 1, 0Ah, 0FFh,	0FEh, 1, 10h; 33
 			db 0FFh, 1, 9, 0FFh, 1,	2, 1, 0FEh; 44
-classString	dd aWarrior		    ; 0
+g_classString	dd aWarrior		    ; 0
 		dd aWizard		; 1
 		dd aSorcerer		; 2
 		dd aConjurer		; 3
@@ -730,15 +727,15 @@ westDelta	viewStruct <253, 253>	  ; 0
 		viewStruct <255, 2>	; 18
 		viewStruct <0, 255>	; 19
 		viewStruct <0, 1>	; 20
-off_44268	dd northDelta, eastDelta, southDelta,	westDelta; 0
-byte_44278	db 3, 3, 3, 3, 3, 3,	3, 1, 1, 1; 0
+g_wild_deltaList	dd northDelta, eastDelta, southDelta,	westDelta; 0
+g_tile_quadrantWidthList	db 3, 3, 3, 3, 3, 3,	3, 1, 1, 1; 0
 		db 1, 1, 1, 6, 6, 6, 6,	6, 6, 6; 10
 		db 10, 10, 10, 10, 10, 10, 2, 2, 2, 2; 20
 		db 10, 10, 10, 10, 10, 10, 10, 10, 10, 10; 30
 		db 10, 3, 3, 3,	3, 18, 18, 18, 10, 10; 40
 		db 10, 10, 10, 10, 6, 6, 32, 32, 32, 11; 50
 		db 11, 0		; 60
-byte_442B6	db 6, 6, 6, 6, 6, 6,	6, 6
+g_tile_quadrantScaleFactor	db 6, 6, 6, 6, 6, 6,	6, 6
 		db 6, 6, 6, 6, 6, 12, 12, 12
 		db 12, 12, 12, 12, 64, 64, 64, 64
 		db 64, 64, 14, 14, 14, 14, 20, 20
@@ -746,15 +743,20 @@ byte_442B6	db 6, 6, 6, 6, 6, 6,	6, 6
 		db 64, 20, 20, 20, 20, 36, 36, 36
 		db 64, 64, 64, 64, 64, 64, 36, 36
 		db 64, 64, 64, 64, 64, 0
-byte_442F4	db 2, 2, 2, 2, 2, 2,	2, 0
-		db 0, 0, 0, 0, 0, 2, 2,	2
-		db 2, 2, 2, 2, 0, 0, 0,	2
-		db 2, 2, 0, 0, 0, 0, 2,	2
-		db 2, 2, 2, 0, 0, 0, 2,	2
-		db 2, 0, 0, 0, 0, 2, 2,	2
-		db 0, 0, 0, 2, 2, 2, 0,	0
-		db 2, 2, 2, 0, 0, 0
-byte_44332	db 1, 2, 3, 4
+g_tile_quadrantAspectOffsetList	db 2, 2, 2, 2, 2 	; 0
+		db 2, 2, 0, 0, 0 	; 5
+		db 0, 0, 0, 2, 2	; 10
+		db 2, 2, 2, 2, 2	; 15
+		db 0, 0, 0, 2, 2	; 20
+		db 2, 0, 0, 0, 0	; 25
+		db 2, 2, 2, 2, 2	; 30
+		db 0, 0, 0, 2, 2	; 35
+		db 2, 0, 0, 0, 0	; 40
+		db 2, 2, 2, 0, 0	; 45
+		db 0, 2, 2, 2, 0	; 50
+		db 0, 2, 2, 2, 0	; 55
+		db 0, 0			; 60
+g_wild_viewSquareIndexList	db 1, 2, 3, 4
 		db 5, 9, 11, 9
 		db 10, 11, 15, 17
 		db 15, 16, 17, 19
@@ -903,7 +905,7 @@ dun_deltaWest	viewStruct <252, 253>   ;	0
 		viewStruct <255, 255>	; 31
 		viewStruct <255, 0>	; 32
 		viewStruct <255, 1>	; 33
-off_44474	dd dun_deltaNorth, dun_deltaEast, dun_deltaSouth, dun_deltaWest	; 3
+g_dun_deltaList	dd dun_deltaNorth, dun_deltaEast, dun_deltaSouth, dun_deltaWest	; 3
 byte_44484	db 0, 1, 2, 2, 2, 0,	3, 4; 0
 		db 3, 3, 4, 4, 4, 0, 3,	4; 8
 byte_44494	db 3Dh, 38h,	2Dh, 1Eh, 0Dh, 0, 2, 2,	2, 2; 0
@@ -914,7 +916,7 @@ byte_44494	db 3Dh, 38h,	2Dh, 1Eh, 0Dh, 0, 2, 2,	2, 2; 0
 		db 0Ch,	0Ch, 0Ch, 0Ch, 0Eh, 0Eh, 0Eh, 34h; 47
 		db 32h,	34h, 40h, 3Eh, 40h, 10h, 10h, 12h; 55
 		db 12h,	12h, 14h, 14h, 0; 63
-byte_444D8	db 0, 0, 0, 0	   ; 0
+g_quadrantRightFlagList	db 0, 0, 0, 0	   ; 0
 		db 0, 0, 0, 0		; 4
 		db 0, 0, -1, -1		; 8
 		db -1, 0, 0, 0		; 12
@@ -942,7 +944,7 @@ byte_44554	db 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 0, 0, 0; 0
 		db 8, 8, 0, 0, 4, 4, 4,	4, 4, 4, 4, 4, 0; 26
 		db 0, 0, 8, 8, 0, 0, 4,	4, 4, 4, 4, 4, 0; 39
 		db 0, 0, 8, 0, 4, 4, 4,	8, 0, 0; 52
-bigpicQuadrantCoords	coordinate_t <12, 42>	   ; 0
+g_tile_quadrantCoordinates	coordinate_t <12, 42>	   ; 0
 		coordinate_t <15, 42>	; 1
 		coordinate_t <18, 42>	; 2
 		coordinate_t <21, 42>	; 3
@@ -955,7 +957,7 @@ bigpicQuadrantCoords	coordinate_t <12, 42>	   ; 0
 		coordinate_t <29, 38>	; 10
 		coordinate_t <31, 38>	; 11
 		coordinate_t <39, 38>	; 12
-		coordinate_t <254,	38>	; 13
+		coordinate_t <254, 38>	; 13
 		coordinate_t <5, 38>	; 14
 		coordinate_t <17, 44>	; 15
 		coordinate_t <24, 44>	; 16
@@ -1010,7 +1012,7 @@ byte_4460C	db 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0; 0
 		db 0, 0FFh, 0FFh, 0FFh,	0, 0, 0, 0, 0, 0; 44
 		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 54
 		db 0			; 61
-byte_4464A	db 30, 31, 32, 33
+g_wild_squareTopologyIndex	db 30, 31, 32, 33
 		db 34, 42, 43, 45
 		db 46, 47, 54, 55
 		db 56, 57, 58, 59
@@ -1667,18 +1669,18 @@ spellString 	spellString_t <aMafl, aMageFlame>; 0
 		spellString_t <aGill, aGillesGills>; 122
 		spellString_t <aDiva, aDivineInt_>; 123
 		spellString_t <aNuke, aGotterdamurung>;	124
-aSpellPoints	db 'Spell Points:',0
-aExpr		db 'Expr:',0
-aGold		db 'Gold:',0
-aPoolGoldTradeG	db 0Ah,0Ah
+s_spellPoints	db 'Spell Points:',0
+s_expr		db 'Expr:',0
+s_gold		db 'Gold:',0
+s_poolGold	db 0Ah,0Ah
 		db '     Pool  gold',0Ah
 		db '     Trade gold',0
-aTradeGoldToWho	db 'Trade gold to whom?',0
-aHowMuchGoldWil	db 'How much gold will you trade?',0
+s_tradeGoldToWhom	db 'Trade gold to whom?',0
+s_howMuchGoldToTrade	db 'How much gold will you trade?',0
 align 2
-aDone		db 'Done!',0
-aInventory	db 'Inventory',0
-aDoYouWishTo@tr	db ' Do you wish to:',0Ah
+s_done		db 'Done!',0
+s_inventory	db 'Inventory',0
+s_inventoryVarString	db ' Do you wish to:',0Ah
 		db 0Ah,0Ah,0Ah
 		db '@Trade the item',0Ah
 		db '@Discard the item',0Ah
@@ -1686,37 +1688,37 @@ aDoYouWishTo@tr	db ' Do you wish to:',0Ah
 		db '@Unequip the item',0Ah
 		db '@Identify the item',0
 align 2
-aItSFilledWith	db 'It',27h,'s filled with ',0
-aTriesToIdentif	db ' tries to identify the item...',0Ah
+s_itsFilledWith	db 'It',27h,'s filled with ',0
+s_triesToIdentify	db ' tries to identify the item...',0Ah
 		db 'and /succeed\fail\s!!',0
 align 2
-aWhoDoes	db 'Who does ',0
-aWantToGiveItTo	db ' want to give it to?',0
+s_whoDoes	db 'Who does ',0
+s_wantToGiveItTo	db ' want to give it to?',0
 align 2
 s_dontKnowAnySpells	db 'You don',27h,'t know any spells.',0
 align 2
-aKnownSpells	db 'Known spells',0
+s_knownSpells	db 'Known spells',0
 align 2
-aRogueAbilities	db 'Rogue abilities',0
-aDisarmTraps	db 'Disarm traps ',0
-aIdentifyChest	db 'Identify chest ',0
-aIdentifyItem	db 'Identify item ',0
+s_rogueAbilities	db 'Rogue abilities',0
+s_disarmTraps	db 'Disarm traps ',0
+s_identifyChest	db 'Identify chest ',0
+s_identifyItem	db 'Identify item ',0
 align 2
-aHideInShadows	db 'Hide in shadows ',0
+s_hideInShadows	db 'Hide in shadows ',0
 align 2
-aCriticalHit	db 'Critical hit ',0
-aBardAbilities	db 'Bard abilities',0
+s_criticalHit	db 'Critical hit ',0
+s_bardAbilities	db 'Bard abilities',0
 align 2
-aNumberOfTunesL	db 'Number of tunes left: ',0
+s_tunesLeft	db 'Number of tunes left: ',0
 align 2
-aHunterAbilitie	db 'Hunter abilities',0
+s_hunterAbilities	db 'Hunter abilities',0
 align 2
 s_pocketsAreEmpty db 'Your pockets are empty.',0
-aStiqdxcnlkhp	db 'StIQDxCnLkHP',0
+s_attributeAbbreviations	db 'StIQDxCnLkHP',0
 align 2
-genericItemStr	dd aItem, aWeapon, aShield, aArmor, aHelm, aGloves, aInstrument, aFigurine; 0
+g_itemGenericStringList	dd aItem, aWeapon, aShield, aArmor, aHelm, aGloves, aInstrument, aFigurine; 0
 		dd aRing, aWand, aItem, aBow,	aQuiver, aContainer, aArmor; 8
-itemStr		dd aNothing, aTorch, aLamp, aBroadsword; 0
+g_itemStringList		dd aNothing, aTorch, aLamp, aBroadsword; 0
 		dd aShortSword,	aDagger, aWarAxe, aHalbard; 4
 		dd aLongBow, aStaff, aBuckler, aTowerShield; 8
 		dd aLeatherArmor, aChainMail, aScaleArmor, aPlateArmor;	12
@@ -2187,30 +2189,30 @@ itemSpellNo	db 255, 126, 127, 255   ; 0	; This array holds the spell number to c
 		db 131,	255, 255, 120	; 244
 		db 133,	255, 255, 255	; 248
 		db 255,	255, 255, 255	; 252
-raceString	dd aHuman		   ; 0
+g_raceString	dd aHuman		   ; 0
 		dd aElf			; 1
 		dd aDwarf		; 2
 		dd aHobbit		; 3
 		dd aHalfElf		; 4
 		dd aHalfOrc		; 5
 		dd aGnome		; 6
-genderString	dd aMale_0		     ; 0
+s_genderString	dd aMale_0		     ; 0
 		dd aFemale		; 1
 		dd nullStr
-		aIsAN db ' is a/n \ ',0
+		s_isAn db ' is a/n \ ',0
 align 2
-aLevel		db 'Level',0
-acDexterityBonus db 1, 1, 2, 2		 ; 0
+s_level		db 'Level',0
+g_acDexterityBonus db 1, 1, 2, 2		 ; 0
 		db 3, 3, 3, 4		; 4
 		db 4, 4, 4, 4		; 8
 		db 5, 5, 5, 5		; 12
 		db 5, 0			; 16
-itemCharFlags	db ' ', '|', '^', '?', 0, 0; 0 ; This is a list of characters used in the inventory
+g_itemFlagCharacters	db ' ', '|', '^', '?', 0, 0; 0 ; This is a list of characters used in the inventory
 			; string for flags.
 			
 			
 			
-off_46C1A	dd item_trade, item_discard, item_equip, item_unequip, item_identify;	0
+g_inventoryActionFunctions	dd inventory_trade, inventory_discard, inventory_equip, inventory_unequip, inventory_identify;	0
 s_escToContinue	db 'ESC to continue',0
 s_thereAreStairs	db 'There are stairs here, going /up\down\. ',0Ah
 		db 'Do you wish to take them?',0
@@ -2336,23 +2338,23 @@ specialAttString dd aKilling, aPoisoning, aDraining, aCrazing, aWithering; 0
 breathAttack	breathAtt_t <0, 0, 0, 0, 0, 41h, 1>; 0
 		db    0
 aYouStillFace	db 'You still face ',0
-aDoYouWishToCon	db 'Do you wish to continue?',0Ah,0
-aButMisses	db ', but misses!',0Ah,0Ah,0
+s_continueQuestion	db 'Do you wish to continue?',0Ah,0
+s_butMisses	db ', but misses!',0Ah,0Ah,0
 s_periodNlNl	db '.', 0Ah, 0Ah,0
 s_exclBlankLine		db '!',0Ah, 0Ah,0
-aJumpsIntoTheShadows	db ' jumps into the shadows, ',0
-aAndSucceeds	db 'and succeeds!',0Ah,0Ah,0
-aButIsDiscovered db 'but is discovered!',0Ah,0Ah,0
+s_jumpsIntoShadows	db ' jumps into the shadows, ',0
+s_andSucceeds	db 'and succeeds!',0Ah,0Ah,0
+s_butIsDiscovered db 'but is discovered!',0Ah,0Ah,0
 		db    0
-aSummonsHelpAnd	db ' summons help and ',0
+s_summonsHelp	db ' summons help and ',0
 		db    0
-aNoneAppears___	db 'none appears...',0Ah,0Ah,0
-aAnotherJoinsTheFray db	'another joins the fray!',0Ah,0Ah,0
+s_noneAppears	db 'none appears...',0Ah,0Ah,0
+s_anotherJoins db	'another joins the fray!',0Ah,0Ah,0
 s_the		db	'The ',0
 		db    0
-aAdvanceS	db ' advance/s\!',0Ah,0Ah,0
+s_advances	db ' advance/s\!',0Ah,0Ah,0
 		db    0
-aButMisses_0	db ', but misses',0
+s_butMisses_0	db ', but misses',0
 		db    0
 aWillYourGallantBand db	'Will your gallant band choose to:',0Ah
 		db '@Fight bravely',0Ah
@@ -2386,12 +2388,12 @@ s_useTheseCommands? db 'Use these commands?',0Ah,0Ah,0
 aAndHits	db ', and hits ',0
 aTimesFor	db ' times for ',0
 aAndHitsFor	db ', and hits for ',0
-aFirBreathEs	db ' /fir\breath\es ',0
+s_firesBreathes	db ' /fir\breath\es ',0
 		db    0
-aLost		db ' lost ',0
+s_lost		db ' lost ',0
 		db    0
-aVoice		db ' voice!',0Ah,0Ah,0
-aPlays___	db ' plays...',0Ah,0Ah,0
+s_voice		db ' voice!',0Ah,0Ah,0
+s_plays	db ' plays...',0Ah,0Ah,0
 aHostilePartyMembers db	'hostile party members!',0Ah,0Ah,0
 		db    0
 asc_473AE	db ',',0
@@ -2403,8 +2405,8 @@ aSorryBud	db 'Sorry, Bud',0
 		db    0
 aAlasYourPartyHasExp db	'Alas, your party has expired, but gone to adventurer heaven.',0
 		db    0
-byte_47412	db ' ', '!', '"', '#', '$', '%', '&', 27h; 0
-		db 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'è'; 8
+g_monkDamageDice	db 20h, 21h, 22h, 23h, 24h, 25h, 26h, 27h
+			db 68h, 69h, 6Ah, 6Bh, 6Ch, 6Dh, 6Eh, 8Fh
 monMeleeAttString dd aSwingsAt		  ; 0
 		dd aSlashesAt		; 1
 		dd aKicksAt		; 2
@@ -2471,21 +2473,16 @@ byte_475AE	db 5, 7, 7, 3	   ; 0
 		db 16h			; 12
 aBadDiceMaskRange db 'Bad dice mask range',0
 		db    0
-off_475D0	dd party_fight
-		dd party_advance
-		dd party_run
-off_475DC	dd bat_attackOpt, bat_defendOpt; 0
-		dd bat_partyAttackOpt, bat_castOpt; 2
-		dd bat_useItemOpt, bat_hideOpt;	4
-		dd bat_songOpt		; 6
-byte_475F8	db 3, 1, 1, 1	   ; 0
-		db 1, 0, 0, 3		; 4
-		db 3, 4, 1, 1		; 8
-		db 4, 0			; 12
-byte_47606	db 3, 2, 0, 0FEh	   ; 0
-byte_4760A	db 0FFh, 0FFh, 0FFh,	0  ; 0
-		db 0, 0, 0, 0		; 4
-		db 1, 1			; 8
+off_475D0	dd bat_partyFightAction
+		dd bat_partyAdvanceAction
+		dd bat_partyRunAction
+off_475DC	dd bat_charPartyAttackActionion, bat_charDefendAction; 0
+		dd bat_charPartyAttackAction, bat_charCastAction; 2
+		dd bat_charUseAction, bat_charHideAction;	4
+		dd bat_charSingAction		; 6
+g_classToHitBonus	db 3, 1, 1, 1, 1, 0, 0, 3, 3, 4, 1, 1, 4, 0
+g_monsterAcBonusList	db 3, 2, 0, 0FEh	   ; 0
+g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0, 1, 1
 aPoisonNeedle	db 'Poison Needle',0
 aPoisonBlades	db 'Poison Blades',0
 aBlades		db 'Blades',0
@@ -2504,7 +2501,7 @@ aCodgerBomb	db 'Codger Bomb',0
 aSwindler	db 'Swindler',0
 aHammer		db 'Hammer',0
 		db    0
-aExperiencePointsForV db ' experience points for valor and battle knowledge, and ',0
+s_experiencePoinsForV db ' experience points for valor and battle knowledge, and ',0
 aTheyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
 		db    0
 aInGold_	db ' in gold.',0Ah,0Ah,0
@@ -3316,7 +3313,7 @@ aMagician_0	db 'Magician',0Ah,0
 aArchmage_0	db 'Archmage',0Ah,0
 aChronomancer_0	db 'Chronomancer',0Ah,0
 spellLevelCost	dw 100, 1000, 2000, 4000, 7000, 10000, 20000; 0
-stru_489E2	spellAdvance <0, 3>	   ; 0
+g_spellLevelData	spellAdvance <0, 3>	   ; 0
 		spellAdvance <3, 3>	; 1
 		spellAdvance <6, 3>	; 2
 		spellAdvance <9, 2>	; 3
@@ -3365,8 +3362,8 @@ stru_489E2	spellAdvance <0, 3>	   ; 0
 		spellAdvance <116, 2>	; 46
 		spellAdvance <118, 2>	; 47
 		spellAdvance <120, 2>	; 48
-specialSpellCost	dd 10000, 50000, 50000	 ; 0
-aThouArtInTheHallOfW	db	'Thou art in the hall of wizards. Would thou like...',0Ah,0Ah
+g_spellsForSalePrice	dd 10000, 50000, 50000	 ; 0
+s_hallOfWizards	db	'Thou art in the hall of wizards. Would thou like...',0Ah,0Ah
 		db 'Advancement',0Ah
 		db 'Spell Acquiring',0Ah
 		db 'Buy a new spell',0Ah
@@ -3375,165 +3372,167 @@ aThouArtInTheHallOfW	db	'Thou art in the hall of wizards. Would thou like...',0A
 aTheGuildEldersPrepare	db 'The Guild elders prepare to weigh thy merits.',0Ah,0Ah
 		db 'Who shall be reviewed?',0
 aTheGuildEldersDeemTha	db 'The Guild elders deem that ',0
-aCannotBeRaisedLevels_	db ' cannot be raised levels.',0
-aTheEldersTeachYouTh	db 'The Elders teach you the lore.',0
+s_cannotBeRaisedLevels_	db ' cannot be raised levels.',0
+s_eldersTeachLore	db 'The Elders teach you the lore.',0
 		db    0
-aWhoSeeksTheSpecialK	db 'Who seeks the special knowledge of the mystic arts?',0
-aThouMayLearn	db 'Thou may learn ',0
-nonClassSpellList	dd aGillesGillsFor, aDivineInterven; 0
+s_buySpellPrompt	db 'Who seeks the special knowledge of the mystic arts?',0
+s_thouMayLearn	db 'Thou may learn ',0
+g_spellsForSaleList	dd aGillesGillsFor, aDivineInterven; 0
 			dd aGotterdamuru_0	; 2
-s_bardInGold	db ' in gold. Who will pay?',0
-aTheLastOfTheGu	db 'The last of the guild elders is here. Would you like...',0Ah,0Ah
+s_inGoldWhoWillPay	db ' in gold. Who will pay?',0
+s_lastOfTheGuildElders	db 'The last of the guild elders is here. Would you like...',0Ah,0Ah
 		db 'Advancement',0Ah
 		db 'Spell Acquiring',0Ah
 		db 'Class Change',0Ah
 		db 'Talk to the elder',0Ah
 		db 'Exit the guild',0
 align 2
-aTheGuildElderP	db 'The Guild elder prepares to weigh your merits.',0Ah,0Ah
+s_elderWeighsMerits	db 'The Guild elder prepares to weigh your merits.',0Ah,0Ah
 		db 'Who shall be reviewed?',0
 align 2
-aHmmm___ShouldI	db '"Hmmm... Should I make you into a zombie perhaps?!?"',0
+s_elderDeadCharacter	db '"Hmmm... Should I make you into a zombie perhaps?!?"',0
 align 2
-aTheGuildElderD	db 'The Guild elder deems that ',0
-aCannotBeRaised	db ' cannot be raised levels.',0
-aStillNeedeth	db ' still needeth ',0
-aExperiencePoin	db ' experience points prior to advancement.',0
+s_guildElderDeems	db 'The Guild elder deems that ',0
+s_cannotBeRaised	db ' cannot be raised levels.',0
+s_stillNeedeth	db ' still needeth ',0
+s_experiencePoints	db ' experience points prior to advancement.',0
 align 2
-aHathEarnedALev	db ' hath earned a level of advancement...',0
+s_hathEarnedLevel	db ' hath earned a level of advancement...',0
 align 2
-a1To		db	'+1 to ',0
+s_plusOneTo		db	'+1 to ',0
 align 2
 fullAttributeString	dd aStrength_, aIntelligence_, aDexterity_;	0
 			dd aConstitution_, aLuck_; 3
-aWhoSeeksKnowle	db 'Who seeks knowledge of the mystic arts?',0
-aThouHathLearne	db 'Thou hath learned all the spells in thy art.',0
+s_whoSeeksKnowledge	db 'Who seeks knowledge of the mystic arts?',0
+s_learnedAllSpells	db 'Thou hath learned all the spells in thy art.',0
 align 2
-aThouCannotAcqu	db 'Thou cannot acquire new spells yet.'
+s_cannotAcquireNewSpells	db 'Thou cannot acquire new spells yet.'
 		db 0
-aSpellLevel	db ' spell level ',0
-aWillCost	db ' will cost ',0
+s_spellLevel	db ' spell level ',0
+s_willCost	db ' will cost ',0
 s_notEnoughGoldNl	db 'Not enough gold.',0Ah,0
-aTheElderTeache	db 'The Elder teaches you the lore.',0
-aWhichMageSeeks	db 'Which mage seeks to change classes?'
+s_elderTeachersLore	db 'The Elder teaches you the lore.',0
+s_whichMageSeeksChange	db 'Which mage seeks to change classes?'
 		db 0
-aThouCannotChan	db 'Thou cannot change class.',0
-aYouMustKnowAtL	db 'You must know at least 3 spell levels in your present art first.',0
+s_cannotChangeClass	db 'Thou cannot change class.',0
+s_mustKnowThreeSpellLevels	db 'You must know at least 3 spell levels in your present art first.',0
 align 2
-aTheeDoesnTQual	db 'Thee doesn',27h,'t qualify for any new class.',0
-aWhichClassShal	db 0Ah,'Which class shall thee become?',0
-aTheeUnderstand	db 'Thee understands the sacrifice, dost thou not? Thee will be stripped of all thy spells and knowledge thereof. Thee will be more powerful than ever before, but more vulnerable as well.',0
-aDostThouAccept	db 'Dost thou accept this sacrifice?',0Ah,0Ah,0
+s_doesntQualifyForNewClass	db 'Thee doesn',27h,'t qualify for any new class.',0
+s_newClassPrompt	db 0Ah,'Which class shall thee become?',0
+s_convertChronomancerPrompt	db 'Thee understands the sacrifice, dost thou not? Thee will be stripped of all thy spells and knowledge thereof. Thee will be more powerful than ever before, but more vulnerable as well.',0
+s_dostThouAccept	db 'Dost thou accept this sacrifice?',0Ah,0Ah,0
 align 2
-aKnowThisTheSpe	db '"Know this, the spell to enter Arboria is invoked by uttering ARBO and the spell to return is ENIK. Be wary, for the spells only work in one place in the land."',0
+s_arboriaSpellText	db '"Know this, the spell to enter Arboria is invoked by uttering ARBO and the spell to return is ENIK. Be wary, for the spells only work in one place in the land."',0
 align 2
-aThereIsALargeG	db '"There is a large grove of trees just south of Skara Brae. The spell will work there."',0
+s_arboriaSpellLocation	db '"There is a large grove of trees just south of Skara Brae. The spell will work there."',0
 align 2
-aNowThouBeginsT	db 'Now thou begins thy new profession.'
+s_beginsNewProfession	db 'Now thou begins thy new profession.'
 		db 0
-aTheOldReviewBo	db 'The old review board is deserted.',0
+s_desertedReviewBoard	db 'The old review board is deserted.',0
 magicUserString	dd aWizard_0, aSorcerer_0, aConjurer_0,	aMagician_0; 0
 		dd aArchmage_0,	aChronomancer_0; 4
-aThouArtNotASpe	db 'Thou art not a spell caster!',0
+s_thouArtNotASpellcaster	db 'Thou art not a spell caster!',0
 align 2
-aWhoWishsToSpea	db 'Who wishs to speak with the elder?',0
+s_whoSpeaksToElder	db 'Who wishs to speak with the elder?',0
 align 2
-aGelidiaTheLand	db '"Gelidia, the land of cold, is entered by uttering GELI and the spell to return is ECUL."',0
-aToTheNorthIsCo	db 'To the north is Cold Peak, your passage to Gelidia is there.',0
+s_gelidiaSpellText	db '"Gelidia, the land of cold, is entered by uttering GELI and the spell to return is ECUL."',0
+s_gelidiaSpellLocation	db 'To the north is Cold Peak, your passage to Gelidia is there.',0
 align 2
-aLucenciaIsEnte	db '"Lucencia is entered by uttering LUCE and the spell to return is ILEG."',0
-aToTheEastIsACr	db 'To the east is a crystal spring, your passage to Lucencia is there.',0
-aKinestiaTheDim	db '"Kinestia, the dimension of machines, is reached by casting KINE. OBRA will bring you back."',0
+s_lucenciaSpellText	db '"Lucencia is entered by uttering LUCE and the spell to return is ILEG."',0
+s_lucenciaSpellLocation	db 'To the east is a crystal spring, your passage to Lucencia is there.',0
+s_kinestiaSpellText	db '"Kinestia, the dimension of machines, is reached by casting KINE. OBRA will bring you back."',0
 align 2
-aToTheSouthWest	db '"To the south-west is an old mine, you may reach Kinestia from there."'
+s_kinestiaSpellLocation	db '"To the south-west is an old mine, you may reach Kinestia from there."'
 db 0
 align 2
-aTenebrosiaCanB	db '"Tenebrosia can be reached by uttering OLUK and the spell to return is ECEA."',0
-aToTheSoutheast	db '"To the southeast is Shadow Rock, your passage to Tenebrosia is there."',0
-aTarmitiaIsEnte	db '"Tarmitia is entered by uttering AECE and the spell to return is KULO."',0
-aToTheSouthIsAV	db '"To the south is a vale, your passage to Tarmitia is there."',0
+s_tenebrosiaSpellText	db '"Tenebrosia can be reached by uttering OLUK and the spell to return is ECEA."',0
+s_tenebrosiaSpellLocation	db '"To the southeast is Shadow Rock, your passage to Tenebrosia is there."',0
+s_tarmitiaSpellText	db '"Tarmitia is entered by uttering AECE and the spell to return is KULO."',0
+s_tarmitiaSpellLocation	db '"To the south is a vale, your passage to Tarmitia is there."',0
 align 2
-aHurryTimeIsRun	db '"Hurry! Time is running out!"',0
-aILlTeachOnlyAC	db '"I',27h,'ll teach only a Chronomancer the special magic that you need to journey on your quest."',0
+s_timeIsRunningOut	db '"Hurry! Time is running out!"',0
+s_teachOnlyChronomancer	db '"I',27h,'ll teach only a Chronomancer the special magic that you need to journey on your quest."',0
 align 2
-aSeekOutBrilhas	db '"Seek out Brilhasti ap Tarj!"',0
+s_seekOutBrilhasti	db '"Seek out Brilhasti ap Tarj!"',0
 align 2
-aTheOldManAward	db 'The old man awards each member 600000 experience points.',0
+s_questAwardXp_1	db 'The old man awards each member 600000 experience points.',0
 align 2
-aWithAWaveOfHis	db 'With a wave of his hand, the old man re-energizes all magic users.',0
+s_questAwardXp_2	db 'With a wave of his hand, the old man re-energizes all magic users.',0
 align 2
-aTheOldManInThe	db 'The old man in the Review Board scratches his head. "Yes, you are the prophesied ones, but you have come too early. No matter."',0
-aBeneathSkaraBr	db '"Beneath Skara Brae you will find one of Tarjan',27h,'s devotees. Brilhasti ap Tarj is a foul Necromancer, and his life impedes my efforts to stave off disaster."',0
+s_questBrilhasti_1	db 'The old man in the Review Board scratches his head. "Yes, you are the prophesied ones, but you have come too early. No matter."',0
+s_questBrilhasti_2	db '"Beneath Skara Brae you will find one of Tarjan',27h,'s devotees. Brilhasti ap Tarj is a foul Necromancer, and his life impedes my efforts to stave off disaster."',0
 align 2
-aYouMayEnterThe	db '"You may enter the Catacombs under the Mad God',27h,'s Temple by uttering his master',27h,'s name... ',27h,'Tarjan"',0
+s_questBrilhasti_3	db '"You may enter the Catacombs under the Mad God',27h,'s Temple by uttering his master',27h,'s name... ',27h,'Tarjan"',0
 align 2
-aDestroyBrilhas	db '"Destroy Brilhasti ap Tarj, then return to me for your true quest."',0
-aWelcomeYeChild	db '"Welcome ye children of the prophecy. Upon your shoulders falls a great weight, for you must embark on what will be your greatest adventure ever."',0
+s_questBrilhasti_4	db '"Destroy Brilhasti ap Tarj, then return to me for your true quest."',0
+s_questValarian_1	db '"Welcome ye children of the prophecy. Upon your shoulders falls a great weight, for you must embark on what will be your greatest adventure ever."',0
 align 2
-aThatWhichHasLa	db '"That which has laid waste to Skara Brae is an ancient evil recently released. It threatens to destroy all reality and time as it has wrought havoc on Skara Brae."',0
-aIfYouCannotSto	db '"If you cannot stop it, it will consume the universe. If you do stop it, you will be rewarded beyond all your dreams."',0
+s_questValarian_2	db '"That which has laid waste to Skara Brae is an ancient evil recently released. It threatens to destroy all reality and time as it has wrought havoc on Skara Brae."',0
+s_questValarian_3	db '"If you cannot stop it, it will consume the universe. If you do stop it, you will be rewarded beyond all your dreams."',0
 align 2
-aPrepareThyselv	db '"Prepare thyselves, and hasten to the place of trees, for it is most like the first dimension you must sojourn in to blunt the evil."',0
-aAboriaTheHomeO	db '"Aboria, the home of Valarian the bold, is reached through using powerful magic that only a Chronomancer can control."',0
+s_questValarian_4	db '"Prepare thyselves, and hasten to the place of trees, for it is most like the first dimension you must sojourn in to blunt the evil."',0
+s_questValarian_5	db '"Aboria, the home of Valarian the bold, is reached through using powerful magic that only a Chronomancer can control."',0
 align 2
-aBringToMeValar	db '"Bring to me Valarian',27h,'s Bow and The Arrows of Life if Valarian will not return here with you."',0
+s_questValarian_6	db '"Bring to me Valarian',27h,'s Bow and The Arrows of Life if Valarian will not return here with you."',0
 align 2
-aYesAndBeOnTheL	db '"Yes, and be on the lookout for an ally, for you are not the first I have sent on this quest. Though your paths are different, they may cross, and you will do well together."',0
+s_questValarian_7	db '"Yes, and be on the lookout for an ally, for you are not the first I have sent on this quest. Though your paths are different, they may cross, and you will do well together."',0
 align 2
-aTheOldManTakes	db 'The old man takes the news of Valarian',27h,'s death hard, but he summons a smile to his lips and breathes deeply.',0
+s_questLanatir_1	db 'The old man takes the news of Valarian',27h,'s death hard, but he summons a smile to his lips and breathes deeply.',0
 align 2
-aYouHaveDoneWel	db '"You have done well, children, and I take well the news that Hawkslayer has survived this long. Now you are bound for a place far distant."',0
-aItIsTheDimensi	db '"It is the dimension of magic. It is known as Gelidia and if your Chronomancer is able, I will share the spells to get you there and back again."',0
-aBringLanatirWi	db '"Bring Lanatir with you, or, if you cannot convince him to come, coax from him the Wand of Power and the Sphere of Lanatir."',0
+s_questLanatir_2	db '"You have done well, children, and I take well the news that Hawkslayer has survived this long. Now you are bound for a place far distant."',0
+s_questLanatir_3	db '"It is the dimension of magic. It is known as Gelidia and if your Chronomancer is able, I will share the spells to get you there and back again."',0
+s_questLanatir_4	db '"Bring Lanatir with you, or, if you cannot convince him to come, coax from him the Wand of Power and the Sphere of Lanatir."',0
 align 2
-aTheOldManAppea	db 'The old man appears visibly shaken by the news of Lanatir',27h,'s death. After a long silence he stares off into space and mumbles, "Is it to be that way then?"',0
+s_questAlliria_1	db 'The old man appears visibly shaken by the news of Lanatir',27h,'s death. After a long silence he stares off into space and mumbles, "Is it to be that way then?"',0
 align 2
-aHisEyesFocusUp	db 'His eyes focus upon you again, and a grim look washes over his features. "Now you are bound for Lucencia."',0
+s_questAlliria_2	db 'His eyes focus upon you again, and a grim look washes over his features. "Now you are bound for Lucencia."',0
 align 2
-aIDareNotHopeAl	db '"I dare not hope Alliria lives, so I want you to recover the Crown of Truth and the Belt of Alliria. Beware, for she had a jealous consort, and he will protect her as best he can."',0
+s_questAlliria_3	db '"I dare not hope Alliria lives, so I want you to recover the Crown of Truth and the Belt of Alliria. Beware, for she had a jealous consort, and he will protect her as best he can."',0
 algn_49F1F:
 align 2
-aTheOldManSLook	db 'The old man',27h,'s look of grim determination withstands news of Alliria',27h,'s death, but the information saps some of his strength.',0
-aQuicklyThenMyC	db '"Quickly then, my children, to distant Kinestia!"',0
-aYouMustReturnH	db '"You must return here with The Hammer of Wrath and Ferofist',27h,'s Helm. I know Ferofist yet lives, but I cannot be sure of how long he will survive."',0
-aHurryThePaceQu	db '"Hurry, the pace quickens, and the outlook is horrible if you fail!"',0
+s_questFerofist_1	db 'The old man',27h,'s look of grim determination withstands news of Alliria',27h,'s death, but the information saps some of his strength.',0
+s_questFerofist_2	db '"Quickly then, my children, to distant Kinestia!"',0
+s_questFerofist_3	db '"You must return here with The Hammer of Wrath and Ferofist',27h,'s Helm. I know Ferofist yet lives, but I cannot be sure of how long he will survive."',0
+s_questFerofist_4	db '"Hurry, the pace quickens, and the outlook is horrible if you fail!"',0
 align 2
-aTheOldManSEyes	db 'The old man',27h,'s eyes narrow as you tell of Ferofist',27h,'s end. "An alliance with the dark one, did he say? It is well he realized his folly in the end."',0
+s_questSceadu_1	db 'The old man',27h,'s eyes narrow as you tell of Ferofist',27h,'s end. "An alliance with the dark one, did he say? It is well he realized his folly in the end."',0
 align 2
-aHePausesASecon	db 'He pauses a second, and you see utter weariness send a tremor through him. "Now to Tenebrosia for all of you."',0
+s_questSceadu_2	db 'He pauses a second, and you see utter weariness send a tremor through him. "Now to Tenebrosia for all of you."',0
 align 2
-aRememberInTheL	db '"Remember, in the land where night is day and day is night, nothing is as you know it to be. Paradox lives there - trust no one but yourselves."',0
+s_questSceadu_3	db '"Remember, in the land where night is day and day is night, nothing is as you know it to be. Paradox lives there - trust no one but yourselves."',0
 align 2
-aFromThereIRequ	db '"From there I require the Helm of Justice and Sceadu',27h,'s Cloak."',0
+s_questSceadu_4	db '"From there I require the Helm of Justice and Sceadu',27h,'s Cloak."',0
 align 2
-aNoTheOldManCri	db '"No!" the old man cries out, "not Sceadu as well. The dark one is utterly mad. Still," the old man smiles, "he burns the chaff while I sow the seed."',0
-aOffWithYouToTa	db '"Off with you to Tarmitia, the land of unceasing warfare. A myriad of ages meld together there, and your success depends upon your ability to adapt."',0
-aBringMeWerraSS	db '"Bring me Werra',27h,'s Shield and the Strifespear."',0
+s_questWerra_1	db '"No!" the old man cries out, "not Sceadu as well. The dark one is utterly mad. Still," the old man smiles, "he burns the chaff while I sow the seed."',0
+s_questWerra_2	db '"Off with you to Tarmitia, the land of unceasing warfare. A myriad of ages meld together there, and your success depends upon your ability to adapt."',0
+s_questWerra_3	db '"Bring me Werra',27h,'s Shield and the Strifespear."',0
 align 2
-aHisEyesLoseThe	db 'His eyes lose their focus. "It is almost done, the circle is almost joined."',0
+s_questWerra_4	db 'His eyes lose their focus. "It is almost done, the circle is almost joined."',0
 align 2
-aIKnowTheOldMan	db '"I know," the old man gurgles, "Werra lies dead." Blood bubbles up on his lips and joins the dark stains on the rest of his clothing. "I, too, have been slain by the Mad One."',0
-aGatherUpThePri	db '"Gather up the prizes you have won, the special ones, those I requested. Hawkslayer has already ventured into Malefia, the land of EVIL."',0
-aIHavePlacedThe	db '"I have placed the prizes in the storage building near the entrance of Skara Brae."',0
-aGetYourselvesH	db '"Get yourselves hence and help him. Destroy the Mad God Tarjan before he destroys all reality!!"',0
+s_questTarjan_1	db '"I know," the old man gurgles, "Werra lies dead." Blood bubbles up on his lips and joins the dark stains on the rest of his clothing. "I, too, have been slain by the Mad One."',0
+s_questTarjan_2	db '"Gather up the prizes you have won, the special ones, those I requested. Hawkslayer has already ventured into Malefia, the land of EVIL."',0
+s_questTarjan_3	db '"I have placed the prizes in the storage building near the entrance of Skara Brae."',0
+s_questTarjan_4	db '"Get yourselves hence and help him. Destroy the Mad God Tarjan before he destroys all reality!!"',0
 align 2
-aWithThoseFinal	db 'With those final words, the old man slumps over, and his body dissolves into a mist that a slight breeze stirs and blows away.',0
+s_questTarjan_5	db 'With those final words, the old man slumps over, and his body dissolves into a mist that a slight breeze stirs and blows away.',0
 align 2
 hpLevelBonusMask db 0Fh, 7, 7, 3, 3, 7,	0Fh, 0Fh, 0Fh, 7; 0 ; This array holds the mask	for bonus hit points for
 		db 7, 7, 7, 0		; 10 ; each class at level-up time.
-off_4A6A4	dd mage_wizardReqCheck, mage_sorcererReqCheck; 0
-		dd mage_conjurorReqCheck, mage_magicianReqCheck; 2
-		dd mage_archmageReqCheck, mage_chronoReqCheck; 4
-byte_4A6BC	db 1, 2, 3, 4, 0Ah, 0Bh ; 0
-aReviewBoard	db 'Review Board',0
+g_mageConversionCheckFunctions	dd mage_convertWizardCheck, mage_convertSorcererCheck; 0
+		dd mage_convertConjurorCheck, mage_convertMagicianCheck; 2
+		dd mage_convertArchmageCheck, mage_convertChronomancerCheck; 4
+
+; Conversion table for key input to class for review_changeMageClass
+g_convertListToMageClass	db 1, 2, 3, 4, 0Ah, 0Bh ; 0
+s_reviewBoard	db 'Review Board',0
 		db    0
-questFuncs	dd chron_questBrilhasti, chron_questValarian; 0
-		dd chron_questLanatir, chron_questAlliria; 2
-		dd chron_questFerofist,	chron_questSceadu; 4
-		dd chron_questWerra, chron_questTarjan;	6
-byte_4A6FA	db 0, 1, 40h, 10h, 4, 1, 40h, 10h; 0
-byte_4A702	db 1, 1, 0, 0, 0, 0,	1, 1; 0
-aGuild		db 'Guild',0
+questFuncs	dd review_questBrilhasti, review_questValarian; 0
+		dd review_questLanatir, review_questAlliria; 2
+		dd review_questFerofist,	review_questSceadu; 4
+		dd review_questWerra, review_questTarjan;	6
+g_questMaskList	db 0, 1, 40h, 10h, 4, 1, 40h, 10h; 0
+g_questByteList	db 1, 1, 0, 0, 0, 0,	1, 1; 0
+s_guild		db 'Guild',0
 s_victoryMessage_1	db '"Welcome, brave heroes. You have succeeded in destroying the threat to all reality. As you know, to do this, you slipped the bonds of time, and traveled forbidden routes'
 		db 'through that which has forever been. You pressed your struggle forward despite danger and death, and you accomplished that which the gods themselves were unable to do."'
 		db 0Ah,0Ah
@@ -4665,78 +4664,18 @@ byte_4CA38	db 1
 		db    0
 		db    0
 		db    0
-byte_4CA3F	db 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
-		db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3
-		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
-		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
-		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 4, 4, 4, 4, 4,	4
-		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-		db 5, 5, 5, 5, 5, 5, 5,	5, 5, 5, 5, 5, 5, 5, 5,	5
-		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
-		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
-		db 6, 6, 6, 6, 6, 6, 6,	6, 6, 6, 6, 6, 6, 6, 6,	6
-		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
-		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
-		db 7, 7, 7, 7, 7, 7, 7,	7, 7, 7, 7, 7, 7, 7, 7,	7
-		db 8, 8, 8, 8, 8, 8, 8,	8, 8, 8, 8, 8, 8, 8, 8,	8
-byte_4CB3F	db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0; 0
-		db 0, 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0, 0,	0; 16
-		db 1, 1, 1, 1, 1, 1, 1,	1, 1, 1, 1, 1, 1, 1, 1,	1; 32
-		db 2, 2, 2, 2, 2, 2, 2,	2, 2, 2, 2, 2, 2, 2, 2,	2; 48
-		db 3, 3, 3, 3, 3, 3, 3,	3, 3, 3, 3, 3, 3, 3, 3,	3; 64
-		db 4, 4, 4, 4, 4, 4, 4,	4, 5, 5, 5, 5, 5, 5, 5,	5; 80
-		db 6, 6, 6, 6, 6, 6, 6,	6, 7, 7, 7, 7, 7, 7, 7,	7; 96
-		db 8, 8, 8, 8, 8, 8, 8,	8, 9, 9, 9, 9, 9, 9, 9,	9; 112
-		db 0Ah,	0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Ah, 0Bh,	0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh, 0Bh; 128
-		db 0Ch,	0Ch, 0Ch, 0Ch, 0Dh, 0Dh, 0Dh, 0Dh, 0Eh,	0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh; 144
-		db 10h,	10h, 10h, 10h, 11h, 11h, 11h, 11h, 12h,	12h, 12h, 12h, 13h, 13h, 13h, 13h; 160
-		db 14h,	14h, 14h, 14h, 15h, 15h, 15h, 15h, 16h,	16h, 16h, 16h, 17h, 17h, 17h, 17h; 176
-		db 18h,	18h, 19h, 19h, 1Ah, 1Ah, 1Bh, 1Bh, 1Ch,	1Ch, 1Dh, 1Dh, 1Eh, 1Eh, 1Fh, 1Fh; 192
-		db 20h,	20h, 21h, 21h, 22h, 22h, 23h, 23h, 24h,	24h, 25h, 25h, 26h, 26h, 27h, 27h; 208
-		db 28h,	28h, 29h, 29h, 2Ah, 2Ah, 2Bh, 2Bh, 2Ch,	2Ch, 2Dh, 2Dh, 2Eh, 2Eh, 2Fh, 2Fh; 224
-		db 30h,	31h, 32h, 33h, 34h, 35h, 36h, 37h, 38h,	39h, 3Ah, 3Bh, 3Ch, 3Dh, 3Eh, 3Fh; 240
-_d3cmp_baseAddr	dw 0
-word_4CC41	dw 0
-_d3cmp_offset	dw 0
-countMaybe	dd 0
-		db 0
-		db 0
-word_4CC4B	dw 2196 dup(0)
-dataHeader	dd 0
-		db    0
-		db    0
-		db    0
-		db    0
-byte_4DD7B	db 103Bh dup(20h)	   ; 0
-workBuf		dw 40h dup(0)		; 0
-		db    0
-		db    0
-workBufIndex	dw	0
-curFromOffset	dw 0
-curFromSegment	dw 0
-		db    0
-		db    0
-		db    0
-		db    0
-curToSegment	dw	0
-curToOffset	dw 0
-word_4EE46	dw 0
-word_4EE48	dw 0
-word_4EE4A	dw 0
-word_4EE4C	dw 0
-word_4EE4E	dw 0
-word_4EE50	dw 0
+
+include(`lib/d3cmp/data.asm')
+
 randomSeed	dw 0
-currentLocationMaybe dw	0
+g_locationNumber dw	0
 dunLevelIndex	dw 0
-dunLevelNum	dw 0
+g_dunLevelNum	dw 0
 sq_north	dw 0
 sq_east		dw 0
 g_direction	dw 0
 inDungeonMaybe	dw 0
-buildingRvalMaybe dw 0
+g_mapRval dw 0
 g_sameSquareFlag	dw 0
 g_curSpellNumber	dw 0
 g_gameProgressFlags	db 7 dup(0)     ; 0
@@ -4759,8 +4698,8 @@ detectDuration		db 0
 shieldDuration		db 0
 levitationDuration	db 0
 g_detectType		db 0
-levelNoMaybe	db 0
-levFlags	db 0
+g_levelNumber	db 0
+g_levelFlags	db 0
 g_dunWidth	db 0
 g_dunHeight	db 0
 g_monsterGroupCount	db 0
@@ -4903,8 +4842,8 @@ minimapWallBitmasks db	0FFh,	0,	0,	0,	0,	0,	0,	0	; 0
 		; 11111111
 		; 11111111
 		db 0, 0
-aFaster		db 0Ah,'<Faster...>',0Ah,0
-aSlower		db 0Ah,'<Slower...>',0Ah,0
+s_faster		db 0Ah,'<Faster...>',0Ah,0
+s_slower		db 0Ah,'<Slower...>',0Ah,0
 txtDelayTable	db 1, 4, 7, 0Bh, 0Eh, 11h, 14h, 17h, 1Ah, 1Dh
 txtDelayIndex	db 7
 _clockTicks	dw 0
@@ -5327,4 +5266,3 @@ byte_5006A	db 4 dup(?)
 dseg_end	db ?
 		db ?
 align 8
-dseg ends

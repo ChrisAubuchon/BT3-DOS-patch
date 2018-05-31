@@ -39,7 +39,7 @@ l_loopEntry:
 
 	mov	al, tavCoords.location[si]
 	cbw
-	cmp	ax, currentLocationMaybe
+	cmp	ax, g_locationNumber
 	jnz	short l_loopIncrement
 
 	mov	ax, cx

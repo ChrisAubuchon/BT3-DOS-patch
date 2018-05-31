@@ -229,7 +229,7 @@ l_attackLoopExit:
 	mov	al, fs:[bx+mon_t.hpDice]
 	sub	ah, ah
 	push	ax
-	CALL(dice_doYDX)
+	CALL(randomYdX)
 	lfs	bx, [bp+monBufferP]
 	mov	cx, fs:[bx+mon_t.hpBase]
 	add	cx, ax

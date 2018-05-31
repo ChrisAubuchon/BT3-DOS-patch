@@ -32,7 +32,7 @@ wizardHall_buySpell proc far
 	jmp	l_return
 
 l_isSpellcaster:
-	mov	ax, currentLocationMaybe
+	mov	ax, g_locationNumber
 	cmp	ax, 3
 	jz	short loc_24C1A
 	cmp	ax, 6
@@ -127,7 +127,7 @@ l_pay:
 	add	ax, 7Ah	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	PUSH_OFFSET(s_eldersTeachLore)
 	PRINTSTRING(true)
 	DELAY(5)

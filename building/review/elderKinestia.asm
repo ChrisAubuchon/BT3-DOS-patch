@@ -15,7 +15,7 @@ review_elderKinestia proc far
 	mov	ax, 5Ch	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_hasLearnedSpell)
+	CALL(character_learnedSpell)
 	or	ax, ax
 	jnz	l_returnZero
 
@@ -27,12 +27,12 @@ review_elderKinestia proc far
 	mov	ax, 5Ch	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 
 	mov	ax, 5Dh	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 
 	mov	ax, 1
 	jmp	short l_return

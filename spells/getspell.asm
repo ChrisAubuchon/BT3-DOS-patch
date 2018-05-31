@@ -43,7 +43,7 @@ loc_1FDC6:
 	jge	short loc_1FE1A
 	push	[bp+var_104]
 	push	[bp+partySlotNumber]
-	CALL(mage_hasLearnedSpell)
+	CALL(character_learnedSpell)
 
 	or	ax, ax
 	jz	short loc_1FE18

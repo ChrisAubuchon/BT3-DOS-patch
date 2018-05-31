@@ -74,7 +74,7 @@ savingThrowCheck proc far
 
 	add	ax, [bp+targetSaveValue]
 	push	ax
-	CALL(_returnXor255, near)
+	CALL(lib_maxFF, near)
 	mov	[bp+targetSaveValue], ax
 	mov	gs:byte_41E63, 0
 	mov	ax, [bp+sourceSaveValue]
@@ -191,7 +191,7 @@ l_partyMemberNotMonster:
 	mov	ax, itemEff_alwaysHide
 	push	ax
 	push	[bp+indexNo]
-	CALL(hasEffectEquipped)
+	CALL(character_isEffectEquipped)
 	or	ax, ax
 	jnz	short l_noLuckBonus
 	add	[bp+partySaveValue], 2
@@ -199,7 +199,7 @@ l_noLuckBonus:
 	CHARINDEX(ax, STACKVAR(indexNo), si)
 	mov	ax, 41h	
 	push	ax
-	CALL(dice_doYDX)
+	CALL(randomYdX)
 	mov	bl, gs:party.class[si]
 	sub	bh, bh
 	mov	cl, classSavingBonus[bx]
@@ -214,32 +214,10 @@ l_antiMagicCheck:
 	sub	ah, ah
 	add	ax, [bp+partySaveValue]
 	push	ax
-	CALL(_returnXor255, near)
+	CALL(lib_maxFF, near)
 l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 _savingThrowCheck endp
-
-; This function	returns	the passed value or 255
-; depending on which is	lower. This is equivalent
-; to the C statement:
-; (val)	<= 255 ? (val) : 255
-; Attributes: bp-based frame
-
-_returnXor255 proc far
-
-	val= word ptr  6
-
-	FUNC_ENTER
-
-	mov	ax, [bp+val]
-	cmp	ax, 255
-	jle	short l_return
-	mov	ax, 255
-l_return:
-	mov	sp, bp
-	pop	bp
-	retf
-_returnXor255 endp

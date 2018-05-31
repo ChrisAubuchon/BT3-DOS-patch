@@ -34,7 +34,7 @@ trap_doDamage proc far
 	mov	[bp+var_2], ax
 	sar	gs:damageAmount, 1
 	push	[bp+arg_0]
-	CALL(bat_doHPDamage)
+	CALL(bat_damageHp)
 l_return:
 	pop	si
 	FUNC_EXIT

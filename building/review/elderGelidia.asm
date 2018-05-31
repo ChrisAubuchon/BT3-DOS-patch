@@ -15,7 +15,7 @@ review_elderGelidia proc far
 	mov	ax, 54h	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_hasLearnedSpell)
+	CALL(character_learnedSpell)
 	or	ax, ax
 	jnz	short l_returnZero
 
@@ -26,11 +26,11 @@ review_elderGelidia proc far
 	mov	ax, 54h	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	mov	ax, 55h	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 	mov	ax, 1
 	jmp	short l_return
 

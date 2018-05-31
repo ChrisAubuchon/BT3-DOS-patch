@@ -83,12 +83,12 @@ l_loop:
 	mov	ax, 68h	
 	push	ax
 	push	[bp+loopCounter]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 
 	mov	ax, 69h	
 	push	ax
 	push	[bp+loopCounter]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 
 l_next:
 	inc	[bp+loopCounter]

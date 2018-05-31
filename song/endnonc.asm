@@ -17,7 +17,7 @@ l_safety:
 	mov	gs:songAntiMonster, 0
 	jmp	short l_return
 l_sanctuary:
-	mov	gs:songACBonus,	0
+	mov	gs:g_songAcBonus,	0
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_return
 l_duotime:

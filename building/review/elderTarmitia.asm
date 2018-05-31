@@ -15,7 +15,7 @@ review_elderTarmitia proc far
 	mov	ax, 64h	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_hasLearnedSpell)
+	CALL(character_learnedSpell)
 	or	ax, ax
 	jnz	short l_returnZero
 
@@ -27,12 +27,12 @@ review_elderTarmitia proc far
 	mov	ax, 64h	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 
 	mov	ax, 65h	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_learnSpell)
+	CALL(character_learnSpell)
 
 	mov	ax, 1
 	jmp	short l_return

@@ -46,7 +46,7 @@ _sp_useWineskin	proc far
 	cmp	gs:party.class[si], class_bard
 	jnz	short loc_2252F
 	push	gs:party.level[si]
-	CALL(_returnXor255, near)
+	CALL(lib_maxFF, near)
 	mov	gs:party.specAbil[si],	al
 	jmp	short l_return
 loc_2252F:

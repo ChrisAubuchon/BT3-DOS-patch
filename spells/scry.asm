@@ -80,7 +80,7 @@ loc_21840:
 	PLURALIZE
 	mov	[bp+var_116], ax
 	mov	[bp+var_114], dx
-	mov	al, levFlags
+	mov	al, g_levelFlags
 	and	al, 10h
 	cmp	al, 1
 	sbb	cx, cx

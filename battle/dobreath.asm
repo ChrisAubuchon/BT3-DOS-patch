@@ -33,6 +33,7 @@ bat_doBreathAttack proc	far
 	; Set levelMultiplier to 1 if source is an enemy
 	cmp	[bp+partySlotNumber], 80h 
 	jl	short l_partyMultiplier
+
 	mov	[bp+levelMultiplier], 1
 	jmp	short l_allFoesCheck
 
@@ -46,10 +47,13 @@ l_allFoesCheck:
 	mov	[bp+partyAttackRval], 0
 	test	[bp+breathFlags], breath_allFoes		; if breathFlags & breathAllFoes
 	jz	short l_oneGroupCheck
+
 	cmp	[bp+partySlotNumber], 80h 			;   if source.isEnemy
 	jge	short l_stripAllFoesFlag			;     breathFlags &= !breathAllFoes
+
 	mov	gs:bat_curTarget, 80h				;   else
 	jmp	short l_oneGroupCheck				;     currentTarget = first enemy group
+
 l_stripAllFoesFlag:
 	and	[bp+breathFlags], 7Fh
 
@@ -61,6 +65,7 @@ l_oneGroupCheck:
 	jnb	short loc_201B9
 	test	[bp+breathFlags], breath_oneGroup
 	jz	short loc_201B9
+
 	mov	ax, [bp+partySlotNumber]
 	jmp	short loc_201BC
 loc_201B9:
@@ -90,6 +95,7 @@ loc_201E6:
 	CALL(bat_isPartyInRange, near)
 	or	ax, ax
 	jnz	loc_20324
+
 	PUSH_OFFSET(s_partyTooFarAway)
 	PUSH_STACK_PTR(outputStringP)
 	STRCAT(outputStringP)
@@ -101,7 +107,7 @@ loc_201E6:
 	DELAY
 	mov	ax, [bp+partyAttackRval]
 	dec	ax
-	jmp	bat_doBreathAttack_exit
+	jmp	l_return
 
 l_targetIsEnemy:
 	mov	al, gs:bat_curTarget
@@ -156,7 +162,7 @@ l_enemyGroupGone:
 	cmp	[bp+breathFlags], breath_allFoes
 	jnb	short loc_20324
 	mov	ax, [bp+partyAttackRval]
-	jmp	bat_doBreathAttack_exit
+	jmp	l_return
 
 loc_20324:
 	cmp	[bp+target], 0
@@ -174,7 +180,7 @@ loc_20345:
 	jbe	short loc_20379
 	mov	al, [bp+arg_6]
 	push	ax
-	CALL(dice_doYDX)
+	CALL(randomYdX)
 	add	gs:damageAmount, ax
 	cmp	gs:damageAmount, 20000
 	jle	short loc_20377
@@ -196,13 +202,13 @@ loc_203AA:
 	cmp	[bp+var_11A], ax
 	jz	loc_2047A
 	mov	bx, ax
-	cmp	gs:byte_42280[bx], 0
+	cmp	gs:g_characterMeleeDistance[bx], 0
 	jnz	loc_2047A
 	mov	al, [bp+specialAttackIndex]
 	sub	ah, ah
 	push	ax
 	push	bx
-	CALL(_canAttackChar, near)
+	CALL(bat_charIsBreathAttackable, near)
 	or	ax, ax
 	jz	loc_2047A
 	CHARINDEX(ax, STACKVAR(target), bx)
@@ -236,15 +242,17 @@ loc_20478:
 	jmp	short loc_2047F
 loc_2047A:
 	mov	[bp+var_2], 0
+
 loc_2047F:
 	cmp	[bp+var_2], 0
-	jnz	short loc_20488
-	jmp	loc_2050C
-loc_20488:
+	jz	loc_2050C
+
 	cmp	[bp+arg_5], 0
 	jz	short loc_2050C
+
 	cmp	gs:bat_curTarget, 80h
 	jnb	short loc_204B0
+
 	mov	al, charSize
 	mul	gs:bat_curTarget
 	mov	bx, ax
@@ -272,17 +280,18 @@ loc_204CF:
 	mov	[bp+var_2], 0
 loc_2050C:
 	cmp	[bp+var_2], 0
-	jnz	short loc_20515
-	jmp	loc_20810
-loc_20515:
+	jz	loc_20810
+
 	push	[bp+spellRange]
 	push	[bp+partySlotNumber]
 	CALL(bat_isPartyInRange, near)
 	mov	[bp+var_4], ax
 	or	ax, ax
-	jz	loc_207F3
+	jz	l_printTooFarAway
+
 	cmp	ax, 2
 	jnz	short loc_2053B
+
 	mov	gs:byte_41E63, 4
 loc_2053B:
 	mov	al, [bp+breathFlags]
@@ -293,12 +302,12 @@ loc_2053B:
 	CALL(savingThrowCheck, near)
 	mov	[bp+var_118], ax
 	or	ax, ax
-	jnz	short loc_20559
-	jmp	loc_207D4
-loc_20559:
+	jz	loc_207D4
+
 	cmp	ax, 1
 	jnz	short loc_20567
 	sar	gs:damageAmount, 1
+
 loc_20567:
 	test	[bp+breathFlags], 3
 	jz	short loc_2058E
@@ -330,13 +339,9 @@ loc_205CF:
 	mov	al, [bp+arg_3]
 	sub	ah, ah
 	and	[bp+var_108], ax
+
 	mov	[bp+counter], 0
-	jmp	short loc_205E8
 loc_205E4:
-	inc	[bp+counter]
-loc_205E8:
-	cmp	[bp+counter], 7
-	jge	short loc_2060F
 	mov	bx, [bp+counter]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
@@ -344,7 +349,10 @@ loc_205E8:
 	jz	short loc_2060D
 	sar	gs:damageAmount, 1
 loc_2060D:
-	jmp	short loc_205E4
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short loc_205E4
+
 loc_2060F:
 	cmp	gs:bat_curTarget, 80h
 	jnb	short loc_20631
@@ -368,13 +376,9 @@ loc_20650:
 	mov	al, [bp+arg_3]
 	sub	ah, ah
 	and	[bp+var_6], ax
+
 	mov	[bp+counter], 0
-	jmp	short loc_20667
 loc_20663:
-	inc	[bp+counter]
-loc_20667:
-	cmp	[bp+counter], 7
-	jge	short loc_2068D
 	mov	bx, [bp+counter]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
@@ -382,14 +386,16 @@ loc_20667:
 	jz	short loc_2068B
 	shl	gs:damageAmount, 1
 loc_2068B:
-	jmp	short loc_20663
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short loc_20663
+
 loc_2068D:
 	mov	ax, gs:damageAmount
 	mov	cl, [bp+specialAttackIndex]
 	sub	ch, ch
 	or	ax, cx
-	jnz	short loc_206A1
-	jmp	loc_207B5
+	jz	loc_207B5
 loc_206A1:
 	PUSH_OFFSET(s_is)
 	PUSH_STACK_PTR(outputStringP)
@@ -429,12 +435,12 @@ loc_206A1:
 	mov	gs:specialAttackVal, ax
 	mov	al, gs:bat_curTarget
 	push	ax
-	CALL(bat_doHPDamage)
+	CALL(bat_damageHp)
 	or	ax, ax
 	jz	short loc_207A7
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
-	CALL(bat_getKillString)
+	CALL(bat_appendSpecialAttackString)
 	SAVE_PTR_STACK(dx,ax,outputStringP)
 	mov	ax, 1
 	push	ax
@@ -455,6 +461,7 @@ loc_207A7:
 	jmp	short loc_207D2
 loc_207B5:
 	PUSH_OFFSET(s_repelledAttack)
+	PUSH_STACK_PTR(outputStringP)
 	STRCAT(outputStringP)
 loc_207D2:
 	jmp	short loc_207F1
@@ -464,7 +471,7 @@ loc_207D4:
 	STRCAT(outputStringP)
 loc_207F1:
 	jmp	short loc_20810
-loc_207F3:
+l_printTooFarAway:
 	PUSH_OFFSET(s_wasTooFarAway)
 	PUSH_STACK_PTR(outputStringP)
 	STRCAT(outputStringP)
@@ -503,39 +510,7 @@ loc_20896:
 loc_2089C:
 	cmp	[bp+var_110], 0
 	jnz	loc_201C6
-bat_doBreathAttack_exit:
+l_return:
 	FUNC_EXIT
 	retf
 bat_doBreathAttack endp
-
-; Attributes: bp-based frame
-
-_canAttackChar proc far
-        partySlotNumber=        word ptr  6
-        specialAttackIndex= word ptr  8
-
-	FUNC_ENTER
-	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
-
-        cmp     byte ptr gs:party._name[bx], 0			; if partySlot.isEmpty
-	jz	l_return_zero					;   return 0
-	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)
-        test    gs:party.status[bx], stat_dead or stat_stoned	; if !partySlot.isDead and !partySlot.isStoned
-	jz	l_return_one					;   return 1
-
-	CHARINDEX(ax, STACKVAR(partySlotNumber), bx)		; Character is either dead or stoned
-        test    gs:party.status[bx], stat_stoned		; if partySlot.isStoned
-	jnz	l_return_zero					;   return 0
-
-								; Character is dead
-        cmp     [bp+specialAttackIndex], speAtt_possess		; if specialAttackIndex != speAtt_possess
-        jnz     short l_return_zero				;   return 0
-l_return_one:
-	mov	ax, 1
-	jmp	l_return
-l_return_zero:
-        sub     ax, ax
-l_return:
-	FUNC_EXIT
-        retf
-_canAttackChar endp

@@ -72,7 +72,7 @@ loc_14A05:
 	mov	al, strg_inventory[si]
 	push	ax
 	push	[bp+arg_0]
-	CALL(inven_addItem)
+	CALL(inventory_addItem)
 	or	ax, ax
 	jz	short l_allFull
 	mov	bx, [bp+var_13C]

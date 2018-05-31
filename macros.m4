@@ -73,9 +73,15 @@ define(`IOWAIT', `mov	ax, 4000h
 
 # PRINTSTRING([clear])
 #
-define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear)', `ifelse(`$1', `wait', `CALL(printStringWithWait)', `CALL(printString)')')')
+define(`PRINTSTRING', `ifelse(`$1', `true', `CALL(printStringWClear)', `ifelse(`$1', `wait', `CALL(printStringWithWait)', `ifelse(`$1', `clear', `CALL(printStringWClear)', `CALL(printString)')')')')
 
-# DELAY([count]
+# PRINTOFFSET(offset, [clear|wait])
+#
+define(`PRINTOFFSET', `ifelse(`$1', `', `errprint(`No argument passed to PRINTOFFSET
+')', `')PUSH_OFFSET(`$1')
+	PRINTSTRING(`$2')')')
+
+# DELAY([count])
 #
 define(`DELAY', `ifelse(`$1', `', `CALL(text_delayWithTable)', `PUSH_IMM($1)
 	CALL(text_delayNoTable)')')
@@ -118,5 +124,13 @@ define(`RANGE_WITH_MAX', `sub	$2, $1
 	sbb	$3, $3
 	and	$2, $3
 	add	$2, $1')
+
+# REGISTER_TRIPLE(srcReg, tmpReg)
+#
+# Multiply srcReg by 3 without using mul/imul
+#
+define(`REGISTER_TRIPLE', `mov	$2, $1
+	shl	$1, 1
+	add	$1, $2')')
 
 divert`'dnl

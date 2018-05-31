@@ -29,6 +29,7 @@ maxDrunkLevel  = 0Ch
 inventorySize  = 24h
 monStruSize  = 30h
 charSize  = 78h
+c_spellCount = 7Eh
 
 ; enum disbelieveFlags
 disb_disbelieve = 1
@@ -52,7 +53,7 @@ icon_levitation	 = 4
 ; enum itemFlags
 itemFlag_equipped  = 1
 itemFlag_unequipable  =	2
-itemFlag_identified  = 80h
+itemFlag_unidentified  = 80h
 
 ; enum itemType
 itType_item  = 0
@@ -85,6 +86,7 @@ dosKeys_home		= 4700h
 dosKeys_upArrow	 = 4800h
 dosKeys_pageUp		= 4900h
 dosKeys_leftArrow  = 4B00h
+dosKeys_center		= 4C00h
 dosKeys_rightArrow  = 4D00h
 dosKeys_end		= 4F00h
 dosKeys_downArrow  = 5000h
@@ -207,3 +209,4 @@ gameState_inCamp	= 1
 gameState_inWilderness	= 2
 gameState_inDungeon	= 4
 gameState_partyDied	= 5
+gameState_quit		= 0FFh

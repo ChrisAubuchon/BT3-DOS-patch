@@ -19,7 +19,7 @@ loc_11B2A:
 loc_11B3B:
 	mov	ax, 2
 loc_11B3E:
-	mov	buildingRvalMaybe, ax
+	mov	g_mapRval, ax
 	mov	ax, 2
 	push	ax
 	PUSH_OFFSET(s_gameSav)
@@ -31,7 +31,7 @@ loc_11B3E:
 	PUSH_OFFSET(s_cantOpenGameSave)
 	PRINTSTRING
 	IOWAIT
-	mov	buildingRvalMaybe, 0
+	mov	g_mapRval, 0
 	jmp	short l_return
 
 l_doSave:
@@ -48,7 +48,7 @@ l_doSave:
 	CALL(write)
 
 	mov	ax, offset byte_4EECC
-	mov	cx, offset currentLocationMaybe
+	mov	cx, offset g_locationNumber
 	mov	bx, seg	dseg
 	sub	ax, cx
 	push	ax
@@ -72,7 +72,7 @@ l_doSave:
 loc_11BEF:
 	sub	ax, ax
 loc_11BF1:
-	mov	buildingRvalMaybe, ax
+	mov	g_mapRval, ax
 l_return:
 	mov	sp, bp
 	pop	bp

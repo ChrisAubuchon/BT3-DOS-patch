@@ -17,7 +17,7 @@ review_resetAgeStatus proc far
 	lea	ax, party.strength[si]
 	push	dx
 	push	ax
-	CALL(_doAgeStatus)
+	CALL(character_applyAgeStatus)
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	or	gs:party.status[bx], stat_old
 	pop	si

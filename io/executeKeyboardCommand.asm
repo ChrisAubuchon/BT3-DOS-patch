@@ -66,6 +66,10 @@ l_partyAttack:
 	mov	g_partyAttackFlag, 1
 	jmp	l_fail
 
+l_battle:
+	CALL(bat_init)
+	jmp	l_fail
+
 l_useItem:
 	CALL(useItem)
 	jmp	l_success
@@ -84,7 +88,8 @@ l_keySwitch:
 keyJumpTable	dw offset l_singBardSong 
 		dw offset l_castSpell	
 		dw offset l_dropMember	
-		dw offset l_fail	
+;		dw offset l_fail	
+		dw offset l_battle
 		dw offset l_fail	
 		dw offset l_fail	
 		dw offset l_printHelp	

@@ -69,7 +69,7 @@ loc_167BC:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
@@ -198,7 +198,7 @@ loc_1694C:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	CALL(d3comp)
+	CALL(d3cmp_flate)
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -213,8 +213,8 @@ loc_1694C:
 	push	[bp+var_25C]
 	push	[bp+var_25E]
 	CALL(_freeMaybe)
-	CALL(sub_116CC)
-	mov	buildingRvalMaybe, 1
+	CALL(map_resetLocation)
+	mov	g_mapRval, 1
 
 	pop	si
 	mov	sp, bp

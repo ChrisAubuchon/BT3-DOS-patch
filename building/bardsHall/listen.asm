@@ -13,7 +13,7 @@ bards_listen proc far
 	push	si
 
 	PUSH_STACK_ADDRESS(var_C)
-	cmp	currentLocationMaybe, 9
+	cmp	g_locationNumber, 9
 	jnz	short loc_25BCC
 	mov	ax, 1
 	jmp	short loc_25BCE

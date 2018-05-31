@@ -22,7 +22,7 @@ l_ioLoopEntry:
 l_return:
 	CALL(writeInventoryStf, near)
 	CALL(text_clear)
-	mov	buildingRvalMaybe, 2
+	mov	g_mapRval, 2
 	sub	ax, ax
 
 	FUNC_EXIT

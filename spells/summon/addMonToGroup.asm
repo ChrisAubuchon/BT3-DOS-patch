@@ -30,7 +30,7 @@ loc_2607B:
 	mov	al, gs:monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
-	CALL(dice_doYDX)
+	CALL(randomYdX)
 	mov	cx, gs:monGroups.hpBase[si]
 	add	cx, ax
 	mov	bx, [bp+arg_2]
