@@ -297,10 +297,12 @@ l_addVorpalPlateBonus:
 	sub	ah, ah
 	cmp	ax, [bp+vorpalLoopCounter]
 	jbe	short l_calculateDamageNext
+
 	CALL(random)
-	and	ax, 4				; This is a bug. It's supposed to be a number
-	add	gs:damageAmount, ax		; between 1 and 4. (x AND 4) returns either 0
-	inc	[bp+vorpalLoopCounter]			; or 4.
+	and	ax, 3					; AND ax with 3 to get 0-3
+	inc	ax					; increment result to get 1-4
+	add	gs:damageAmount, ax
+	inc	[bp+vorpalLoopCounter]
 	jmp	short l_addVorpalPlateBonus
 
 l_calculateDamageNext:

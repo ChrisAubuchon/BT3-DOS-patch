@@ -63,3 +63,5 @@
   will now be drained as expected when poisoned.
 
 - Fixed the drop rate for Harmonic Gems
+
+- Fix vorpal plating damage calculation
