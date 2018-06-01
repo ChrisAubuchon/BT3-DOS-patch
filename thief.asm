@@ -20308,7 +20308,7 @@ l_doRound:
 	call	bat_partyDisbelieves
 	cmp	gs:monDisbelieveFlag, 0
 	jnz	short l_noDisbelieve
-	call	bat_isAMonGroupActive
+	call	bat_monGroupActive
 	or	ax, ax
 	jz	short l_noDisbelieve
 	call	bat_monDisbelieve
@@ -20345,7 +20345,7 @@ party_died:
 	jmp	short l_return
 
 l_partyAlive:
-	call	bat_isAMonGroupActive
+	call	bat_monGroupActive
 	or	ax, ax
 	jz	short l_noMoreEnemies
 	call	_return_zero
@@ -23216,7 +23216,7 @@ bat_printOpponents proc	far
 	mov	gs:byte_4228B, 0
 	cmp	[bp+arg_0], 0
 	jnz	short loc_1CB89
-	call	bat_isAMonGroupActive
+	call	bat_monGroupActive
 	or	ax, ax
 	jz	short loc_1CB63
 	mov	ax, 6
@@ -24491,7 +24491,7 @@ bat_partyGetActions proc far
 	jz	short loc_1D720
 	jmp	loc_1D7BE
 loc_1D720:
-	call	bat_isAMonGroupActive
+	call	bat_monGroupActive
 	or	ax, ax
 	jnz	short loc_1D72C
 	jmp	loc_1D7BE
@@ -26953,7 +26953,7 @@ bat_partyPackBonuses endp
 
 ; Attributes: bp-based frame
 
-bat_isAMonGroupActive proc far
+bat_monGroupActive proc far
 
 	groupNo= word ptr -2
 
@@ -26982,7 +26982,7 @@ loc_1F15F:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_isAMonGroupActive endp
+bat_monGroupActive endp
 
 ; Attributes: bp-based frame
 
@@ -27262,7 +27262,7 @@ loc_1F46A:
 loc_1F474:
 	push	[bp+var_102]
 	push	cs
-	call	near ptr bat_canGetTreasure
+	call	near ptr bat_charGetReward
 	add	sp, 2
 	or	ax, ax
 	jnz	short loc_1F486
@@ -27343,7 +27343,7 @@ loc_1F565:
 bat_getReward endp
 
 ; Attributes: bp-based frame
-bat_canGetTreasure proc	far
+bat_charGetReward proc	far
 
 	arg_0= word ptr	 6
 
@@ -27375,7 +27375,7 @@ loc_1F5B9:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_canGetTreasure endp
+bat_charGetReward endp
 
 ; Attributes: bp-based frame
 
@@ -27544,7 +27544,7 @@ chest_setOffTrap proc far
 	push	[bp+var_108]
 	push	[bp+arg_0]
 	push	cs
-	call	near ptr chest_doTrapAttack
+	call	near ptr chest_doTrap
 	add	sp, 4
 	jmp	short loc_1F7CA
 loc_1F7A6:
@@ -27558,7 +27558,7 @@ loc_1F7B2:
 	push	[bp+var_108]
 	push	[bp+var_102]
 	push	cs
-	call	near ptr chest_doTrapAttack
+	call	near ptr chest_doTrap
 	add	sp, 4
 	jmp	short loc_1F7AE
 loc_1F7CA:
@@ -27579,7 +27579,7 @@ loc_1F7CA:
 chest_setOffTrap endp
 
 ; Attributes: bp-based frame
-chest_doTrapAttack proc	far
+chest_doTrap proc	far
 
 	var_2= word ptr	-2
 	arg_0= word ptr	 6
@@ -27624,7 +27624,7 @@ loc_1F88B:
 	mov	sp, bp
 	pop	bp
 	retf
-chest_doTrapAttack endp
+chest_doTrap endp
 
 ; Attributes: bp-based frame
 chest_open proc	far

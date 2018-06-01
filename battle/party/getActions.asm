@@ -23,7 +23,7 @@ bat_partyGetActions proc far
 	jz	short loc_1D720
 	jmp	loc_1D7BE
 loc_1D720:
-	call	bat_isAMonGroupActive
+	call	bat_monGroupActive
 	or	ax, ax
 	jnz	short loc_1D72C
 	jmp	loc_1D7BE

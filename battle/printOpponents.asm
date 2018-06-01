@@ -19,7 +19,7 @@ bat_printOpponents proc	far
 	mov	gs:byte_4228B, 0
 	cmp	[bp+arg_0], 0
 	jnz	short loc_1CB89
-	call	bat_isAMonGroupActive
+	call	bat_monGroupActive
 	or	ax, ax
 	jz	short loc_1CB63
 	mov	ax, 6

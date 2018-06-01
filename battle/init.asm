@@ -57,7 +57,7 @@ l_doRound:
 	CALL(bat_partyDisbelieves)
 	cmp	gs:monDisbelieveFlag, 0
 	jnz	short l_noDisbelieve
-	CALL(bat_isAMonGroupActive)
+	CALL(bat_monGroupActive)
 	or	ax, ax
 	jz	short l_noDisbelieve
 	CALL(bat_monDisbelieve)
@@ -90,7 +90,7 @@ party_died:
 	jmp	short l_return
 
 l_partyAlive:
-	CALL(bat_isAMonGroupActive)
+	CALL(bat_monGroupActive)
 	or	ax, ax
 	jz	short l_noMoreEnemies
 	CALL(_return_zero)

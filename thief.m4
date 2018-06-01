@@ -505,8 +505,19 @@ include(`battle/mon/countGroups.asm')
 include(`battle/mon/moveGroup.asm')
 include(`battle/party/packBonuses.asm')
 include(`battle/mon/groupActive.asm')
-
-include(`seg009.asm')
+include(`lib/returnZero.asm')
+include(`battle/end.asm')
+include(`battle/getReward.asm')
+include(`battle/char/getReward.asm')
+include(`battle/chest/examine.asm')
+include(`battle/chest/setOffTrap.asm')
+include(`battle/chest/doTrap.asm')
+include(`battle/chest/open.asm')
+include(`battle/chest/disarm.asm')
+include(`battle/chest/trapZap.asm')
+include(`battle/chest/returnOne.asm')
+include(`battle/chest/trapStrcmp.asm')
+include(`battle/doChest.asm')
 
 seg009 ends
 

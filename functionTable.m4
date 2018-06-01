@@ -79,7 +79,7 @@ define(`CALL', `ifelse(
 	`$1', `bat_getRandomChar',			`__call($2)bat_getRandomChar, 2)',
 	`$1', `bat_getReward',				`__call($2)bat_getReward)',
 	`$1', `bat_monTarjanSpecial',			`__call($2)bat_monTarjanSpecial)',
-	`$1', `bat_isAMonGroupActive',			`__call($2)bat_isAMonGroupActive)',
+	`$1', `bat_monGroupActive',			`__call($2)bat_monGroupActive)',
 	`$1', `bat_isPartyInRange',			`__call($2)bat_isPartyInRange, 4)',
 	`$1', `bat_init',				`__call($2)bat_init)',
 	`$1', `bat_monCast',				`__call($2)bat_monCast, 6)',
