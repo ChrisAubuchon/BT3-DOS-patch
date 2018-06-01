@@ -20,7 +20,7 @@ loc_1F0AD:
 	mov	al, gs:(byte_42444+1)[bx]
 	mov	gs:byte_42444[bx], al
 	mov	bx, [bp+var_2]
-	mov	al, gs:(strengthBonus+1)[bx]
+	mov	al, gs:(g_strengthSpellBonus+1)[bx]
 	mov	gs:g_strengthSpellBonus[bx], al
 	mov	bx, [bp+var_2]
 	mov	al, gs:(vorpalPlateBonus+1)[bx]

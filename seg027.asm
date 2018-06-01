@@ -19,7 +19,7 @@ word_41E6C	dw 0
 trapIndex	dw 0
 g_charFreezeToHitBonus	db 0
 byte_41E71	db 0
-g_spellStrengthBonus	db 7 dup(0)	      ;	0
+g_strengthSpellBonus	db 7 dup(0)	      ;	0
 byte_41E79	db 0
 mapWidth	db 0
 align 2

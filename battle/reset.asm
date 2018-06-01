@@ -4,17 +4,10 @@ bat_reset proc far
 
 	counter= word ptr -2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER(2)
+
 	mov	[bp+counter], 0
-	jmp	short loc_1D0B8
-loc_1D0B5:
-	inc	[bp+counter]
-loc_1D0B8:
-	cmp	[bp+counter], 4
-	jge	loc_1D130
+l_resetMonsterDataLoop:
 	mov	ax, 40h	
 	push	ax
 	sub	ax, ax
@@ -26,8 +19,7 @@ loc_1D0B8:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	memset
-	add	sp, 8
+	CALL(memset)
 
 	mov	ax, 40h	
 	push	ax
@@ -40,8 +32,7 @@ loc_1D0B8:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	memset
-	add	sp, 8
+	CALL(memset)
 
 	mov	ax, 40h	
 	push	ax
@@ -54,8 +45,7 @@ loc_1D0B8:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	memset
-	add	sp, 8
+	CALL(memset)
 
 	sub	al, al
 	mov	bx, [bp+counter]
@@ -66,20 +56,17 @@ loc_1D0B8:
 	mov	gs:monSpellToHitPenalty[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:monAttackBonus[bx], al
-	jmp	loc_1D0B5
-loc_1D130:
-	mov	[bp+counter], 0
-	jmp	short loc_1D13A
-loc_1D137:
 	inc	[bp+counter]
-loc_1D13A:
-	cmp	[bp+counter], 7
-	jge	short loc_1D18D
+	cmp	[bp+counter], 4
+	jl	l_resetMonsterDataLoop
+
+	mov	[bp+counter], 0
+l_resetCharacterDataLoop:
 	mov	bx, [bp+counter]
 	mov	gs:g_charActionList[bx], 2
 	sub	al, al
 	mov	bx, [bp+counter]
-	mov	gs:[bx+8], al
+	mov	gs:vorpalPlateBonus[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:g_strengthSpellBonus[bx], al
 	mov	bx, [bp+counter]
@@ -88,8 +75,10 @@ loc_1D13A:
 	mov	gs:g_characterMeleeDistance[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:bat_charPriority[bx], al
-	jmp	short loc_1D137
-loc_1D18D:
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short l_resetCharacterDataLoop
+
 	sub	al, al
 	mov	gs:g_divineDamageBonus, al
 	mov	gs:g_charFreezeToHitBonus, al
@@ -111,7 +100,7 @@ loc_1D18D:
 	sub	ax, ax
 	mov	gs:batRewardHi,	ax
 	mov	gs:batRewardLo,	ax
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 bat_reset endp

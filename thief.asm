@@ -23783,13 +23783,9 @@ bat_reset proc far
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	mov	[bp+counter], 0
-	jmp	short loc_1D0B8
-loc_1D0B5:
-	inc	[bp+counter]
-loc_1D0B8:
-	cmp	[bp+counter], 4
-	jge	loc_1D130
+l_resetMonsterDataLoop:
 	mov	ax, 40h	
 	push	ax
 	sub	ax, ax
@@ -23841,20 +23837,17 @@ loc_1D0B8:
 	mov	gs:monSpellToHitPenalty[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:monAttackBonus[bx], al
-	jmp	loc_1D0B5
-loc_1D130:
-	mov	[bp+counter], 0
-	jmp	short loc_1D13A
-loc_1D137:
 	inc	[bp+counter]
-loc_1D13A:
-	cmp	[bp+counter], 7
-	jge	short loc_1D18D
+	cmp	[bp+counter], 4
+	jl	l_resetMonsterDataLoop
+
+	mov	[bp+counter], 0
+l_resetCharacterDataLoop:
 	mov	bx, [bp+counter]
 	mov	gs:g_charActionList[bx], 2
 	sub	al, al
 	mov	bx, [bp+counter]
-	mov	gs:[bx+8], al
+	mov	gs:vorpalPlateBonus[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:g_strengthSpellBonus[bx], al
 	mov	bx, [bp+counter]
@@ -23863,8 +23856,10 @@ loc_1D13A:
 	mov	gs:g_characterMeleeDistance[bx], al
 	mov	bx, [bp+counter]
 	mov	gs:bat_charPriority[bx], al
-	jmp	short loc_1D137
-loc_1D18D:
+	inc	[bp+counter]
+	cmp	[bp+counter], 7
+	jl	short l_resetCharacterDataLoop
+
 	sub	al, al
 	mov	gs:g_divineDamageBonus, al
 	mov	gs:g_charFreezeToHitBonus, al
@@ -23886,6 +23881,7 @@ loc_1D18D:
 	sub	ax, ax
 	mov	gs:batRewardHi,	ax
 	mov	gs:batRewardLo,	ax
+
 	mov	sp, bp
 	pop	bp
 	retf
@@ -25184,126 +25180,173 @@ loc_1DDD3:
 	retf
 bat_monGroupCount endp
 
+; Calculating melee success
+; -------------------------
+; 1. Determine the target's AC
+;    a. Party member
+;	targetAc = member.ac
+;    b. Monster
+;       targetAc = monsterType.ac + monsterType.acBonus + monsterType.advanceSpeedBonus - freezeSpell.penalty
+;
+; 2. Subtract equipped weapon (if any) toHit bonus from targetAc
+;    targetAc -= weapon.toHitBonus
+;
+; 3. Add monster-cast Word of Fear bonus
+;    targetAc += monster.wofBonus
+;
+; 4. Determine source attack value
+;    a. Summon
+;       sourceAttack = random(summon.toHitLo, summon.toHitHi)
+;    b. Character
+;       i.  sourceAttack = MAX((level >> 4), 255)
+;       ii. Subtract (strength >> 1) from targetAc
+;           targetAc -= (strength >> 1)
+;
+; 5. Calculate pre-bonus attackSuccess
+;    attackSuccessFlag = targetAc - sourceAttack
+;
+; 6. Apply bonues
+;    attackSuccessFlag -= (classToHitBonus + freezeSpellToHitBonus + 2d8 + strengthSpellBonus)
+;
+; 7. If (attackSuccessFlag > 0)
+;    Attack fails
+;
 ; Attributes: bp-based frame
 
 bat_charExecuteMeleeAttack proc far
 
-	var_22=	word ptr -22h
-	var_20=	word ptr -20h
-	var_1E=	dword ptr -1Eh
-	var_1A=	word ptr -1Ah
-	var_18=	word ptr -18h
-	var_16=	word ptr -16h
-	var_14=	word ptr -14h
-	var_12=	word ptr -12h
-	var_10=	word ptr -10h
-	var_E= word ptr	-0Eh
-	var_C= word ptr	-0Ch
-	var_A= word ptr	-0Ah
-	var_8= word ptr	-8
-	var_6= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
+	monkLevel=	word ptr -1Ch
+	summonP=	dword ptr -1Ah
+	numberOfAttacks=	word ptr -16h
+	damageDice=	word ptr -14h
+	vorpalLoopCounter=	word ptr -12h
+	sourceToHitValue=	word ptr -10h
+	weaponBonusDamage=	word ptr -0Eh
+	monsterTargetGroup= word ptr	-0Ch
+	targetGroupDistance= word ptr	-0Ah
+	attackSuccessFlag= word ptr	-8h
+	equippedWeaponSlot= word ptr	-6
+	targetAc= word ptr	-4
+	loopCounter= word ptr	-2
+	slotNumber= word ptr	 6
+	actionTarget= word ptr	 8
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 22h	
+	mov	ax, 1Ch
 	call	someStackOperation
 	push	si
-	cmp	[bp+arg_2], 80h
-	jge	short loc_1DED6
-	getCharP	[bp+arg_2], bx
-	mov	al, gs:party.ac[bx]
+
+	cmp	[bp+actionTarget], 80h
+	jge	short l_monsterTarget
+
+	mov	ax, charSize
+	imul	[bp+actionTarget]
+	mov	bx, ax		; if target is party member
+	mov	al, gs:party.ac[bx]				;   then targetAc = member AC
 	cbw
-	mov	[bp+var_4], ax
-	jmp	loc_1DF74
-loc_1DED6:
-	mov	ax, [bp+arg_2]
+	mov	[bp+targetAc], ax
+	jmp	l_getSourceAttackValue
+
+l_monsterTarget:
+	mov	ax, [bp+actionTarget]
 	and	ax, 3
-	mov	[bp+var_E], ax
-	getMonP	[bp+var_E], bx
+	mov	[bp+monsterTargetGroup], ax
+	mov	ax, monStruSize
+	imul	[bp+monsterTargetGroup]
+	mov	ax, ax
 	mov	al, gs:monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
-	mov	[bp+var_C], ax
-	or	ax, ax
-	jz	short loc_1DF17
-	mov	bx, [bp+arg_0]
-	mov	al, gs:g_characterMeleeDistance[bx]
+	mov	[bp+targetGroupDistance], ax			; if targetGroupDistance == 0
+	or	ax, ax						;   then goto l_inMeleeRange
+	jz	short l_inMeleeRange
+
+	mov	bx, [bp+slotNumber]				; else if characterMeleeDistance < targetGroupDistance
+	mov	al, gs:g_characterMeleeDistance[bx]		;   then return MISSED
 	sub	ah, ah
-	mov	cx, [bp+var_C]
+	mov	cx, [bp+targetGroupDistance]
 	dec	cx
 	cmp	ax, cx
-	jnb	short loc_1DF17
-	sub	ax, ax
-	jmp	loc_1E277
-loc_1DF17:
-	getMonP	[bp+var_E], si
+	jb	l_returnZero
+
+l_inMeleeRange:
+	mov	ax, monStruSize
+	imul	[bp+monsterTargetGroup]
+	mov	si, ax
 	mov	al, gs:monGroups.packedGenAc[si]
 	sub	ah, ah
 	and	ax, 3Fh
-	mov	[bp+var_4], ax
-	mov	al, gs:monGroups.flags[si]
-	sub	ah, ah
-	mov	cl, 6
-	shr	ax, cl
-	and	ax, 3
-	mov	[bp+var_22], ax
-	mov	bx, ax
-	mov	al, g_monsterAcBonusList[bx]
+	mov	[bp+targetAc], ax				; targetAc = monsterType.Ac
+
+	mov	al, gs:monGroups.flags[si]			; Apply a bonus/penalty to the
+	sub	ah, ah						; targetAc based on the monster
+	mov	cl, 6						; flags.
+	shr	ax, cl						;
+	and	ax, 3						; I have no idea why this isn't
+	mov	bx, ax						; just part of the monster's base
+	mov	al, g_monsterAcBonusList[bx]			; AC.
 	cbw
-	add	[bp+var_4], ax
-	mov	al, gs:monGroups.distance[si]
-	sub	ah, ah
-	mov	cl, 4
-	shr	ax, cl
-	mov	[bp+var_8], ax
-	mov	bx, ax
-	mov	al, g_monsterAdvanceSpeedAcBonusList[bx]
+	add	[bp+targetAc], ax				; targetAc += AcBonus
+
+	mov	al, gs:monGroups.distance[si]			; Apply a bonus/penalty to the
+	sub	ah, ah						; targetAc based on the monster's
+	mov	cl, 4						; advance speed.
+	shr	ax, cl						;
+	mov	bx, ax						; Again, no idea why this wasn't
+	mov	al, g_monsterAdvanceSpeedAcBonusList[bx]	; just included in the base AC.
 	cbw
-	add	[bp+var_4], ax
-	mov	bx, [bp+var_E]
-	mov	al, gs:g_monFreezeAcPenalty[bx]
-	sub	ah, ah
-	sub	[bp+var_4], ax
-loc_1DF74:
+	add	[bp+targetAc], ax				; targetAc += advanceSpeedBonus
+
+	mov	bx, [bp+monsterTargetGroup]			; Apply Freeze Foes penalty to
+	mov	al, gs:g_monFreezeAcPenalty[bx]			; targetAc
+	sub	ah, ah						;
+	sub	[bp+targetAc], ax				; targetAc -= freezeAcPenalty
+
+l_getSourceAttackValue:
 	mov	ax, itType_weapon
 	push	ax
-	push	[bp+arg_0]
+	push	[bp+slotNumber]
 	call	character_getTypeEquippedSlot
 	add	sp, 4
-	mov	[bp+var_6], ax
+	mov	[bp+equippedWeaponSlot], ax
 	or	ax, ax
-	jl	short loc_1DFB8
-	mov	bx, ax
-	mov	al, itemTypeList[bx]
-	sub	ah, ah
+	jl	short l_noWeaponEquipped
+
+	mov	bx, ax						; Set the special attack value
+	mov	al, itemTypeList[bx]				; for the equipped weapon
+	sub	ah, ah						; e.g. stoning, criticial hit
 	mov	cl, 4
 	shr	ax, cl
 	mov	gs:specialAttackVal, ax
-	mov	al, item_acBonWeapDam[bx]
-	sub	ah, ah
-	shr	ax, cl
-	mov	[bp+var_10], ax
-	sub	[bp+var_4], ax
+
+	mov	al, item_acBonWeapDam[bx]			; Some weapons provide an to-hit bonus
+	sub	ah, ah						; to the attacker. Deduct the bonus amount
+	shr	ax, cl						; from the target's AC.
+	mov	[bp+weaponBonusDamage], ax			;
+	sub	[bp+targetAc], ax				; targetAc -= weapon to-hit bonus
 	jmp	short loc_1DFC8
-loc_1DFB8:
-	mov	[bp+var_10], 0
+
+l_noWeaponEquipped:
+	mov	[bp+weaponBonusDamage], 0
 	mov	gs:specialAttackVal, 0
+
 loc_1DFC8:
-	mov	al, gs:g_monsterWOFBonus
-	sub	ah, ah
-	add	ax, [bp+var_4]
-	mov	[bp+var_18], ax
-	getCharP	[bp+arg_0], si
+	mov	al, gs:g_monsterWOFBonus			; Add bonus from monsters casting
+	sub	ah, ah						; Word of Fear. The added value
+	add	ax, [bp+targetAc]				; was getting written to an unused
+	mov	[bp+targetAc], ax				; stack var. Write to targetAc to fix
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
 	cmp	gs:party.class[si], class_monster
-	jb	short loc_1E01B
-	add	ax, offset party
-	mov	word ptr [bp+var_1E], ax
-	mov	word ptr [bp+var_1E+2],	seg seg027
-	lfs	bx, [bp+var_1E]
+	jb	short l_getCharacterToHit
+
+	add	ax, offset party				; Summon toHit value is a random number
+	mov	word ptr [bp+summonP], ax			; between the monster type's toHitLo
+	mov	word ptr [bp+summonP+2], seg seg027		; and toHitHi values.
+	lfs	bx, [bp+summonP]
 	mov	al, fs:[bx+summonStat_t.toHitHi]
 	sub	ah, ah
 	push	ax
@@ -25312,180 +25355,219 @@ loc_1DFC8:
 	push	cs
 	call	near ptr randomBetweenXandY
 	add	sp, 4
-	mov	[bp+var_12], ax
-	mov	ax, [bp+var_4]
-	sub	ax, [bp+var_12]
-	mov	[bp+var_A], ax
-	jmp	short loc_1E059
-loc_1E01B:
-	getCharP	[bp+arg_0], bx
-	mov	ax, gs:party.level[bx]
+	mov	[bp+sourceToHitValue], ax
+	mov	ax, [bp+targetAc]				; attackSuccessFlag = targetAc - sourceToHitValue
+	sub	ax, [bp+sourceToHitValue]
+	mov	[bp+attackSuccessFlag], ax
+	jmp	short l_applyToHitBonuses
+
+l_getCharacterToHit:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax			; Charcter toHitValue uses the level as the base.
+	mov	ax, gs:party.level[bx]				; sourceToHitValue = level >> 2
 	shr	ax, 1
 	shr	ax, 1
-	mov	[bp+var_12], ax
-	cmp	ax, 0FFh
-	jle	short loc_1E03D
-	mov	[bp+var_12], 0FFh
-loc_1E03D:
-	getCharP	[bp+arg_0], bx
-	mov	al, gs:party.strength[bx]
-	sub	ah, ah
-	shr	ax, 1
-	mov	cx, [bp+var_4]
-	sub	cx, ax
-	sub	cx, [bp+var_12]
-	mov	[bp+var_A], cx
-loc_1E059:
+	mov	[bp+sourceToHitValue], ax
+	cmp	ax, 0FFh					; Maximum toHit base of 255. Indicates a character
+	jle	short l_applyStrengthBonus			; level > 1020. That's a LOT of grinding...
+	mov	[bp+sourceToHitValue], 0FFh
+
+l_applyStrengthBonus:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax			; Subtract (strength >> 1) from targetAc.
+	mov	al, gs:party.strength[bx]			;
+	sub	ah, ah						;
+	shr	ax, 1						;
+	mov	cx, [bp+targetAc]				; targetAc -= (strength >> 1)
+	sub	cx, ax						;
+	sub	cx, [bp+sourceToHitValue]			; attackSuccessFlag = targetAc - sourceToHitValue
+	mov	[bp+attackSuccessFlag], cx
+
+l_applyToHitBonuses:
 	call	random_2d8
-	mov	cx, ax
-	getCharP	[bp+arg_0], bx
-	mov	bl, gs:party.class[bx]
-	sub	bh, bh
-	mov	al, g_classToHitBonus[bx]
-	cbw
-	mov	bx, [bp+arg_0]
-	mov	dl, gs:g_strengthSpellBonus[bx]
-	sub	dh, dh
-	add	ax, dx
-	add	ax, cx
-	mov	cl, gs:g_charFreezeToHitBonus
-	sub	ch, ch
-	add	ax, cx
-	sub	[bp+var_A], ax
-	cmp	[bp+var_A], 0
-	jle	short loc_1E0A5
-	sub	ax, ax
-	jmp	loc_1E277
-loc_1E0A5:
-	getCharP	bx, bx
+	mov	cx, ax						;   in cx
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax			; Store a bonus based on class
+	mov	bl, gs:party.class[bx]				;   .
+	sub	bh, bh						;   .
+	mov	al, g_classToHitBonus[bx]			;   .
+	cbw							;   in ax
+
+	mov	bx, [bp+slotNumber]				; Store strenghth spell bonus
+	mov	dl, gs:g_strengthSpellBonus[bx]			;   .
+	sub	dh, dh						;   in dx
+	add	ax, dx						; ax += dx
+	add	ax, cx						; ax += cx
+	mov	cl, gs:g_charFreezeToHitBonus			; Store freeze foes toHit bonus
+	sub	ch, ch						;   in cx
+	add	ax, cx						; ax += cx
+	sub	[bp+attackSuccessFlag], ax			; attackSuccessFlag -= ax
+	cmp	[bp+attackSuccessFlag], 0			; if (attackSuccessFlag > 0)
+	jg	l_returnZero					;   attack fails
+
+	; -------------------------------------------
+	; Begin damage calculation
+	; -------------------------------------------
+	mov	ax, charSize
+	imul	bx
+	mov	bx, ax
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1E0D5
+	jb	short l_calcCharacterDamage
+
 	mov	ax, gs:summonMeleeType
 	mov	gs:specialAttackVal, ax
 	mov	ax, gs:summonMeleeDamage
-	mov	[bp+var_16], ax
-	jmp	short loc_1E12B
-loc_1E0D5:
-	cmp	[bp+var_6], 0
-	jl	short loc_1E0EE
-	mov	bx, [bp+var_6]
+	mov	[bp+damageDice], ax
+	jmp	short l_hiddenRogueOneAttack
+
+l_calcCharacterDamage:
+	cmp	[bp+equippedWeaponSlot], 0
+	jl	short l_unarmedMonkDamage
+
+	mov	bx, [bp+equippedWeaponSlot]
 	mov	al, itemDamageDice[bx]
 	sub	ah, ah
-	mov	[bp+var_16], ax
-	jmp	short loc_1E12B
-loc_1E0EE:
-	getCharP	[bp+arg_0], si
-	cmp	gs:party.class[si], class_monk
-	jnz	short loc_1E126
+	mov	[bp+damageDice], ax
+	jmp	short l_hiddenRogueOneAttack
+
+l_unarmedMonkDamage:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax		; Monk damage dice is determined by
+	cmp	gs:party.class[si], class_monk		; g_monkDamageDice[MAX(15, level >> 2)]
+	jnz	short l_unarmedNonMonkDamage
 	mov	ax, gs:party.level[si]
 	shr	ax, 1
 	shr	ax, 1
-	mov	[bp+var_20], ax
+	mov	[bp+monkLevel], ax
 	cmp	ax, 0Fh
-	jle	short loc_1E118
-	mov	[bp+var_20], 0Fh
-loc_1E118:
-	mov	bx, [bp+var_20]
+	jle	short l_skipMax
+	mov	[bp+monkLevel], 0Fh
+l_skipMax:
+	mov	bx, [bp+monkLevel]
 	mov	al, g_monkDamageDice[bx]
 	sub	ah, ah
-	mov	[bp+var_16], ax
-	jmp	short loc_1E12B
-loc_1E126:
-	mov	[bp+var_16], 20h 
-loc_1E12B:
-	getCharP	[bp+arg_0], bx
+	mov	[bp+damageDice], ax
+	jmp	short l_hiddenRogueOneAttack
+
+l_unarmedNonMonkDamage:
+	mov	[bp+damageDice], 20h 
+
+l_hiddenRogueOneAttack:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	gs:party.class[bx], class_rogue
-	jnz	short loc_1E152
-	mov	bx, [bp+arg_0]
-	cmp	gs:g_characterMeleeDistance[bx], 0
-	jnz	short loc_1E152
+	jnz	short l_notRogue
+
+	mov	bx, [bp+slotNumber]			; Rogue's only get one attack when
+	cmp	gs:g_characterMeleeDistance[bx], 0	; they attack from the shadows
+	jnz	short l_notRogue
 	sub	ax, ax
-	jmp	short loc_1E165
-loc_1E152:
-	getCharP	[bp+arg_0], bx
+	jmp	short l_countAttackNumber
+
+l_notRogue:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	mov	al, gs:party.numAttacks[bx]
 	sub	ah, ah
-loc_1E165:
-	mov	[bp+var_2], ax
+
+l_countAttackNumber:
+	mov	[bp+loopCounter], ax
 	mov	al, gs:songExtraAttack
 	sub	ah, ah
-	add	[bp+var_2], ax
-	inc	[bp+var_2]
-	mov	ax, [bp+var_2]
-	mov	[bp+var_1A], ax
+	add	[bp+loopCounter], ax
+	inc	[bp+loopCounter]
+	mov	ax, [bp+loopCounter]
+	mov	[bp+numberOfAttacks], ax
 	mov	gs:damageAmount, 0
-	jmp	short loc_1E18E
-loc_1E18B:
-	dec	[bp+var_2]
-loc_1E18E:
-	cmp	[bp+var_2], 0
-	jle	short loc_1E1F8
-	push	[bp+var_16]
+
+l_calculateDamageLoop:
+	push	[bp+damageDice]
 	push	cs
 	call	near ptr randomYdX
 	add	sp, 2
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+slotNumber]
 	mov	cl, gs:g_strengthSpellBonus[bx]
 	sub	ch, ch
 	add	cx, ax
 	mov	al, gs:g_divineDamageBonus
 	sub	ah, ah
 	add	cx, ax
-	add	cx, [bp+var_10]
+	add	cx, [bp+weaponBonusDamage]
 	add	gs:damageAmount, cx
-	mov	[bp+var_14], 0
-	jmp	short loc_1E1D0
-loc_1E1CD:
-	inc	[bp+var_14]
-loc_1E1D0:
-	mov	bx, [bp+arg_0]
+
+	mov	[bp+vorpalLoopCounter], 0
+l_addVorpalPlateBonus:
+	mov	bx, [bp+slotNumber]
 	mov	al, gs:vorpalPlateBonus[bx]
 	sub	ah, ah
-	cmp	ax, [bp+var_14]
-	jbe	short loc_1E1F6
+	cmp	ax, [bp+vorpalLoopCounter]
+	jbe	short l_calculateDamageNext
+
 	call	random
-	and	ax, 4
+	and	ax, 3					; AND ax with 3 to get 0-3
+	inc	ax					; increment result to get 1-4
 	add	gs:damageAmount, ax
-	jmp	short loc_1E1CD
-loc_1E1F6:
-	jmp	short loc_1E18B
-loc_1E1F8:
-	mov	bx, [bp+arg_0]
+	inc	[bp+vorpalLoopCounter]
+	jmp	short l_addVorpalPlateBonus
+
+l_calculateDamageNext:
+	dec	[bp+loopCounter]
+	cmp	[bp+loopCounter], 0
+	jg	short l_calculateDamageLoop
+
+	mov	bx, [bp+slotNumber]
 	cmp	gs:g_characterMeleeDistance[bx], 0
-	jz	short loc_1E232
+	jz	short l_checkHunterCrit
+
 	call	random
 	mov	cx, ax
-	getCharP	[bp+arg_0], bx
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	gs:(party.specAbil+2)[bx], cl
-	jbe	short loc_1E226
+	jbe	short l_failHiddenCrit
 	mov	ax, speAtt_criticalHit
-	jmp	short loc_1E228
-loc_1E226:
+	jmp	short l_saveHiddenCrit
+l_failHiddenCrit:
 	sub	ax, ax
-loc_1E228:
+l_saveHiddenCrit:
 	mov	gs:specialAttackVal, ax
-	jmp	short loc_1E272
-loc_1E232:
-	getCharP	[bp+arg_0], si
+	jmp	short l_returnSuccess
+
+l_checkHunterCrit:
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
 	cmp	gs:party.class[si], class_hunter
-	;;jnz	short loc_1E267
-	jnz	short loc_1E272
+	jnz	short l_returnSuccess
+
 	call	random
 	cmp	gs:party.specAbil[si],	al
-	jbe	short loc_1E25B
+	jbe	short l_zeroSpecialAttack
 	mov	ax, speAtt_criticalHit
-	jmp	short loc_1E25D
-loc_1E25B:
+	jmp	short l_setSpecialAttack
+
+l_zeroSpecialAttack:
 	sub	ax, ax
-loc_1E25D:
+
+l_setSpecialAttack:
 	mov	gs:specialAttackVal, ax
-	jmp	short loc_1E272
-;;loc_1E267:
-;;	mov	gs:specialAttackVal, 0
-loc_1E272:
-	mov	ax, [bp+var_1A]
-	jmp	short $+2
-loc_1E277:
+
+l_returnSuccess:
+	mov	ax, [bp+numberOfAttacks]
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -26839,7 +26921,6 @@ loc_1EFF5:
 	retf
 bat_monCountGroups endp
 
-
 ; This function	copies the monster group to a
 ; different slot and zeroes the	vacated	slot.
 ; Attributes: bp-based frame
@@ -26932,7 +27013,7 @@ loc_1F0AD:
 	mov	al, gs:(byte_42444+1)[bx]
 	mov	gs:byte_42444[bx], al
 	mov	bx, [bp+var_2]
-	mov	al, gs:(strengthBonus+1)[bx]
+	mov	al, gs:(g_strengthSpellBonus+1)[bx]
 	mov	gs:g_strengthSpellBonus[bx], al
 	mov	bx, [bp+var_2]
 	mov	al, gs:(vorpalPlateBonus+1)[bx]
@@ -26945,7 +27026,7 @@ loc_1F0F9:
 	mov	gs:byte_42444+6, 0
 	mov	gs:g_strengthSpellBonus+6, 0
 	mov	gs:vorpalPlateBonus+6, 0
-	mov	gs:byte_42286, 0
+	mov	gs:g_characterMeleeDistance+6, 0
 	mov	sp, bp
 	pop	bp
 	retf
@@ -27680,6 +27761,7 @@ loc_1F920:
 	retf
 chest_open endp
 
+
 ; Attributes: bp-based frame
 
 chest_disarm proc far
@@ -27870,6 +27952,7 @@ chest_returnOne	proc far
 	retf
 chest_returnOne	endp
 
+
 ; Attributes: bp-based frame
 
 chest_trapStrcmp proc far
@@ -27933,6 +28016,7 @@ loc_1FB85:
 	pop	bp
 	retf
 chest_trapStrcmp endp
+
 
 ; Attributes: bp-based frame
 
@@ -28043,7 +28127,6 @@ loc_1FC84:
 locret_1FC88:
 	retf
 bat_doChest endp
-align 2
 
 
 seg009 ends
@@ -31234,8 +31317,10 @@ sp_wordOfFear proc far
 	add	sp, 2
 	or	ax, ax
 	jz	short l_return
+
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster
+
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	mov	si, ax
@@ -31248,12 +31333,13 @@ sp_wordOfFear proc far
 	; byte_41E50 isn't used anywhere else
 	mov	al, spellEffectFlags[bx]
 	add	gs:byte_41E50[si], al
-
 	jmp	short l_return
+
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
 	add	gs:g_monsterWOFBonus, al
+
 l_return:
 	pop	si
 	mov	sp, bp
@@ -51494,8 +51580,8 @@ aSorryBud	db 'Sorry, Bud',0
 		db    0
 aAlasYourPartyHasExp db	'Alas, your party has expired, but gone to adventurer heaven.',0
 		db    0
-g_monkDamageDice	db ' ', '!', '"', '#', '$', '%', '&', 27h; 0
-		db 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'è'; 8
+g_monkDamageDice	db 20h, 21h, 22h, 23h, 24h, 25h, 26h, 27h
+			db 68h, 69h, 6Ah, 6Bh, 6Ch, 6Dh, 6Eh, 8Fh
 monMeleeAttString dd aSwingsAt		  ; 0
 		dd aSlashesAt		; 1
 		dd aKicksAt		; 2
@@ -51569,14 +51655,9 @@ off_475DC	dd bat_charPartyAttackActionion, bat_charDefendAction; 0
 		dd bat_charPartyAttackAction, bat_charCastAction; 2
 		dd bat_charUseAction, bat_charHideAction;	4
 		dd bat_charSingAction		; 6
-g_classToHitBonus	db 3, 1, 1, 1	   ; 0
-		db 1, 0, 0, 3		; 4
-		db 3, 4, 1, 1		; 8
-		db 4, 0			; 12
+g_classToHitBonus	db 3, 1, 1, 1, 1, 0, 0, 3, 3, 4, 1, 1, 4, 0
 g_monsterAcBonusList	db 3, 2, 0, 0FEh	   ; 0
-g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh,	0  ; 0
-		db 0, 0, 0, 0		; 4
-		db 1, 1			; 8
+g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0, 1, 1
 aPoisonNeedle	db 'Poison Needle',0
 aPoisonBlades	db 'Poison Blades',0
 aBlades		db 'Blades',0
@@ -54428,9 +54509,6 @@ byte_5006A	db 4 dup(?)
 dseg_end	db ?
 		db ?
 align 8
-
-debug_here	db	'here',0
-debug_alt	db	'alt',0
 
 
 dseg ends
