@@ -513,7 +513,7 @@ cleanupAndExit proc far
 	mov	bp, sp
 	mov	ax, 6
 	call	someStackOperation
-	call	song_endMusic
+	call	sound_stop
 	call	sub_2800B
 	sub	ax, ax
 	push	ax
@@ -23766,7 +23766,7 @@ l_songSwitch:
 	cmp	ax, song_shield
 	jz	short l_shield
 l_endAndReturn:
-	call	song_endMusic
+	call	sound_stop
 l_return:
 	mov	sp, bp
 	pop	bp
@@ -27123,7 +27123,7 @@ loc_1F1C5:
 	call	song_doNoncombatEffect
 	jmp	short loc_1F1F4
 loc_1F1EF:
-	call	song_endMusic
+	call	sound_stop
 loc_1F1F4:
 	call	bat_reset
 	pop	si
@@ -33399,7 +33399,7 @@ song_playSong proc far
 	mov	gs:g_currentSongPlusOne, al
 	mov	al, [bp+songNumber]
 	mov	gs:g_currentSong, al
-	call	song_endMusic
+	call	sound_stop
 
 	mov	ax, offset byte_40420
 	mov	dx, seg	seg026
@@ -33434,7 +33434,7 @@ loc_22D5E:
 	mov	dx, seg	seg026
 	push	dx
 	push	ax
-	call	song_initSound
+	call	sound_start
 	add	sp, 6
 	mov	sp, bp
 	pop	bp
@@ -33474,7 +33474,7 @@ endNoncombatSong proc far
 
 	push	cs
 	call	near ptr song_endNoncombatEffect
-	call	song_endMusic
+	call	sound_stop
 	mov	sp, bp
 	pop	bp
 	retf
@@ -42748,7 +42748,7 @@ _bigpic_copyRightTopo endp
 
 ; Attributes: bp-based frame
 
-song_initSound proc far
+sound_start proc far
 
 	_segment= word ptr  8
 	arg_4= word ptr	 0Ah
@@ -42762,14 +42762,14 @@ song_initSound proc far
 	call	music_driver
 	pop	bp
 	retf
-song_initSound endp
+sound_start endp
 
 
-song_endMusic proc far
+sound_stop proc far
 	mov	ah, 2
 	call	music_driver
 	retf
-song_endMusic endp
+sound_stop endp
 
 
 sub_27E05 proc far

@@ -17,7 +17,7 @@ song_playSong proc far
 	mov	gs:g_currentSongPlusOne, al
 	mov	al, [bp+songNumber]
 	mov	gs:g_currentSong, al
-	CALL(song_endMusic)
+	CALL(sound_stop)
 
 	mov	ax, offset byte_40420
 	mov	dx, seg	seg026
@@ -50,7 +50,7 @@ loc_22D5E:
 	mov	dx, seg	seg026
 	push	dx
 	push	ax
-	CALL(song_initSound)
+	CALL(sound_start)
 	FUNC_EXIT
 	retf
 song_playSong endp

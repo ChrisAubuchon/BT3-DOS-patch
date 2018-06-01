@@ -42,7 +42,7 @@ loc_1F1C5:
 	call	song_doNoncombatEffect
 	jmp	short loc_1F1F4
 loc_1F1EF:
-	call	song_endMusic
+	call	sound_stop
 loc_1F1F4:
 	call	bat_reset
 	pop	si

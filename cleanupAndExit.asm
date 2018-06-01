@@ -6,7 +6,7 @@ cleanupAndExit proc far
 	loopCounter= word ptr	-2
 
 	FUNC_ENTER(6)
-	CALL(song_endMusic)
+	CALL(sound_stop)
 	CALL(sub_2800B)
 	sub	ax, ax
 	push	ax

@@ -36,7 +36,7 @@ l_songSwitch:
 	cmp	ax, song_shield
 	jz	short l_shield
 l_endAndReturn:
-	CALL(song_endMusic)
+	CALL(sound_stop)
 l_return:
 	mov	sp, bp
 	pop	bp
