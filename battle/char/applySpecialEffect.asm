@@ -2,11 +2,10 @@
 
 bat_charApplySpecialEffect proc far
 
-	loopCounter= word ptr	-4
-	var_2= word ptr	-2
+	loopCounter= word ptr	-2
 	charNo=	word ptr  6
 
-	FUNC_ENTER(4)
+	FUNC_ENTER(2)
 	push	si
 
 	mov	ax, gs:specialAttackVal
@@ -114,7 +113,6 @@ l_unequipLoop:
 	add	si, [bp+loopCounter]
 	mov	al, gs:party.inventory.itemNo[si]
 	sub	ah, ah
-	mov	[bp+var_2], ax
 	mov	bx, ax
 	cmp	itemTypeList[bx], 1
 	jnz	short l_unequipLoopNext
