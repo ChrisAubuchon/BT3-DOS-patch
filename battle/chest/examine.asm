@@ -2,106 +2,76 @@
 
 chest_examine proc far
 
-	var_106= word ptr -106h
-	var_104= word ptr -104h
-	var_102= word ptr -102h
-	var_100= word ptr -100h
+	slotNumber= word ptr -106h
+	stringBufferP= dword ptr -104h
+	stringBuffer= word ptr -100h
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 106h
-	call	someStackOperation
+	FUNC_ENTER(106h)
 	push	si
-	mov	ax, offset aWhoWillExamineIt?
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	call	readSlotNumber
-	mov	[bp+var_106], ax
+	PRINTOFFSET(s_whoWillExamine, clear)
+	CALL(readSlotNumber)
+	mov	[bp+slotNumber], ax
 	or	ax, ax
-	jge	short loc_1F5E8
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F5E8:
-	getCharP	[bp+var_106], bx
+	jl	l_returnZero
+
+	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1F602
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F602:
-	mov	bx, [bp+var_106]
+	jnb	l_returnZero
+
+	mov	bx, [bp+slotNumber]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
-	test	gs:word_42298, ax
-	jz	short loc_1F62E
-	mov	ax, offset aThatCharacterHasAlr
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F62E:
-	mov	bx, [bp+var_106]
+	test	gs:g_chestExamined, ax
+	jz	short l_newExaminer
+
+	PRINTOFFSET(s_alreadyExamined, clear)
+	jmp	l_returnZero
+
+l_newExaminer:
+	mov	bx, [bp+slotNumber]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
-	or	gs:word_42298, ax
-	getCharP	bx, bx
+	or	gs:g_chestExamined, ax
+
+	CHARINDEX(ax, bx, bx)
 	test	gs:party.status[bx], 1Ch
-	jz	short loc_1F65E
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F65E:
-	getCharP	[bp+var_106], si
+	jnz	l_returnZero
+	CHARINDEX(ax, STACKVAR(slotNumber), si)
+
 	cmp	gs:party.class[si], class_rogue
-	jnz	short loc_1F67F
-	call	random
+	jnz	short l_foundNothing
+	CALL(random)
+
 	cmp	gs:(party.specAbil+1)[si], al
-	jnb	short loc_1F690
-loc_1F67F:
-	mov	ax, offset aYouFoundNothing_
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	sub	ax, ax
-	jmp	short loc_1F6EE
-loc_1F690:
-	mov	ax, offset aItLooksLikeA
-	push	ds
-	push	ax
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	strcat
-	add	sp, 8
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	jnb	short l_foundTrap
+
+l_foundNothing:
+	PRINTOFFSET(s_foundNothing, clear)
+	jmp	short l_returnZero
+
+l_foundTrap:
+	PUSH_OFFSET(s_looksLike)
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT(stringBufferP)
 	mov	bx, gs:trapIndex
-	mov	al, byte_47988[bx]
+	mov	al, g_chestTrapIndexToName[bx]
 	cbw
 	mov	bx, ax
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (trapName+2)[bx]
-	push	word ptr trapName[bx]
+	push	word ptr (g_chestTrapName+2)[bx]
+	push	word ptr g_chestTrapName[bx]
 	push	dx
-	push	[bp+var_104]
-	call	strcat
-	add	sp, 8
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	printStringWClear
-	add	sp, 4
+	push	word ptr [bp+stringBufferP]
+	STRCAT(stringBufferP)
+	PUSH_STACK_ADDRESS(stringBuffer)
+	PRINTSTRING(clear)
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
-loc_1F6EE:
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 chest_examine endp

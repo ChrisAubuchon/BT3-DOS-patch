@@ -1,24 +1,23 @@
 ; Attributes: bp-based frame
 chest_doTrap proc	far
 
-	var_2= word ptr	-2
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER
 	push	si
-	getCharP	[bp+arg_0], si
+
+	CHARINDEX(ax, STACKVAR(arg_0), si)
 	cmp	byte ptr gs:party._name[si], 0
-	jz	short loc_1F88B
+	jz	short l_return
+
 	test	gs:party.status[si], stat_dead
-	jnz	short loc_1F88B
+	jnz	short l_return
+
 	mov	al, byte ptr [bp+arg_0]
 	mov	gs:bat_curTarget, al
 	mov	bx, gs:trapIndex
-	mov	al, trapFlags[bx]
+	mov	al, g_chestTrapFlags[bx]
 	sub	ah, ah
 	and	ax, 7Fh
 	mov	gs:specialAttackVal, ax
@@ -28,20 +27,17 @@ chest_doTrap proc	far
 	push	ax
 	mov	ax, 80h
 	push	ax
-	call	savingThrowCheck
-	add	sp, 4
-	mov	[bp+var_2], ax
+	CALL(savingThrowCheck)
 	or	ax, ax
-	jz	short loc_1F88B
+	jz	short l_return
+
 	mov	ax, 1
-	mov	[bp+var_2], ax
 	sar	gs:damageAmount, 1
 	push	[bp+arg_0]
-	call	bat_damageHp
-	add	sp, 2
-loc_1F88B:
+	CALL(bat_damageHp)
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 chest_doTrap endp

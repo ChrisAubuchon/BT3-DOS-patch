@@ -1,4 +1,4 @@
-aThereIsAChestHere_Wil db 'There is a chest here. Will you:',0Ah,0Ah
+s_chestPrompt db 'There is a chest here. Will you:',0Ah,0Ah
 		db '@Examine chest',0Ah
 		db '@Open chest',0Ah
 		db '@Disarm chest',0Ah
@@ -74,7 +74,7 @@ g_chestTrapSaveData	saveStru 4 dup(<0Fh,	0Fh>); 0
 		saveStru <28h, 28h>	; 21
 		saveStru <27h, 27h>	; 22
 		saveStru 9 dup(<28h, 28h>); 23
-aChest		db 'Chest!',0
+s_chest		db 'Chest!',0
 		db    0
 g_chestTrapIndexToName	db 0		;  0 - Poison needle
 			db 1		;  1 - Poison blades

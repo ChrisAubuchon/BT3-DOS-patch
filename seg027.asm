@@ -83,7 +83,7 @@ mapDataSeg	dw 0
 word_42294	dw 0
 byte_42296	db 0
 align 2
-word_42298	dw 0
+g_chestExamined	dw 0
 byte_4229A	db 0
 sqRegenHPFlag	db 0
 monSpellToHitPenalty	db 4	dup(0)		   ; 0

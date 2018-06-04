@@ -1,54 +1,49 @@
 ; Attributes: bp-based frame
 chest_open proc	far
 
-	var_2= word ptr	-2
+	FUNC_ENTER(2)
+	push	si
+	push	di
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	mov	ax, offset aWhoWillOpenIt?
-	push	ds
-	push	ax
-	call	printStringWClear
-	add	sp, 4
-	call	readSlotNumber
-	mov	[bp+var_2], ax
+define(`slotNumber', `di')
+	PRINTOFFSET(s_whoWillOpen, clear)
+	CALL(readSlotNumber)
+	mov	slotNumber, ax
 	or	ax, ax
-	jge	short loc_1F8B8
-	sub	ax, ax
-	jmp	short loc_1F920
-loc_1F8B8:
-	getCharP	[bp+var_2], bx
-	test	gs:party.status[bx], 7Ch
-	jz	short loc_1F8D0
-	sub	ax, ax
-	jmp	short loc_1F920
-loc_1F8D0:
-	getCharP	[bp+var_2], bx
-	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1F8E4
-	sub	ax, ax
-	jmp	short loc_1F920
-loc_1F8E4:
-	call	random
+	jl	l_returnZero
+
+	CHARINDEX(ax, slotNumber, si)
+	test	gs:party.status[si], 7Ch
+	jnz	l_returnZero
+
+	cmp	gs:party.class[si], class_monster
+	jnb	l_returnZero
+
+	CALL(random)
 	test	al, 80h
-	jz	short loc_1F8F9
-	push	[bp+var_2]
-	push	cs
-	call	near ptr chest_setOffTrap
-	add	sp, 2
-	jmp	short loc_1F90F
-loc_1F8F9:
+	jz	short l_noTrap
+
+	push	slotNumber
+	CALL(chest_setOffTrap, near)
+	jmp	short l_returnOne
+
+l_noTrap:
 	mov	gs:trapIndex, 0
 	mov	gs:word_42560, 1
-loc_1F90F:
-	delayNoTable	5
+
+l_returnOne:
+	DELAY(5)
 	mov	ax, 1
-	jmp	short $+2
-loc_1F920:
-	mov	sp, bp
-	pop	bp
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	pop	di
+	pop	si
+	FUNC_EXIT
 	retf
 chest_open endp
 
+undefine(`slotNumber')
