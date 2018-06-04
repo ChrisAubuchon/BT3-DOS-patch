@@ -1,4 +1,5 @@
 include(`macros.m4')dnl
+include(`constants.m4')dnl
 include struct.h
 include enums.h
 include macros.h
@@ -93,7 +94,7 @@ include(`misc/restoreGame.asm')
 include(`item/use.asm')
 include(`item/doSpell.asm')
 include(`item/useCharge.asm')
-include(`lib/sound/soundToggle.asm')
+include(`lib/sound/toggle.asm')
 include(`io/printVarString.asm')
 include(`io/printLocation.asm')
 include(`party/dropMember.asm')
