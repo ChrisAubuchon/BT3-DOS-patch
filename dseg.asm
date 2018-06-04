@@ -2483,24 +2483,6 @@ off_475DC	dd bat_charPartyAttackActionion, bat_charDefendAction; 0
 g_classToHitBonus	db 3, 1, 1, 1, 1, 0, 0, 3, 3, 4, 1, 1, 4, 0
 g_monsterAcBonusList	db 3, 2, 0, 0FEh	   ; 0
 g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0, 1, 1
-aPoisonNeedle	db 'Poison Needle',0
-aPoisonBlades	db 'Poison Blades',0
-aBlades		db 'Blades',0
-aShockWave	db 'Shock Wave',0
-aCrazycloud	db 'Crazycloud',0
-aVortex		db 'Vortex',0
-aShocks		db 'Shocks',0
-aPoisonDarts	db 'Poison Darts',0
-aAcidBurst	db 'Acid Burst',0
-aGasCloud	db 'Gas Cloud',0
-aPoisonSpikes	db 'Poison Spikes',0
-aMindBlast	db 'Mind Blast',0
-aBasiliskSnare	db 'Basilisk Snare',0
-aDeathBlades	db 'Death Blades',0
-aCodgerBomb	db 'Codger Bomb',0
-aSwindler	db 'Swindler',0
-aHammer		db 'Hammer',0
-		db    0
 s_experiencePoinsForV db ' experience points for valor and battle knowledge, and ',0
 aTheyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
 		db    0
@@ -2510,78 +2492,11 @@ aEachCharacterReceive db 'Each character receives ',0
 		db    0
 aThePartyDisbelieves_ db 'The party disbelieves...',0Ah,0Ah,0
 		db    0
-aThereIsAChestHere_Wil db 'There is a chest here. Will you:',0Ah,0Ah
-		db '@Examine chest',0Ah
-		db '@Open chest',0Ah
-		db '@Disarm chest',0Ah
-		db '@Trap Zap',0Ah
-		db '@Leave chest',0
-aWhoWillCastATrzp?	db 'Who will cast a TRZP?',0
-s_dontKnowThatSpell_	db 'You don',27h,'t know that spell.',0
-		db    0
-aYouNeedAtLeast2SpellP	db 'You need at least 2 spell points.',0
-aWhoWillExamineIt?	db 'Who will examine it?',0
-		db    0
-aItLooksLikeA	db 'It looks like a ',0
-		db    0
-aThatCharacterHasAlr	db 'That character has already checked.'
-		db 0
-aYouFoundNothing_	db 'You found nothing.',0
-		db    0
-aWhoWillDisarmIt?	db 'Who will disarm it?',0
-aEnterTrapName	db 'Enter trap name:',0
-		db    0
-aDisarmFailed	db 'Disarm failed!',0
-		db    0
-aYouDisarmedIt	db 'You disarmed it!',0
-		db    0
-aWhoWillOpenIt?	db 'Who will open it?',0
-aYouSetOffA	db 'You set off a ',0
-		db    0
-trapFlags	db 1,	1, 0, 80h, 1, 1, 80h, 3; 0
-		db 1, 1, 80h, 9, 81h, 80h, 81h,	81h; 8
-		db 1, 3, 0, 6, 81h, 84h, 8, 80h; 16
-		db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 24
-trapDice	db 41h, 41h, 44h, 41h,	43h, 43h, 46h, 42h; 0
-		db 45h,	45h, 47h, 46h, 47h, 48h, 47h, 47h; 8
-		db 49h,	47h, 49h, 21h, 49h, 47h, 45h, 49h; 16
-		db 49h,	49h, 49h, 49h, 49h, 49h, 49h, 49h; 24
-stru_47938	saveStru 4 dup(<0Fh,	0Fh>); 0
-		saveStru 4 dup(<13h, 13h>); 4
-		saveStru 4 dup(<15h, 15h>); 8
-		saveStru 4 dup(<18h, 18h>); 12
-		saveStru 4 dup(<26h, 26h>); 16
-		saveStru <27h, 27h>	; 20
-		saveStru <28h, 28h>	; 21
-		saveStru <27h, 27h>	; 22
-		saveStru 9 dup(<28h, 28h>); 23
-aChest		db 'Chest!',0
-		db    0
-byte_47988	db 0, 1, 2, 3, 0, 1,	3, 4; 0
-		db 0, 1, 6, 5, 7, 8, 9,	9; 8
-		db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h; 16
-		db 0Eh,	0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh; 24
-trapName	dd aPoisonNeedle	 ; 0
-		dd aPoisonBlades	; 1
-		dd aBlades		; 2
-		dd aShockWave		; 3
-		dd aCrazycloud		; 4
-		dd aVortex		; 5
-		dd aShocks		; 6
-		dd aPoisonDarts		; 7
-		dd aAcidBurst		; 8
-		dd aGasCloud		; 9
-		dd aPoisonSpikes	; 10
-		dd aMindBlast		; 11
-		dd aMindJab		; 12
-		dd aBasiliskSnare	; 13
-		dd aDeathBlades		; 14
-		dd aCodgerBomb		; 15
-		dd aSwindler		; 16
-		dd aHammer		; 17
+
+include(`battle/chest/data.asm')
+
 poisonDmg	db 1, 2, 4, 8, 0Ah, 10h, 14h, 18h; 0
 aTreasure	db 'Treasure',0
-off_47A00	dd chest_examine, chest_open,	chest_disarm, chest_trapZap, chest_returnOne
 aFried		db 'fried',0
 aFrozen		db 'frozen',0
 aShocked	db 'shocked',0
