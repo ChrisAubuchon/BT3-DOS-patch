@@ -40,10 +40,12 @@ getLevelXp proc far
 	mov	[bp+var_2], dx
 	mov	[bp+level], 11
 	jmp	short l_classSpecificXp
+
 l_levelUnderTwelve:
 	sub	ax, ax
 	mov	[bp+var_2], ax
 	mov	[bp+var_4], ax
+
 l_classSpecificXp:
 	CHARINDEX(ax, STACKVAR(playerNo), bx)
 	mov	bl, gs:party.class[bx]
@@ -65,7 +67,5 @@ l_classSpecificXp:
 
 	pop	si
 	FUNC_EXIT
-	mov	sp, bp
-	pop	bp
 	retf
 getLevelXp endp
