@@ -9,6 +9,7 @@ define(`specialAttack_age', `4')
 define(`specialAttack_possess', `5')
 define(`specialAttack_stone', `6')
 define(`specialAttack_critical', `7')
+define(`specialAttack_unequip', `8')
 define(`specialAttack_spptDrain', `9')
 
 divert`'dnl

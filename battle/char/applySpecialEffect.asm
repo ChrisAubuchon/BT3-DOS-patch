@@ -2,73 +2,75 @@
 
 bat_charApplySpecialEffect proc far
 
-	var_4= word ptr	-4
+	loopCounter= word ptr	-4
 	var_2= word ptr	-2
 	charNo=	word ptr  6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER(4)
 	push	si
+
 	mov	ax, gs:specialAttackVal
-	jmp	loc_1E869
-loc_1E68A:
-	sub	ax, ax
-	jmp	loc_1E88A
-poisonChar:
-	getCharP	[bp+charNo], bx
+	cmp	ax, 9
+	ja	l_returnZero
+	add	ax, ax
+	xchg	ax, bx
+	jmp	cs:l_offsetTable[bx]
+
+l_offsetTable	dw offset l_returnZero
+		dw offset l_poisonAttack
+		dw offset l_levelDrainAttack
+		dw offset l_nutsAttack
+		dw offset l_ageAttack
+		dw offset l_possessAttack
+		dw offset l_stoneAttack
+		dw offset l_criticalAttack
+		dw offset l_unequipAttack
+		dw offset consumeSppt
+
+l_poisonAttack:
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	or	gs:party.status[bx], stat_poisoned
-	mov	ax, 1
-	jmp	loc_1E88A
-levelDrainChar:
-	getCharP	[bp+charNo], bx
+	jmp	l_returnOne
+
+l_levelDrainAttack:
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1E6C2
-	sub	ax, ax
-	jmp	loc_1E88A
-	jmp	short loc_1E70E
-loc_1E6C2:
-	getCharP	[bp+charNo], bx
+	jnb	l_returnZero
+
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	cmp	gs:party.level[bx], 1
-	jbe	short loc_1E6DF
-	getCharP	[bp+charNo], bx
+	jbe	short l_setXp
+
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	dec	gs:party.level[bx]
-loc_1E6DF:
-	getCharP	[bp+charNo], si
+
+l_setXp:
+	CHARINDEX(ax, STACKVAR(charNo), si)
 	mov	ax, gs:party.level[si]
 	dec	ax
 	push	ax
 	push	[bp+charNo]
-	call	getLevelXp
-	add	sp, 4
+	CALL(getLevelXp)
 	cwd
 	mov	word ptr gs:party.experience[si], ax
 	mov	word ptr gs:(party.experience+2)[si], dx
-	mov	ax, 1
-	jmp	loc_1E88A
-loc_1E70E:
-	sub	ax, ax
-	jmp	loc_1E88A
-nutsifyChar:
-	getCharP	[bp+charNo], bx
+	jmp	l_returnOne
+
+l_nutsAttack:
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	or	gs:party.status[bx], stat_nuts
-	mov	ax, 1
-	jmp	loc_1E88A
-oldifyChar:
-	getCharP	[bp+charNo], bx
+	jmp	l_returnOne
+
+l_ageAttack:
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1E744
-	sub	ax, ax
-	jmp	loc_1E88A
-loc_1E744:
-	getCharP	[bp+charNo], bx
+	jnb	l_returnZero
+
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	test	gs:party.status[bx], stat_old
-	jz	short loc_1E759
-	sub	ax, ax
-	jmp	loc_1E88A
-loc_1E759:
-	getCharP	[bp+charNo], si
+	jnz	l_returnZero
+
+	CHARINDEX(ax, STACKVAR(charNo), si)
 	mov	ax, 5
 	push	ax
 	lea	ax, party.savedST[si]
@@ -78,84 +80,66 @@ loc_1E759:
 	lea	ax, party.strength[si]
 	push	dx
 	push	ax
-	push	cs
-	call	near ptr character_applyAgeStatus
-	add	sp, 0Ah
-	getCharP	[bp+charNo], bx
+	CALL(character_applyAgeStatus, near)
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	or	gs:party.status[bx], stat_old
-	mov	ax, 1
-	jmp	loc_1E88A
-possessChar:
-	getCharP	[bp+charNo], si
+	jmp	l_returnOne
+
+l_possessAttack:
+	CHARINDEX(ax, STACKVAR(charNo), si)
 	mov	gs:party.currentHP[si], 64h 
 	and	gs:party.status[si], stat_poisoned or stat_old	or stat_stoned or stat_paralyzed or stat_possessed or stat_nuts	or stat_unknown
 	or	gs:party.status[si], stat_possessed
-	mov	ax, 1
-	jmp	loc_1E88A
-stoneChar:
-	getCharP	[bp+charNo], si
+	jmp	l_returnOne
+
+l_stoneAttack:
+	CHARINDEX(ax, STACKVAR(charNo), si)
 	mov	gs:party.currentHP[si], 0
 	mov	gs:party.hostileFlag[si], 0
 	or	gs:party.status[si], stat_stoned
-	mov	ax, 1
-	jmp	loc_1E88A
-killChar:
-	getCharP	[bp+charNo], si
+	jmp	l_returnOne
+
+l_criticalAttack:
+	CHARINDEX(ax, STACKVAR(charNo), si)
 	or	gs:party.status[si], stat_dead
 	mov	gs:party.currentHP[si], 0
 	mov	gs:party.hostileFlag[si], 0
-	mov	ax, 1
-	jmp	loc_1E88A
-loc_1E802:
-	mov	[bp+var_4], 0
-	jmp	short loc_1E80D
-loc_1E809:
-	add	[bp+var_4], 3
-loc_1E80D:
-	cmp	[bp+var_4], 24h	
-	jge	short loc_1E846
-	getCharP	[bp+charNo], si
-	add	si, [bp+var_4]
+	jmp	l_returnOne
+
+l_unequipAttack:
+	mov	[bp+loopCounter], 0
+
+l_unequipLoop:
+	CHARINDEX(ax, STACKVAR(charNo), si)
+	add	si, [bp+loopCounter]
 	mov	al, gs:party.inventory.itemNo[si]
 	sub	ah, ah
 	mov	[bp+var_2], ax
 	mov	bx, ax
 	cmp	itemTypeList[bx], 1
-	jnz	short loc_1E844
+	jnz	short l_unequipLoopNext
+
 	and	gs:party.inventory.itemFlags[si], 0FCh
-loc_1E844:
-	jmp	short loc_1E809
-loc_1E846:
-	mov	ax, 1
-	jmp	short loc_1E88A
+
+l_unequipLoopNext:
+	add	[bp+loopCounter], 3
+	cmp	[bp+loopCounter], 24h	
+	jl	short l_unequipLoop
+	jmp	short l_returnOne
+
 consumeSppt:
-	getCharP	[bp+charNo], bx
+	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	gs:party.currentSppt[bx], 0
+
+l_returnOne:
 	mov	ax, 1
-	jmp	short loc_1E88A
-loc_1E863:
+	jmp	short l_return
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short loc_1E88A
-	jmp	short loc_1E88A
-loc_1E869:
-	cmp	ax, 9
-	ja	short loc_1E863
-	add	ax, ax
-	xchg	ax, bx
-	jmp	cs:off_1E876[bx]
-off_1E876 dw offset loc_1E68A
-dw offset poisonChar
-dw offset levelDrainChar
-dw offset nutsifyChar
-dw offset oldifyChar
-dw offset possessChar
-dw offset stoneChar
-dw offset killChar
-dw offset loc_1E802
-dw offset consumeSppt
-loc_1E88A:
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bat_charApplySpecialEffect endp

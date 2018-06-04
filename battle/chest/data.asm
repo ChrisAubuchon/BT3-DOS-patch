@@ -50,7 +50,7 @@ g_chestTrapFlags	db specialAttack_poison		; 0
 			db specialAttack_stone		; 19
 			db specialAttack_poison or ALL	; 20
 			db specialAttack_age    or ALL	; 21
-			db 8				; 22
+			db specialAttack_unequip	; 22
 			db ALL				; 23
 			db specialAttack_poison or ALL	; 24
 			db specialAttack_poison or ALL	; 25
