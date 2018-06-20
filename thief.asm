@@ -6273,13 +6273,12 @@ party_isSlotActive endp
 
 tavern_enter proc far
 
-	loopCounter= word ptr -6
-	lastCharNo= word ptr -4
-	var_2= word ptr	-2
+	loopCounter= word ptr -4
+	lastCharNo= word ptr -2
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 6
+	mov	ax, 4
 	call	someStackOperation
 
 	push	cs
@@ -6303,6 +6302,7 @@ l_resetDrunkLoop:
 	call	near ptr tav_setTitle
 	add	sp, 2
 	mov	g_tavernSayingBase, ax
+
 l_tavernMainLoop:
 	mov	ax, offset s_tavernGreeting
 	push	ds
@@ -6313,36 +6313,6 @@ l_tavernMainLoop:
 	push	ax
 	call	getKey
 	add	sp, 2
-	mov	[bp+var_2], ax
-	jmp	short l_optionSwitch
-
-l_orderDrink:
-	push	[bp+lastCharNo]
-	push	cs
-	call	near ptr tav_orderDrink
-	add	sp, 2
-	or	ax, ax
-	jz	short l_refreshParty
-	sub	ax, ax
-	jmp	short l_return
-l_refreshParty:
-	mov	byte ptr g_printPartyFlag,	0
-	jmp	short l_waitAndLoop
-
-l_talkToBarkeep:
-	push	[bp+lastCharNo]
-	push	cs
-	call	near ptr tavern_talkToBarkeep
-	add	sp, 2
-	mov	byte ptr g_printPartyFlag,	0
-	jmp	short l_waitAndLoop
-
-l_exitTavern:
-	call	text_clear
-	sub	ax, ax
-	jmp	short l_return
-
-l_optionSwitch:
 	cmp	ax, 'E'
 	jz	short l_exitTavern
 	cmp	ax, 'O'
@@ -6356,12 +6326,39 @@ l_optionSwitch:
 	cmp	ax, 114h
 	jz	short l_exitTavern
 	jmp	l_tavernMainLoop
+
+l_orderDrink:
+	push	[bp+lastCharNo]
+	push	cs
+	call	near ptr tav_orderDrink
+	add	sp, 2
+	or	ax, ax
+	jnz	short l_returnZero
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	short l_waitAndLoop
+
+l_talkToBarkeep:
+	push	[bp+lastCharNo]
+	push	cs
+	call	near ptr tavern_talkToBarkeep
+	add	sp, 2
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	short l_waitAndLoop
+
+l_exitTavern:
+	call	text_clear
+	jmp	short l_returnZero
+
 l_waitAndLoop:
 	mov	ax, 4000h
 	push	ax
 	call	getKey
 	add	sp, 2
 	jmp	l_tavernMainLoop
+
+l_returnZero:
+	sub	ax, ax
+
 l_return:
 	mov	sp, bp
 	pop	bp
@@ -6370,20 +6367,17 @@ tavern_enter endp
 
 ; Attributes: bp-based frame
 
-; DWORD var_2 & var_4
-
 tav_orderDrink proc far
 
-	var_112= word ptr -112h
-	var_12=	word ptr -12h
+	stringBuffer= word ptr -112h
+	isOrdered=	word ptr -12h
 	drinkIndexNumber=	word ptr -10h
-	var_E= word ptr	-0Eh
+	loopCounter= word ptr	-0Eh
 	orderer= word ptr	-0Ch
 	inputKey= word ptr	-0Ah
-	var_8= word ptr	-8
-	var_6= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	lineCount= word ptr	-8
+	mouseMask= word ptr	-6
+	stringBufferP= dword ptr	-4
 	lastCharNo= word ptr  6
 
 	push	bp
@@ -6394,7 +6388,7 @@ tav_orderDrink proc far
 	mov	ax, offset s_whoWillOrder
 	push	ds
 	push	ax
-	call	printStringWClear
+	call	printString
 	add	sp, 4
 
 	push	cs
@@ -6417,13 +6411,14 @@ l_orderLoopEntry:
 	mov	ax, offset s_seatThyself
 	push	ds
 	push	ax
-	lea	ax, [bp+var_112]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
 	mov	ax, charSize
 	imul	[bp+orderer]
 	mov	bx, ax
@@ -6431,13 +6426,14 @@ l_orderLoopEntry:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	[bp+var_2]
-	push	[bp+var_4]
+	push	word ptr [bp+stringBufferP+2]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
-	lea	ax, [bp+var_112]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printStringWClear
@@ -6445,29 +6441,27 @@ l_orderLoopEntry:
 	mov	al, gs:txt_numLines
 	sub	ah, ah
 	add	ax, 2
-	mov	[bp+var_8], ax
-	mov	[bp+var_6], 0
-	mov	[bp+var_E], 0
-	jmp	short loc_13B64
+	mov	[bp+lineCount], ax
+	mov	[bp+mouseMask], 0
+	mov	[bp+loopCounter], 0
 loc_13B61:
-	inc	[bp+var_E]
-loc_13B64:
-	cmp	[bp+var_E], 5
-	jge	short loc_13B80
-	mov	bx, [bp+var_8]
-	add	bx, [bp+var_E]
+	mov	bx, [bp+lineCount]
+	add	bx, [bp+loopCounter]
 	shl	bx, 1
 	mov	ax, bitMask16bit[bx]
-	or	[bp+var_6], ax
-	jmp	short loc_13B61
-loc_13B80:
+	or	[bp+mouseMask], ax
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 5
+	jl	short loc_13B61
+
 	mov	ax, offset s_drinkOptions
 	push	ds
 	push	ax
 	call	printString
 	add	sp, 4
-loc_13B8D:
-	push	[bp+var_6]
+
+l_inputLoop:
+	push	[bp+mouseMask]
 	call	getKey
 	add	sp, 2
 	mov	[bp+inputKey], ax
@@ -6475,38 +6469,42 @@ loc_13B8D:
 	jz	l_returnZero
 	cmp	ax, 119h
 	jz	l_returnZero
-	mov	[bp+var_12], 1
-	mov	[bp+var_E], 0
-	jmp	short loc_13BB9
-loc_13BB6:
-	inc	[bp+var_E]
-loc_13BB9:
-	cmp	[bp+var_E], 5
-	jge	short loc_13BE7
-	mov	bx, [bp+var_E]
+
+	mov	[bp+isOrdered], 1
+	mov	[bp+loopCounter], 0
+l_checkKeyLoop:
+	mov	bx, [bp+loopCounter]
 	mov	al, byte ptr s_drinkOptionKeys[bx]
 	cbw
 	cmp	ax, [bp+inputKey]
-	jz	short loc_13BD9
+	jz	short l_setDrinkNumber
+
 	mov	ax, bx
-	add	ax, [bp+var_8]
+	add	ax, [bp+lineCount]
 	add	ax, 10Eh
 	cmp	ax, [bp+inputKey]
-	jnz	short loc_13BE5
-loc_13BD9:
+	jz	short l_setDrinkNumber
+
+l_checkKeyNext:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 5
+	jl	short l_checkKeyLoop
+	jmp	short l_checkForOrder
+
+l_setDrinkNumber:
 	mov	ax, bx
 	mov	[bp+drinkIndexNumber], ax
-	mov	[bp+var_12], 0
-	jmp	short loc_13BE7
-loc_13BE5:
-	jmp	short loc_13BB6
-loc_13BE7:
-	cmp	[bp+var_12], 0
-	jnz	short loc_13B8D
+	mov	[bp+isOrdered], 0
+
+l_checkForOrder:
+	cmp	[bp+isOrdered], 0
+	jnz	short l_inputLoop
+
 l_checkDrunkLevel:
 	mov	bx, [bp+orderer]
 	cmp	tav_drunkLevel[bx], maxDrunkLevel
 	jl	short l_payForDrink
+
 	mov	ax, offset s_cantOrder
 	push	ds
 	push	ax
@@ -6518,6 +6516,7 @@ l_checkDrunkLevel:
 	add	sp, 2
 	or	ax, ax
 	jz	l_returnZero
+
 	mov	ax, offset s_partyIsDisgrace
 	push	ds
 	push	ax
@@ -6555,8 +6554,15 @@ l_hereToGoLoopEntry:
 	push	ax
 	call	getKey
 	add	sp, 2
-	mov	[bp+inputKey], ax
-	jmp	short l_hereToGoSwitch
+	cmp	ax, 'H'
+	jz	short l_drinkHere
+	cmp	ax, 'T'
+	jz	short l_drinkToGo
+	cmp	ax, 10Fh
+	jz	short l_drinkHere
+	cmp	ax, 110h
+	jz	short l_drinkToGo
+	jmp	short l_hereToGoLoopEntry
 
 l_drinkHere:
 	push	[bp+drinkIndexNumber]
@@ -6574,17 +6580,6 @@ l_drinkToGo:
 	add	sp, 4
 	jmp	short l_returnZero
 
-l_hereToGoSwitch:
-	cmp	ax, 'H'
-	jz	short l_drinkHere
-	cmp	ax, 'T'
-	jz	short l_drinkToGo
-	cmp	ax, 10Fh
-	jz	short l_drinkHere
-	cmp	ax, 110h
-	jz	short l_drinkToGo
-	jmp	short l_hereToGoLoopEntry
-
 l_notEnoughGold:
 	mov	ax, offset s_notEnoughGold
 	push	ds
@@ -6594,6 +6589,7 @@ l_notEnoughGold:
 
 l_returnZero:
 	sub	ax, ax
+
 l_return:
 	mov	sp, bp
 	pop	bp
@@ -6651,19 +6647,21 @@ character_removeGold	endp
 
 tavern_drink proc far
 
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	slotLevel= word ptr	-2
+	slotNumber= word ptr	 6
 	drinkIndexNumber= word ptr	 8
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+	push	si
 
 	call	text_clear
 
-	cmp	[bp+drinkIndexNumber], 4
-	jnz	short loc_13D39
+	cmp	[bp+drinkIndexNumber], 4	; Ginger Ale
+	jnz	short l_notGingerAle
+
 	mov	ax, offset s_thirstQuencher
 	push	ds
 	push	ax
@@ -6671,34 +6669,37 @@ tavern_drink proc far
 	add	sp, 4
 	jmp	l_return
 
-loc_13D39:
-	cmp	[bp+drinkIndexNumber], 3
-	jnz	short loc_13D4E
+l_notGingerAle:
+	cmp	[bp+drinkIndexNumber], 3	; Mead
+	jnz	short l_notMead
+
 	mov	ax, offset s_goodStuff
 	push	ds
 	push	ax
 	call	printString
 	add	sp, 4
-	jmp	short loc_13D5B
+	jmp	short l_calculateDrunkLevel
 
-loc_13D4E:
+l_notMead:
 	mov	ax, offset s_burpNotBad
 	push	ds
 	push	ax
 	call	printString
 	add	sp, 4
 
-loc_13D5B:
-	mov	bx, [bp+arg_0]
+l_calculateDrunkLevel:
+	mov	bx, [bp+slotNumber]
 	mov	si, [bp+drinkIndexNumber]
 	mov	al, tavern_drinkStrength[si]
 	add	tav_drunkLevel[bx], al
 	cmp	tav_drunkLevel[bx], 0Ch
-	jle	short loc_13D78
-	mov	bx, [bp+arg_0]
+	jle	short l_printDrunkString
+
+	mov	bx, [bp+slotNumber]
 	mov	tav_drunkLevel[bx], 0Ch
-loc_13D78:
-	mov	bx, [bp+arg_0]
+
+l_printDrunkString:
+	mov	bx, [bp+slotNumber]
 	mov	al, tav_drunkLevel[bx]
 	cbw
 	mov	bx, ax
@@ -6711,21 +6712,23 @@ loc_13D78:
 
 	; Restore bard songs
 	mov	ax, charSize
-	imul	[bp+arg_0]
+	imul	[bp+slotNumber]
 	mov	si, ax
 	cmp	gs:party.class[si], class_bard
 	jnz	short l_return
+
 	mov	ax, gs:party.level[si]
 	sub	ax, 0FFh
 	sbb	cx, cx
 	and	ax, cx
 	add	ax, 0FFh
-	mov	[bp+var_2], ax
+	mov	[bp+slotLevel], ax
 	mov	al, gs:party.specAbil[si]
 	sub	ah, ah
-	cmp	ax, [bp+var_2]
+	cmp	ax, [bp+slotLevel]
 	jnb	short l_return
 	inc	gs:party.specAbil[si]
+
 l_return:
 	mov	ax, 4000h
 	push	ax
@@ -6741,40 +6744,45 @@ tavern_drink endp
 
 tavern_getWineskin	proc far
 
-	var_2= word ptr	-2
+	drinkFlags= word ptr	-2
 	partySlotNumber= word ptr	 6
-	arg_2= word ptr	 8
+	drinkIndexNumber= word ptr	 8
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
 
-	cmp	[bp+arg_2], 4
-	jnz	short loc_13DF3
-	sub	ax, ax
-	jmp	short loc_13DF6
-loc_13DF3:
-	mov	ax, 4
-loc_13DF6:
-	mov	[bp+var_2], ax
+	cmp	[bp+drinkIndexNumber], 4		; Ginger Ale
+	jnz	short l_fillWithSpirits
+
+	sub	ax, ax					; wineskin->water
+	jmp	short l_addWindskin
+
+l_fillWithSpirits:
+	mov	ax, 4					; wineskin->spirits
+
+l_addWindskin:
+	mov	[bp+drinkFlags], ax
 	mov	ax, 1
 	push	ax
-	push	[bp+var_2]
+	push	[bp+drinkFlags]
 	mov	ax, 76h	
 	push	ax
 	push	[bp+partySlotNumber]
 	call	inventory_addItem
 	add	sp, 8
 	or	ax, ax
-	jz	short loc_13E22
+	jz	short l_inventoryFull
+
 	mov	ax, offset s_barkeepFillsWineskin
 	push	ds
 	push	ax
 	call	printString
 	add	sp, 4
-	jmp	short loc_13E55
-loc_13E22:
+	jmp	short l_return
+
+l_inventoryFull:
 	mov	ax, offset s_sorryBut
 	push	ds
 	push	ax
@@ -6794,7 +6802,8 @@ loc_13E22:
 	push	ax
 	call	printString
 	add	sp, 4
-loc_13E55:
+
+l_return:
 	mov	ax, 4000h
 	push	ax
 	call	getKey
@@ -6916,14 +6925,11 @@ tav_setTitle endp
 
 ; Attributes: bp-based frame
 
-; DWORD - var_2 & var_4
-
 tavern_talkToBarkeep proc far
 
 	var_A= word ptr	-0Ah
 	talkerSlotNumber= word ptr	-8
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	tipAmount= dword ptr	-4
 
 	push	bp
 	mov	bp, sp
@@ -6976,12 +6982,12 @@ l_skipNameCalling:
 	call	printString
 	add	sp, 4
 	call	readGold
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	mov	word ptr [bp+tipAmount], ax
+	mov	word ptr [bp+tipAmount+2], dx
 	or	dx, ax
 	jz	l_return
-	push	[bp+var_2]
-	push	[bp+var_4]
+	push	word ptr [bp+tipAmount+2]
+	push	word ptr [bp+tipAmount]
 	push	[bp+talkerSlotNumber]
 	push	cs
 	call	near ptr character_removeGold
@@ -7015,10 +7021,10 @@ loc_14020:
 	shl	bx, 1
 	mov	ax, g_tavernSayingCost[bx]
 	sub	dx, dx
-	cmp	dx, [bp+var_2]
+	cmp	dx, word ptr [bp+tipAmount+2]
 	ja	short loc_1401D
 	jb	short loc_1403D
-	cmp	ax, [bp+var_4]
+	cmp	ax, word ptr [bp+tipAmount]
 	jnb	short loc_1401D
 loc_1403D:
 	mov	bx, [bp+var_A]
@@ -49462,44 +49468,52 @@ g_campActionFunctions	dd camp_addMember
 		dd camp_exit
 s_thievesInf	db	'thieves.inf',0
 s_partiesInf	db	'parties.inf',0
+
 s_tavernGreeting	db 'Hail, travelers! Step to the bar and I',27h,'ll draw you a tankard.',0Ah
-		db 'You can:',0Ah
-		db 'Order a drink',0Ah
-		db 'Talk to barkeep',0Ah
-		db 'Exit the tavern',0
+			db 'You can:',0Ah
+			db 'Order a drink',0Ah
+			db 'Talk to barkeep',0Ah
+			db 'Exit the tavern',0
 align 2
-s_whoWillOrder	db 'Who will order a drink?',0
-s_seatThyself	db	'Seat thyself,',0Ah,0
+
+s_whoWillOrder		db 'Who will order a drink?',0
+
+s_seatThyself		db 'Seat thyself,',0Ah,0
 align 2
-s_drinkOptions	db 'What',27h,'ll it be?',0Ah
-		db 'Ale',0Ah
-		db 'Beer',0Ah
-		db 'Mead',0Ah
-		db 'Foul spirits',0Ah
-		db 'Ginger Ale',0
+
+s_drinkOptions		db 'What',27h,'ll it be?',0Ah
+			db 'Ale',0Ah
+			db 'Beer',0Ah
+			db 'Mead',0Ah
+			db 'Foul spirits',0Ah
+			db 'Ginger Ale',0
 align 2
-s_cantOrder	db 'Thou are in no condition to order anything.',0
+
+s_cantOrder		db 'Thou are in no condition to order anything.',0
+
 s_partyIsDisgrace	db 'In fact, thy party is a disgrace..',0Ah
-		db 'Bouncers!!!',0
+			db 'Bouncers!!!',0
 align 2
-s_hereOrToGo	db 'Will you have it...',0Ah
-		db 'Here or',0Ah
-		db 'To go?',0
+
+s_hereOrToGo		db 'Will you have it...',0Ah
+			db 'Here or',0Ah
+			db 'To go?',0
 align 2
-s_burpNotBad	db '(Burp!) Not too bad.',0
+s_burpNotBad		db '(Burp!) Not too bad.',0
 align 2
-s_goodStuff	db 'My goodness, that',27h,'s good stuff.',0
+s_goodStuff		db 'My goodness, that',27h,'s good stuff.',0
 s_thirstQuencher	db 'Now that',27h,'s a real thirst quencher!',0
 align 2
-aButYouFeelALit	db 'But you feel a little light-headed.'
-		db 0
-aYouStartHiccup	db 'You start hiccuping',0
-aYouBeginToSing	db 'You begin to sing 99 bottles of beer on the wall.',0
-aYouSeemToHaveA	db 'You seem to have a hard time staying on the bar stool.',0
+
+s_littleLightheaded	db 'But you feel a little light-headed.', 0
+s_startHiccuping	db 'You start hiccuping',0
+s_beginToSing		db 'You begin to sing 99 bottles of beer on the wall.',0
+s_hardTimeOnBarstool	db 'You seem to have a hard time staying on the bar stool.',0
 align 2
-aYouCollapseOnT	db 'You collapse on the floor.',0
+s_collapseOnFloor	db 'You collapse on the floor.',0
 align 2
-s_sorryBut	db 'Sorry but ',0
+
+s_sorryBut		db 'Sorry but ',0
 align 2
 s_cantCarryAnyMore	db ' can',27h,'t carry any more items.',0
 align 2
@@ -49507,78 +49521,86 @@ s_barkeepFillsWineskin	db 'The bartender fills a wineskin with your order and ha
 s_whoTalksToBarkeep	db 'Who will talk to the barkeep?',0
 s_noConditionToTalk	db 'You are in no condition to talk.',0
 align 2
-s_talkAintCheap db '"Talk ain',27h,'t cheap,',0
+s_talkAintCheap		db '"Talk ain',27h,'t cheap,',0
 align 2
-s_beerBreath	db ' Beer Breath',0
+s_beerBreath		db ' Beer Breath',0
 align 2
-s_barkeepSays	db '" the barkeep says.',0
+s_barkeepSays		db '" the barkeep says.',0
 s_howMuchWillTip	db 'How much will you tip him?',0
 align 2
-s_moneyTalks	db '"Money talks, friend," he says.',0
-aThereSABuildin	db '"There',27h,'s a building in Skara Brae where some of the survivors stashed their goods. It may be helpful," smiles the bartender',0
-aBeOnTheLookout	db '"Be on the lookout for the magic gems, your spellcasters will need them."',0
-aThereLiesAnoth	db '"There lies another bar in Celaria Bree, seek it. It exists only in the dimension called Lucencia."',0
-aSeekOutTheOldM	db '"Seek out the old man in the Review Board. He keeps watch over everything."',0
-aGoToTheBardSHa	db '"Go to the bard',27h,'s hall and listen to the songs they sing. They contain useful information."',0
-aThereIsSaidToB	db '"There is said to be a key existing in the Violet Mountains, this will gain access to Cyanis',27h,'s Tower."', 0
+s_moneyTalks		db '"Money talks, friend," he says.',0
+s_sayingStash		db '"There',27h,'s a building in Skara Brae where some of the survivors stashed their goods. It may be helpful," smiles the bartender',0
+s_sayingHarmonicGems	db '"Be on the lookout for the magic gems, your spellcasters will need them."',0
+s_sayingAnotherBar	db '"There lies another bar in Celaria Bree, seek it. It exists only in the dimension called Lucencia."',0
+s_sayingReviewBoard	db '"Seek out the old man in the Review Board. He keeps watch over everything."',0
+s_sayingBardsHall	db '"Go to the bard',27h,'s hall and listen to the songs they sing. They contain useful information."',0
+s_sayingViolet		db '"There is said to be a key existing in the Violet Mountains, this will gain access to Cyanis',27h,'s Tower."', 0
 align 2
-aAckItSNotJustA	db '"Ack! It',27h,'s not just a word, but a state of mind."',0
-aTheKeyToFindin	db '"The key to finding Sceadu is finding the lock."',0
+s_sayingAck		db '"Ack! It',27h,'s not just a word, but a state of mind."',0
+s_sayingFindLock		db '"The key to finding Sceadu is finding the lock."',0
 align 2
-aSceaduCanBeFou	db '"Sceadu can be found in the middle of Nowhere."',0
-aSeekWerraInTar	db '"Seek Werra in Tarmitia."',0
-s_notEnoughGold	db 'Not enough gold.',0
+s_sayingSceadu		db '"Sceadu can be found in the middle of Nowhere."',0
+s_sayingWerra		db '"Seek Werra in Tarmitia."',0
+s_notEnoughGold		db 'Not enough gold.',0
 align 2
-barkeepSayings	dd aThereSABuildin      ; 0
-		dd aBeOnTheLookout	; 1
-		dd aThereLiesAnoth	; 2
-		dd aSeekOutTheOldM	; 3
-		dd aSeekOutTheOldM	; 4
-		dd aAckItSNotJustA	; 5
-		dd aBeOnTheLookout	; 6
-		dd aThereLiesAnoth	; 7
-		dd aGoToTheBardSHa	; 8
-		dd aThereIsSaidToB	; 9
-		dd aBeOnTheLookout	; 10
-		dd aSeekOutTheOldM	; 11
-		dd aSeekWerraInTar	; 12
-		dd aTheKeyToFindin	; 13
-		dd aSceaduCanBeFou	; 14
-s_drinkOptionKeys		db 'ABMFG',0
+
+barkeepSayings		dd s_sayingStash      ; 0
+			dd s_sayingHarmonicGems	; 1
+			dd s_sayingAnotherBar	; 2
+			dd s_sayingReviewBoard	; 3
+			dd s_sayingReviewBoard	; 4
+			dd s_sayingAck	; 5
+			dd s_sayingHarmonicGems	; 6
+			dd s_sayingAnotherBar	; 7
+			dd s_sayingBardsHall	; 8
+			dd s_sayingViolet	; 9
+			dd s_sayingHarmonicGems	; 10
+			dd s_sayingReviewBoard	; 11
+			dd s_sayingWerra	; 12
+			dd s_sayingFindLock	; 13
+			dd s_sayingSceadu	; 14
+s_drinkOptionKeys	db 'ABMFG',0
 g_drinkPriceList	db 3, 2, 4, 6, 1, 3	   ; 0
-nullDrunkValue	dw 0
-drunkString	dd nullDrunkValue	    ; 0
-		dd nullDrunkValue	; 1
-		dd nullDrunkValue	; 2
-		dd nullDrunkValue	; 3
-		dd aButYouFeelALit	; 4
-		dd aButYouFeelALit	; 5
-		dd aYouStartHiccup	; 6
-		dd aYouStartHiccup	; 7
-		dd aYouBeginToSing	; 8
-		dd aYouSeemToHaveA	; 9
-		dd aYouSeemToHaveA	; 10
-		dd aYouCollapseOnT	; 11
-		dd aYouCollapseOnT	; 12
-tavern_drinkStrength db 1,	2, 3, 4, 0, 0	  ; 0
-s_scrapwood	db 'Scrapwood',0
-s_staggerInn	db 'Stagger Inn',0
-s_hicHaven	db 'Hic Haven',0
-s_cheers	db 'Cheers',0
-s_tavern	db 'Tavern',0
-g_tavernData	tavernLoc_t <12, 17, 0, 0, 0>; 0
-		tavernLoc_t <7,	12, 3, 2, 5>; 1
-		tavernLoc_t <2,	3, 3, 4, 5>; 2
-		tavernLoc_t <13, 7, 6, 6, 5>; 3
-		tavernLoc_t <99, 99, 99, 8, 10>; 4
-		db    0
-tavernNames	dd s_scrapwood	    ; 0
-		dd s_staggerInn		; 1
-		dd s_hicHaven		; 2
-		dd s_cheers		; 3
-		dd s_tavern		; 4
+nullDrunkValue		dw 0
+drunkString		dd nullDrunkValue	    ; 0
+			dd nullDrunkValue	; 1
+			dd nullDrunkValue	; 2
+			dd nullDrunkValue	; 3
+			dd s_littleLightheaded	; 4
+			dd s_littleLightheaded	; 5
+			dd s_startHiccuping	; 6
+			dd s_startHiccuping	; 7
+			dd s_beginToSing	; 8
+			dd s_hardTimeOnBarstool	; 9
+			dd s_hardTimeOnBarstool	; 10
+			dd s_collapseOnFloor	; 11
+			dd s_collapseOnFloor	; 12
+
+tavern_drinkStrength	db 1, 2, 3, 4, 0, 0	  ; 0
+
+s_scrapwood		db 'Scrapwood',0
+s_staggerInn		db 'Stagger Inn',0
+s_hicHaven		db 'Hic Haven',0
+s_cheers		db 'Cheers',0
+s_tavern		db 'Tavern',0
+
+g_tavernData		tavernLoc_t <12, 17, 0, 0, 0>; 0
+			tavernLoc_t <7,	12, 3, 2, 5>; 1
+			tavernLoc_t <2,	3, 3, 4, 5>; 2
+			tavernLoc_t <13, 7, 6, 6, 5>; 3
+			tavernLoc_t <99, 99, 99, 8, 10>; 4
+			db    0
+
+tavernNames		dd s_scrapwood	    ; 0
+			dd s_staggerInn		; 1
+			dd s_hicHaven		; 2
+			dd s_cheers		; 3
+			dd s_tavern		; 4
+
 g_tavernSayingCost	dw 0, 50, 250, 500, 1000 ; 0
-		db    0
+			db    0
+
+
 s_templeGreeting	db 'Welcome, oh weary ones, to our humble temple.',0Ah
 			db 'Dost thou wish to...',0Ah
 			db 'Heal a character',0Ah

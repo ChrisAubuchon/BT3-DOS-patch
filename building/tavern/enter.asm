@@ -2,11 +2,10 @@
 
 tavern_enter proc far
 
-	loopCounter= word ptr -6
-	lastCharNo= word ptr -4
-	var_2= word ptr	-2
+	loopCounter= word ptr -4
+	lastCharNo= word ptr -2
 
-	FUNC_ENTER(6)
+	FUNC_ENTER(4)
 
 	CALL(party_findEmptySlot, near)
 	mov	[bp+lastCharNo], ax
@@ -25,38 +24,13 @@ l_resetDrunkLoop:
 	CALL(bigpic_drawPictureNumber)
 	CALL(tav_setTitle, near)
 	mov	g_tavernSayingBase, ax
+
 l_tavernMainLoop:
 	PUSH_OFFSET(s_tavernGreeting)
 	PRINTSTRING(true)
 	mov	ax, 70h	
 	push	ax
 	CALL(getKey)
-	mov	[bp+var_2], ax
-	jmp	short l_optionSwitch
-
-l_orderDrink:
-	push	[bp+lastCharNo]
-	CALL(tav_orderDrink, near)
-	or	ax, ax
-	jz	short l_refreshParty
-	sub	ax, ax
-	jmp	short l_return
-l_refreshParty:
-	mov	byte ptr g_printPartyFlag,	0
-	jmp	short l_waitAndLoop
-
-l_talkToBarkeep:
-	push	[bp+lastCharNo]
-	CALL(tavern_talkToBarkeep, near)
-	mov	byte ptr g_printPartyFlag,	0
-	jmp	short l_waitAndLoop
-
-l_exitTavern:
-	CALL(text_clear)
-	sub	ax, ax
-	jmp	short l_return
-
-l_optionSwitch:
 	cmp	ax, 'E'
 	jz	short l_exitTavern
 	cmp	ax, 'O'
@@ -70,9 +44,32 @@ l_optionSwitch:
 	cmp	ax, 114h
 	jz	short l_exitTavern
 	jmp	l_tavernMainLoop
+
+l_orderDrink:
+	push	[bp+lastCharNo]
+	CALL(tav_orderDrink, near)
+	or	ax, ax
+	jnz	short l_returnZero
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	short l_waitAndLoop
+
+l_talkToBarkeep:
+	push	[bp+lastCharNo]
+	CALL(tavern_talkToBarkeep, near)
+	mov	byte ptr g_printPartyFlag,	0
+	jmp	short l_waitAndLoop
+
+l_exitTavern:
+	CALL(text_clear)
+	jmp	short l_returnZero
+
 l_waitAndLoop:
 	IOWAIT
 	jmp	l_tavernMainLoop
+
+l_returnZero:
+	sub	ax, ax
+
 l_return:
 	FUNC_EXIT
 	retf

@@ -1,13 +1,10 @@
 ; Attributes: bp-based frame
 
-; DWORD - var_2 & var_4
-
 tavern_talkToBarkeep proc far
 
 	var_A= word ptr	-0Ah
 	talkerSlotNumber= word ptr	-8
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	tipAmount= dword ptr	-4
 
 	FUNC_ENTER(0Ah)
 
@@ -41,12 +38,11 @@ l_skipNameCalling:
 	PUSH_OFFSET(s_howMuchWillTip)
 	PRINTSTRING
 	CALL(readGold)
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	mov	word ptr [bp+tipAmount], ax
+	mov	word ptr [bp+tipAmount+2], dx
 	or	dx, ax
 	jz	l_return
-	push	[bp+var_2]
-	push	[bp+var_4]
+	PUSH_STACK_PTR(tipAmount)
 	push	[bp+talkerSlotNumber]
 	CALL(character_removeGold, near)
 	or	ax, ax
@@ -73,10 +69,10 @@ loc_14020:
 	shl	bx, 1
 	mov	ax, g_tavernSayingCost[bx]
 	sub	dx, dx
-	cmp	dx, [bp+var_2]
+	cmp	dx, word ptr [bp+tipAmount+2]
 	ja	short loc_1401D
 	jb	short loc_1403D
-	cmp	ax, [bp+var_4]
+	cmp	ax, word ptr [bp+tipAmount]
 	jnb	short loc_1401D
 loc_1403D:
 	mov	bx, [bp+var_A]
