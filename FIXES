@@ -65,3 +65,7 @@
 - Fixed the drop rate for Harmonic Gems
 
 - Fix vorpal plating damage calculation
+
+- Fix tip amounts for barkeeper sayings. In the 8 bit versions, g_tavernSayingCost
+  is "0x0000, 0x0032, 0x00fa, 0x01f4, 0x03e8". The original DOS version only ported
+  the low 8 bits: "0x00, 0x32, 0xfa, 0xf4, 0xe8"
