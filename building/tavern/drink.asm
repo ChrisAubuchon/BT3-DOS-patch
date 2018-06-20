@@ -2,42 +2,44 @@
 
 tavern_drink proc far
 
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	slotLevel= word ptr	-2
+	slotNumber= word ptr	 6
 	drinkIndexNumber= word ptr	 8
 
 	FUNC_ENTER(2)
+	push	si
 
 	CALL(text_clear)
 
-	cmp	[bp+drinkIndexNumber], 4
-	jnz	short loc_13D39
-	PUSH_OFFSET(s_thirstQuencher)
-	PRINTSTRING
+	cmp	[bp+drinkIndexNumber], 4	; Ginger Ale
+	jnz	short l_notGingerAle
+
+	PRINTOFFSET(s_thirstQuencher)
 	jmp	l_return
 
-loc_13D39:
-	cmp	[bp+drinkIndexNumber], 3
-	jnz	short loc_13D4E
-	PUSH_OFFSET(s_goodStuff)
-	PRINTSTRING
-	jmp	short loc_13D5B
+l_notGingerAle:
+	cmp	[bp+drinkIndexNumber], 3	; Mead
+	jnz	short l_notMead
 
-loc_13D4E:
-	PUSH_OFFSET(s_burpNotBad)
-	PRINTSTRING
+	PRINTOFFSET(s_goodStuff)
+	jmp	short l_calculateDrunkLevel
 
-loc_13D5B:
-	mov	bx, [bp+arg_0]
+l_notMead:
+	PRINTOFFSET(s_burpNotBad)
+
+l_calculateDrunkLevel:
+	mov	bx, [bp+slotNumber]
 	mov	si, [bp+drinkIndexNumber]
 	mov	al, tavern_drinkStrength[si]
 	add	tav_drunkLevel[bx], al
 	cmp	tav_drunkLevel[bx], 0Ch
-	jle	short loc_13D78
-	mov	bx, [bp+arg_0]
+	jle	short l_printDrunkString
+
+	mov	bx, [bp+slotNumber]
 	mov	tav_drunkLevel[bx], 0Ch
-loc_13D78:
-	mov	bx, [bp+arg_0]
+
+l_printDrunkString:
+	mov	bx, [bp+slotNumber]
 	mov	al, tav_drunkLevel[bx]
 	cbw
 	mov	bx, ax
@@ -48,24 +50,25 @@ loc_13D78:
 	PRINTSTRING
 
 	; Restore bard songs
-	CHARINDEX(ax, STACKVAR(arg_0), si)
+	CHARINDEX(ax, STACKVAR(slotNumber), si)
 	cmp	gs:party.class[si], class_bard
 	jnz	short l_return
+
 	mov	ax, gs:party.level[si]
 	sub	ax, 0FFh
 	sbb	cx, cx
 	and	ax, cx
 	add	ax, 0FFh
-	mov	[bp+var_2], ax
+	mov	[bp+slotLevel], ax
 	mov	al, gs:party.specAbil[si]
 	sub	ah, ah
-	cmp	ax, [bp+var_2]
+	cmp	ax, [bp+slotLevel]
 	jnb	short l_return
 	inc	gs:party.specAbil[si]
+
 l_return:
 	IOWAIT
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 tavern_drink endp
