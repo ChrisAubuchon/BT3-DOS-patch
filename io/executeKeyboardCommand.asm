@@ -66,38 +66,6 @@ l_partyAttack:
 	mov	g_partyAttackFlag, 1
 	jmp	l_fail
 
-l_battle:
-	push di
-	push si
-	mov	ax, 1
-	mov	cx, ax
-	shl	ax, 1
-	shl	ax, 1
-	add	ax, cx
-	mov	di, ax
-
-	mov	g_direction, 2
-	mov	si, g_direction
-	shl	si, 1
-
-	mov	al, g_tavernData.sqN[di]
-	cbw
-	add	ax, dirDeltaN[si]
-	mov	sq_north, ax
-
-	mov	al, g_tavernData.sqE[di]
-	cbw
-	sub	ax, dirDeltaE[si]
-	mov	sq_east,  ax
-
-	mov	al, g_tavernData.location[di]
-	cbw
-	mov	g_locationNumber, ax
-	pop	si
-	pop	di
-	CALL(tavern_enter)
-	jmp	l_fail
-
 l_useItem:
 	CALL(useItem)
 	jmp	l_success
@@ -116,8 +84,7 @@ l_keySwitch:
 keyJumpTable	dw offset l_singBardSong 
 		dw offset l_castSpell	
 		dw offset l_dropMember	
-;		dw offset l_fail	
-		dw offset l_battle
+		dw offset l_fail	
 		dw offset l_fail	
 		dw offset l_fail	
 		dw offset l_printHelp	

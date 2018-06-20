@@ -23,14 +23,16 @@ l_loopEnter:
 	mov	al, figurineItemNo[bx]
 	sub	ah, ah
 	cmp	ax, [bp+itemNo]
-	jnz	short l_loopEnter
+	jnz	short l_loopNext
 	mov	al, byte_483AC[bx]
 	push	ax
 	push	[bp+spellCaster]
 	CALL(summon_execute)
+
+l_loopNext:
 	dec	[bp+loopCounter]
 	cmp	[bp+loopCounter], 0
-	jg	l_loopEnter
+	jge	l_loopEnter
 
 	FUNC_EXIT
 	retf
