@@ -6527,17 +6527,17 @@ l_checkDrunkLevel:
 	jmp	l_return
 
 l_payForDrink:
-	; BUG - This should probably be [bp+drinkIndexOrder]. As it is, the amount paid
+	; BUG - This should probably be [bp+drinkIndexNumber]. As it is, the amount paid
 	; for the drink is dependent on which party slot the drinker is in. The character
 	; in slot 7 actually pays 0 for each drink.
 	;
-	mov	bx, [bp+orderer]
+	mov	bx, [bp+drinkIndexNumber]
 	mov	al, g_drinkPriceList[bx]
 	cbw
 	cwd
 	push	dx
 	push	ax
-	push	bx
+	push	[bp+orderer]
 	push	cs
 	call	near ptr character_removeGold
 	add	sp, 6
@@ -49544,12 +49544,12 @@ s_sayingWerra		db '"Seek Werra in Tarmitia."',0
 s_notEnoughGold		db 'Not enough gold.',0
 align 2
 
-barkeepSayings		dd s_sayingStash      ; 0
+barkeepSayings		dd s_sayingStash	; 0
 			dd s_sayingHarmonicGems	; 1
 			dd s_sayingAnotherBar	; 2
 			dd s_sayingReviewBoard	; 3
 			dd s_sayingReviewBoard	; 4
-			dd s_sayingAck	; 5
+			dd s_sayingAck		; 5
 			dd s_sayingHarmonicGems	; 6
 			dd s_sayingAnotherBar	; 7
 			dd s_sayingBardsHall	; 8

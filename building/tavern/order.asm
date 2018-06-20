@@ -119,17 +119,17 @@ l_checkDrunkLevel:
 	jmp	l_return
 
 l_payForDrink:
-	; BUG - This should probably be [bp+drinkIndexOrder]. As it is, the amount paid
+	; BUG - This should probably be [bp+drinkIndexNumber]. As it is, the amount paid
 	; for the drink is dependent on which party slot the drinker is in. The character
 	; in slot 7 actually pays 0 for each drink.
 	;
-	mov	bx, [bp+orderer]
+	mov	bx, [bp+drinkIndexNumber]
 	mov	al, g_drinkPriceList[bx]
 	cbw
 	cwd
 	push	dx
 	push	ax
-	push	bx
+	push	[bp+orderer]
 	CALL(character_removeGold, near)
 	or	ax, ax
 	jz	short l_notEnoughGold

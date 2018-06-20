@@ -69,3 +69,7 @@
 - Fix tip amounts for barkeeper sayings. In the 8 bit versions, g_tavernSayingCost
   is "0x0000, 0x0032, 0x00fa, 0x01f4, 0x03e8". The original DOS version only ported
   the low 8 bits: "0x00, 0x32, 0xfa, 0xf4, 0xe8"
+
+- Fix drink prices in taverns. The code originally used the slotNumber as the index
+  into the g_drinkPriceList. Replace that with the drinkIndexNumber to get the proper
+  price.
