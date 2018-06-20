@@ -359,7 +359,7 @@ sqN db ?		; base 10
 sqE db ?		; base 10
 location db ?		; base 10
 field_3	db ?		; base 10
-field_4	db ?		; base 10
+sayingBase	db ?		; base 10
 tavernLoc_t ends
 
 templeLoc_t struc ; (sizeof=0x4)

@@ -20,7 +20,7 @@ bat_charSingAction proc far
 	jl	short loc_1D6AE
 	mov	al, byte ptr [bp+var_2]
 	mov	bx, [bp+arg_0]
-	mov	gs:byte_42244[bx], al
+	mov	gs:g_batCharActionTarget[bx], al
 loc_1D6AE:
 	cmp	[bp+var_2], 0
 	jl	short loc_1D6B9

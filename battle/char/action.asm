@@ -46,7 +46,7 @@ off_1B3EA dw offset l_attack		; Attack
 
 l_attack:
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	push	bx

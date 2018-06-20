@@ -51,6 +51,8 @@ define(`CALL', `ifelse(
 	`$1', `bards_listen',				`__call($2)bards_listen)',
 	`$1', `bards_printLyrics',			`__call($2)bards_printLyrics, 2)',
 	`$1', `bat_charAction',				`__call($2)bat_charAction, 2)',
+	`$1', `bat_charApplySpecialEffect',		`__call($2)bat_charApplySpecialEffect, 2)',
+	`$1', `bat_charGetActionTarget',		`__call($2)bat_charGetActionTarget, 6)',
 	`$1', `bat_charIsAttackable',			`__call($2)bat_charIsAttackable, 2)',
 	`$1', `bat_charPossessedAttack',		`__call($2)bat_charPossessedAttack, 2)',
 	`$1', `bat_charMelee',			`__call($2)bat_charMelee, 4)',

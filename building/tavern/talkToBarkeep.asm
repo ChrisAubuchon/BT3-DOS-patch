@@ -70,8 +70,8 @@ loc_14020:
 	cmp	[bp+var_A], 0
 	jl	short l_return
 	mov	bx, [bp+var_A]
-	mov	al, byte_43876[bx]
-	sub	ah, ah
+	shl	bx, 1
+	mov	ax, g_tavernSayingCost[bx]
 	sub	dx, dx
 	cmp	dx, [bp+var_2]
 	ja	short loc_1401D
@@ -79,7 +79,8 @@ loc_14020:
 	cmp	ax, [bp+var_4]
 	jnb	short loc_1401D
 loc_1403D:
-	add	bx, tavern_sayingBase
+	mov	bx, [bp+var_A]
+	add	bx, g_tavernSayingBase
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (barkeepSayings+2)[bx]

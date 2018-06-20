@@ -50,7 +50,7 @@ loc_1D58F:
 	jz	short loc_1D61F
 	mov	al, byte ptr g_curSpellNumber
 	mov	bx, [bp+arg_0]
-	mov	gs:byte_42244[bx], al
+	mov	gs:g_batCharActionTarget[bx], al
 	mov	al, byte ptr [bp+var_4]
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42334[bx], al

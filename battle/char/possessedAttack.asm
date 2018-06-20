@@ -25,7 +25,7 @@ l_partyTarget:
 	push	ax
 	CALL(bat_getRandomChar)
 	mov	bx, [bp+slotNumber]
-	mov	gs:byte_42244[bx], al
+	mov	gs:g_batCharActionTarget[bx], al
 	jmp	short l_doAttack
 
 l_checkEnemyGroup:
@@ -34,7 +34,7 @@ l_checkEnemyGroup:
 
 l_enemyTarget:
 	mov	bx, [bp+slotNumber]
-	mov	gs:byte_42244[bx], 80h
+	mov	gs:g_batCharActionTarget[bx], 80h
 
 l_doAttack:
 	push	[bp+slotNumber]

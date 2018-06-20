@@ -24,7 +24,7 @@ l_resetDrunkLoop:
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 	CALL(tav_setTitle, near)
-	mov	tavern_sayingBase, ax
+	mov	g_tavernSayingBase, ax
 l_tavernMainLoop:
 	PUSH_OFFSET(s_tavernGreeting)
 	PRINTSTRING(true)

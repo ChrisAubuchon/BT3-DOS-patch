@@ -515,7 +515,7 @@ loc_282CC:
 	pop	es
 	assume es:dseg
 	cld
-	mov	di, offset tavern_sayingBase
+	mov	di, offset g_tavernSayingBase
 	mov	cx, offset dseg_end+2
 	sub	cx, di
 	xor	ax, ax

@@ -37,7 +37,7 @@ partyTail	character_t <>
 newCharBuffer	character_t <>
 g_lastDetectSqN	db 0
 		db 0
-byte_42244	db 0
+g_batCharActionTarget	db 0
 		db 0
 		db 0
 		db 0

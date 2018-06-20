@@ -12,7 +12,7 @@ bat_charCast proc far
 	mov	ax, 1
 	push	ax
 	push	ax
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	push	bx

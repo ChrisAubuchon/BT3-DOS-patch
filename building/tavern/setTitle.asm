@@ -27,17 +27,17 @@ l_loopEntry:
 	shl	ax, 1
 	add	ax, cx
 	mov	si, ax
-	mov	al, byte ptr tavCoords.sqN[si]
+	mov	al, byte ptr g_tavernData.sqN[si]
 	cbw
 	cmp	ax, [bp+deltaN]
 	jnz	short l_loopIncrement
 
-	mov	al, tavCoords.sqE[si]
+	mov	al, g_tavernData.sqE[si]
 	cbw
 	cmp	ax, [bp+deltaE]
 	jnz	short l_loopIncrement
 
-	mov	al, tavCoords.location[si]
+	mov	al, g_tavernData.location[si]
 	cbw
 	cmp	ax, g_locationNumber
 	jnz	short l_loopIncrement
@@ -62,7 +62,7 @@ l_setTitleAndReturn:
 	shl	bx, 1
 	shl	bx, 1
 	add	bx, ax
-	mov	al, tavCoords.field_4[bx]
+	mov	al, g_tavernData.sayingBase[bx]
 	cbw
 
 	pop	si

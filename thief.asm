@@ -2397,7 +2397,35 @@ l_partyAttack:
 	jmp	l_fail
 
 l_battle:
-	call	bat_init
+	push di
+	push si
+	mov	ax, 1
+	mov	cx, ax
+	shl	ax, 1
+	shl	ax, 1
+	add	ax, cx
+	mov	di, ax
+
+	mov	g_direction, 2
+	mov	si, g_direction
+	shl	si, 1
+
+	mov	al, g_tavernData.sqN[di]
+	cbw
+	add	ax, dirDeltaN[si]
+	mov	sq_north, ax
+
+	mov	al, g_tavernData.sqE[di]
+	cbw
+	sub	ax, dirDeltaE[si]
+	mov	sq_east,  ax
+
+	mov	al, g_tavernData.location[di]
+	cbw
+	mov	g_locationNumber, ax
+	pop	si
+	pop	di
+	call	tavern_enter
 	jmp	l_fail
 
 l_useItem:
@@ -6307,7 +6335,7 @@ l_resetDrunkLoop:
 	push	cs
 	call	near ptr tav_setTitle
 	add	sp, 2
-	mov	tavern_sayingBase, ax
+	mov	g_tavernSayingBase, ax
 l_tavernMainLoop:
 	mov	ax, offset s_tavernGreeting
 	push	ds
@@ -6873,17 +6901,17 @@ l_loopEntry:
 	shl	ax, 1
 	add	ax, cx
 	mov	si, ax
-	mov	al, byte ptr tavCoords.sqN[si]
+	mov	al, byte ptr g_tavernData.sqN[si]
 	cbw
 	cmp	ax, [bp+deltaN]
 	jnz	short l_loopIncrement
 
-	mov	al, tavCoords.sqE[si]
+	mov	al, g_tavernData.sqE[si]
 	cbw
 	cmp	ax, [bp+deltaE]
 	jnz	short l_loopIncrement
 
-	mov	al, tavCoords.location[si]
+	mov	al, g_tavernData.location[si]
 	cbw
 	cmp	ax, g_locationNumber
 	jnz	short l_loopIncrement
@@ -6909,7 +6937,7 @@ l_setTitleAndReturn:
 	shl	bx, 1
 	shl	bx, 1
 	add	bx, ax
-	mov	al, tavCoords.field_4[bx]
+	mov	al, g_tavernData.sayingBase[bx]
 	cbw
 
 	pop	si
@@ -7017,8 +7045,8 @@ loc_14020:
 	cmp	[bp+var_A], 0
 	jl	short l_return
 	mov	bx, [bp+var_A]
-	mov	al, byte_43876[bx]
-	sub	ah, ah
+	shl	bx, 1
+	mov	ax, g_tavernSayingCost[bx]
 	sub	dx, dx
 	cmp	dx, [bp+var_2]
 	ja	short loc_1401D
@@ -7026,7 +7054,8 @@ loc_14020:
 	cmp	ax, [bp+var_4]
 	jnb	short loc_1401D
 loc_1403D:
-	add	bx, tavern_sayingBase
+	mov	bx, [bp+var_A]
+	add	bx, g_tavernSayingBase
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (barkeepSayings+2)[bx]
@@ -7978,10 +8007,12 @@ getLevelXp proc far
 	mov	[bp+var_2], dx
 	mov	[bp+level], 11
 	jmp	short l_classSpecificXp
+
 l_levelUnderTwelve:
 	sub	ax, ax
 	mov	[bp+var_2], ax
 	mov	[bp+var_4], ax
+
 l_classSpecificXp:
 	mov	ax, charSize
 	imul	[bp+playerNo]
@@ -8004,8 +8035,6 @@ l_classSpecificXp:
 	adc	dx, [bp+var_2]
 
 	pop	si
-	mov	sp, bp
-	pop	bp
 	mov	sp, bp
 	pop	bp
 	retf
@@ -20518,7 +20547,7 @@ off_1B3EA dw offset l_attack		; Attack
 
 l_attack:
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	push	bx
@@ -22219,7 +22248,7 @@ bat_charCast proc far
 	mov	ax, 1
 	push	ax
 	push	ax
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	push	bx
@@ -22244,7 +22273,7 @@ bat_charUse proc far
 	mov	ax, 1
 	push	ax
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	mov	al, gs:byte_42276[bx]
@@ -22418,7 +22447,7 @@ loc_1C3AA:
 	call	printString
 	add	sp, 4
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	push	bx
@@ -22499,7 +22528,7 @@ l_partyTarget:
 	call	bat_getRandomChar
 	add	sp, 2
 	mov	bx, [bp+slotNumber]
-	mov	gs:byte_42244[bx], al
+	mov	gs:g_batCharActionTarget[bx], al
 	jmp	short l_doAttack
 
 l_checkEnemyGroup:
@@ -22508,7 +22537,7 @@ l_checkEnemyGroup:
 
 l_enemyTarget:
 	mov	bx, [bp+slotNumber]
-	mov	gs:byte_42244[bx], 80h
+	mov	gs:g_batCharActionTarget[bx], 80h
 
 l_doAttack:
 	push	[bp+slotNumber]
@@ -24146,16 +24175,16 @@ bat_partyRunAction endp
 
 ; Attributes: bp-based frame
 
-bat_charPartyAttackActionion proc far
+bat_charAttackAction proc far
 
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	targetNumber= word ptr	-2
+	slotNumber= word ptr	 6
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	mov	ax, offset aAttack
+	mov	ax, offset s_attack
 	push	ds
 	push	ax
 	mov	ax, 2
@@ -24163,35 +24192,29 @@ bat_charPartyAttackActionion proc far
 	push	cs
 	call	near ptr bat_charGetActionTarget
 	add	sp, 6
-	mov	[bp+var_2], ax
-	or	ax, ax
-	jl	short loc_1D4A2
-	mov	al, byte ptr [bp+var_2]
-	mov	bx, [bp+arg_0]
-	mov	gs:byte_42244[bx], al
-loc_1D4A2:
-	cmp	[bp+var_2], 0
-	jl	short loc_1D4AD
+	cmp	ax, 0
+	jl	l_returnZero
+
+	mov	bx, [bp+slotNumber]
+	mov	gs:g_batCharActionTarget[bx], al
 	mov	ax, 1
-	jmp	short loc_1D4AF
-loc_1D4AD:
+	jmp	short l_return
+
+l_returnZero:
 	sub	ax, ax
-loc_1D4AF:
-	jmp	short $+2
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
-bat_charPartyAttackActionion endp
+bat_charAttackAction endp
 
 ; Attributes: bp-based frame
 
 bat_charDefendAction proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	mov	ax, 1
-	jmp	short $+2
 	mov	sp, bp
 	pop	bp
 	retf
@@ -24202,28 +24225,29 @@ bat_charDefendAction endp
 bat_charCastAction proc far
 
 	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	slotNumber= word ptr	 6
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
+
 	mov	ax, 1
 	push	ax
-	push	[bp+arg_0]
+	push	[bp+slotNumber]
 	call	getSpellNumber
 	add	sp, 4
+
 	mov	[bp+var_2], ax
 	or	ax, ax
-	jge	short loc_1D4ED
-	sub	ax, ax
-	jmp	short loc_1D541
-loc_1D4ED:
+	jl	l_returnZero
+
 	mov	al, byte ptr g_curSpellNumber
-	mov	bx, [bp+arg_0]
-	mov	gs:byte_42244[bx], al
+	mov	bx, [bp+slotNumber]
+	mov	gs:g_batCharActionTarget[bx], al
 	cmp	[bp+var_2], 4
 	jg	short loc_1D52D
+
 	mov	ax, offset s_castAt
 	push	ds
 	push	ax
@@ -24235,21 +24259,27 @@ loc_1D4ED:
 	jge	l_bat_charCastAction_gotTarget
 
 	mov	ax, 0				; Return 0 if no target selected.
-	jmp	loc_1D541
+	jmp	l_return
 
 l_bat_charCastAction_gotTarget:
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+slotNumber]
 	mov	gs:byte_42276[bx], al
 	mov	ax, 1
-	jmp	short loc_1D541
+	jmp	short l_return
+
 loc_1D52D:
 	mov	al, byte ptr [bp+var_2]
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+slotNumber]
 	mov	gs:byte_42276[bx], al
-loc_1D53C:
+
+l_returnOne:
 	mov	ax, 1
-	jmp	short $+2
-loc_1D541:
+	jmp	short l_return
+
+l_returnZero:	
+	sub	ax, ax
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
@@ -24307,7 +24337,7 @@ loc_1D58F:
 	jz	short loc_1D61F
 	mov	al, byte ptr g_curSpellNumber
 	mov	bx, [bp+arg_0]
-	mov	gs:byte_42244[bx], al
+	mov	gs:g_batCharActionTarget[bx], al
 	mov	al, byte ptr [bp+var_4]
 	mov	bx, [bp+arg_0]
 	mov	gs:byte_42334[bx], al
@@ -24378,10 +24408,7 @@ bat_charUseAction endp
 bat_charHideAction proc far
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	mov	ax, 1
-	jmp	short $+2
 	mov	sp, bp
 	pop	bp
 	retf
@@ -24409,7 +24436,7 @@ bat_charSingAction proc far
 	jl	short loc_1D6AE
 	mov	al, byte ptr [bp+var_2]
 	mov	bx, [bp+arg_0]
-	mov	gs:byte_42244[bx], al
+	mov	gs:g_batCharActionTarget[bx], al
 loc_1D6AE:
 	cmp	[bp+var_2], 0
 	jl	short loc_1D6B9
@@ -24427,14 +24454,11 @@ bat_charSingAction endp
 ; Attributes: bp-based frame
 bat_charPartyAttackAction proc	far
 
-	var_2= word ptr	-2
 	arg_0= word ptr	 6
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	mov	ax, offset aAttack
+	mov	ax, offset s_attack
 	push	ds
 	push	ax
 	mov	ax, 1
@@ -24442,21 +24466,18 @@ bat_charPartyAttackAction proc	far
 	push	cs
 	call	near ptr bat_charGetActionTarget
 	add	sp, 6
-	mov	[bp+var_2], ax
-	or	ax, ax
-	jl	short loc_1D6F2
-	mov	al, byte ptr [bp+var_2]
+	cmp	ax, 0
+	jl	l_returnZero
+
 	mov	bx, [bp+arg_0]
-	mov	gs:byte_42244[bx], al
-loc_1D6F2:
-	cmp	[bp+var_2], 0
-	jl	short loc_1D6FD
+	mov	gs:g_batCharActionTarget[bx], al
 	mov	ax, 1
-	jmp	short loc_1D6FF
-loc_1D6FD:
+	jmp	short l_return
+
+l_returnZero:
 	sub	ax, ax
-loc_1D6FF:
-	jmp	short $+2
+
+l_return:
 	mov	sp, bp
 	pop	bp
 	retf
@@ -25926,62 +25947,58 @@ bat_monKill endp
 
 bat_charDamageHp proc far
 
-	arg_0= word ptr	 6
+	slotNumber= word ptr	 6
 
 	push	bp
 	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
 	push	si
-	getCharP	[bp+arg_0], bx
-	cmp	byte ptr gs:party._name[bx], 0
-	jnz	short loc_1E5CC
-	sub	ax, ax
-	jmp	loc_1E66E
-loc_1E5CC:
-	getCharP	[bp+arg_0], bx
-	test	gs:party.status[bx], stat_dead
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+	cmp	byte ptr gs:party._name[si], 0
+	jz	l_returnZero
+
+	test	gs:party.status[si], stat_dead
 	jz	short loc_1E5FA
+
 	cmp	gs:specialAttackVal, speAtt_possess
-	jnz	short loc_1E5F6
-	push	[bp+arg_0]
+	jnz	l_returnZero
+
+	push	[bp+slotNumber]
 	push	cs
 	call	near ptr bat_charApplySpecialEffect
 	add	sp, 2
-	jmp	short loc_1E66E
-	jmp	short loc_1E5FA
-loc_1E5F6:
-	sub	ax, ax
-	jmp	short loc_1E66E
+	jmp	short l_return
+
 loc_1E5FA:
-	getCharP	[bp+arg_0], bx
-	test	gs:party.status[bx], stat_stoned
-	jz	short loc_1E612
-	sub	ax, ax
-	jmp	short loc_1E66E
-loc_1E612:
-	getCharP	[bp+arg_0], si
+	test	gs:party.status[si], stat_stoned
+	jnz	l_returnZero
+
 	mov	ax, gs:damageAmount
 	cmp	gs:party.currentHP[si], ax
 	jnb	short loc_1E647
+
 	or	gs:party.status[si], stat_dead
 	mov	gs:party.currentHP[si], 0
 	mov	gs:party.hostileFlag[si], 0
 	mov	ax, 1
-	jmp	short loc_1E66E
-	jmp	short loc_1E662
+	jmp	short l_return
+
 loc_1E647:
 	mov	ax, gs:damageAmount
 	mov	cx, ax
-	getCharP	[bp+arg_0], bx
-	sub	gs:party.currentHP[bx], cx
-loc_1E662:
-	push	[bp+arg_0]
+	sub	gs:party.currentHP[si], cx
+	push	[bp+slotNumber]
 	push	cs
 	call	near ptr bat_charApplySpecialEffect
 	add	sp, 2
-	jmp	short $+2
-loc_1E66E:
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -25992,40 +26009,62 @@ bat_charDamageHp endp
 
 bat_charApplySpecialEffect proc far
 
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	loopCounter= word ptr	-2
 	charNo=	word ptr  6
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 4
+	mov	ax, 2
 	call	someStackOperation
 	push	si
+
 	mov	ax, gs:specialAttackVal
-	jmp	loc_1E869
-loc_1E68A:
-	sub	ax, ax
-	jmp	loc_1E88A
-poisonChar:
-	getCharP	[bp+charNo], bx
+	cmp	ax, 9
+	ja	l_returnZero
+	add	ax, ax
+	xchg	ax, bx
+	jmp	cs:l_offsetTable[bx]
+
+l_offsetTable	dw offset l_returnZero
+		dw offset l_poisonAttack
+		dw offset l_levelDrainAttack
+		dw offset l_nutsAttack
+		dw offset l_ageAttack
+		dw offset l_possessAttack
+		dw offset l_stoneAttack
+		dw offset l_criticalAttack
+		dw offset l_unequipAttack
+		dw offset consumeSppt
+
+l_poisonAttack:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	or	gs:party.status[bx], stat_poisoned
-	mov	ax, 1
-	jmp	loc_1E88A
-levelDrainChar:
-	getCharP	[bp+charNo], bx
+	jmp	l_returnOne
+
+l_levelDrainAttack:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1E6C2
-	sub	ax, ax
-	jmp	loc_1E88A
-	jmp	short loc_1E70E
-loc_1E6C2:
-	getCharP	[bp+charNo], bx
+	jnb	l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	cmp	gs:party.level[bx], 1
-	jbe	short loc_1E6DF
-	getCharP	[bp+charNo], bx
+	jbe	short l_setXp
+
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	dec	gs:party.level[bx]
-loc_1E6DF:
-	getCharP	[bp+charNo], si
+
+l_setXp:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
 	mov	ax, gs:party.level[si]
 	dec	ax
 	push	ax
@@ -26035,30 +26074,31 @@ loc_1E6DF:
 	cwd
 	mov	word ptr gs:party.experience[si], ax
 	mov	word ptr gs:(party.experience+2)[si], dx
-	mov	ax, 1
-	jmp	loc_1E88A
-loc_1E70E:
-	sub	ax, ax
-	jmp	loc_1E88A
-nutsifyChar:
-	getCharP	[bp+charNo], bx
+	jmp	l_returnOne
+
+l_nutsAttack:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	or	gs:party.status[bx], stat_nuts
-	mov	ax, 1
-	jmp	loc_1E88A
-oldifyChar:
-	getCharP	[bp+charNo], bx
+	jmp	l_returnOne
+
+l_ageAttack:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1E744
-	sub	ax, ax
-	jmp	loc_1E88A
-loc_1E744:
-	getCharP	[bp+charNo], bx
+	jnb	l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	test	gs:party.status[bx], stat_old
-	jz	short loc_1E759
-	sub	ax, ax
-	jmp	loc_1E88A
-loc_1E759:
-	getCharP	[bp+charNo], si
+	jnz	l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
 	mov	ax, 5
 	push	ax
 	lea	ax, party.savedST[si]
@@ -26071,79 +26111,75 @@ loc_1E759:
 	push	cs
 	call	near ptr character_applyAgeStatus
 	add	sp, 0Ah
-	getCharP	[bp+charNo], bx
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	or	gs:party.status[bx], stat_old
-	mov	ax, 1
-	jmp	loc_1E88A
-possessChar:
-	getCharP	[bp+charNo], si
+	jmp	l_returnOne
+
+l_possessAttack:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
 	mov	gs:party.currentHP[si], 64h 
 	and	gs:party.status[si], stat_poisoned or stat_old	or stat_stoned or stat_paralyzed or stat_possessed or stat_nuts	or stat_unknown
 	or	gs:party.status[si], stat_possessed
-	mov	ax, 1
-	jmp	loc_1E88A
-stoneChar:
-	getCharP	[bp+charNo], si
+	jmp	l_returnOne
+
+l_stoneAttack:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
 	mov	gs:party.currentHP[si], 0
 	mov	gs:party.hostileFlag[si], 0
 	or	gs:party.status[si], stat_stoned
-	mov	ax, 1
-	jmp	loc_1E88A
-killChar:
-	getCharP	[bp+charNo], si
+	jmp	l_returnOne
+
+l_criticalAttack:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
 	or	gs:party.status[si], stat_dead
 	mov	gs:party.currentHP[si], 0
 	mov	gs:party.hostileFlag[si], 0
-	mov	ax, 1
-	jmp	loc_1E88A
-loc_1E802:
-	mov	[bp+var_4], 0
-	jmp	short loc_1E80D
-loc_1E809:
-	add	[bp+var_4], 3
-loc_1E80D:
-	cmp	[bp+var_4], 24h	
-	jge	short loc_1E846
-	getCharP	[bp+charNo], si
-	add	si, [bp+var_4]
+	jmp	l_returnOne
+
+l_unequipAttack:
+	mov	[bp+loopCounter], 0
+
+l_unequipLoop:
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	si, ax
+	add	si, [bp+loopCounter]
 	mov	al, gs:party.inventory.itemNo[si]
 	sub	ah, ah
-	mov	[bp+var_2], ax
 	mov	bx, ax
 	cmp	itemTypeList[bx], 1
-	jnz	short loc_1E844
+	jnz	short l_unequipLoopNext
+
 	and	gs:party.inventory.itemFlags[si], 0FCh
-loc_1E844:
-	jmp	short loc_1E809
-loc_1E846:
-	mov	ax, 1
-	jmp	short loc_1E88A
+
+l_unequipLoopNext:
+	add	[bp+loopCounter], 3
+	cmp	[bp+loopCounter], 24h	
+	jl	short l_unequipLoop
+	jmp	short l_returnOne
+
 consumeSppt:
-	getCharP	[bp+charNo], bx
+	mov	ax, charSize
+	imul	[bp+charNo]
+	mov	bx, ax
 	mov	gs:party.currentSppt[bx], 0
+
+l_returnOne:
 	mov	ax, 1
-	jmp	short loc_1E88A
-loc_1E863:
+	jmp	short l_return
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short loc_1E88A
-	jmp	short loc_1E88A
-loc_1E869:
-	cmp	ax, 9
-	ja	short loc_1E863
-	add	ax, ax
-	xchg	ax, bx
-	jmp	cs:off_1E876[bx]
-off_1E876 dw offset loc_1E68A
-dw offset poisonChar
-dw offset levelDrainChar
-dw offset nutsifyChar
-dw offset oldifyChar
-dw offset possessChar
-dw offset stoneChar
-dw offset killChar
-dw offset loc_1E802
-dw offset consumeSppt
-loc_1E88A:
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -27462,104 +27498,109 @@ bat_charGetReward endp
 
 chest_examine proc far
 
-	var_106= word ptr -106h
-	var_104= word ptr -104h
-	var_102= word ptr -102h
-	var_100= word ptr -100h
+	slotNumber= word ptr -106h
+	stringBufferP= dword ptr -104h
+	stringBuffer= word ptr -100h
 
 	push	bp
 	mov	bp, sp
 	mov	ax, 106h
 	call	someStackOperation
 	push	si
-	mov	ax, offset aWhoWillExamineIt?
+	mov	ax, offset s_whoWillExamine
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
 	call	readSlotNumber
-	mov	[bp+var_106], ax
+	mov	[bp+slotNumber], ax
 	or	ax, ax
-	jge	short loc_1F5E8
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F5E8:
-	getCharP	[bp+var_106], bx
+	jl	l_returnZero
+
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	bx, ax
 	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1F602
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F602:
-	mov	bx, [bp+var_106]
+	jnb	l_returnZero
+
+	mov	bx, [bp+slotNumber]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
-	test	gs:word_42298, ax
-	jz	short loc_1F62E
-	mov	ax, offset aThatCharacterHasAlr
+	test	gs:g_chestExamined, ax
+	jz	short l_newExaminer
+
+	mov	ax, offset s_alreadyExamined
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F62E:
-	mov	bx, [bp+var_106]
+	jmp	l_returnZero
+
+l_newExaminer:
+	mov	bx, [bp+slotNumber]
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
-	or	gs:word_42298, ax
-	getCharP	bx, bx
+	or	gs:g_chestExamined, ax
+
+	mov	ax, charSize
+	imul	bx
+	mov	bx, ax
 	test	gs:party.status[bx], 1Ch
-	jz	short loc_1F65E
-	sub	ax, ax
-	jmp	loc_1F6EE
-loc_1F65E:
-	getCharP	[bp+var_106], si
+	jnz	l_returnZero
+	mov	ax, charSize
+	imul	[bp+slotNumber]
+	mov	si, ax
+
 	cmp	gs:party.class[si], class_rogue
-	jnz	short loc_1F67F
+	jnz	short l_foundNothing
 	call	random
+
 	cmp	gs:(party.specAbil+1)[si], al
-	jnb	short loc_1F690
-loc_1F67F:
-	mov	ax, offset aYouFoundNothing_
+	jnb	short l_foundTrap
+
+l_foundNothing:
+	mov	ax, offset s_foundNothing
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	sub	ax, ax
-	jmp	short loc_1F6EE
-loc_1F690:
-	mov	ax, offset aItLooksLikeA
+	jmp	short l_returnZero
+
+l_foundTrap:
+	mov	ax, offset s_looksLike
 	push	ds
 	push	ax
-	lea	ax, [bp+var_100]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
 	mov	bx, gs:trapIndex
-	mov	al, byte_47988[bx]
+	mov	al, g_chestTrapIndexToName[bx]
 	cbw
 	mov	bx, ax
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (trapName+2)[bx]
-	push	word ptr trapName[bx]
+	push	word ptr (g_chestTrapName+2)[bx]
+	push	word ptr g_chestTrapName[bx]
 	push	dx
-	push	[bp+var_104]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
-	lea	ax, [bp+var_100]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printStringWClear
 	add	sp, 4
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
-loc_1F6EE:
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -27571,10 +27612,9 @@ chest_examine endp
 chest_setOffTrap proc far
 
 	var_108= word ptr -108h
-	var_106= word ptr -106h
-	var_104= word ptr -104h
+	stringBufferP= dword ptr -106h
 	var_102= word ptr -102h
-	var_100= word ptr -100h
+	stringBuffer= word ptr -100h
 	arg_0= word ptr	 6
 
 	push	bp
@@ -27582,32 +27622,35 @@ chest_setOffTrap proc far
 	mov	ax, 108h
 	call	someStackOperation
 	push	si
-	mov	ax, offset aYouSetOffA
+
+	mov	ax, offset s_youSetOff
 	push	ds
 	push	ax
-	lea	ax, [bp+var_100]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
 	mov	bx, gs:trapIndex
-	mov	al, byte_47988[bx]
+	mov	al, g_chestTrapIndexToName[bx]
 	cbw
 	mov	bx, ax
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (trapName+2)[bx]
-	push	word ptr trapName[bx]
+	push	word ptr (g_chestTrapName+2)[bx]
+	push	word ptr g_chestTrapName[bx]
 	push	dx
-	push	[bp+var_106]
+	push	word ptr [bp+stringBufferP]
 	call	strcat
 	add	sp, 8
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+
 	mov	bx, gs:trapIndex
-	mov	al, trapDice[bx]
+	mov	al, g_chestTrapDice[bx]
 	sub	ah, ah
 	push	ax
 	call	randomYdX
@@ -27615,44 +27658,46 @@ chest_setOffTrap proc far
 	mov	[bp+var_108], ax
 	mov	si, gs:trapIndex
 	shl	si, 1
-	mov	al, byte ptr stru_47938.lo[si]
+	mov	al, byte ptr g_chestTrapSaveData.lo[si]
 	mov	gs:monGroups.breathSaveLo, al
-	mov	al, stru_47938.hi[si]
+	mov	al, g_chestTrapSaveData.hi[si]
 	mov	gs:monGroups.breathSaveHi, al
 	mov	bx, gs:trapIndex
-	test	trapFlags[bx], 80h
-	jz	short loc_1F7A6
+	test	g_chestTrapFlags[bx], 80h
+	jz	short l_affectWholeParty
+
 	push	[bp+var_108]
 	push	[bp+arg_0]
 	push	cs
 	call	near ptr chest_doTrap
 	add	sp, 4
-	jmp	short loc_1F7CA
-loc_1F7A6:
+	jmp	short l_return
+
+l_affectWholeParty:
 	mov	[bp+var_102], 0
-	jmp	short loc_1F7B2
-loc_1F7AE:
-	inc	[bp+var_102]
-loc_1F7B2:
-	cmp	[bp+var_102], 7
-	jge	short loc_1F7CA
+l_damageLoop:
 	push	[bp+var_108]
 	push	[bp+var_102]
-	push	cs
-	call	near ptr chest_doTrap
+	call	chest_doTrap
 	add	sp, 4
-	jmp	short loc_1F7AE
-loc_1F7CA:
+	inc	[bp+var_102]
+	cmp	[bp+var_102], 7
+	jl	short l_damageLoop
+
+l_return:
 	mov	gs:trapIndex, 0
-	lea	ax, [bp+var_100]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	printString
 	add	sp, 4
 	mov	byte ptr g_printPartyFlag,	0
-	wait4IO
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
 	mov	ax, 1
-	jmp	short $+2
+
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -27662,24 +27707,26 @@ chest_setOffTrap endp
 ; Attributes: bp-based frame
 chest_doTrap proc	far
 
-	var_2= word ptr	-2
 	arg_0= word ptr	 6
 	arg_2= word ptr	 8
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
 	push	si
-	getCharP	[bp+arg_0], si
+
+	mov	ax, charSize
+	imul	[bp+arg_0]
+	mov	si, ax
 	cmp	byte ptr gs:party._name[si], 0
-	jz	short loc_1F88B
+	jz	short l_return
+
 	test	gs:party.status[si], stat_dead
-	jnz	short loc_1F88B
+	jnz	short l_return
+
 	mov	al, byte ptr [bp+arg_0]
 	mov	gs:bat_curTarget, al
 	mov	bx, gs:trapIndex
-	mov	al, trapFlags[bx]
+	mov	al, g_chestTrapFlags[bx]
 	sub	ah, ah
 	and	ax, 7Fh
 	mov	gs:specialAttackVal, ax
@@ -27691,16 +27738,16 @@ chest_doTrap proc	far
 	push	ax
 	call	savingThrowCheck
 	add	sp, 4
-	mov	[bp+var_2], ax
 	or	ax, ax
-	jz	short loc_1F88B
+	jz	short l_return
+
 	mov	ax, 1
-	mov	[bp+var_2], ax
 	sar	gs:damageAmount, 1
 	push	[bp+arg_0]
 	call	bat_damageHp
 	add	sp, 2
-loc_1F88B:
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -27710,233 +27757,261 @@ chest_doTrap endp
 ; Attributes: bp-based frame
 chest_open proc	far
 
-	var_2= word ptr	-2
-
 	push	bp
 	mov	bp, sp
 	mov	ax, 2
 	call	someStackOperation
-	mov	ax, offset aWhoWillOpenIt?
+	push	si
+	push	di
+
+
+	mov	ax, offset s_whoWillOpen
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
 	call	readSlotNumber
-	mov	[bp+var_2], ax
+	mov	di, ax
 	or	ax, ax
-	jge	short loc_1F8B8
-	sub	ax, ax
-	jmp	short loc_1F920
-loc_1F8B8:
-	getCharP	[bp+var_2], bx
-	test	gs:party.status[bx], 7Ch
-	jz	short loc_1F8D0
-	sub	ax, ax
-	jmp	short loc_1F920
-loc_1F8D0:
-	getCharP	[bp+var_2], bx
-	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1F8E4
-	sub	ax, ax
-	jmp	short loc_1F920
-loc_1F8E4:
+	jl	l_returnZero
+
+	mov	ax, charSize
+	imul	di
+	mov	si, ax
+	test	gs:party.status[si], 7Ch
+	jnz	l_returnZero
+
+	cmp	gs:party.class[si], class_monster
+	jnb	l_returnZero
+
 	call	random
 	test	al, 80h
-	jz	short loc_1F8F9
-	push	[bp+var_2]
+	jz	short l_noTrap
+
+	push	di
 	push	cs
 	call	near ptr chest_setOffTrap
 	add	sp, 2
-	jmp	short loc_1F90F
-loc_1F8F9:
+	jmp	short l_returnOne
+
+l_noTrap:
 	mov	gs:trapIndex, 0
 	mov	gs:word_42560, 1
-loc_1F90F:
-	delayNoTable	5
+
+l_returnOne:
+	mov	ax, 5
+	push	ax
+	call	text_delayNoTable
+	add	sp, 2
 	mov	ax, 1
-	jmp	short $+2
-loc_1F920:
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	pop	di
+	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 chest_open endp
 
 
+
 ; Attributes: bp-based frame
 
 chest_disarm proc far
 
-	var_2A=	word ptr -2Ah
-	var_2= word ptr	-2
+	stringBuffer=	word ptr -28h
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 2Ah	
+	mov	ax, 28h
 	call	someStackOperation
 	push	si
-	mov	ax, offset aWhoWillDisarmIt?
+	push	di
+
+
+	mov	ax, offset s_whoWillDisarm
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
 	call	readSlotNumber
-	mov	[bp+var_2], ax
+	mov	di, ax
 	or	ax, ax
-	jge	short loc_1F94E
-	sub	ax, ax
-	jmp	loc_1FA16
-loc_1F94E:
-	getCharP	[bp+var_2], bx
+	jl	l_returnZero
+
+	mov	ax, charSize
+	imul	di
+	mov	bx, ax
 	test	gs:party.status[bx], 1Ch
-	jz	short loc_1F967
-	sub	ax, ax
-	jmp	loc_1FA16
-loc_1F967:
-	mov	ax, offset aEnterTrapName
+	jnz	l_returnZero
+
+	mov	ax, offset s_enterTrapName
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
 	mov	ax, 28h	
 	push	ax
-	lea	ax, [bp+var_2A]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	call	readString
 	add	sp, 6
 	mov	bx, gs:trapIndex
-	mov	al, byte_47988[bx]
+	mov	al, g_chestTrapIndexToName[bx]
 	cbw
 	mov	bx, ax
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (trapName+2)[bx]
-	push	word ptr trapName[bx]
-	lea	ax, [bp+var_2A]
+	push	word ptr (g_chestTrapName+2)[bx]
+	push	word ptr g_chestTrapName[bx]
+	lea	ax, [bp+stringBuffer]
 	push	ss
 	push	ax
 	push	cs
 	call	near ptr chest_trapStrcmp
 	add	sp, 8
 	or	ax, ax
-	jz	short loc_1FA07
-	getCharP	[bp+var_2], si
+	jz	short l_setOffTrap
+
+	mov	ax, charSize
+	imul	di
+	mov	si, ax
 	cmp	gs:party.class[si], class_rogue
-	jnz	short loc_1F9F4
+	jnz	short l_disarmFailed
+
 	call	random
 	cmp	gs:party.specAbil[si],	al
-	jb	short loc_1F9F4
-	mov	ax, offset aYouDisarmedIt
+	jb	short l_disarmFailed
+
+	mov	ax, offset s_youDisarmedIt
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
 	mov	gs:trapIndex, 0
-	mov	ax, 1
-	jmp	short loc_1FA16
-	jmp	short loc_1FA05
-loc_1F9F4:
-	mov	ax, offset aDisarmFailed
+	jmp	short l_returnOne
+
+l_disarmFailed:
+	mov	ax, offset s_disarmFailed
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	sub	ax, ax
-	jmp	short loc_1FA16
-loc_1FA05:
-	jmp	short loc_1FA11
-loc_1FA07:
-	push	[bp+var_2]
+	jmp	short l_returnZero
+
+l_setOffTrap:
+	push	di
 	push	cs
 	call	near ptr chest_setOffTrap
 	add	sp, 2
-loc_1FA11:
+
+l_returnOne:
 	mov	ax, 1
-	jmp	short $+2
-loc_1FA16:
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	pop	di
 	pop	si
 	mov	sp, bp
 	pop	bp
 	retf
 chest_disarm endp
 
+
+
 ; Attributes: bp-based frame
 
 chest_trapZap proc far
 
-	var_2= word ptr	-2
+
+
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	mov	ax, offset aWhoWillCastATrzp?
+	push	di
+	push	si
+
+	mov	ax, offset s_whoWillCastTrzp
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
 	call	readSlotNumber
-	mov	[bp+var_2], ax
+	mov	di, ax
 	or	ax, ax
-	jge	short loc_1FA44
-	sub	ax, ax
-	jmp	loc_1FB00
-loc_1FA44:
-	getCharP	[bp+var_2], bx
-	test	gs:party.status[bx], 7Ch
-	jz	short loc_1FA5D
-	sub	ax, ax
-	jmp	loc_1FB00
-loc_1FA5D:
-	getCharP	[bp+var_2], bx
-	cmp	gs:party.class[bx], class_monster
-	jb	short loc_1FA72
-	sub	ax, ax
-	jmp	loc_1FB00
-loc_1FA72:
+	jl	l_returnZero
+
+	mov	ax, charSize
+	imul	di
+	mov	si, ax
+	test	gs:party.status[si], 7Ch
+	jnz	l_returnZero
+
+	cmp	gs:party.class[si], class_monster
+	jnb	l_returnZero
+
 	mov	ax, 2
 	push	ax
-	push	[bp+var_2]
+	push	di
 	call	character_learnedSpell
 	add	sp, 4
 	or	ax, ax
-	jz	short loc_1FAEF
-	getCharP	[bp+var_2], bx
-	cmp	gs:party.currentSppt[bx], 2
-	jnb	short loc_1FAAA
-	mov	ax, offset aYouNeedAtLeast2SpellP
+	jz	short l_dontKnowSpell
+
+	cmp	gs:party.currentSppt[si], 2
+	jnb	short l_castSpell
+
+	mov	ax, offset s_needTwoSpellPoints
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	sub	ax, ax
-	jmp	short loc_1FB00
-loc_1FAAA:
-	getCharP	[bp+var_2], bx
-	sub	gs:party.currentSppt[bx], 2
+	jmp	l_returnZero
+
+l_castSpell:
+	sub	gs:party.currentSppt[si], 2
 	mov	gs:trapIndex, 0
 	mov	byte ptr g_printPartyFlag,	0
-	mov	ax, offset aYouDisarmedIt
+	mov	ax, offset s_youDisarmedIt
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	wait4IO
+	mov	ax, 4000h
+	push	ax
+	call	getKey
+	add	sp, 2
 	mov	ax, 1
-	jmp	short loc_1FB00
-loc_1FAEF:
+	jmp	short l_return
+
+l_dontKnowSpell:
 	mov	ax, offset s_dontKnowThatSpell_
 	push	ds
 	push	ax
 	call	printStringWClear
 	add	sp, 4
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
-loc_1FB00:
+
+l_return:
+	pop	si
+	pop	di
 	mov	sp, bp
 	pop	bp
 	retf
 chest_trapZap endp
+
+
+
 
 ; Attributes: bp-based frame
 
@@ -27957,7 +28032,6 @@ chest_returnOne	endp
 
 chest_trapStrcmp proc far
 
-	var_2= word ptr	-2
 	arg_0= dword ptr  6
 	arg_4= dword ptr  0Ah
 
@@ -27966,14 +28040,14 @@ chest_trapStrcmp proc far
 	mov	ax, 2
 	call	someStackOperation
 	push	si
-	mov	[bp+var_2], 0
-	jmp	short loc_1FB2D
+
+
+	sub	dx, dx
 loc_1FB2A:
-	inc	[bp+var_2]
-loc_1FB2D:
-	cmp	[bp+var_2], 28h	
-	jge	short loc_1FB80
-	mov	bx, [bp+var_2]
+	cmp	dx, 28h
+	jge	short l_returnOne
+
+	mov	bx, dx
 	lfs	si, [bp+arg_4]
 	mov	al, fs:[bx+si]
 	cbw
@@ -27982,17 +28056,16 @@ loc_1FB2D:
 	mov	al, fs:[bx+si]
 	cbw
 	or	ax, cx
-	jnz	short loc_1FB4F
-	mov	ax, 1
-	jmp	short loc_1FB85
-loc_1FB4F:
+	jz	short l_returnOne
+
+	push	dx
 	lfs	si, [bp+arg_4]
 	mov	al, fs:[bx+si]
 	cbw
 	push	ax
 	call	toUpper
 	add	sp, 2
-	mov	bx, [bp+var_2]
+	mov	bx, dx
 	lfs	si, [bp+arg_0]
 	mov	cx, ax
 	mov	al, fs:[bx+si]
@@ -28001,16 +28074,22 @@ loc_1FB4F:
 	mov	si, cx
 	call	toUpper
 	add	sp, 2
+	pop	dx
 	cmp	ax, si
-	jz	short loc_1FB7E
-	sub	ax, ax
-	jmp	short loc_1FB85
-loc_1FB7E:
+	jnz	short l_returnZero
+
+l_loopNext:
+	inc	dx
 	jmp	short loc_1FB2A
-loc_1FB80:
+
+l_returnOne:
 	mov	ax, 1
-	jmp	short $+2
-loc_1FB85:
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
@@ -28018,32 +28097,37 @@ loc_1FB85:
 chest_trapStrcmp endp
 
 
+
+
 ; Attributes: bp-based frame
 
 bat_doChest proc far
 
-	var_30=	word ptr -30h
-	var_1C=	word ptr -1Ch
-	var_1A=	word ptr -1Ah
-	var_18=	word ptr -18h
-	var_16=	word ptr -16h
-	var_C= word ptr	-0Ch
-	var_A= word ptr	-0Ah
+	validOptionMouse=	word ptr -30h
+	printPromptFlag=	word ptr -1Ch
+	loopCounter=	word ptr -1Ah
+	mouseBitmask=	word ptr -18h
+	validOptionKeys=	word ptr -16h
+	inKey= word ptr	-0Ch
+	optionList= word ptr	-0Ah
 
 	push	bp
 	mov	bp, sp
-	mov	ax, 30h	
+	mov	ax, 30h
 	call	someStackOperation
 	push	si
+
 	mov	ax, 35h	
 	push	ax
 	call	bigpic_drawPictureNumber
 	add	sp, 2
-	mov	ax, offset aChest
+
+	mov	ax, offset s_chest
 	push	ds
 	push	ax
 	call	setTitle
 	add	sp, 4
+
 	call	random
 	and	ax, 3
 	mov	cl, g_levelNumber
@@ -28052,79 +28136,87 @@ bat_doChest proc far
 	shl	cx, 1
 	add	cx, ax
 	mov	gs:trapIndex, cx
-	mov	gs:word_42298, 0
-	mov	[bp+var_1A], 0
-	jmp	short loc_1FBE6
-loc_1FBE3:
-	inc	[bp+var_1A]
-loc_1FBE6:
-	cmp	[bp+var_1A], 0Ah
-	jge	short loc_1FBF5
-	mov	si, [bp+var_1A]
-	mov	byte ptr [bp+si+var_A],	1
-	jmp	short loc_1FBE3
-loc_1FBF5:
+	mov	gs:g_chestExamined, 0
+
+	sub	si, si
+l_initOptionListLoop:
+	mov	byte ptr [bp+si+optionList],	1
+	inc	si
+	cmp	si, 0Ah
+	jl	short l_initOptionListLoop
+
+l_chestLoop:
 	call	text_clear
-	lea	ax, [bp+var_30]
+	lea	ax, [bp+validOptionMouse]
 	push	ss
 	push	ax
-	lea	ax, [bp+var_16]
+	lea	ax, [bp+validOptionKeys]
 	push	ss
 	push	ax
-	lea	ax, [bp+var_A]
+	lea	ax, [bp+optionList]
 	push	ss
 	push	ax
-	mov	ax, offset aThereIsAChestHere_Wil
+	mov	ax, offset s_chestPrompt
 	push	ds
 	push	ax
 	call	printVarString
 	add	sp, 10h
-	mov	[bp+var_18], ax
-loc_1FC19:
-	mov	[bp+var_1C], 1
-	push	[bp+var_18]
+	mov	[bp+mouseBitmask], ax
+
+l_getKey:
+	mov	[bp+printPromptFlag], 1
+	push	[bp+mouseBitmask]
 	call	getKey
 	add	sp, 2
-	mov	[bp+var_C], ax
-	mov	[bp+var_1A], 0
-loc_1FC31:
-	mov	si, [bp+var_1A]
-	cmp	byte ptr [bp+si+var_16], 0
-	jz	short loc_1FC7B
-	mov	al, byte ptr [bp+si+var_16]
+	mov	[bp+inKey], ax
+	mov	[bp+loopCounter], 0
+
+l_searchOptionsLoop:
+	mov	si, [bp+loopCounter]
+	cmp	byte ptr [bp+si+validOptionKeys], 0
+	jz	short l_chestLoopNext
+
+	mov	al, byte ptr [bp+si+validOptionKeys]
 	cbw
-	cmp	ax, [bp+var_C]
-	jz	short loc_1FC4D
+	cmp	ax, [bp+inKey]
+	jz	short l_keyFound
+
 	shl	si, 1
-	mov	ax, [bp+var_C]
-	cmp	[bp+si+var_30],	ax
-	jnz	short loc_1FC76
-loc_1FC4D:
-	mov	bx, [bp+var_1A]
+	mov	ax, [bp+inKey]
+	cmp	[bp+si+validOptionMouse],	ax
+	jnz	short l_searchOptionsNext
+
+l_keyFound:
+	mov	bx, [bp+loopCounter]
 	shl	bx, 1
 	shl	bx, 1
-	call	off_47A00[bx]
+	call	g_chestActionFunctions[bx]
 	or	ax, ax
-	jz	short loc_1FC65
+	jz	short l_markReprintPrompt
+
 	call	text_clear
-	jmp	short loc_1FC84
-	jmp	short loc_1FC6A
-loc_1FC65:
-	mov	[bp+var_1C], 0
-loc_1FC6A:
-	delayNoTable	2
-loc_1FC76:
-	inc	[bp+var_1A]
-	jmp	short loc_1FC31
-loc_1FC7B:
-	cmp	[bp+var_1C], 0
-	jnz	short loc_1FC19
-	jmp	loc_1FBF5
-loc_1FC84:
+	jmp	short l_return
+
+l_markReprintPrompt:
+	mov	[bp+printPromptFlag], 0
+	mov	ax, 2
+	push	ax
+	call	text_delayNoTable
+	add	sp, 2
+
+l_searchOptionsNext:
+	inc	[bp+loopCounter]
+	jmp	short l_searchOptionsLoop
+
+l_chestLoopNext:
+	cmp	[bp+printPromptFlag], 0
+	jnz	short l_getKey
+	jmp	l_chestLoop
+
+l_return:
 	pop	si
 	mov	sp, bp
 	pop	bp
-locret_1FC88:
 	retf
 bat_doChest endp
 
@@ -42743,9 +42835,6 @@ loc_27DC3:
 	retn
 _bigpic_copyRightTopo endp
 
-
-
-
 ; Attributes: bp-based frame
 
 sound_start proc far
@@ -42764,13 +42853,11 @@ sound_start proc far
 	retf
 sound_start endp
 
-
 sound_stop proc far
 	mov	ah, 2
 	call	music_driver
 	retf
 sound_stop endp
-
 
 sub_27E05 proc far
 	mov	ah, al
@@ -42800,6 +42887,7 @@ dungeon_getWallInDirection proc far
 	pop	bp
 	retf
 dungeon_getWallInDirection endp
+
 
 ; Attributes: bp-based frame
 
@@ -42888,6 +42976,7 @@ byte_27E86 db 0, 1, 2, 3, 4, 5,	6, 7; 0
 db 8, 9, 0Ah, 0, 0Ch, 0Dh, 0Eh,	0Fh; 8
 byte_27E96 db 0, 10h, 20h, 30h,	40h, 50h, 60h, 70h; 0
 db 80h,	90h, 0A0h, 0, 0C0h, 0D0h, 0E0h,	0F0h; 8
+
 ; Attributes: bp-based frame
 
 bigpic_makeNight proc far
@@ -42925,6 +43014,8 @@ loc_27EBC:
 	pop	bp
 	retf
 bigpic_makeNight endp
+
+
 
 
 sub_27ED8 proc far
@@ -43442,7 +43533,7 @@ loc_282CC:
 	pop	es
 	assume es:dseg
 	cld
-	mov	di, offset tavern_sayingBase
+	mov	di, offset g_tavernSayingBase
 	mov	cx, offset dseg_end+2
 	sub	cx, di
 	xor	ax, ax
@@ -49506,7 +49597,7 @@ s_staggerInn	db 'Stagger Inn',0
 s_hicHaven	db 'Hic Haven',0
 s_cheers	db 'Cheers',0
 s_tavern	db 'Tavern',0
-tavCoords	tavernLoc_t <12, 17, 0, 0, 0>; 0
+g_tavernData	tavernLoc_t <12, 17, 0, 0, 0>; 0
 		tavernLoc_t <7,	12, 3, 2, 5>; 1
 		tavernLoc_t <2,	3, 3, 4, 5>; 2
 		tavernLoc_t <13, 7, 6, 6, 5>; 3
@@ -49517,7 +49608,7 @@ tavernNames	dd s_scrapwood	    ; 0
 		dd s_hicHaven		; 2
 		dd s_cheers		; 3
 		dd s_tavern		; 4
-byte_43876	db 0, 50, 250, 244, 232 ; 0
+g_tavernSayingCost	dw 0, 50, 250, 500, 1000 ; 0
 		db    0
 s_templeGreeting	db 'Welcome, oh weary ones, to our humble temple.',0Ah
 			db 'Dost thou wish to...',0Ah
@@ -51557,7 +51648,7 @@ s_nlUseOn	db 0Ah,'Use on ',0
 		db    0
 aYouCanTUseThatItem_ db	'You can',27h,'t use that item.',0
 		db    0
-aAttack		db 0Ah,'Attack ',0
+s_attack	db 0Ah,'Attack ',0
 		db    0
 s_useTheseCommands? db 'Use these commands?',0Ah,0Ah,0
 aAndHits	db ', and hits ',0
@@ -51651,31 +51742,13 @@ aBadDiceMaskRange db 'Bad dice mask range',0
 off_475D0	dd bat_partyFightAction
 		dd bat_partyAdvanceAction
 		dd bat_partyRunAction
-off_475DC	dd bat_charPartyAttackActionion, bat_charDefendAction; 0
+off_475DC	dd bat_charAttackAction, bat_charDefendAction; 0
 		dd bat_charPartyAttackAction, bat_charCastAction; 2
 		dd bat_charUseAction, bat_charHideAction;	4
 		dd bat_charSingAction		; 6
 g_classToHitBonus	db 3, 1, 1, 1, 1, 0, 0, 3, 3, 4, 1, 1, 4, 0
 g_monsterAcBonusList	db 3, 2, 0, 0FEh	   ; 0
 g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0, 1, 1
-aPoisonNeedle	db 'Poison Needle',0
-aPoisonBlades	db 'Poison Blades',0
-aBlades		db 'Blades',0
-aShockWave	db 'Shock Wave',0
-aCrazycloud	db 'Crazycloud',0
-aVortex		db 'Vortex',0
-aShocks		db 'Shocks',0
-aPoisonDarts	db 'Poison Darts',0
-aAcidBurst	db 'Acid Burst',0
-aGasCloud	db 'Gas Cloud',0
-aPoisonSpikes	db 'Poison Spikes',0
-aMindBlast	db 'Mind Blast',0
-aBasiliskSnare	db 'Basilisk Snare',0
-aDeathBlades	db 'Death Blades',0
-aCodgerBomb	db 'Codger Bomb',0
-aSwindler	db 'Swindler',0
-aHammer		db 'Hammer',0
-		db    0
 s_experiencePoinsForV db ' experience points for valor and battle knowledge, and ',0
 aTheyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
 		db    0
@@ -51685,43 +51758,75 @@ aEachCharacterReceive db 'Each character receives ',0
 		db    0
 aThePartyDisbelieves_ db 'The party disbelieves...',0Ah,0Ah,0
 		db    0
-aThereIsAChestHere_Wil db 'There is a chest here. Will you:',0Ah,0Ah
+
+s_chestPrompt db 'There is a chest here. Will you:',0Ah,0Ah
 		db '@Examine chest',0Ah
 		db '@Open chest',0Ah
 		db '@Disarm chest',0Ah
 		db '@Trap Zap',0Ah
 		db '@Leave chest',0
-aWhoWillCastATrzp?	db 'Who will cast a TRZP?',0
+s_whoWillCastTrzp	db 'Who will cast a TRZP?',0
 s_dontKnowThatSpell_	db 'You don',27h,'t know that spell.',0
 		db    0
-aYouNeedAtLeast2SpellP	db 'You need at least 2 spell points.',0
-aWhoWillExamineIt?	db 'Who will examine it?',0
+s_needTwoSpellPoints	db 'You need at least 2 spell points.',0
+s_whoWillExamine	db 'Who will examine it?',0
 		db    0
-aItLooksLikeA	db 'It looks like a ',0
+s_looksLike	db 'It looks like a ',0
 		db    0
-aThatCharacterHasAlr	db 'That character has already checked.'
+s_alreadyExamined	db 'That character has already checked.'
 		db 0
-aYouFoundNothing_	db 'You found nothing.',0
+s_foundNothing	db 'You found nothing.',0
 		db    0
-aWhoWillDisarmIt?	db 'Who will disarm it?',0
-aEnterTrapName	db 'Enter trap name:',0
+s_whoWillDisarm	db 'Who will disarm it?',0
+s_enterTrapName	db 'Enter trap name:',0
 		db    0
-aDisarmFailed	db 'Disarm failed!',0
+s_disarmFailed	db 'Disarm failed!',0
 		db    0
-aYouDisarmedIt	db 'You disarmed it!',0
+s_youDisarmedIt	db 'You disarmed it!',0
 		db    0
-aWhoWillOpenIt?	db 'Who will open it?',0
-aYouSetOffA	db 'You set off a ',0
+s_whoWillOpen	db 'Who will open it?',0
+s_youSetOff	db 'You set off a ',0
 		db    0
-trapFlags	db 1,	1, 0, 80h, 1, 1, 80h, 3; 0
-		db 1, 1, 80h, 9, 81h, 80h, 81h,	81h; 8
-		db 1, 3, 0, 6, 81h, 84h, 8, 80h; 16
-		db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 24
-trapDice	db 41h, 41h, 44h, 41h,	43h, 43h, 46h, 42h; 0
+
+
+g_chestTrapFlags	db 1		; 0
+			db 1		; 1
+			db 0		; 2
+			db 80h				; 3
+			db 1		; 4
+			db 1		; 5
+			db 80h				; 6
+			db 3	; 7
+			db 1		; 8
+			db 1		; 9
+			db 80h				; 10
+			db 9	; 11
+			db 1 or 80h	; 12
+			db 80h				; 13
+			db 1 or 80h	; 14
+			db 1 or 80h	; 15
+			db 1		; 16
+			db 3	; 17
+			db 0		; 18
+			db 6		; 19
+			db 1 or 80h	; 20
+			db 4    or 80h	; 21
+			db 8	; 22
+			db 80h				; 23
+			db 1 or 80h	; 24
+			db 1 or 80h	; 25
+			db 1 or 80h	; 26
+			db 1 or 80h	; 27
+			db 1 or 80h	; 28
+			db 1 or 80h	; 29
+			db 1 or 80h	; 30
+			db 1 or 80h	; 31
+
+g_chestTrapDice	db 41h, 41h, 44h, 41h,	43h, 43h, 46h, 42h; 0
 		db 45h,	45h, 47h, 46h, 47h, 48h, 47h, 47h; 8
 		db 49h,	47h, 49h, 21h, 49h, 47h, 45h, 49h; 16
 		db 49h,	49h, 49h, 49h, 49h, 49h, 49h, 49h; 24
-stru_47938	saveStru 4 dup(<0Fh,	0Fh>); 0
+g_chestTrapSaveData	saveStru 4 dup(<0Fh,	0Fh>); 0
 		saveStru 4 dup(<13h, 13h>); 4
 		saveStru 4 dup(<15h, 15h>); 8
 		saveStru 4 dup(<18h, 18h>); 12
@@ -51730,33 +51835,83 @@ stru_47938	saveStru 4 dup(<0Fh,	0Fh>); 0
 		saveStru <28h, 28h>	; 21
 		saveStru <27h, 27h>	; 22
 		saveStru 9 dup(<28h, 28h>); 23
-aChest		db 'Chest!',0
+s_chest		db 'Chest!',0
 		db    0
-byte_47988	db 0, 1, 2, 3, 0, 1,	3, 4; 0
-		db 0, 1, 6, 5, 7, 8, 9,	9; 8
-		db 0Ah,	0Bh, 0Ch, 0Dh, 0Eh, 0Fh, 10h, 11h; 16
-		db 0Eh,	0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh; 24
-trapName	dd aPoisonNeedle	 ; 0
-		dd aPoisonBlades	; 1
-		dd aBlades		; 2
-		dd aShockWave		; 3
-		dd aCrazycloud		; 4
-		dd aVortex		; 5
-		dd aShocks		; 6
-		dd aPoisonDarts		; 7
-		dd aAcidBurst		; 8
-		dd aGasCloud		; 9
-		dd aPoisonSpikes	; 10
-		dd aMindBlast		; 11
-		dd aMindJab		; 12
-		dd aBasiliskSnare	; 13
-		dd aDeathBlades		; 14
-		dd aCodgerBomb		; 15
-		dd aSwindler		; 16
-		dd aHammer		; 17
+g_chestTrapIndexToName	db 0		;  0 - Poison needle
+			db 1		;  1 - Poison blades
+			db 2		;  2 - Blades
+			db 3		;  3 - Shockwave
+			db 0		;  4 - Poison needle
+			db 1		;  5 - Poison blades
+			db 3		;  6 - Shockwave
+			db 4		;  7 - Crazy cloud
+			db 0		;  8 - Poison needle
+			db 1		;  9 - Poison blades
+			db 6		; 10 - Shocks
+			db 5		; 11 - Vortex
+			db 7		; 12 - Poison darts
+			db 8		; 13 - Acid burst
+			db 9		; 14 - Gas cloud
+			db 9		; 15 - Gas cloud
+			db 0Ah		; 16 - Poison Spikes
+			db 0Bh		; 17 - Mind blast
+			db 0Ch		; 18 - Mind jab
+			db 0Dh		; 19 - Basilisk snare
+			db 0Eh		; 20 - Death blades
+			db 0Fh		; 21 - Codger bomb
+			db 10h		; 22 - Swindler
+			db 11h		; 23 - Hammer
+			db 0Eh		; 24 - Death blades
+			db 0Eh		; 25 - Death blades
+			db 0Eh		; 26 - Death blades
+			db 0Eh		; 27 - Death blades
+			db 0Eh		; 28 - Death blades
+			db 0Eh		; 29 - Death blades
+			db 0Eh		; 30 - Death blades
+			db 0Eh		; 31 - Death blades
+
+s_chestPoisonNeedle	db 'Poison Needle',0
+s_chestPoisonBlades	db 'Poison Blades',0
+s_chestBlades		db 'Blades',0
+s_chestShockwave	db 'Shock Wave',0
+s_chestCrazyCloud	db 'Crazycloud',0
+s_chestVortex		db 'Vortex',0
+s_chestShocks		db 'Shocks',0
+s_chestPoisonDarts	db 'Poison Darts',0
+s_chestAcidBurst	db 'Acid Burst',0
+s_chestGasCloud		db 'Gas Cloud',0
+s_chestPoisonSpikes	db 'Poison Spikes',0
+s_chestMindBlast	db 'Mind Blast',0
+s_chestMindJab		db 'Mind Jab',0
+s_chestBasiliskSnare	db 'Basilisk Snare',0
+s_chestDeathBlades	db 'Death Blades',0
+s_chestCodgerBomb	db 'Codger Bomb',0
+s_chestSwindler		db 'Swindler',0
+s_chestHammer		db 'Hammer',0
+			db    0
+g_chestTrapName	dd s_chestPoisonNeedle		; 0
+		dd s_chestPoisonBlades		; 1
+		dd s_chestBlades		; 2
+		dd s_chestShockwave		; 3
+		dd s_chestCrazyCloud		; 4
+		dd s_chestVortex		; 5
+		dd s_chestShocks		; 6
+		dd s_chestPoisonDarts		; 7
+		dd s_chestAcidBurst		; 8
+		dd s_chestGasCloud		; 9
+		dd s_chestPoisonSpikes		; 10
+		dd s_chestMindBlast		; 11
+		dd s_chestMindJab		; 12
+		dd s_chestBasiliskSnare		; 13
+		dd s_chestDeathBlades		; 14
+		dd s_chestCodgerBomb		; 15
+		dd s_chestSwindler		; 16
+		dd s_chestHammer		; 17
+g_chestActionFunctions	dd chest_examine, chest_open,	chest_disarm, chest_trapZap, chest_returnOne
+
+
 poisonDmg	db 1, 2, 4, 8, 0Ah, 10h, 14h, 18h; 0
 aTreasure	db 'Treasure',0
-off_47A00	dd chest_examine, chest_open,	chest_disarm, chest_trapZap, chest_returnOne
 aFried		db 'fried',0
 aFrozen		db 'frozen',0
 aShocked	db 'shocked',0
@@ -54456,7 +54611,7 @@ aR6000StackOver	db 'R6000',0Dh,0Ah
 		db 0FFh
 		db 0FFh
 		db    0
-tavern_sayingBase	dw 0
+g_tavernSayingBase	dw 0
 tav_drunkLevel	db 8 dup(0)	       ; 0
 curStrByte	db ?
 align 2

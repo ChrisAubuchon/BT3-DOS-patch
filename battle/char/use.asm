@@ -9,7 +9,7 @@ bat_charUse proc far
 	mov	ax, 1
 	push	ax
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	mov	al, gs:byte_42276[bx]

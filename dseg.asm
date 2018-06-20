@@ -331,7 +331,7 @@ s_staggerInn	db 'Stagger Inn',0
 s_hicHaven	db 'Hic Haven',0
 s_cheers	db 'Cheers',0
 s_tavern	db 'Tavern',0
-tavCoords	tavernLoc_t <12, 17, 0, 0, 0>; 0
+g_tavernData	tavernLoc_t <12, 17, 0, 0, 0>; 0
 		tavernLoc_t <7,	12, 3, 2, 5>; 1
 		tavernLoc_t <2,	3, 3, 4, 5>; 2
 		tavernLoc_t <13, 7, 6, 6, 5>; 3
@@ -342,7 +342,7 @@ tavernNames	dd s_scrapwood	    ; 0
 		dd s_hicHaven		; 2
 		dd s_cheers		; 3
 		dd s_tavern		; 4
-byte_43876	db 0, 50, 250, 244, 232 ; 0
+g_tavernSayingCost	dw 0, 50, 250, 500, 1000 ; 0
 		db    0
 s_templeGreeting	db 'Welcome, oh weary ones, to our humble temple.',0Ah
 			db 'Dost thou wish to...',0Ah
@@ -2382,7 +2382,7 @@ s_nlUseOn	db 0Ah,'Use on ',0
 		db    0
 aYouCanTUseThatItem_ db	'You can',27h,'t use that item.',0
 		db    0
-aAttack		db 0Ah,'Attack ',0
+s_attack	db 0Ah,'Attack ',0
 		db    0
 s_useTheseCommands? db 'Use these commands?',0Ah,0Ah,0
 aAndHits	db ', and hits ',0
@@ -2476,7 +2476,7 @@ aBadDiceMaskRange db 'Bad dice mask range',0
 off_475D0	dd bat_partyFightAction
 		dd bat_partyAdvanceAction
 		dd bat_partyRunAction
-off_475DC	dd bat_charPartyAttackActionion, bat_charDefendAction; 0
+off_475DC	dd bat_charAttackAction, bat_charDefendAction; 0
 		dd bat_charPartyAttackAction, bat_charCastAction; 2
 		dd bat_charUseAction, bat_charHideAction;	4
 		dd bat_charSingAction		; 6
@@ -5128,7 +5128,7 @@ aR6000StackOver	db 'R6000',0Dh,0Ah
 		db 0FFh
 		db 0FFh
 		db    0
-tavern_sayingBase	dw 0
+g_tavernSayingBase	dw 0
 tav_drunkLevel	db 8 dup(0)	       ; 0
 curStrByte	db ?
 align 2

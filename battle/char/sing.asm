@@ -47,7 +47,7 @@ loc_1C3AA:
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:byte_42244[bx]
+	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
 	push	bx
