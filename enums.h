@@ -203,10 +203,3 @@ minimap_undiscovered	= 0Eh
 ; enum specialCharacters
 ch_InsertCursor		= 60h
 ch_OverwriteCursor	= 5Fh
-
-; enum gameStates
-gameState_inCamp	= 1
-gameState_inWilderness	= 2
-gameState_inDungeon	= 4
-gameState_partyDied	= 5
-gameState_quit		= 0FFh

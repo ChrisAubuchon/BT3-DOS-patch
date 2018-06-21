@@ -1,5 +1,12 @@
 divert(`-1')
 
+# Game state values
+define(`gameState_inCamp', `1')
+define(`gameState_inWilderness', `2')
+define(`gameState_inDungeon', `4')
+define(`gameState_partyDied', `5')
+define(`gameState_quit', `0FFh')
+
 # Special Attack values
 define(`specialAttack_none', `0')
 define(`specialAttack_poison', `1')
