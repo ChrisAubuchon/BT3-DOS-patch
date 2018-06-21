@@ -11,20 +11,20 @@ empty_enter proc	far
 	CALL(bat_init)
 
 l_noBattle:
-	cmp	g_locationNumber, 1
-	jnz	short loc_14956
-	mov	ax, 50
-	jmp	short loc_14959
-loc_14956:
-	mov	ax, 69
+	cmp	g_locationNumber, location_skara
+	jnz	short l_useEmptyPicture
+	mov	ax, bigpic_destroyedBuilding
+	jmp	short l_showPicture
 
-loc_14959:
+l_useEmptyPicture:
+	mov	ax, bigpic_emptyBuilding
+
+l_showPicture:
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 	PUSH_OFFSET(s_building)
 	CALL(setTitle)
-	PUSH_OFFSET(s_emptyBuilding)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_emptyBuilding, clear)
 	IOWAIT
 	sub	ax, ax
 

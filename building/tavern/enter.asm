@@ -19,7 +19,7 @@ l_resetDrunkLoop:
 	cmp	[bp+loopCounter], 7
 	jl	l_resetDrunkLoop
 
-	mov	ax, 83
+	mov	ax, bigpic_tavern
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 	CALL(tav_setTitle, near)

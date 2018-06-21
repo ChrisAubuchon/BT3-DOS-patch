@@ -11,20 +11,20 @@ tavern_drink proc far
 
 	CALL(text_clear)
 
-	cmp	[bp+drinkIndexNumber], 4	; Ginger Ale
+	cmp	[bp+drinkIndexNumber], tavern_gingerAle
 	jnz	short l_notGingerAle
 
 	PRINTOFFSET(s_thirstQuencher)
 	jmp	l_return
 
 l_notGingerAle:
-	cmp	[bp+drinkIndexNumber], 3	; Mead
-	jnz	short l_notMead
+	cmp	[bp+drinkIndexNumber], tavern_foulSpirits
+	jnz	short l_notFoulSpirits
 
 	PRINTOFFSET(s_goodStuff)
 	jmp	short l_calculateDrunkLevel
 
-l_notMead:
+l_notFoulSpirits:
 	PRINTOFFSET(s_burpNotBad)
 
 l_calculateDrunkLevel:

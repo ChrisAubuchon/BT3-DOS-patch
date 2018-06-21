@@ -12,4 +12,19 @@ define(`specialAttack_critical', `7')
 define(`specialAttack_unequip', `8')
 define(`specialAttack_spptDrain', `9')
 
+# Bigpic labels
+define(`bigpic_destroyedBuilding', `50')
+define(`bigpic_emptyBuilding', `69')
+define(`bigpic_tavern', `83')
+
+# Location numbers
+define(`location_skara', `1')
+
+# Tavern drinks
+define(`tavern_ale', `0')
+define(`tavern_beer', `1')
+define(`tavern_mead', `2')
+define(`tavern_foulSpirits', `3')
+define(`tavern_gingerAle', `4')
+
 divert`'dnl

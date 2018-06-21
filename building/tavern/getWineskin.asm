@@ -8,7 +8,7 @@ tavern_getWineskin	proc far
 
 	FUNC_ENTER(2)
 
-	cmp	[bp+drinkIndexNumber], 4		; Ginger Ale
+	cmp	[bp+drinkIndexNumber], tavern_gingerAle
 	jnz	short l_fillWithSpirits
 
 	sub	ax, ax					; wineskin->water

@@ -8028,13 +8028,14 @@ empty_enter proc	far
 
 l_noBattle:
 	cmp	g_locationNumber, 1
-	jnz	short loc_14956
+	jnz	short l_useEmptyPicture
 	mov	ax, 50
-	jmp	short loc_14959
-loc_14956:
-	mov	ax, 69
+	jmp	short l_showPicture
 
-loc_14959:
+l_useEmptyPicture:
+	mov	ax, 50
+
+l_showPicture:
 	push	ax
 	call	bigpic_drawPictureNumber
 	add	sp, 2
