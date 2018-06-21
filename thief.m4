@@ -1,7 +1,6 @@
-include(`macros.m4')dnl
 include(`constants.m4')dnl
+include(`macros.m4')dnl
 include struct.h
-include enums.h
 include macros.h
 
 ; TODO

@@ -1,3 +1,6 @@
+charSize = 78h
+monStruSize = 30h
+
 func_enter	macro
 	push	bp
 	mov	bp, sp

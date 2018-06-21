@@ -36,7 +36,7 @@ loc_1EADA:
 	cmp	ax, 2
 	jnz	short loc_1EB61
 loc_1EB20:
-	mov	gs:specialAttackVal, speAtt_stoning
+	mov	gs:specialAttackVal, specialAttack_stone
 	getMonP	[bp+groupNo], bx
 	mov	gs:monGroups.groupSize[bx], 1
 	push	[bp+groupNo]

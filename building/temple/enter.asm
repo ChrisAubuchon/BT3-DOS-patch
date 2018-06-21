@@ -8,15 +8,14 @@ temple_enter proc far
 	FUNC_ENTER(4)
 
 	CALL(text_clear)
-	mov	ax, 49
+	mov	ax, bigpic_temple
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 	CALL(temple_setTitle, near)
 	CALL(party_findEmptySlot, near)
 	mov	[bp+lastSlot], ax
 l_templeIoLoopEntry:
-	PUSH_OFFSET(s_templeGreeting)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_templeGreeting, clear)
 
 l_badKey:
 	mov	ax, 70h	
@@ -33,18 +32,6 @@ l_badKey:
 
 l_skipMouseSubtract:
 	mov	ax, [bp+inputKey]
-	jmp	short l_keySwitch
-l_healCharacter:
-	CALL(temple_getHealee, near)
-	jmp	short l_ioWaitAndLoop
-l_poolGold:
-	push	[bp+lastSlot]
-	CALL(temple_getGoldPoolee, near)
-l_ioWaitAndLoop:
-	mov	byte ptr g_printPartyFlag,	0
-	IOWAIT
-	jmp	l_templeIoLoopEntry
-l_keySwitch:
 	cmp	ax, 'E'
 	jz	short l_returnZero
 	cmp	ax, 'H'
@@ -57,11 +44,26 @@ l_keySwitch:
 	jz	short l_poolGold
 	cmp	ax, 110h
 	jz	short l_returnZero
-	jmp	l_badKey
+	jmp	short l_badKey
+
+l_healCharacter:
+	CALL(temple_getHealee, near)
+	jmp	short l_ioWaitAndLoop
+
+l_poolGold:
+	push	[bp+lastSlot]
+	CALL(temple_getGoldPoolee, near)
+
+l_ioWaitAndLoop:
+	mov	byte ptr g_printPartyFlag,	0
+	IOWAIT
+	jmp	l_templeIoLoopEntry
+
+
 l_returnZero:
 	sub	ax, ax
+
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 temple_enter endp

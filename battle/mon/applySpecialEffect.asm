@@ -17,9 +17,9 @@ bat_monApplySpecialEffect proc far
 	shl	ax, 1
 	add	bx, ax
 	and	gs:bat_monBeenHitList[bx], 0FEh
-	cmp	gs:specialAttackVal, speAtt_stoning
+	cmp	gs:specialAttackVal, specialAttack_stone
 	jz	short loc_1E495
-	cmp	gs:specialAttackVal, speAtt_criticalHit
+	cmp	gs:specialAttackVal, specialAttack_critical
 	jnz	short loc_1E4A7
 loc_1E495:
 	push	[bp+monNo]

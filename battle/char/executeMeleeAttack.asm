@@ -319,7 +319,7 @@ l_calculateDamageNext:
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	cmp	gs:(party.specAbil+2)[bx], cl
 	jbe	short l_failHiddenCrit
-	mov	ax, speAtt_criticalHit
+	mov	ax, specialAttack_critical
 	jmp	short l_saveHiddenCrit
 l_failHiddenCrit:
 	sub	ax, ax
@@ -335,7 +335,7 @@ l_checkHunterCrit:
 	CALL(random)
 	cmp	gs:party.specAbil[si],	al
 	jbe	short l_zeroSpecialAttack
-	mov	ax, speAtt_criticalHit
+	mov	ax, specialAttack_critical
 	jmp	short l_setSpecialAttack
 
 l_zeroSpecialAttack:

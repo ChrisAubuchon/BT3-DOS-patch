@@ -18,7 +18,7 @@ bat_charIsBreathAttackable proc far
 	jnz	l_return_zero					;   return 0
 
 								; Character is dead
-        cmp     [bp+specialAttackIndex], speAtt_possess		; if specialAttackIndex != speAtt_possess
+        cmp     [bp+specialAttackIndex], specialAttack_possess		; if specialAttackIndex != specialAttack_possess
         jnz     short l_return_zero				;   return 0
 l_return_one:
 	mov	ax, 1
