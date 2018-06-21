@@ -157,7 +157,7 @@ l_checkKey:
 	CALL(mage_removeAllSpells, near)
 
 l_changeClass:
-	getCharP	[bp+slotNumber], si
+	CHARINDEX(ax, STACKVAR(slotNumber), si)
 	mov	bx, [bp+loopCounter]
 	mov	al, g_convertListToMageClass[bx]
 	sub	ah, ah

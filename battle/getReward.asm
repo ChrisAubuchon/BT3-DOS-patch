@@ -13,9 +13,8 @@ bat_getReward proc far
 	var_102= word ptr -102h
 	var_100= word ptr -100h
 
-	func_enter
-	_chkstk	114h
-	delayNoTable	2
+	FUNC_ENTER(114h)
+	DELAY(2)
 	call	text_clear
 	mov	gs:trapIndex, 0
 	mov	ax, gs:batRewardLo
@@ -151,7 +150,7 @@ loc_1F38E:
 loc_1F3B0:
 	cmp	gs:trapIndex, 0
 	jnz	short loc_1F3C8
-	delayNoTable	1
+	DELAY(1)
 loc_1F3C8:
 	call	random
 	sub	ah, ah
@@ -263,7 +262,7 @@ loc_1F4A5:
 	mov	word ptr [bp+var_108+2], ss
 	lfs	bx, [bp+var_108]
 	mov	byte ptr fs:[bx], 0
-	delayNoTable	2
+	DELAY(2)
 	jmp	short loc_1F544
 	jmp	short loc_1F541
 loc_1F535:
@@ -280,7 +279,7 @@ loc_1F547:
 	push	ax
 	call	printString
 	add	sp, 4
-	delayNoTable	8
+	DELAY(8)
 	sub	ax, ax
 	jmp	short $+2
 loc_1F565:

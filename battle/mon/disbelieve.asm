@@ -35,7 +35,7 @@ loc_1EB89:
 	push	ax
 	call	printString
 	add	sp, 4
-	delayWithTable
+	DELAY
 	jmp	short loc_1EBEB
 loc_1EBE9:
 	jmp	short loc_1EB86

@@ -5,10 +5,7 @@ party_applyEquipmentEffects proc far
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER(4)
 	push	si
 	mov	[bp+var_4], 0
 	jmp	short loc_1EC81
@@ -19,7 +16,7 @@ loc_1EC81:
 	jl	short loc_1EC8A
 	jmp	loc_1ED56
 loc_1EC8A:
-	getCharP	[bp+var_4], bx
+	CHARINDEX(ax, STACKVAR(var_4), bx)
 	test	gs:party.status[bx], 0Ch
 	jz	short loc_1ECA1
 	jmp	loc_1ED53
@@ -43,7 +40,7 @@ loc_1ECBC:
 	jnz	short loc_1ECD2
 	inc	[bp+var_2]
 loc_1ECD2:
-	getCharP	[bp+var_4], si
+	CHARINDEX(ax, STACKVAR(var_4), si)
 	mov	ax, [bp+var_2]
 	add	gs:party.currentSppt[si], ax
 	mov	ax, gs:party.maxSppt[si]
@@ -68,7 +65,7 @@ loc_1ED1E:
 	or	ax, ax
 	jnz	short loc_1ED53
 loc_1ED31:
-	getCharP	[bp+var_4], si
+	CHARINDEX(ax, STACKVAR(var_4), si)
 	inc	gs:party.currentHP[si]
 	mov	ax, gs:party.maxHP[si]
 	cmp	gs:party.currentHP[si], ax
@@ -79,7 +76,6 @@ loc_1ED53:
 loc_1ED56:
 	mov	byte ptr g_printPartyFlag,	0
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 party_applyEquipmentEffects endp

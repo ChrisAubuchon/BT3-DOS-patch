@@ -21,7 +21,7 @@ party_died proc far
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	wait4IO
+	IOWAIT
 	sub	al, al
 	mov	gs:g_nonRandomBattleFlag, al
 	mov	g_partyAttackFlag, al

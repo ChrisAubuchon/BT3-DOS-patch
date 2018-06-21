@@ -47,7 +47,7 @@ printCharPronoun proc far
 loc_1452B:
 	jmp	short loc_14564
 loc_1452D:
-	getCharP	word ptr [bp+arg_4], si
+	CHARINDEX(ax, word ptr [bp+arg_4], si)
 	mov	al, gs:party.gender[si]
 	sub	ah, ah
 	and	ax, 3

@@ -279,7 +279,8 @@ l_checkForwardKey:
 	jnz	l_checkLeftArrowKey
 	
 l_moveForward:
-	push_imm	1
+	mov	ax, 1
+	push	ax
 	push	[bp+var_E]
 	CALL(dun_canAdvance)
 	or	ax, ax

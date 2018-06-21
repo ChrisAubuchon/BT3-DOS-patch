@@ -93,7 +93,7 @@ loc_1D61F:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	wait4IO
+	IOWAIT
 	call	text_clear
 	sub	ax, ax
 	jmp	short loc_1D663
@@ -106,7 +106,7 @@ loc_1D643:
 	push	ax
 	call	printStringWClear
 	add	sp, 4
-	wait4IO
+	IOWAIT
 l_bat_useItem_opt_return_zero:
 	sub	ax, ax
 	jmp	short $+2
