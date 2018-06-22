@@ -46,7 +46,7 @@ wild_main proc far
 	CALL(map_readMonsters)
 
 	PUSH_STACK_ADDRESS(levelName)
-	PUSH_STACK_PTR(levelP)
+	PUSH_STACK_DWORD(levelP)
 	CALL(unmaskString)
 
 	lfs	bx, [bp+levelP]

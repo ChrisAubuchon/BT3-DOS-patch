@@ -19,8 +19,7 @@ loc_23001:
 	jnz	short loc_23001
 
 l_ioLoop:
-	PUSH_OFFSET(s_lastOfTheGuildElders)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_lastOfTheGuildElders, clear)
 	mov	[bp+getKeyMouseMask], 0
 
 	mov	[bp+loopCounter], 0

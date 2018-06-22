@@ -63,6 +63,7 @@ define(`specialAttack_unequip', `8')
 define(`specialAttack_spptDrain', `9')
 
 # Bigpic labels
+define(`bigpic_reviewBoard', `48')
 define(`bigpic_temple', `49')
 define(`bigpic_destroyedBuilding', `50')
 define(`bigpic_treasure', `52')

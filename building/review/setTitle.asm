@@ -1,54 +1,56 @@
 ; Attributes: bp-based frame
 ;
-; DWORD var_2 & var_4
+; DWORD titleSTring+2 & titleSTring
 
 review_setTitle proc far
 
 	bigpicNumber= word ptr	-8
-	var_6= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	boardActiveFlag= word ptr	-6
+	titleSTring= dword ptr	-4
 
 	FUNC_ENTER(8)
+
 	mov	ax, 0Ch
 	push	ax
 	CALL(quest_partyNotHasFlagSet)
 	cmp	ax, 1
 	sbb	cx, cx
 	neg	cx
-	mov	[bp+var_6], cx
+	mov	[bp+boardActiveFlag], cx
 	or	cx, cx
-	jz	short loc_24150
-	mov	ax, 32h	
-	jmp	short loc_24153
-loc_24150:
-	mov	ax, 2Fh	
-loc_24153:
-	mov	[bp+bigpicNumber], ax
-	cmp	[bp+var_6], 0
-	jz	short loc_24161
-	mov	ax, offset s_building
-	jmp	short loc_24164
+	jz	short l_useReviewBoard
 
-loc_24161:
+	mov	ax, bigpic_destroyedBuilding
+	jmp	short l_checkTitle
+
+l_useReviewBoard:
+	mov	ax, bigpic_reviewBoard
+
+l_checkTitle:
+	mov	[bp+bigpicNumber], ax
+	cmp	[bp+boardActiveFlag], 0
+	jz	short l_useReviewTitle
+
+	mov	ax, offset s_building
+	jmp	short l_setTitle
+
+l_useReviewTitle:
 	mov	ax, offset s_reviewBoard
 
-loc_24164:
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], ds
+l_setTitle:
+	mov	word ptr [bp+titleSTring], ax
+	mov	word ptr [bp+titleSTring+2], ds
 	push	[bp+bigpicNumber]
 	CALL(bigpic_drawPictureNumber)
 
-	push	[bp+var_2]
-	push	[bp+var_4]
+	PUSH_STACK_DWORD(titleSTring)
 	CALL(setTitle)
 
-	cmp	[bp+var_6], 0
+	cmp	[bp+boardActiveFlag], 0
 	jz	short l_return
 	CALL(text_clear)
-	PUSH_OFFSET(s_desertedReviewBoard)
-	PRINTSTRING
-	add	sp, 4
+	PRINTOFFSET(s_desertedReviewBoard)
+
 	mov	ax, 0FFh
 	push	ax
 	mov	ax, 3Eh	

@@ -42,7 +42,7 @@ l_setArticle:
 	jnb	l_skipCharacterDescription
 
 	PUSH_OFFSET(s_level)
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 	mov	ax, 3
@@ -51,7 +51,7 @@ l_setArticle:
 	sub	ax, ax
 	push	ax
 	push	gs:party.level[bx]
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	ITOA(stringBufferP)
 
 	lfs	bx, [bp+stringBufferP]
@@ -65,7 +65,7 @@ l_setArticle:
 	shl	bx, 1
 	push	word ptr (s_genderString+2)[bx]
 	push	word ptr s_genderString[bx]
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 	lfs	bx, [bp+stringBufferP]
@@ -79,7 +79,7 @@ l_setArticle:
 	shl	bx, 1
 	push	word ptr (g_raceString+2)[bx]
 	push	word ptr g_raceString[bx]
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 	lfs	bx, [bp+stringBufferP]
@@ -94,7 +94,7 @@ l_skipCharacterDescription:
 	shl	bx, 1
 	push	word ptr (g_classString+2)[bx]
 	push	word ptr g_classString[bx]
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)

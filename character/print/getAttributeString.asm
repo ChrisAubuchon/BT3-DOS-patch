@@ -62,7 +62,7 @@ l_skipOneDigitCheck:
 	cwd
 	push	dx
 	push	ax
-	PUSH_STACK_PTR(stringBuffer)
+	PUSH_STACK_DWORD(stringBuffer)
 	ITOA(stringBuffer)
 
 	lfs	bx, [bp+stringBuffer]

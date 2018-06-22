@@ -140,7 +140,7 @@ loc_1C04B:
 
 loc_1C0A7:
 	PUSH_OFFSET(s_periodNlNl)
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 loc_1C0B3:

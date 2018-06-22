@@ -14,8 +14,7 @@ review_changeMageClass proc far
 	FUNC_ENTER(22h)
 	push	si
 
-	PUSH_OFFSET(s_whichMageSeeksChange)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_whichMageSeeksChange, clear)
 	CALL(readSlotNumber)
 	mov	[bp+slotNumber], ax
 	or	ax, ax
@@ -29,8 +28,7 @@ review_changeMageClass proc far
 	jnz	short l_spellcasterCheck
 
 l_unableToChangeClass:
-	PUSH_OFFSET(s_cannotChangeClass)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_cannotChangeClass, wait)
 	jmp	l_return
 
 l_spellcasterCheck:
@@ -43,8 +41,7 @@ l_spellcasterCheck:
 	cmp	ax, 0FFh
 	jnz	short l_checkSpellLevels
 
-	PUSH_OFFSET(s_thouArtNotASpellcaster)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_thouArtNotASpellcaster, wait)
 	jmp	l_return
 
 l_checkSpellLevels:
@@ -106,13 +103,11 @@ l_convertNext:
 l_emptyListCheck:
 	cmp	[bp+convertList], 0
 	jnz	short l_promptForNewClass
-	PUSH_OFFSET(s_doesntQualifyForNewClass)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_doesntQualifyForNewClass, wait)
 	jmp	l_return
 
 l_promptForNewClass:
-	PUSH_OFFSET(s_newClassPrompt)
-	PRINTSTRING
+	PRINTOFFSET(s_newClassPrompt)
 
 l_ioLoop:
 	push	[bp+convertListMouseMask]
@@ -142,18 +137,14 @@ l_checkKey:
 	cmp	ax, 5
 	jnz	short l_changeClass
 
-	PUSH_OFFSET(s_convertChronomancerPrompt)
-	PRINTSTRING(wait)
-	PUSH_OFFSET(s_dostThouAccept)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_convertChronomancerPrompt, wait)
+	PRINTOFFSET(s_dostThouAccept, clear)
 	CALL(getYesNo)
 	or	ax, ax
 	jz	l_return
 
-	PUSH_OFFSET(s_arboriaSpellText)
-	PRINTSTRING(wait)
-	PUSH_OFFSET(s_arboriaSpellLocation)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_arboriaSpellText, wait)
+	PRINTOFFSET(s_arboriaSpellLocation, wait)
 	push	[bp+slotNumber]
 	CALL(mage_removeAllSpells, near)
 
@@ -183,8 +174,7 @@ l_changeClass:
 	push	[bp+slotNumber]
 	CALL(character_learnSpellLevel, near)
 	mov	byte ptr g_printPartyFlag,	0
-	PUSH_OFFSET(s_beginsNewProfession)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_beginsNewProfession, wait)
 
 l_return:
 	pop	si

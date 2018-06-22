@@ -41,7 +41,7 @@ l_singular:
 	APPEND_CHAR(STACKVAR(stringBufferP), ' ')
 	sub	ax, ax
 	push	ax
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_STACK_ADDRESS(unmaskedName)
 	PLURALIZE(stringBufferP)
 

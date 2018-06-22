@@ -50,7 +50,7 @@ loc_1F255:
 
 	push	dx
 	push	ax
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	ITOA(stringBufferP)
 
 	PUSH_OFFSET(s_experiencePoinsForV)
@@ -87,16 +87,16 @@ loc_1F319:
 
 	sub	ax, ax
 	push	ax
-	PUSH_STACK_PTR(goldReward)
+	PUSH_STACK_DWORD(goldReward)
 	CALL(bat_giveGold, near)
 
 	push	dx
 	push	ax
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	ITOA(stringBufferP)
 
 	PUSH_OFFSET(s_inGold)
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 	mov	[bp+itemLoopCounter], 0
@@ -189,10 +189,10 @@ loc_1F474:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_foundA)
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 	push	[bp+newItemIdentification]

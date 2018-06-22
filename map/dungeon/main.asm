@@ -44,7 +44,7 @@ dun_main proc far
 	CALL(map_readMonsters)
 
 	PUSH_STACK_ADDRESS(dungeonName)
-	PUSH_STACK_PTR(levP)
+	PUSH_STACK_DWORD(levP)
 	CALL(unmaskString)
 
 	lfs	bx, [bp+levP]

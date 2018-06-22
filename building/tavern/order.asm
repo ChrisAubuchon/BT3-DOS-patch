@@ -40,7 +40,7 @@ l_orderLoopEntry:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 	PUSH_STACK_ADDRESS(stringBuffer)

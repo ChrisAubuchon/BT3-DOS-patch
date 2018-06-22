@@ -42,7 +42,7 @@ l_skipNameCalling:
 	mov	word ptr [bp+tipAmount+2], dx
 	or	dx, ax
 	jz	l_return
-	PUSH_STACK_PTR(tipAmount)
+	PUSH_STACK_DWORD(tipAmount)
 	push	[bp+talkerSlotNumber]
 	CALL(character_removeGold, near)
 	or	ax, ax

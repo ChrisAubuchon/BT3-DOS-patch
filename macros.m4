@@ -49,9 +49,9 @@ ifelse(`$2', `', `	push	ds', `	mov	dx, $2
 	push	dx')
 	push	ax')dnl
 
-# PUSH_STACK_PTR(var)
+# PUSH_STACK_DWORD(var)
 #
-define(`PUSH_STACK_PTR', `push	word ptr [bp+$1+2]
+define(`PUSH_STACK_DWORD', `push	word ptr [bp+$1+2]
 	push	word ptr [bp+$1]')
 
 # PUSH_STACK_ADDRESS(variable)

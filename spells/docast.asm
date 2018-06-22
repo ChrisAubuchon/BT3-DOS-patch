@@ -21,7 +21,7 @@ doCastSpell proc far
 	jge	short l_spptCheck
 
 	PUSH_OFFSET(s_castsASpell)
-	PUSH_STACK_PTR(stringBufP)
+	PUSH_STACK_DWORD(stringBufP)
 	STRCAT(stringBufP)
 	APPEND_CHAR(STACKVAR(stringBufP), ' ')
 

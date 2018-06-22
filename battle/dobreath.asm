@@ -97,7 +97,7 @@ loc_201E6:
 	jnz	loc_20324
 
 	PUSH_OFFSET(s_partyTooFarAway)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	lea	ax, [bp+stringBuf]
 	push	ss
@@ -193,7 +193,7 @@ loc_20379:
 	jb	short loc_203AA
 
 	PUSH_OFFSET(s_one)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	mov	[bp+var_2], 1
 	jmp	loc_2047F
@@ -229,7 +229,7 @@ loc_203AA:
 	test	[bp+breathFlags], breath_isBreath
 	jz	short loc_20467
 	PUSH_OFFSET(s_repelledAttack)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	mov	byte ptr g_printPartyFlag,	0
 	mov	[bp+var_2], 0
@@ -275,7 +275,7 @@ loc_204CF:
 	test	[bp+var_10C], ax
 	jnz	short loc_2050C
 	PUSH_OFFSET(s_repelledAttack)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	mov	[bp+var_2], 0
 loc_2050C:
@@ -398,7 +398,7 @@ loc_2068D:
 	jz	loc_207B5
 loc_206A1:
 	PUSH_OFFSET(s_is)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	mov	bl, [bp+arg_4]
 	sub	bh, bh
@@ -410,7 +410,7 @@ loc_206A1:
 	push	ax
 	STRCAT(outputStringP)
 	PUSH_OFFSET(a_for)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	xor	ax, ax
 	push	ax
@@ -456,24 +456,24 @@ loc_206A1:
 	jmp	short loc_207D2
 loc_207A7:
 	PUSH_OFFSET(s_periodNlNl)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	jmp	short loc_207D2
 loc_207B5:
 	PUSH_OFFSET(s_repelledAttack)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 loc_207D2:
 	jmp	short loc_207F1
 loc_207D4:
 	PUSH_OFFSET(s_repelledAttack)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 loc_207F1:
 	jmp	short loc_20810
 l_printTooFarAway:
 	PUSH_OFFSET(s_wasTooFarAway)
-	PUSH_STACK_PTR(outputStringP)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 loc_20810:
 	lfs	bx, [bp+outputStringP]

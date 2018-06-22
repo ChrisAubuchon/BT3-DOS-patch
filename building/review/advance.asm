@@ -2,14 +2,13 @@
 
 review_advance proc far
 
-	var_C= dword ptr -0Ch
+	attributeC= dword ptr -0Ch
 	ageStatusFlag= word ptr	-8
 	attributeIndex= word ptr	-6
 	hpBonus= word ptr	-4
 	bonusVar= word ptr	-2
 	charNo=	word ptr  6
 	arg_2= word ptr	 8
-	arg_4= word ptr	 0Ah
 
 	FUNC_ENTER(0Ch)
 	push	si
@@ -209,8 +208,8 @@ l_increaseRandomAttribute:
 	mov	[bp+attributeIndex], ax
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	add	ax, offset party.strength
-	mov	word ptr [bp+var_C], ax
-	mov	word ptr [bp+var_C+2], seg seg027
+	mov	word ptr [bp+attributeC], ax
+	mov	word ptr [bp+attributeC+2], seg seg027
 
 ; This section looks for an attribute under 30 to increase. It is possible
 ; to not increase an attribute when levelling up since the attribute search
@@ -220,7 +219,7 @@ l_findAttributeToIncrease:
 	cmp	[bp+attributeIndex], 5
 	jge	short l_restoreAgeStatus
 	mov	bx, [bp+attributeIndex]
-	lfs	si, [bp+var_C]
+	lfs	si, [bp+attributeC]
 	cmp	byte ptr fs:[bx+si], 30
 	jl	short l_printIncreasedAttribute
 	mov	byte ptr fs:[bx+si], 30
@@ -229,14 +228,11 @@ l_findAttributeToIncrease:
 
 l_printIncreasedAttribute:
 	mov	bx, [bp+attributeIndex]
-	lfs	si, [bp+var_C]
+	lfs	si, [bp+attributeC]
 	inc	byte ptr fs:[bx+si]
 	PUSH_OFFSET(s_plusOneTo)
-	push	[bp+arg_4]
-	push	[bp+arg_2]
-	STRCAT
-	mov	[bp+arg_2], ax
-	mov	[bp+arg_4], dx
+	PUSH_STACK_DWORD(arg_2)
+	STRCAT(arg_2)
 	mov	bx, [bp+attributeIndex]
 	shl	bx, 1
 	shl	bx, 1
@@ -244,9 +240,7 @@ l_printIncreasedAttribute:
 	push	word ptr fullAttributeString[bx]
 	push	dx
 	push	ax
-	STRCAT
-	mov	[bp+arg_2], ax
-	mov	[bp+arg_4], dx
+	STRCAT(arg_2)
 	jmp	short l_restoreAgeStatus
 
 l_restoreAgeStatus:
@@ -256,8 +250,8 @@ l_restoreAgeStatus:
 	CALL(review_resetAgeStatus)
 
 l_return:
-	mov	ax, [bp+arg_2]
-	mov	dx, [bp+arg_4]
+	mov	ax, word ptr [bp+arg_2]
+	mov	dx, word ptr [bp+arg_2+2]
 	pop	si
 	FUNC_EXIT
 	retf

@@ -229,7 +229,7 @@ l_attackSucceeds:
 
 l_noKill:
 	PUSH_OFFSET(s_periodNlNl)
-	PUSH_STACK_PTR(stringBufferP)
+	PUSH_STACK_DWORD(stringBufferP)
 	STRCAT(stringBufferP)
 
 l_return:
