@@ -4,7 +4,7 @@ bat_giveExperience proc	far
 	rostSize= word ptr -8
 	loopCounter= word ptr	-6
 	xpPerCharacter= dword ptr	-4
-	totalXp= word ptr	 6
+	totalXp= dword ptr	 6
 
 	FUNC_ENTER(8)
 	push	si
