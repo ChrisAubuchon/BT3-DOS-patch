@@ -9,8 +9,7 @@ song_singNonCombat	proc far
 	FUNC_ENTER(6)
 
 	CALL(text_clear)
-	PUSH_OFFSET(s_whoWillPlay)
-	PRINTSTRING
+	PRINTOFFSET(s_whoWillPlay)
 
 	CALL(readSlotNumber)
 	mov	[bp+partySlotNumber], ax

@@ -2,7 +2,6 @@
 
 review_changeMageClass proc far
 
-	var_78=	word ptr -76h
 	convertList=	word ptr -22h
 	currentClassSpellIndex=	word ptr -20h
 	loopCounter= word ptr -1Eh
@@ -12,7 +11,7 @@ review_changeMageClass proc far
 	var_16=	word ptr -16h
 	convertListMouseMask= word ptr	-2
 
-	FUNC_ENTER(76h)
+	FUNC_ENTER(22h)
 	push	si
 
 	PUSH_OFFSET(s_whichMageSeeksChange)
@@ -59,8 +58,7 @@ l_spellLevelLoop:
 	or	ax, ax
 	jnz	short l_spellLevelNext
 
-	PUSH_OFFSET(s_mustKnowThreeSpellLevels)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_mustKnowThreeSpellLevels, wait)
 	jmp	l_return
 
 l_spellLevelNext:
@@ -81,6 +79,7 @@ l_convertLoop:
 	add	sp, 2
 	or	ax, ax
 	jz	short l_convertNext
+
 	mov	bx, [bp+loopCounter]
 	shl	bx, 1
 	shl	bx, 1
@@ -131,12 +130,14 @@ l_checkKey:
 	cmp	[bp+inKey], 31h 
 	jl	short l_ioLoop
 	mov	ax, [bp+convertList]
-	add	ax, 31h	
+	add	ax, '1'
 	cmp	ax, [bp+inKey]
 	jl	short l_ioLoop
+
 	mov	si, [bp+inKey]
+	sub	si, '1'
 	shl	si, 1
-	mov	ax, [bp+si+var_78]
+	mov	ax, [bp+si+var_16]
 	mov	[bp+loopCounter], ax
 	cmp	ax, 5
 	jnz	short l_changeClass

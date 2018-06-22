@@ -5,6 +5,7 @@ mage_convertWizardCheck proc far
 	slotNumber= word ptr	 6
 
 	FUNC_ENTER
+
 	mov	ax, 2Ah
 	push	ax
 	push	[bp+slotNumber]

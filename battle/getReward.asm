@@ -2,85 +2,68 @@
 
 bat_getReward proc far
 
-	var_114= word ptr -114h
-	var_112= word ptr -112h
-	var_110= word ptr -110h
-	var_10E= word ptr -10Eh
-	var_10C= word ptr -10Ch
-	var_10A= word ptr -10Ah
-	var_108= dword ptr -108h
-	var_104= word ptr -104h
-	var_102= word ptr -102h
-	var_100= word ptr -100h
+	loopCounter= word ptr -114h
+	itemLoopCounter= word ptr -112h
+	newItemIdentification= word ptr -110h
+	goldReward= dword ptr -10Eh
+	newItemCount= word ptr -10Ah
+	stringBufferP= dword ptr -108h
+	newItemNumber= word ptr -104h
+	currentSlotNumber= word ptr -102h
+	stringBuffer= word ptr -100h
 
 	FUNC_ENTER(114h)
+
 	DELAY(2)
-	call	text_clear
+	CALL(text_clear)
 	mov	gs:trapIndex, 0
 	mov	ax, gs:batRewardLo
 	or	ax, gs:batRewardHi
-	jnz	short loc_1F239
-	sub	ax, ax
-	jmp	loc_1F565
-loc_1F239:
+	jz	l_returnZero
+
 	cmp	inDungeonMaybe, 0
 	jz	short loc_1F255
+
 	cmp	byte_4EECC, 0
 	jz	short loc_1F255
-	push	cs
-	call	near ptr bat_doChest
+
+	CALL(bat_doChest, near)
+
 loc_1F255:
-	call	party_getLastSlot
+	CALL(party_getLastSlot)
 	cmp	ax, 7
-	jle	short loc_1F265
-	mov	ax, 1
-	jmp	loc_1F565
-loc_1F265:
+	jg	l_returnOne
+
 	mov	ax, gs:batRewardLo
 	or	ax, gs:batRewardHi
-	jnz	short loc_1F279
-	sub	ax, ax
-	jmp	loc_1F565
-loc_1F279:
-	mov	ax, offset aEachCharacterReceive
-	push	ds
-	push	ax
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	strcat
-	add	sp, 8
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
+	jz	l_returnZero
+
+	PUSH_OFFSET(s_eachCharacterReceives)
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT(stringBufferP)
+
 	sub	ax, ax
 	push	ax
 	push	gs:batRewardHi
 	push	gs:batRewardLo
-	push	cs
-	call	near ptr bat_giveExperience
-	add	sp, 4
+	CALL(bat_giveExperience, near)
+
 	push	dx
 	push	ax
-	push	word ptr [bp+var_108+2]
-	push	word ptr [bp+var_108]
-	call	itoa
-	add	sp, 0Ah
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
-	mov	ax, offset s_experiencePoinsForV
-	push	ds
-	push	ax
+	PUSH_STACK_PTR(stringBufferP)
+	ITOA(stringBufferP)
+
+	PUSH_OFFSET(s_experiencePoinsForV)
 	push	dx
-	push	word ptr [bp+var_108]
-	call	strcat
-	add	sp, 8
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
+	push	word ptr [bp+stringBufferP]
+	STRCAT(stringBufferP)
+
 	cmp	gs:trapIndex, 0
 	jz	short loc_1F2F1
 	sub	ax, ax
 	cwd
 	jmp	short loc_1F30A
+
 loc_1F2F1:
 	mov	ax, 5
 	cwd
@@ -88,52 +71,35 @@ loc_1F2F1:
 	push	ax
 	push	gs:batRewardHi
 	push	gs:batRewardLo
-	call	__32bitDivide
+	CALL(__32bitDivide)
+
 loc_1F30A:
-	mov	[bp+var_10E], ax
-	mov	[bp+var_10C], dx
+	mov	word ptr [bp+goldReward], ax
+	mov	word ptr [bp+goldReward+2], dx
+
 loc_1F319:
-	mov	ax, 34h	
+	mov	ax, bigpic_treasure
 	push	ax
-	call	bigpic_drawPictureNumber
-	add	sp, 2
-	mov	ax, offset aTreasure
-	push	ds
-	push	ax
-	call	setTitle
-	add	sp, 4
+	CALL(bigpic_drawPictureNumber)
+
+	PUSH_OFFSET(s_treasure)
+	CALL(setTitle)
+
 	sub	ax, ax
 	push	ax
-	push	[bp+var_10C]
-	push	[bp+var_10E]
-	push	cs
-	call	near ptr bat_giveGold
-	add	sp, 4
+	PUSH_STACK_PTR(goldReward)
+	CALL(bat_giveGold, near)
+
 	push	dx
 	push	ax
-	push	word ptr [bp+var_108+2]
-	push	word ptr [bp+var_108]
-	call	itoa
-	add	sp, 0Ah
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
-	mov	ax, offset aInGold_
-	push	ds
-	push	ax
-	push	dx
-	push	word ptr [bp+var_108]
-	call	strcat
-	add	sp, 8
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
-	mov	[bp+var_112], 0
-	jmp	short loc_1F384
-loc_1F380:
-	inc	[bp+var_112]
-loc_1F384:
-	cmp	[bp+var_112], 4
-	jl	short loc_1F38E
-	jmp	loc_1F547
+	PUSH_STACK_PTR(stringBufferP)
+	ITOA(stringBufferP)
+
+	PUSH_OFFSET(s_inGold)
+	PUSH_STACK_PTR(stringBufferP)
+	STRCAT(stringBufferP)
+
+	mov	[bp+itemLoopCounter], 0
 loc_1F38E:
 	mov	al, g_levelNumber
 	sub	ah, ah
@@ -142,148 +108,139 @@ loc_1F38E:
 	push	ax
 	sub	ax, ax
 	push	ax
-	call	randomBetweenXandY
-	add	sp, 4
+	CALL(randomBetweenXandY)
 	or	ax, ax
-	jz	short loc_1F3B0
-	jmp	loc_1F544
-loc_1F3B0:
+	jnz	l_itemLoopNext
+
 	cmp	gs:trapIndex, 0
-	jnz	short loc_1F3C8
+	jnz	short l_getRewardItemNumber
 	DELAY(1)
-loc_1F3C8:
-	call	random
+
+l_getRewardItemNumber:
+	CALL(random)
 	sub	ah, ah
-	cmp	ax, 224
-	jl	short loc_1F3E9
+	cmp	ax, 224			; Undefined values are returned
+	jl	short l_checkLevelMask		; as harmonic gems
 	cmp	ax, 240
-	jge	short loc_1F3E9
-	mov	ax, 195
-loc_1F3E9:
-	mov	[bp+var_104], ax
+	jge	short l_checkLevelMask
+	mov	ax, item_harmonicGem
+
+l_checkLevelMask:
+	mov	[bp+newItemNumber], ax
 	mov	bl, g_levelNumber
 	sub	bh, bh
 	mov	al, byteMaskList[bx]
 	sub	ah, ah
-	mov	bx, [bp+var_104]
+	mov	bx, [bp+newItemNumber]
 	mov	cl, itemLevMask[bx]
 	sub	ch, ch
 	test	ax, cx
-	jz	short loc_1F3C8
+	jz	short l_getRewardItemNumber
+
 	mov	al, g_itemBaseCount[bx]
-	mov	[bp+var_10A], ax
+	mov	[bp+newItemCount], ax
 	cmp	ax, 1
-	jz	short loc_1F43A
+	jz	short l_checkIdentificationFlag
+
 	cmp	ax, 0FFh
-	jz	short loc_1F43A
+	jz	short l_checkIdentificationFlag
+
 	push	ax
 	mov	ax, 1
 	push	ax
-	call	randomBetweenXandY
-	add	sp, 4
-	mov	[bp+var_10A], ax
-loc_1F43A:
-	call	random
+	CALL(randomBetweenXandY)
+	mov	[bp+newItemCount], ax
+
+l_checkIdentificationFlag:
+	CALL(random)
 	test	al, 7
-	jnz	short loc_1F448
-	mov	ax, 80h
-	jmp	short loc_1F44A
-loc_1F448:
+	jnz	short l_itemIsIdentified
+
+	mov	ax, itemFlag_unidentified
+	jmp	short l_setIdentificationFlag
+
+l_itemIsIdentified:
 	sub	ax, ax
-loc_1F44A:
-	mov	[bp+var_110], ax
+
+l_setIdentificationFlag:
+	mov	[bp+newItemIdentification], ax
 	mov	ax, 7
 	push	ax
-	call	bat_getRandomChar
-	add	sp, 2
-	mov	[bp+var_102], ax
-	mov	[bp+var_114], 0
-	jmp	short loc_1F46A
-loc_1F466:
-	inc	[bp+var_114]
-loc_1F46A:
-	cmp	[bp+var_114], 7
-	jl	short loc_1F474
-	jmp	loc_1F544
+	CALL(bat_getRandomChar)
+	mov	[bp+currentSlotNumber], ax
+
+	mov	[bp+loopCounter], 0
 loc_1F474:
-	push	[bp+var_102]
-	push	cs
-	call	near ptr bat_charGetReward
-	add	sp, 2
+	push	[bp+currentSlotNumber]
+	CALL(bat_charGetReward, near)
 	or	ax, ax
-	jnz	short loc_1F486
-	jmp	loc_1F535
-loc_1F486:
-	push	[bp+var_10A]
-	push	[bp+var_110]
-	push	[bp+var_104]
-	push	[bp+var_102]
-	call	inventory_addItem
-	add	sp, 8
+	jz	l_characterLoopNext
+
+	push	[bp+newItemCount]
+	push	[bp+newItemIdentification]
+	push	[bp+newItemNumber]
+	push	[bp+currentSlotNumber]
+	CALL(inventory_addItem)
 	or	ax, ax
-	jnz	short loc_1F4A5
-	jmp	loc_1F535
-loc_1F4A5:
-	getCharP	[bp+var_102], bx
+	jz	l_characterLoopNext
+
+	CHARINDEX(ax, STACKVAR(currentSlotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	word ptr [bp+var_108+2]
-	push	word ptr [bp+var_108]
-	call	strcat
-	add	sp, 8
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
-	mov	ax, offset aFoundA
-	push	ds
-	push	ax
-	push	dx
-	push	word ptr [bp+var_108]
-	call	strcat
-	add	sp, 8
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
-	push	[bp+var_110]
-	push	[bp+var_104]
+	PUSH_STACK_PTR(stringBufferP)
+	STRCAT(stringBufferP)
+	PUSH_OFFSET(s_foundA)
+	PUSH_STACK_PTR(stringBufferP)
+	STRCAT(stringBufferP)
+
+	push	[bp+newItemIdentification]
+	push	[bp+newItemNumber]
 	push	dx
 	push	ax
-	call	inventory_getItemName
-	add	sp, 8
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], dx
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	printString
-	add	sp, 4
-	lea	ax, [bp+var_100]
-	mov	word ptr [bp+var_108], ax
-	mov	word ptr [bp+var_108+2], ss
-	lfs	bx, [bp+var_108]
+	CALL(inventory_getItemName)
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], dx
+	PUSH_STACK_ADDRESS(stringBuffer)
+	PRINTSTRING
+	lea	ax, [bp+stringBuffer]
+	mov	word ptr [bp+stringBufferP], ax
+	mov	word ptr [bp+stringBufferP+2], ss
+	lfs	bx, [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 0
 	DELAY(2)
-	jmp	short loc_1F544
-	jmp	short loc_1F541
-loc_1F535:
-	dec	[bp+var_102]
-	jns	short loc_1F541
-	mov	[bp+var_102], 6
-loc_1F541:
-	jmp	loc_1F466
-loc_1F544:
-	jmp	loc_1F380
+	jmp	short l_itemLoopNext
+
+l_characterLoopNext:
+	dec	[bp+currentSlotNumber]
+	jns	short loc_1F466
+
+	mov	[bp+currentSlotNumber], 6
+
+loc_1F466:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jl	loc_1F474
+
+l_itemLoopNext:
+	inc	[bp+itemLoopCounter]
+	cmp	[bp+itemLoopCounter], 4
+	jl	loc_1F38E
+
 loc_1F547:
-	lea	ax, [bp+var_100]
-	push	ss
-	push	ax
-	call	printString
-	add	sp, 4
+	PUSH_STACK_ADDRESS(stringBuffer)
+	PRINTSTRING
 	DELAY(8)
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
-loc_1F565:
-	mov	sp, bp
-	pop	bp
+	jmp	short l_return
+
+l_returnOne:
+	mov	ax, 1
+
+l_return:
+	FUNC_EXIT
 	retf
 bat_getReward endp

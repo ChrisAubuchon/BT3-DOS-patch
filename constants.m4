@@ -65,6 +65,7 @@ define(`specialAttack_spptDrain', `9')
 # Bigpic labels
 define(`bigpic_temple', `49')
 define(`bigpic_destroyedBuilding', `50')
+define(`bigpic_treasure', `52')
 define(`bigpic_emptyBuilding', `69')
 define(`bigpic_tavern', `83')
 
@@ -119,7 +120,7 @@ define(`itType_quiver', `12')
 define(`itType_container', `13')
 define(`itType_armor0', `14')
 
-; enum dosKeys')
+# DOS Key values
 define(`dosKeys_Enter', `0Dh')
 define(`dosKeys_ESC', `1Bh')
 define(`dosKeys_F1', `3B00h')
@@ -139,13 +140,13 @@ define(`dosKeys_end', `4F00h')
 define(`dosKeys_downArrow', `5000h')
 define(`dosKeys_pageDown', `5100h')
 
-; enum directionEnum')
+# Direction values
 define(`dir_north', `0')
 define(`dir_east', `1')
 define(`dir_south', `2')
 define(`dir_west', `3')
 
-; enum itemEffects')
+# Item effects
 define(`itemEff_none', `0')
 define(`itemEff_regenHP', `1')
 define(`itemEff_anotherSpptRegen', `2')
@@ -160,7 +161,7 @@ define(`itemEff_quaterSpptUse', `12')
 define(`itemEff_regenSppt', `13')
 define(`itemEff_resurrect', `14')
 
-; enum questFlag')
+# Quest flags
 define(`quest_valarianActive', `0')
 define(`quest_valarianDone', `1')
 define(`quest_lanatirActive', `2')
@@ -178,21 +179,21 @@ define(`quest_tarjanDone', `0Dh')
 define(`quest_brilhastActive', `0Eh')
 define(`quest_brilhastDone', `0Fh')
 
-; enum breathFlags (bitfield)')
+# Breath weapon flags
 define(`breath_isBreath', `1')
 define(`breath_oneGroup', `40h')
 define(`breath_allFoes', `80h')
 
-; enum monsterFlags (bitfield)')
+# Monster flags
 define(`mon_attackStr', `0Fh')
 define(`mon_noSummon', `20h')
 
-; enum targetEnum')
+# Target values
 define(`target_partyMember', `1')
 define(`target_monGroup', `2')
 define(`target_monAndParty', `3')
 
-; enum songEnum')
+# Songs
 define(`song_sirRobin', `0')
 define(`song_safety', `1')
 define(`song_sanctuary', `2')
@@ -202,11 +203,11 @@ define(`song_watchwood', `5')
 define(`song_overture', `6')
 define(`song_shield', `7')
 
-; enum levelFile')
+# Level file numbers
 define(`lev_monsterl', `1')
 define(`lev_monsterh', `2')
 
-; enum healFlags')
+# Heal spell flags
 define(`heal_fleshrestore', `1')
 define(`heal_stoned', `2')
 define(`heal_possession', `3')
@@ -218,11 +219,11 @@ define(`heal_fullHeal', `0FDh')
 define(`heal_quickfix', `0FEh')
 define(`heal_levelMul', `0FFh')
 
-; enum spellCastFlags')
+# Spell cast flags
 define(`spellcast_spellOnly', `8')
 define(`spellcast_combatOnly', `10h')
 
-; enum miniMapBitmasks')
+# Minimap bitmasks
 define(`minimap_topWall', `0')
 define(`minimap_rightWall', `1')
 define(`minimap_bottomWall', `2')
@@ -231,8 +232,11 @@ define(`minimap_dot', `0Ch')
 define(`minimap_X', `0Dh')
 define(`minimap_undiscovered', `0Eh')
 
-; enum specialCharacters')
+# Special Characters
 define(`ch_InsertCursor', `60h')
 define(`ch_OverwriteCursor', `5Fh')
+
+# Items
+define(`item_harmonicGem', `195')
 
 divert`'dnl

@@ -49,8 +49,7 @@ l_searchSpellLevelsLoop:
 l_learnedAllLevelsCheck:
 	cmp	[bp+loopCounter], 6
 	jle	short l_levelCheckForSpells
-	PUSH_OFFSET(s_learnedAllSpells)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_learnedAllSpells, wait)
 	jmp	l_return
 
 l_levelCheckForSpells:
@@ -91,7 +90,7 @@ l_ioLoop:
 	STRCAT(stringBufferP)
 	mov	bx, [bp+loopCounter]
 	shl	bx, 1
-	mov	ax, levelCost[bx]
+	mov	ax, spellLevelCost[bx]
 	mov	[bp+levelCost], ax
 	sub	ax, ax
 	push	ax

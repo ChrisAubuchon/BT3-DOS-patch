@@ -28,7 +28,6 @@ l_loop:
 	or	ax, ax
 	jz	short l_next
 	inc	[bp+classCount]
-	jmp	short l_loop
 
 l_next:
 	inc	[bp+loopCounter]

@@ -14,7 +14,7 @@ song_getSong proc far
 	partySlotNumber=	word ptr  6
 	songPlayingFlag= word ptr	 8
 
-	FUNC_ENTER(34h)
+	FUNC_ENTER(22Ch)
 	push	si
 
 	sub	ax, ax
@@ -57,6 +57,7 @@ l_loopEnter:
 	push	word ptr [bp+songListStringP]
 	STRCAT(songListStringP)
 	PUSH_STACK_ADDRESS(songListString)
+	PRINTSTRING
 	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
@@ -65,7 +66,7 @@ l_loopEnter:
 l_next:
 	inc	[bp+counter]
 	cmp	[bp+counter], 8
-	jge	l_loopEnter
+	jl	l_loopEnter
 
 	mov	ax, bitMask16bit+16h
 	or	[bp+var_12], ax

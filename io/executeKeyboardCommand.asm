@@ -31,6 +31,10 @@ l_printHelp:
 	CALL(printCommandHelp, near)
 	jmp	l_success
 
+l_debug:
+	CALL(bards_enter)
+	jmp	l_success
+
 l_castSpell:
 	sub	ax, ax
 	push	ax
@@ -84,7 +88,8 @@ l_keySwitch:
 keyJumpTable	dw offset l_singBardSong 
 		dw offset l_castSpell	
 		dw offset l_dropMember	
-		dw offset l_fail	
+;		dw offset l_fail	
+		dw offset l_debug
 		dw offset l_fail	
 		dw offset l_fail	
 		dw offset l_printHelp	

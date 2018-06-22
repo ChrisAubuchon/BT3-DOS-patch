@@ -13,8 +13,7 @@ bards_enter proc far
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 l_loop:
-	mov	ax, offset s_bardHallGreeting
-	PRINTSTRING(true)
+	PRINTOFFSET(s_bardHallGreeting, clear)
 	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	si, ax

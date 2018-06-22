@@ -16,6 +16,7 @@ define(`__call', `ifelse(`$1', `near', `_NEAR_CALL(')ifelse(`$1', `far', `_FAR_C
 #
 define(`CALL', `ifelse(
 	`$1', `_32bitDivide',				`__call($2)_32bitDivide)',
+	`$1', `__32bitDivide',				`__call($2)__32bitDivide)',
 	`$1', `_32bitMod',				`__call($2)_32bitMod)',
 	`$1', `_batchSpellCast',			`__call($2)_batchSpellCast, 4)',
 	`$1', `_bigpic_copyTopoElem',			`__call($2)_bigpic_copyTopoElem, 12h)',
@@ -60,10 +61,13 @@ define(`CALL', `ifelse(
 	`$1', `bat_charUse',			`__call($2)bat_charUse, 2)',
 	`$1', `bat_charSing',				`__call($2)bat_charSing, 2)',
 	`$1', `bat_charHide',			`__call($2)bat_charHide, 2)',
+	`$1', `bat_charGetReward',			`__call($2)bat_charGetReward, 2)',
 	`$1', `bat_convertSongToCombat',		`__call($2)bat_convertSongToCombat, 4)',
 	`$1', `bat_doBreathAttack',			`__call($2)bat_doBreathAttack, 0Ch)',
 	`$1', `bat_doCombatSong',			`__call($2)bat_doCombatSong, 4)',
 	`$1', `bat_monAction',				`__call($2)bat_monAction, 4)',
+	`$1', `bat_giveExperience',				`__call($2)bat_giveExperience, 4)',
+	`$1', `bat_giveGold',				`__call($2)bat_giveGold, 4)',
 	`$1', `bat_doChest',				`__call($2)bat_doChest)',
 	`$1', `bat_doRound',				`__call($2)bat_doRound)',
 	`$1', `bat_damageHp',				`__call($2)bat_damageHp, 2)',

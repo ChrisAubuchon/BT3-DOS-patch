@@ -2372,9 +2372,9 @@ g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0, 1, 1
 s_experiencePoinsForV db ' experience points for valor and battle knowledge, and ',0
 aTheyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
 		db    0
-aInGold_	db ' in gold.',0Ah,0Ah,0
-aFoundA		db ' found a ',0
-aEachCharacterReceive db 'Each character receives ',0
+s_inGold	db ' in gold.',0Ah,0Ah,0
+s_foundA		db ' found a ',0
+s_eachCharacterReceives db 'Each character receives ',0
 		db    0
 aThePartyDisbelieves_ db 'The party disbelieves...',0Ah,0Ah,0
 		db    0
@@ -2382,7 +2382,7 @@ aThePartyDisbelieves_ db 'The party disbelieves...',0Ah,0Ah,0
 include(`battle/chest/data.asm')
 
 poisonDmg	db 1, 2, 4, 8, 0Ah, 10h, 14h, 18h; 0
-aTreasure	db 'Treasure',0
+s_treasure	db 'Treasure',0
 aFried		db 'fried',0
 aFrozen		db 'frozen',0
 aShocked	db 'shocked',0
