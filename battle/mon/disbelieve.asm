@@ -2,46 +2,38 @@
 
 bat_monDisbelieve proc far
 
-	charNo=	word ptr -2
+	loopCounter=	word ptr -2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER(2)
 	push	si
-	mov	[bp+charNo], 0
-	jmp	short loc_1EB89
-loc_1EB86:
-	inc	[bp+charNo]
-loc_1EB89:
-	cmp	[bp+charNo], 7
-	jge	short loc_1EBEB
-	getCharP	[bp+charNo], si
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	CHARINDEX(ax, STACKVAR(loopCounter), si)
 	cmp	byte ptr gs:party._name[si], 0
-	jz	short loc_1EBE9
+	jz	short l_next
 	cmp	gs:party.class[si], class_illusion
-	jnz	short loc_1EBE9
+	jnz	short l_next
 	mov	gs:bat_curTarget, 80h
 	sub	ax, ax
 	push	ax
 	push	ax
-	call	savingThrowCheck
-	add	sp, 4
+	CALL(savingThrowCheck)
 	or	ax, ax
-	jz	short loc_1EBE9
+	jz	short l_next
+
 	inc	gs:monDisbelieveFlag
-	mov	ax, offset aTheyDisbelieve
-	push	ds
-	push	ax
-	call	printString
-	add	sp, 4
+	PRINTOFFSET(s_theyDisbelieve)
 	DELAY
-	jmp	short loc_1EBEB
-loc_1EBE9:
-	jmp	short loc_1EB86
-loc_1EBEB:
+	jmp	short l_return
+
+l_next:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jl	short l_loop
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bat_monDisbelieve endp

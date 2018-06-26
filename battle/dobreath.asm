@@ -168,7 +168,7 @@ loc_20324:
 	cmp	[bp+target], 0
 	jl	loc_2086F
 loc_2032E:
-	mov	gs:damageAmount, 0
+	mov	gs:g_damageAmount, 0
 	mov	[bp+counter], 0
 	jmp	short loc_20345
 loc_20341:
@@ -181,10 +181,10 @@ loc_20345:
 	mov	al, [bp+arg_6]
 	push	ax
 	CALL(randomYdX)
-	add	gs:damageAmount, ax
-	cmp	gs:damageAmount, 20000
+	add	gs:g_damageAmount, ax
+	cmp	gs:g_damageAmount, 20000
 	jle	short loc_20377
-	mov	gs:damageAmount, 20000
+	mov	gs:g_damageAmount, 20000
 	jmp	short loc_20379
 loc_20377:
 	jmp	short loc_20341
@@ -306,7 +306,7 @@ loc_2053B:
 
 	cmp	ax, 1
 	jnz	short loc_20567
-	sar	gs:damageAmount, 1
+	sar	gs:g_damageAmount, 1
 
 loc_20567:
 	test	[bp+breathFlags], 3
@@ -315,7 +315,7 @@ loc_20567:
 	jnb	short loc_2058E
 	cmp	gs:songHalfDamage, 0
 	jz	short loc_2058E
-	sar	gs:damageAmount, 1
+	sar	gs:g_damageAmount, 1
 loc_2058E:
 	cmp	gs:bat_curTarget, 80h
 	jnb	short loc_205B0
@@ -347,7 +347,7 @@ loc_205E4:
 	sub	ah, ah
 	test	[bp+var_108], ax
 	jz	short loc_2060D
-	sar	gs:damageAmount, 1
+	sar	gs:g_damageAmount, 1
 loc_2060D:
 	inc	[bp+counter]
 	cmp	[bp+counter], 7
@@ -384,14 +384,14 @@ loc_20663:
 	sub	ah, ah
 	test	[bp+var_6], ax
 	jz	short loc_2068B
-	shl	gs:damageAmount, 1
+	shl	gs:g_damageAmount, 1
 loc_2068B:
 	inc	[bp+counter]
 	cmp	[bp+counter], 7
 	jl	short loc_20663
 
 loc_2068D:
-	mov	ax, gs:damageAmount
+	mov	ax, gs:g_damageAmount
 	mov	cl, [bp+specialAttackIndex]
 	sub	ch, ch
 	or	ax, cx
@@ -414,19 +414,19 @@ loc_206A1:
 	STRCAT(outputStringP)
 	xor	ax, ax
 	push	ax
-	mov	ax, gs:damageAmount
+	mov	ax, gs:g_damageAmount
 	cwd
 	push	dx
 	push	ax
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
 	ITOA(outputStringP)
-	mov	ax, gs:damageAmount
+	mov	ax, gs:g_damageAmount
 	dec	ax
 	push	ax
 	push	dx
 	push	word ptr [bp+outputStringP]
-	mov	ax, offset aPointSOfDamage
+	mov	ax, offset s_pointsOfDamage
 	push	ds
 	push	ax
 	PLURALIZE(outputStringP)
@@ -441,7 +441,7 @@ loc_206A1:
 	push	word ptr [bp+outputStringP+2]
 	push	word ptr [bp+outputStringP]
 	CALL(bat_appendSpecialAttackString)
-	SAVE_PTR_STACK(dx,ax,outputStringP)
+	SAVE_STACK_DWORD(dx,ax,outputStringP)
 	mov	ax, 1
 	push	ax
 	mov	ax, 3
@@ -452,7 +452,7 @@ loc_206A1:
 	push	dx
 	push	word ptr [bp+outputStringP]
 	CALL(printCharPronoun)
-	SAVE_PTR_STACK(dx,ax,outputStringP)
+	SAVE_STACK_DWORD(dx,ax,outputStringP)
 	jmp	short loc_207D2
 loc_207A7:
 	PUSH_OFFSET(s_periodNlNl)

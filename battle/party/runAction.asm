@@ -2,56 +2,43 @@
 
 bat_partyRunAction proc far
 
-	var_2= word ptr	-2
+	loopCounter= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER(2)
+
 	cmp	gs:songCanRun, 0
-	jz	short loc_1D404
-	mov	gs:runAwayFlag,	1
-	mov	ax, 1
-	jmp	short loc_1D46D
-loc_1D404:
-	mov	[bp+var_2], 0
-	jmp	short loc_1D40E
-loc_1D40B:
-	inc	[bp+var_2]
-loc_1D40E:
-	cmp	[bp+var_2], 7
-	jge	short loc_1D44C
-	getCharP	[bp+var_2], bx
+	jnz	short l_returnOne
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	CHARINDEX(ax, STACKVAR(loopCounter), bx)
 	cmp	byte ptr gs:party._name[bx], 0
-	jz	short loc_1D44A
+	jz	short l_next
 	mov	ax, itemEff_alwaysRunAway
 	push	ax
-	push	[bp+var_2]
-	call	character_isEffectEquipped
-	add	sp, 4
+	push	[bp+loopCounter]
+	CALL(character_isEffectEquipped)
 	or	ax, ax
-	jnz	short loc_1D44A
-	mov	gs:runAwayFlag,	1
-	mov	ax, 1
-	jmp	short loc_1D46D
-loc_1D44A:
-	jmp	short loc_1D40B
-loc_1D44C:
-	call	random
+	jz	short l_returnOne
+l_next:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
+	jl	short l_loop
+
+	CALL(random)
 	sub	ah, ah
-	mov	[bp+var_2], ax
 	cmp	ax, 0C0h 
-	jg	short loc_1D45F
-	mov	al, 1
-	jmp	short loc_1D461
-loc_1D45F:
-	sub	al, al
-loc_1D461:
-	mov	gs:runAwayFlag,	al
-	sub	ah, ah
-	jmp	short $+2
-loc_1D46D:
-	mov	sp, bp
-	pop	bp
+	jle	short l_returnOne
+
+	sub	ax, ax
+	mov	gs:g_runAwayFlag, al
+	jmp	short l_return
+
+l_returnOne:
+	mov	gs:g_runAwayFlag, 1
+	mov	ax, 1
+
+l_return:
+	FUNC_EXIT
 	retf
 bat_partyRunAction endp

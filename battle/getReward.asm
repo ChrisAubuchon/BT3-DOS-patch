@@ -172,7 +172,7 @@ l_setIdentificationFlag:
 	mov	[bp+loopCounter], 0
 loc_1F474:
 	push	[bp+currentSlotNumber]
-	CALL(bat_charGetReward, near)
+	CALL(bat_charCanGetReward, near)
 	or	ax, ax
 	jz	l_characterLoopNext
 

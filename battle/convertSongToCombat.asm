@@ -2,66 +2,69 @@
 
 bat_convertSongToCombat	proc far
 
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
+	singerLevel= word ptr	 6
+	songNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	mov	ax, [bp+arg_2]
-	jmp	short loc_1CEC0
-loc_1CE55:
+	FUNC_ENTER
+
+	mov	ax, [bp+songNumber]
+	or	ax, ax
+	jz	short l_sirRobin
+
+	cmp	ax, song_sanctuary
+	jz	short l_sanctuary
+
+	cmp	ax, song_bringaround
+	jz	short l_bringaround
+
+	cmp	ax, song_duotime
+	jz	short l_duotime
+
+	cmp	ax, song_shield
+	jz	short l_shield
+
+	jmp	short l_return
+
+l_sirRobin:
 	mov	gs:songCanRun, 1
 	or	gs:disbelieveFlags, disb_nohelp
-	jmp	short loc_1CEDA
-loc_1CE6B:
-	cmp	[bp+arg_0], 60
-	jle	short loc_1CE75
-	mov	al, 0Fh
-	jmp	short loc_1CE7C
-loc_1CE75:
-	mov	ax, [bp+arg_0]
-	sar	ax, 1
-	sar	ax, 1
-loc_1CE7C:
-	mov	gs:g_songAcBonus,	al
-	or	al, al
-	jnz	short loc_1CE8D
-	inc	gs:g_songAcBonus
-loc_1CE8D:
-	jmp	short loc_1CEDA
-loc_1CE8F:
-	mov	ax, [bp+arg_0]
-	cmp	ax, 0Fh
-	jle	short loc_1CE9E
+	jmp	short l_return
+
+l_sanctuary:
 	mov	ax, 0Fh
-loc_1CE9E:
+	cmp	[bp+singerLevel], 60
+	jg	l_setShieldBonus
+
+	mov	ax, [bp+singerLevel]		; Shield bonus is (level / 4)
+	sar	ax, 1
+	sar	ax, 1
+	
+l_setShieldBonus:
+	mov	gs:g_songAcBonus, al
+	or	al, al
+	jnz	short l_return
+	inc	gs:g_songAcBonus
+	jmp	short l_return
+
+l_bringaround:
+	mov	ax, [bp+singerLevel]
+	cmp	ax, 0Fh
+
+	jle	short l_setRegenAmout
+	mov	ax, 0Fh
+
+l_setRegenAmout:
 	mov	gs:songRegenHP,	al
-	jmp	short loc_1CEDA
-loc_1CEA4:
+	jmp	short l_return
+
+l_duotime:
 	mov	gs:songExtraAttack, 1
-	jmp	short loc_1CEDA
-loc_1CEB0:
+	jmp	short l_return
+
+l_shield:
 	mov	gs:songHalfDamage, 1
-	jmp	short loc_1CEDA
-loc_1CEBC:
-	jmp	short loc_1CEDA
-	jmp	short loc_1CEDA
-loc_1CEC0:
-	or	ax, ax
-	jz	short loc_1CE55
-	cmp	ax, song_sanctuary
-	jz	short loc_1CE6B
-	cmp	ax, song_bringaround
-	jz	short loc_1CE8F
-	cmp	ax, song_duotime
-	jz	short loc_1CEA4
-	cmp	ax, song_shield
-	jz	short loc_1CEB0
-	jmp	short loc_1CEBC
-loc_1CEDA:
-	mov	sp, bp
-	pop	bp
+
+l_return:
+	FUNC_EXIT
 	retf
 bat_convertSongToCombat	endp

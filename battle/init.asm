@@ -25,7 +25,7 @@ bat_init proc far
 	mov	[bp+var_8], 0
 	sub	al, al
 	mov	gs:partyFrozenFlag, al
-	mov	gs:runAwayFlag,	al
+	mov	gs:g_runAwayFlag,	al
 
 l_roundStart:
 	CALL(bat_monSortGroups, near)
@@ -38,7 +38,7 @@ l_roundStart:
 	jnz	short l_doRound
 
 	CALL(bat_partyGetActions, near)
-	cmp	gs:runAwayFlag,	0
+	cmp	gs:g_runAwayFlag,	0
 	jz	short l_doRound
 
 partyRan:

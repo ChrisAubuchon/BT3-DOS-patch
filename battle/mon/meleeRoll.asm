@@ -13,7 +13,7 @@ bat_monMeleeRoll proc far
 	push	si
 
 	mov	gs:specialAttackVal, 0
-	mov	gs:damageAmount, 0
+	mov	gs:g_damageAmount, 0
 	mov	bx, [bp+target]
 	cmp	gs:g_characterMeleeDistance[bx], 0
 	jnz	l_returnZero
@@ -57,7 +57,7 @@ l_underMax:
 	mov	cl, gs:monAttackBonus[bx]
 	sub	ch, ch
 	add	cx, ax
-	mov	gs:damageAmount, cx
+	mov	gs:g_damageAmount, cx
 	mov	ax, 1
 	jmp	short l_return
 

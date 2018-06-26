@@ -2242,20 +2242,17 @@ s_advances	db ' advance/s\!',0Ah,0Ah,0
 		db    0
 s_butMisses_0	db ', but misses',0
 		db    0
-aWillYourGallantBand db	'Will your gallant band choose to:',0Ah
+s_willYourGallantBand db	'Will your gallant band choose to:',0Ah
 		db '@Fight bravely',0Ah
 		db '@Advance ahead',0Ah
 		db '@Run away',0Ah,0
 		db    0
 aThePartyAdvances db 0Ah,0Ah,'The party advances!',0Ah,0Ah,0
-aHasTheseOptionsThisBa db ' has these options this battle round:',0Ah,0Ah
+s_hasTheseOptions db ' has these options this battle round:',0Ah,0Ah
 		db '@Attack foes ',0
 		db    0
-byte_4724A	db 31h
-		db  30h	; 0
-		db  27h	
-		db    0
-a@defend@partyAttack@c db 0Ah
+s_attackDistString	db '10',27h,0
+s_characterOptionsString db 0Ah
 		db '@Defend',0Ah
 		db '@Party attack',0Ah
 		db '@Cast a spell',0Ah
@@ -2263,17 +2260,17 @@ a@defend@partyAttack@c db 0Ah
 		db '@Hide in shadows',0Ah
 		db '@Bard Song',0Ah,0
 		db    0
-aSelectAnOption_ db 0Ah,0Ah,'Select an option.',0
+s_selectAnOption db 0Ah,0Ah,'Select an option.',0
 s_nlUseOn	db 0Ah,'Use on ',0
 		db    0
-aYouCanTUseThatItem_ db	'You can',27h,'t use that item.',0
+s_youCantUseThatItem db	'You can',27h,'t use that item.',0
 		db    0
 s_attack	db 0Ah,'Attack ',0
 		db    0
-s_useTheseCommands? db 'Use these commands?',0Ah,0Ah,0
-aAndHits	db ', and hits ',0
-aTimesFor	db ' times for ',0
-aAndHitsFor	db ', and hits for ',0
+s_useTheseCommands db 'Use these commands?',0Ah,0Ah,0
+s_andHits	db ', and hits ',0
+s_timesFor	db ' times for ',0
+s_andHitsFor	db ', and hits for ',0
 s_firesBreathes	db ' /fir\breath\es ',0
 		db    0
 s_lost		db ' lost ',0
@@ -2286,7 +2283,7 @@ asc_473AE	db ',',0
 aAnd_1		db 'and ',0
 		db 0
 a__1		db '.',0Ah,0Ah,0
-aParty		db 'Party',0
+s_party		db 'Party',0
 aSorryBud	db 'Sorry, Bud',0
 		db    0
 aAlasYourPartyHasExp db	'Alas, your party has expired, but gone to adventurer heaven.',0
@@ -2348,9 +2345,9 @@ battleCryString	dd aDissentionInYo	; 0
 		dd aYourOnslaughtI	; 4
 		dd aNotAgainYouMoa	; 5
 		dd aGimmeABreakWhe	; 6
-aMember17	db 'member #(1-7)',0
-aMember1	db 'member #(1)',0
-aOr		db ' or ',0
+s_memberOneToSeven	db 'member #(1-7)',0
+s_memberOne	db 'member #(1)',0
+s_or		db ' or ',0
 		db    0
 vowelList	db 'A', 'E', 'I', 'O', 'U', 0               ; 4
 byte_475AE	db 5, 7, 7, 3	   ; 0
@@ -2359,10 +2356,10 @@ byte_475AE	db 5, 7, 7, 3	   ; 0
 		db 16h			; 12
 aBadDiceMaskRange db 'Bad dice mask range',0
 		db    0
-off_475D0	dd bat_partyFightAction
+g_batPartyOptionFunctions	dd bat_partyFightAction
 		dd bat_partyAdvanceAction
 		dd bat_partyRunAction
-off_475DC	dd bat_charAttackAction, bat_charDefendAction; 0
+g_batCharOptionFunctions	dd bat_charAttackAction, bat_charDefendAction; 0
 		dd bat_charPartyAttackAction, bat_charCastAction; 2
 		dd bat_charUseAction, bat_charHideAction;	4
 		dd bat_charSingAction		; 6
@@ -2370,7 +2367,7 @@ g_classToHitBonus	db 3, 1, 1, 1, 1, 0, 0, 3, 3, 4, 1, 1, 4, 0
 g_monsterAcBonusList	db 3, 2, 0, 0FEh	   ; 0
 g_monsterAdvanceSpeedAcBonusList	db 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0, 1, 1
 s_experiencePoinsForV db ' experience points for valor and battle knowledge, and ',0
-aTheyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
+s_theyDisbelieve	db 'They disbelieve!',0Ah,0Ah,0
 		db    0
 s_inGold	db ' in gold.',0Ah,0Ah,0
 s_foundA		db ' found a ',0
@@ -2419,7 +2416,7 @@ align 2
 s_wasTooFarAway db 'was too far away!',0Ah,0Ah,0
 s_is		db 'is ',0
 a_for		db	' for ',0
-aPointSOfDamage	db ' point/\s\ of damage',0
+s_pointsOfDamage	db ' point/\s\ of damage',0
 align 2
 aAnd		db	'And ',0
 align 2

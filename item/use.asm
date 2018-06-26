@@ -56,7 +56,7 @@ loc_11D4B:
 	jge	short l_doUse
 	PUSH_OFFSET(s_UseOn)
 	push	[bp+targetSlotNumber]
-	CALL(bat_charGetActionTarget)
+	CALL(bat_charGetActionOptionsTarget)
 	mov	[bp+targetSlotNumber], ax
 	or	ax, ax
 	jl	short l_return

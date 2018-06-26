@@ -13,7 +13,7 @@ bat_doChest proc far
 	FUNC_ENTER(30h)
 	push	si
 
-	mov	ax, 35h	
+	mov	ax, bigpic_chest
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 

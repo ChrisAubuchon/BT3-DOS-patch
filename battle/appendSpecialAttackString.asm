@@ -3,23 +3,17 @@
 bat_appendSpecialAttackString proc far
 
 	arg_0= word ptr	 6
-	arg_2= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
+
 	mov	bx, gs:specialAttackVal
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (specialAttString+2)[bx]
 	push	word ptr specialAttString[bx]
-	push	[bp+arg_2]
-	push	[bp+arg_0]
-	call	strcat
-	add	sp, 8
-	jmp	short $+2
-	mov	sp, bp
-	pop	bp
+	PUSH_STACK_DWORD(arg_0)
+	STRCAT
+
+	FUNC_EXIT
 	retf
 bat_appendSpecialAttackString endp

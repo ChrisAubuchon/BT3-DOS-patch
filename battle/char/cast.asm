@@ -7,7 +7,7 @@ bat_charCast proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:byte_42276[bx]
+	mov	al, gs:g_batCharSpellTarget[bx]
 	mov	gs:bat_curTarget, al
 	mov	ax, 1
 	push	ax

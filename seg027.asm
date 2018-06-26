@@ -56,13 +56,7 @@ g_monFreezeAcPenalty	db 0
 		db 0
 g_charFreezeAcPenalty	db 0
 		db 0
-byte_42276	db 0
-		db 0
-		db 0
-		db 0
-		db 0
-		db 0
-		db 0
+g_batCharSpellTarget	db 7 	dup(0)
 		db 0
 g_usedItemSlotNumber	db 0
 		db 0
@@ -102,7 +96,7 @@ rowOffset	dd 20h dup(0)		  ; 0 ;	This array holds the offsets into the maps-lo|h
 word_42330	dw 0
 partyFrozenFlag	db 0
 		db    0
-byte_42334	db 0
+g_batCharUseISlotNumber	db 0
 		db    0
 		db    0
 		db    0
@@ -129,7 +123,7 @@ bigpicCellData_seg	dw 0
 disbelieveFlags	db 0
 align 2
 word_42410	dw 0
-damageAmount	dw 0
+g_damageAmount	dw 0
 stuckFlag	db 0
 align 2
 g_inventoryPackStart	dw 0
@@ -149,7 +143,7 @@ word_4243A	dw 0
 word_4243C	dw 0
 word_4243E	dw 0
 g_divineDamageBonus	db 0
-runAwayFlag	db 0
+g_runAwayFlag	db 0
 songRegenHP	db 0
 db    0
 byte_42444	db 7	dup(0)
@@ -168,7 +162,6 @@ word_4245A	dw 0
 monHpList	dw 80h dup(0)		  ; 0
 songCanRun	db 0
 g_lastDetectSqE	db 0
-byte_4255E	db 0
 align 2
 word_42560	dw 0
 word_42562	dw 0

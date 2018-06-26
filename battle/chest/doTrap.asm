@@ -22,7 +22,7 @@ chest_doTrap proc	far
 	and	ax, 7Fh
 	mov	gs:specialAttackVal, ax
 	mov	ax, [bp+arg_2]
-	mov	gs:damageAmount, ax
+	mov	gs:g_damageAmount, ax
 	sub	ax, ax
 	push	ax
 	mov	ax, 80h
@@ -32,7 +32,7 @@ chest_doTrap proc	far
 	jz	short l_return
 
 	mov	ax, 1
-	sar	gs:damageAmount, 1
+	sar	gs:g_damageAmount, 1
 	push	[bp+arg_0]
 	CALL(bat_damageHp)
 

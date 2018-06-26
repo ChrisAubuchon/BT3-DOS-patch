@@ -2,7 +2,7 @@
 
 bat_charCastAction proc far
 
-	var_2= word ptr	-2
+	spellFlags= word ptr	-2
 	slotNumber= word ptr	 6
 
 	FUNC_ENTER(2)
@@ -12,39 +12,30 @@ bat_charCastAction proc far
 	push	[bp+slotNumber]
 	CALL(getSpellNumber)
 
-	mov	[bp+var_2], ax
+	mov	[bp+spellFlags], ax
 	or	ax, ax
 	jl	l_returnZero
 
 	mov	al, byte ptr g_curSpellNumber
 	mov	bx, [bp+slotNumber]
 	mov	gs:g_batCharActionTarget[bx], al
-	cmp	[bp+var_2], 4
-	jg	short loc_1D52D
+	cmp	[bp+spellFlags], 4
+	jg	short l_untargettedSpell
 
-	mov	ax, offset s_castAt
-	push	ds
-	push	ax
-	push	[bp+var_2]
-	push	cs
-	call	near ptr bat_charGetActionTarget
-	add	sp, 6
+	PUSH_OFFSET(s_castAt)
+	push	[bp+spellFlags]
+	CALL(bat_charGetActionOptionsTarget, near)
 	or	ax,ax
-	jge	l_bat_charCastAction_gotTarget
+	jl	l_returnZero
 
-	mov	ax, 0				; Return 0 if no target selected.
-	jmp	l_return
-
-l_bat_charCastAction_gotTarget:
 	mov	bx, [bp+slotNumber]
-	mov	gs:byte_42276[bx], al
-	mov	ax, 1
-	jmp	short l_return
+	mov	gs:g_batCharSpellTarget[bx], al
+	jmp	short l_returnOne
 
-loc_1D52D:
-	mov	al, byte ptr [bp+var_2]
+l_untargettedSpell:				; An untargetted spell has the spell flags
+	mov	al, byte ptr [bp+spellFlags]	; in the target
 	mov	bx, [bp+slotNumber]
-	mov	gs:byte_42276[bx], al
+	mov	gs:g_batCharSpellTarget[bx], al
 
 l_returnOne:
 	mov	ax, 1

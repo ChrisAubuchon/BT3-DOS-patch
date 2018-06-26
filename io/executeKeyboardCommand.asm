@@ -32,7 +32,7 @@ l_printHelp:
 	jmp	l_success
 
 l_debug:
-	CALL(bards_enter)
+	CALL(bat_doChest)
 	jmp	l_success
 
 l_castSpell:

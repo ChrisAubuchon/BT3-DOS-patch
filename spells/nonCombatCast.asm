@@ -51,7 +51,7 @@ l_isSpellCaster:
 	jge	short l_doCast
 	PUSH_OFFSET(s_castAt)
 	push	[bp+spellTargetFlag]
-	CALL(bat_charGetActionTarget)
+	CALL(bat_charGetActionOptionsTarget)
 	mov	[bp+var_2], ax
 	or	ax, ax
 	jl	l_returnZero

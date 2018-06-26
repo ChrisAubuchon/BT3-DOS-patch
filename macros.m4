@@ -60,9 +60,9 @@ define(`PUSH_STACK_ADDRESS', `lea	ax, [bp+$1]
 	push	ss
 	push	ax')dnl
 
-# SAVE_PTR_STACK(segment, offset, destination)
+# SAVE_STACK_DWORD(segment, offset, variable)
 #
-define(`SAVE_PTR_STACK', `mov	word ptr [bp+$3], $2
+define(`SAVE_STACK_DWORD', `mov	word ptr [bp+$3], $2
 	mov	word ptr [bp+$3+2], $1')
 
 # IOWAIT
@@ -89,7 +89,7 @@ define(`DELAY', `ifelse(`$1', `', `CALL(text_delayWithTable)', `PUSH_IMM($1)
 # STRCAT([destination])
 #
 define(`STRCAT', `CALL(strcat)
-ifelse(`$1', `', `dnl', `	SAVE_PTR_STACK(dx,ax,$1)')')
+ifelse(`$1', `', `dnl', `	SAVE_STACK_DWORD(dx,ax,$1)')')
 
 # STRCMP
 #
@@ -111,12 +111,12 @@ define(`NULL_TERMINATE', `ifelse(`$1', `', `errprint(`No argument passed to NULL
 # ITOA([destination])
 #
 define(`ITOA', `CALL(itoa)
-ifelse(`$1', `', `dnl', `	SAVE_PTR_STACK(dx,ax,$1)')')
+ifelse(`$1', `', `dnl', `	SAVE_STACK_DWORD(dx,ax,$1)')')
 
 # PLURALIZE([destination])
 #
 define(`PLURALIZE', `CALL(str_pluralize)
-ifelse(`$1', `', `dnl',	`	SAVE_PTR_STACK(dx,ax,$1)')')
+ifelse(`$1', `', `dnl',	`	SAVE_STACK_DWORD(dx,ax,$1)')')
 
 # RANGE_WITH_MAX(maximum, srcreg, tmpreg)
 #

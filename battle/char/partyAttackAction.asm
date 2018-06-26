@@ -7,7 +7,7 @@ bat_charPartyAttackAction proc	far
 	PUSH_OFFSET(s_attack)
 	mov	ax, 1
 	push	ax
-	CALL(bat_charGetActionTarget, near)
+	CALL(bat_charGetActionOptionsTarget, near)
 	cmp	ax, 0
 	jl	l_returnZero
 

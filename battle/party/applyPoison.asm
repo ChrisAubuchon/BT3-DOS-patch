@@ -1,46 +1,46 @@
 ; Attributes: bp-based frame
 bat_partyApplyPoison proc	far
 
-	charNo=	word ptr -4
-	var_2= word ptr	-2
+	slotNumber=	word ptr -4
+	damageAmount= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER(4)
 	push	si
+
 	mov	bl, g_levelNumber
 	sub	bh, bh
 	mov	al, poisonDmg[bx]
 	cbw
-	mov	[bp+var_2], ax
-	mov	[bp+charNo], 0
-	jmp	short loc_1EC19
-loc_1EC16:
-	inc	[bp+charNo]
-loc_1EC19:
-	cmp	[bp+charNo], 7
-	jge	short loc_1EC66
-	getCharP	[bp+charNo], si
+	mov	[bp+damageAmount], ax
+	mov	[bp+slotNumber], 0
+
+l_loop:
+	CHARINDEX(ax, STACKVAR(slotNumber), si)
 	test	gs:party.status[si], stat_poisoned
-	jz	short loc_1EC64
-	mov	ax, [bp+var_2]
+	jz	short l_next
+
+	mov	ax, [bp+damageAmount]
 	cmp	gs:party.currentHP[si], ax
-	ja	short loc_1EC52
+	ja	short l_doDamage
+
 	and	gs:party.status[si], 0FEh
 	or	gs:party.status[si], stat_dead
 	mov	gs:party.currentHP[si], 0
-	jmp	short loc_1EC64
-loc_1EC52:
-	mov	ax, [bp+var_2]
+	jmp	short l_next
+
+l_doDamage:
+	mov	ax, [bp+damageAmount]
 	mov	cx, ax
-	getCharP	[bp+charNo], bx
+	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	sub	gs:party.currentHP[bx], cx
-loc_1EC64:
-	jmp	short loc_1EC16
-loc_1EC66:
+
+l_next:
+	inc	[bp+slotNumber]
+	cmp	[bp+slotNumber], 7
+	jl	short l_loop
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bat_partyApplyPoison endp

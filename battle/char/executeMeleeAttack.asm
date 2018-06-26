@@ -275,7 +275,7 @@ l_countAttackNumber:
 	inc	[bp+loopCounter]
 	mov	ax, [bp+loopCounter]
 	mov	[bp+numberOfAttacks], ax
-	mov	gs:damageAmount, 0
+	mov	gs:g_damageAmount, 0
 
 l_calculateDamageLoop:
 	push	[bp+damageDice]
@@ -288,7 +288,7 @@ l_calculateDamageLoop:
 	sub	ah, ah
 	add	cx, ax
 	add	cx, [bp+weaponBonusDamage]
-	add	gs:damageAmount, cx
+	add	gs:g_damageAmount, cx
 
 	mov	[bp+vorpalLoopCounter], 0
 l_addVorpalPlateBonus:
@@ -301,7 +301,7 @@ l_addVorpalPlateBonus:
 	CALL(random)
 	and	ax, 3					; AND ax with 3 to get 0-3
 	inc	ax					; increment result to get 1-4
-	add	gs:damageAmount, ax
+	add	gs:g_damageAmount, ax
 	inc	[bp+vorpalLoopCounter]
 	jmp	short l_addVorpalPlateBonus
 

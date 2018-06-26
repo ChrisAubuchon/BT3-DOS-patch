@@ -25,7 +25,7 @@ loc_1E5FA:
 	test	gs:party.status[si], stat_stoned
 	jnz	l_returnZero
 
-	mov	ax, gs:damageAmount
+	mov	ax, gs:g_damageAmount
 	cmp	gs:party.currentHP[si], ax
 	jnb	short loc_1E647
 
@@ -36,7 +36,7 @@ loc_1E5FA:
 	jmp	short l_return
 
 loc_1E647:
-	mov	ax, gs:damageAmount
+	mov	ax, gs:g_damageAmount
 	mov	cx, ax
 	sub	gs:party.currentHP[si], cx
 	push	[bp+slotNumber]

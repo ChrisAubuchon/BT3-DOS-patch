@@ -12,9 +12,9 @@ bat_charUse proc far
 	mov	al, gs:g_batCharActionTarget[bx]
 	sub	ah, ah
 	push	ax
-	mov	al, gs:byte_42276[bx]
+	mov	al, gs:g_batCharSpellTarget[bx]
 	push	ax
-	mov	al, gs:byte_42334[bx]
+	mov	al, gs:g_batCharUseISlotNumber[bx]
 	push	ax
 	push	bx
 	CALL(item_doSpell)

@@ -39,7 +39,7 @@ loc_1E4A7:
 	add	ax, offset monHpList
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], seg seg027
-	mov	ax, gs:damageAmount
+	mov	ax, gs:g_damageAmount
 	lfs	bx, [bp+var_4]
 	sub	fs:[bx], ax
 	lfs	bx, [bp+var_4]

@@ -50,7 +50,7 @@ l_doBattle:
 	jmp	short l_return
 
 l_battleOver:
-	cmp	gs:runAwayFlag,	1
+	cmp	gs:g_runAwayFlag,	1
 	sbb	ax, ax
 	neg	ax
 	push	ax

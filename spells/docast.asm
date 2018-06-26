@@ -14,7 +14,7 @@ doCastSpell proc far
 	push	[bp+partySlotNumber]
 	PUSH_STACK_ADDRESS(stringBuf)
 	CALL(bat_getAttackerName)
-	SAVE_PTR_STACK(dx, ax, stringBufP)
+	SAVE_STACK_DWORD(dx, ax, stringBufP)
 	APPEND_CHAR(STACKVAR(stringBufP), ' ')
 
 	cmp	[bp+spellNumber], 7Eh 
