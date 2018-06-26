@@ -175,7 +175,7 @@ l_characterActionCheckKeyNext:
 
 l_uncontrolledAction:
 	mov	bx, [bp+slotNumber]
-	mov	gs:g_charActionList[bx], 8
+	mov	gs:g_charActionList[bx], charAction_possessed
 
 l_characterActionNext:
 	inc	[bp+slotNumber]

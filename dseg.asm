@@ -2247,7 +2247,7 @@ s_willYourGallantBand db	'Will your gallant band choose to:',0Ah
 		db '@Advance ahead',0Ah
 		db '@Run away',0Ah,0
 		db    0
-aThePartyAdvances db 0Ah,0Ah,'The party advances!',0Ah,0Ah,0
+s_thePartyAdvances db 0Ah,0Ah,'The party advances!',0Ah,0Ah,0
 s_hasTheseOptions db ' has these options this battle round:',0Ah,0Ah
 		db '@Attack foes ',0
 		db    0

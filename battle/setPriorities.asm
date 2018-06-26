@@ -52,7 +52,7 @@ l_characterLoop:
 
 l_notSummon:
 	mov	bx, [bp+loopCounter]
-	cmp	gs:g_charActionList[bx], 6
+	cmp	gs:g_charActionList[bx], charAction_hide
 	jnz	short loc_1C696
 
 	mov	gs:bat_charPriority[bx], 0FFh

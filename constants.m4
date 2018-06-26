@@ -242,4 +242,14 @@ define(`ch_OverwriteCursor', `5Fh')
 # Items
 define(`item_harmonicGem', `195')
 
+# Character actions
+define(`charAction_melee', `1')
+define(`charAction_defend', `2')
+define(`charAction_partyAttack', `3')
+define(`charAction_cast', `4')
+define(`charAction_use', `5')
+define(`charAction_hide', `6')
+define(`charAction_sing', `7')
+define(`charAction_possessed', `8')
+
 divert`'dnl

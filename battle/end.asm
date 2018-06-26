@@ -2,51 +2,47 @@
 
 bat_end	proc far
 
-	var_2= word ptr	-2
-	song= word ptr	6
-	arg_2= word ptr	 8
-	arg_4= word ptr	 0Ah
+	loopCounter= word ptr	-2
+	batCurrentSong= word ptr	6
+	currentSinger= word ptr	 8
+	currentSong= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER(2)
 	push	si
+
 	sub	al, al
 	mov	gs:g_nonRandomBattleFlag, al
 	mov	byte_4EECC, al
 	mov	g_partyAttackFlag, al
-	mov	[bp+var_2], 0
-	jmp	short loc_1F1A5
-loc_1F1A2:
-	inc	[bp+var_2]
-loc_1F1A5:
-	cmp	[bp+var_2], 4
-	jge	short loc_1F1C5
-	getMonP	[bp+var_2], si
+	mov	[bp+loopCounter], 0
+l_resetMonsterGRoups:
+	MONINDEX(ax, STACKVAR(loopCounter), si)
 	mov	byte ptr gs:monGroups._name[si], 0
 	mov	gs:monGroups.groupSize[si], 0
-	jmp	short loc_1F1A2
-loc_1F1C5:
-	cmp	[bp+song], 0
-	jz	short loc_1F1EF
-	push	[bp+arg_2]
-	call	_charCanPlaySong
-	add	sp, 2
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 4
+	jl	short l_resetMonsterGRoups
+
+l_convertSong:
+	cmp	[bp+batCurrentSong], 0
+	jz	short l_stopSound
+	push	[bp+currentSinger]
+	CALL(_charCanPlaySong)
 	or	ax, ax
-	jz	short loc_1F1EF
-	push	[bp+arg_4]
-	push	[bp+arg_2]
-	call	song_playSong
-	add	sp, 4
-	call	song_doNoncombatEffect
-	jmp	short loc_1F1F4
-loc_1F1EF:
-	call	sound_stop
-loc_1F1F4:
-	call	bat_reset
+	jz	short l_stopSound
+
+	push	[bp+currentSong]
+	push	[bp+currentSinger]
+	CALL(song_playSong)
+	CALL(song_doNoncombatEffect)
+	jmp	short l_return
+
+l_stopSound:
+	CALL(sound_stop)
+
+l_return:
+	CALL(bat_reset)
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bat_end	endp

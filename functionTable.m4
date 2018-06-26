@@ -24,6 +24,7 @@ define(`CALL', `ifelse(
 	`$1', `_bigpic_copyLeftTopo',			`__call($2)_bigpic_copyLeftTopo)',
 	`$1', `bat_charIsBreathAttackable',				`__call($2)bat_charIsBreathAttackable, 4)',
 	`$1', `_canSingSong',				`__call($2)_canSingSong, 2)',
+	`$1', `_charCanPlaySong',				`__call($2)_charCanPlaySong, 2)',
 	`$1', `_doHeal',				`__call($2)_doHeal, 6)',
 	`$1', `character_applyAgeStatus',				`__call($2)character_applyAgeStatus, 0Ah)',
 	`$1', `_freeMaybe',				`__call($2)_freeMaybe, 4)',

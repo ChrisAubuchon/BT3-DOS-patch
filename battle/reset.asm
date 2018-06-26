@@ -63,7 +63,7 @@ l_resetMonsterDataLoop:
 	mov	[bp+counter], 0
 l_resetCharacterDataLoop:
 	mov	bx, [bp+counter]
-	mov	gs:g_charActionList[bx], 2
+	mov	gs:g_charActionList[bx], charAction_defend
 	sub	al, al
 	mov	bx, [bp+counter]
 	mov	gs:vorpalPlateBonus[bx], al
