@@ -1,7 +1,6 @@
 include(`constants.m4')dnl
 include(`macros.m4')dnl
 include struct.h
-include macros.h
 
 ; TODO
 ;

@@ -2,31 +2,27 @@
 
 bat_monGroupActive proc far
 
-	groupNo= word ptr -2
+	loopCounter= word ptr -2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
-	mov	[bp+groupNo], 0
-	jmp	short loc_1F13A
-loc_1F137:
-	inc	[bp+groupNo]
-loc_1F13A:
-	cmp	[bp+groupNo], 4
-	jge	short loc_1F15B
-	getMonP	[bp+groupNo], bx
+	FUNC_ENTER(2)
+
+	mov	[bp+loopCounter], 0
+l_loop:
+	MONINDEX(ax, STACKVAR(loopCounter), bx)
 	test	gs:monGroups.groupSize[bx], 1Fh
-	jz	short loc_1F159
+	jz	short l_next
 	mov	ax, 1
-	jmp	short loc_1F15F
-loc_1F159:
-	jmp	short loc_1F137
-loc_1F15B:
+	jmp	short l_return
+
+l_next:
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 4
+	jl	short l_loop
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
-loc_1F15F:
-	mov	sp, bp
-	pop	bp
+
+l_return:
+	FUNC_EXIT
 	retf
 bat_monGroupActive endp

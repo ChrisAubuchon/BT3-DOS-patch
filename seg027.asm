@@ -68,7 +68,7 @@ align 2
 g_userSlotNumber	db 0
 g_wildWrapFlag	db	0
 		db    0
-byte_4228B	db 0
+g_batNoCryFlag	db 0
 mapRval		dw 0
 byte_4228E	db 0
 align 2
@@ -110,7 +110,7 @@ word_4233E	dw 0
 bigpicCellNumber	db 0
 align 2
 monGroups	mon_t <>
-stru_42372	mon_t <>
+g_monGroupsNext	mon_t <>
 		mon_t <>
 		mon_t <>
 levelChangedFlag	dw 0
@@ -120,7 +120,7 @@ align 2
 summonMeleeType	dw 0
 bigpicCellData_off	dw 0
 bigpicCellData_seg	dw 0
-disbelieveFlags	db 0
+g_disbelieveFlags	db 0
 align 2
 word_42410	dw 0
 g_damageAmount	dw 0
@@ -159,7 +159,7 @@ word_42456	dw 0
 g_nonRandomBattleFlag	db 0
 align 2
 word_4245A	dw 0
-monHpList	dw 80h dup(0)		  ; 0
+g_monHpList	dw 80h dup(0)		  ; 0
 songCanRun	db 0
 g_lastDetectSqE	db 0
 align 2

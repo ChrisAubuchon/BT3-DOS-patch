@@ -64,7 +64,7 @@ define(`specialAttack_spptDrain', `9')
 
 # Bigpic labels
 define(`bigpic_maleWarrior', `33')
-define(`bigpic_reviewBoard', `48')
+define(`bigpic_reviewBoard', `47')
 define(`bigpic_temple', `49')
 define(`bigpic_destroyedBuilding', `50')
 define(`bigpic_treasure', `52')
@@ -190,6 +190,7 @@ define(`breath_allFoes', `80h')
 # Monster flags
 define(`mon_attackStr', `0Fh')
 define(`mon_noSummon', `20h')
+define(`mon_isIllusion', `10h')
 
 # Target values
 define(`target_partyMember', `1')

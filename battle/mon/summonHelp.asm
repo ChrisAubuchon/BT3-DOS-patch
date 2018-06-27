@@ -31,7 +31,7 @@ bat_monSummonHelp proc far
 	cmp	al, 1Fh
 	jz	short l_noHelp
 
-	test	gs:disbelieveFlags, disb_nohelp
+	test	gs:g_disbelieveFlags, disb_nohelp
 	jz	short loc_1B5B0
 
 l_noHelp:
@@ -62,7 +62,7 @@ loc_1B5B0:
 	mov	cl, 6
 	shl	ax, cl
 	add	bx, ax
-	mov	gs:monHpList[bx], dx
+	mov	gs:g_monHpList[bx], dx
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	bl, gs:monGroups.groupSize[bx]
 	and	bx, 1Fh

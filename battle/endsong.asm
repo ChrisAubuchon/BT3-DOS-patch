@@ -10,7 +10,7 @@ bat_endCombatSong proc far
 	sub	ah, ah
 	jmp	short l_songSwitch
 l_sirrobin:
-	and	gs:disbelieveFlags, 0FDh
+	and	gs:g_disbelieveFlags, 0FDh
 	jmp	short l_endAndReturn
 l_shield:
 	mov	gs:songHalfDamage, 0

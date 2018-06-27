@@ -267,7 +267,7 @@ loc_271F3:
 	mov	[bp+var_132], ax
 	mov	[bp+var_130], dx
 
-	PUSH_OFFSET(s_commaAnd)
+	PUSH_OFFSET(s_comms_capitalAnd)
 	push	dx
 	push	[bp+var_132]
 	CALL(strcat)

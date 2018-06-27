@@ -27,7 +27,7 @@ bat_convertSongToCombat	proc far
 
 l_sirRobin:
 	mov	gs:songCanRun, 1
-	or	gs:disbelieveFlags, disb_nohelp
+	or	gs:g_disbelieveFlags, disb_nohelp
 	jmp	short l_return
 
 l_sanctuary:

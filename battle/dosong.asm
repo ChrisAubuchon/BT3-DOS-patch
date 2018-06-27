@@ -29,7 +29,7 @@ loc_1CF2C:
 
 l_sirrobin:
 	mov	gs:songCanRun, 1
-	or	gs:disbelieveFlags, disb_nohelp
+	or	gs:g_disbelieveFlags, disb_nohelp
 	jmp	l_return
 
 l_sanctuary:

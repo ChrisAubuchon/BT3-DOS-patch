@@ -17,6 +17,7 @@ bat_setBigpic proc far
 	jnz	short l_notPartyAttack
 
 	mov	ax, bigpic_maleWarrior
+	push	ax
 	CALL(bigpic_drawPictureNumber)
 	PUSH_OFFSET(s_party)
 	CALL(setTitle)

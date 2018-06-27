@@ -4,66 +4,63 @@
 
 bat_monMoveGroup proc far
 
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
+	sourceSlotNumber= word ptr	 6
+	destinationSlotNumber= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	getMonP	[bp+arg_2], bx
+	FUNC_ENTER
+
+	MONINDEX(ax, STACKVAR(destinationSlotNumber), bx)
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	getMonP	[bp+arg_0], bx
+	MONINDEX(ax, STACKVAR(sourceSlotNumber), bx)
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	bat_monCopyBuffer
-	add	sp, 8
+	CALL(bat_monCopyBuffer)
+
 	mov	ax, 40h	
 	push	ax
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+sourceSlotNumber]
 	mov	cl, 6
 	shl	bx, cl
-	lea	ax, monHpList[bx]
+	lea	ax, g_monHpList[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	mov	bx, [bp+arg_2]
+	mov	bx, [bp+destinationSlotNumber]
 	shl	bx, cl
-	lea	ax, monHpList[bx]
+	lea	ax, g_monHpList[bx]
 	push	dx
 	push	ax
-	call	memcpy
-	add	sp, 0Ah
+	CALL(memcpy)
+
 	mov	ax, monStruSize
 	push	ax
 	sub	ax, ax
 	push	ax
-	getMonP	[bp+arg_0], bx
+	MONINDEX(ax, STACKVAR(sourceSlotNumber), bx)
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	memset
-	add	sp, 8
+	CALL(memset)
+
 	mov	ax, 40h	
 	push	ax
 	sub	ax, ax
 	push	ax
-	mov	bx, [bp+arg_0]
+	mov	bx, [bp+sourceSlotNumber]
 	mov	cl, 6
 	shl	bx, cl
-	lea	ax, monHpList[bx]
+	lea	ax, g_monHpList[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	memset
-	add	sp, 8
-	mov	sp, bp
-	pop	bp
+	CALL(memset)
+
+	FUNC_EXIT
 	retf
 bat_monMoveGroup endp

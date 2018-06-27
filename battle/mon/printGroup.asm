@@ -8,66 +8,53 @@
 
 bat_monPrintGroup proc far
 
-	var_16=	word ptr -16h
-	var_14=	word ptr -14h
-	arg_0= dword ptr  6
-	arg_4= word ptr	 0Ah
+	groupSize=	word ptr -16h
+	unmaskedString=	word ptr -14h
+	stringBufferP= dword ptr  6
+	slotNumber= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 16h
-	call	someStackOperation
-	getMonP	[bp+arg_4], bx
+	FUNC_ENTER(16h)
+
+	MONINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	al, gs:monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
-	mov	[bp+var_16], ax
+	mov	[bp+groupSize], ax
 	mov	ax, 2
 	push	ax
-	mov	ax, [bp+var_16]
+	mov	ax, [bp+groupSize]
 	cwd
 	push	dx
 	push	ax
-	push	word ptr [bp+arg_0+2]
-	push	word ptr [bp+arg_0]
-	call	itoa
-	add	sp, 0Ah
-	mov	word ptr [bp+arg_0], ax
-	mov	word ptr [bp+arg_0+2], dx
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
-	mov	byte ptr fs:[bx], 20h
-	lea	ax, [bp+var_14]
-	push	ss
-	push	ax
-	getMonP	[bp+arg_4], bx
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
+
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], ' '
+	PUSH_STACK_ADDRESS(unmaskedString)
+	MONINDEX(ax, STACKVAR(slotNumber), bx)
 	lea	ax, monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	call	unmaskString
-	add	sp, 8
-	mov	ax, [bp+var_16]
+	CALL(unmaskString)
+	mov	ax, [bp+groupSize]
 	dec	ax
 	push	ax
-	push	word ptr [bp+arg_0+2]
-	push	word ptr [bp+arg_0]
-	lea	ax, [bp+var_14]
-	push	ss
-	push	ax
-	call	str_pluralize
-	add	sp, 0Ah
-	mov	word ptr [bp+arg_0], ax
-	mov	word ptr [bp+arg_0+2], dx
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
-	mov	byte ptr fs:[bx], 20h ;	' '
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
-	mov	byte ptr fs:[bx], 28h
+	PUSH_STACK_DWORD(stringBufferP)
+	PUSH_STACK_ADDRESS(unmaskedString)
+	PLURALIZE(stringBufferP)
+
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], ' '
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], '('
 	mov	ax, 2
 	push	ax
-	getMonP	[bp+arg_4], bx
+	MONINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	al, gs:monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
@@ -84,22 +71,18 @@ bat_monPrintGroup proc far
 	rcl	dx, 1
 	push	dx
 	push	ax
-	push	word ptr [bp+arg_0+2]
-	push	word ptr [bp+arg_0]
-	call	itoa
-	add	sp, 0Ah
-	mov	word ptr [bp+arg_0], ax
-	mov	word ptr [bp+arg_0+2], dx
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
+
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
 	mov	byte ptr fs:[bx], 27h
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
-	mov	byte ptr fs:[bx], 29h
-	mov	ax, word ptr [bp+arg_0]
-	mov	dx, word ptr [bp+arg_0+2]
-	jmp	short $+2
-	mov	sp, bp
-	pop	bp
+	lfs	bx, [bp+stringBufferP]
+	inc	word ptr [bp+stringBufferP]
+	mov	byte ptr fs:[bx], ')'
+	mov	ax, word ptr [bp+stringBufferP]
+	mov	dx, word ptr [bp+stringBufferP+2]
+
+	FUNC_EXIT
 	retf
 bat_monPrintGroup endp

@@ -7,7 +7,7 @@ summon_execute proc far
 
 	FUNC_ENTER
 
-	test	gs:disbelieveFlags, disb_nosummon
+	test	gs:g_disbelieveFlags, disb_nosummon
 	jz	short loc_25E96
 	PUSH_OFFSET(s_butItFizzledNl)
 	PRINTSTRING

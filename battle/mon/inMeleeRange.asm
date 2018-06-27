@@ -6,37 +6,33 @@
 
 bat_monGroupInMeleeRange proc far
 
-	var_2= word ptr	-2
+	loopCounter= word ptr	-2
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER(2)
 	push	si
-	mov	[bp+var_2], 3
-	jmp	short loc_1D9D9
-loc_1D9D6:
-	dec	[bp+var_2]
-loc_1D9D9:
-	cmp	[bp+var_2], 0
-	jl	short loc_1DA04
-	getMonP	[bp+var_2], si
+
+	mov	[bp+loopCounter], 3
+
+l_loop:
+	MONINDEX(ax, STACKVAR(loopCounter), si)
 	test	gs:monGroups.groupSize[si], 1Fh
-	jz	short loc_1DA02
+	jz	short l_next
 	mov	al, gs:monGroups.distance[si]
 	and	al, 0Fh
 	cmp	al, 2
-	jnb	short loc_1DA02
+	jnb	short l_next
 	sub	ax, ax
-	jmp	short loc_1DA09
-loc_1DA02:
-	jmp	short loc_1D9D6
-loc_1DA04:
+	jmp	short l_return
+
+l_next:
+	dec	[bp+loopCounter]
+	cmp	[bp+loopCounter], 0
+	jge	short l_loop
+
 	mov	ax, 1
-	jmp	short $+2
-loc_1DA09:
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bat_monGroupInMeleeRange endp

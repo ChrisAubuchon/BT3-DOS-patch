@@ -145,7 +145,7 @@ l_setGroupHpLoop:
 	mov	cx, [bp+currentMonsterIndex]
 	shl	cx, 1
 	add	bx, cx
-	mov	gs:monHpList[bx], ax
+	mov	gs:g_monHpList[bx], ax
 	inc	[bp+currentMonsterIndex]
 	mov	ax, [bp+currentGroupSize]
 	cmp	[bp+currentMonsterIndex], ax

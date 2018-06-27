@@ -40,7 +40,7 @@ loc_2607B:
 	mov	cx, [bp+groupSize]
 	shl	cx, 1
 	add	bx, cx
-	mov	gs:monHpList[bx], ax
+	mov	gs:g_monHpList[bx], ax
 	mov	bx, [bp+arg_2]
 	mov	cl, 6
 	shl	bx, cl

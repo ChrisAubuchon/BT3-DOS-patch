@@ -2,76 +2,71 @@
 
 bat_monDamageHp proc far
 
-	monNo= word ptr	-4
+	loopCounter= word ptr	-4
 	groupSize= word	ptr -2
-	groupNo= word ptr  6
+	slotNumber= word ptr  6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
-	getMonP	[bp+groupNo], bx
+	FUNC_ENTER(4)
+
+	MONINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	al, gs:monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+groupSize],	ax
 	or	ax, ax
-	jnz	short loc_1E3E1
-	sub	ax, ax
-	jmp	short loc_1E459
-loc_1E3E1:
-	mov	[bp+monNo], 0
-	jmp	short loc_1E3EB
-loc_1E3E8:
-	inc	[bp+monNo]
-loc_1E3EB:
+	jz	short l_returnZero
+
+	mov	[bp+loopCounter], 0
+l_findUnhitMonsterLoop:
 	mov	ax, [bp+groupSize]
-	cmp	[bp+monNo], ax
-	jge	short loc_1E41E
-	mov	bx, [bp+groupNo]
+	cmp	[bp+loopCounter], ax
+	jge	short l_markAllAsUnhit
+	mov	bx, [bp+slotNumber]
 	mov	cl, 6
 	shl	bx, cl
-	mov	ax, [bp+monNo]
+	mov	ax, [bp+loopCounter]
 	shl	ax, 1
 	add	bx, ax
 	test	byte ptr gs:bat_monBeenHitList[bx], 1
-	jz	short loc_1E41C
-	push	[bp+monNo]
-	push	[bp+groupNo]
-	push	cs
-	call	near ptr bat_monApplySpecialEffect
-	add	sp, 4
-	jmp	short loc_1E459
-loc_1E41C:
-	jmp	short loc_1E3E8
-loc_1E41E:
-	mov	[bp+monNo], 0
-	jmp	short loc_1E428
-loc_1E425:
-	inc	[bp+monNo]
-loc_1E428:
+	jz	short l_fundUnhitMonsterNext
+
+	push	[bp+loopCounter]
+	push	[bp+slotNumber]
+	CALL(bat_monApplySpecialEffect, near)
+	jmp	short l_return
+
+l_fundUnhitMonsterNext:
+	inc	[bp+loopCounter]
+	jmp	short l_findUnhitMonsterLoop
+
+l_markAllAsUnhit:
+	mov	[bp+loopCounter], 0
+l_loop:
 	mov	ax, [bp+groupSize]
-	cmp	[bp+monNo], ax
-	jge	short loc_1E44A
-	mov	bx, [bp+groupNo]
+	cmp	[bp+loopCounter], ax
+	jge	short l_applyEffect
+	mov	bx, [bp+slotNumber]
 	mov	cl, 6
 	shl	bx, cl
-	mov	ax, [bp+monNo]
+	mov	ax, [bp+loopCounter]
 	shl	ax, 1
 	add	bx, ax
 	or	byte ptr gs:bat_monBeenHitList[bx], 1
-	jmp	short loc_1E425
-loc_1E44A:
+	inc	[bp+loopCounter]
+	jmp	short l_loop
+
+l_applyEffect:
 	sub	ax, ax
 	push	ax
-	push	[bp+groupNo]
-	push	cs
-	call	near ptr bat_monApplySpecialEffect
-	add	sp, 4
-	jmp	short $+2
-loc_1E459:
-	mov	sp, bp
-	pop	bp
+	push	[bp+slotNumber]
+	CALL(bat_monApplySpecialEffect, near)
+	jmp	short l_return
+
+l_returnZero:
+	sub	ax, ax
+
+l_return:
+	FUNC_EXIT
 	retf
 bat_monDamageHp endp
 

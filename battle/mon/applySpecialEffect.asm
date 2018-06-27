@@ -36,7 +36,7 @@ loc_1E4A7:
 	mov	cx, [bp+monNo]
 	shl	cx, 1
 	add	ax, cx
-	add	ax, offset monHpList
+	add	ax, offset g_monHpList
 	mov	word ptr [bp+var_4], ax
 	mov	word ptr [bp+var_4+2], seg seg027
 	mov	ax, gs:g_damageAmount

@@ -13,9 +13,9 @@ sp_disbelieve proc far
 	jge	short l_monCaster
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
-	or	gs:disbelieveFlags, al
+	or	gs:g_disbelieveFlags, al
 
-	cmp	gs:disbelieveFlags, disb_disruptill
+	cmp	gs:g_disbelieveFlags, disb_disruptill
 	jb	l_return
 
 	mov	[bp+var_2], 0
@@ -41,7 +41,7 @@ l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
 	test	spellEffectFlags[bx], disb_nosummon
 	jz	short l_monDisbelieve
-	or	gs:disbelieveFlags, disb_nosummon
+	or	gs:g_disbelieveFlags, disb_nosummon
 	jmp	short l_return
 l_monDisbelieve:
 	mov	al, byte ptr [bp+spellCaster]

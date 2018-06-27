@@ -15,7 +15,7 @@ l_resetMonsterDataLoop:
 	mov	bx, [bp+counter]
 	mov	cl, 6
 	shl	bx, cl
-	lea	ax, monHpList[bx]
+	lea	ax, g_monHpList[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -88,7 +88,7 @@ l_resetCharacterDataLoop:
 	mov	gs:monFrozenFlag, al
 	mov	gs:byte_422A4, al
 	mov	gs:byte_41E63, al
-	mov	gs:disbelieveFlags, al
+	mov	gs:g_disbelieveFlags, al
 	mov	gs:monDisbelieveFlag, al
 	mov	gs:antiMagicFlag, al
 	mov	gs:partyFrozenFlag, al

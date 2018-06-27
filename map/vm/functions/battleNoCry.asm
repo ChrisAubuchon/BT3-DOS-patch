@@ -5,7 +5,7 @@ mfunc_battleNoCry proc far
 	dataP= dword ptr	 6
 
 	FUNC_ENTER
-	mov	gs:byte_4228B, 1
+	mov	gs:g_batNoCryFlag, 1
 	push	word ptr [bp+dataP+2]
 	push	word ptr [bp+dataP]
 	CALL(mfunc_battle, near)

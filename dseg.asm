@@ -1052,7 +1052,7 @@ aDisp		db 'DISP',0
 aDispossess	db 'Dispossess',0
 aHerb		db 'HERB',0
 aSummonHerb	db 'Summon Herb',0
-aAnde		db 'ANDE',0
+s_ande		db 'ANDE',0
 aAnimateDead	db 'Animate Dead',0
 aSpbi		db 'SPBI',0
 aSpellBind	db 'Spell Bind',0
@@ -1494,7 +1494,7 @@ spellString 	spellString_t <aMafl, aMageFlame>; 0
 		spellString_t <aFlco, aFlameColumn>; 61
 		spellString_t <aDisp, aDispossess>; 62
 		spellString_t <aHerb, aSummonHerb>; 63
-		spellString_t <aAnde, aAnimateDead>; 64
+		spellString_t <s_ande, aAnimateDead>; 64
 		spellString_t <aSpbi, aSpellBind>; 65
 		spellString_t <aSowh, aSoulWhip>; 66
 		spellString_t <aGrsu, aGreaterSummon>; 67
@@ -2210,20 +2210,20 @@ aGropesAt	db 'gropes at',0
 aReachesToward	db 'reaches toward',0
 aPeersAt	db 'peers at',0
 aStaresAt	db 'stares at',0
-aDissentionInYo	db 'Dissention in your ranks...',0Ah
+s_dissentionInYourRanks	db 'Dissention in your ranks...',0Ah
 db 0Ah,0
-aWillThereEverB	db '"Will there ever be an end to them?" you shout. You see ',0
-aEnjoyYourNextL	db '"Enjoy your next life!" you snarl. You see ',0
-aYourBattlecryI	db 'Your battlecry is heard by all as you face ',0
-aYourOnslaughtI	db 'Your onslaught is greeted with laughter, you face ',0
-aNotAgainYouMoa	db '"Not again!" you moan as you face ',0
-aGimmeABreakWhe	db '"Gimme a break! Where do they come from?" You see ',0
+s_willThereBeAnEnd	db '"Will there ever be an end to them?" you shout. You see ',0
+s_enjoyYourNextLife	db '"Enjoy your next life!" you snarl. You see ',0
+s_yourBattlecry	db 'Your battlecry is heard by all as you face ',0
+s_yourOnslaught	db 'Your onslaught is greeted with laughter, you face ',0
+s_notAgainYouMoan	db '"Not again!" you moan as you face ',0
+s_gimmeABreak	db '"Gimme a break! Where do they come from?" You see ',0
 align 2
 specialAttString dd aKilling, aPoisoning, aDraining, aCrazing, aWithering; 0
 		dd aPossessing,	aStoning, aCriticallyHitt, aStealing, aPhazing;	5
 breathAttack	breathAtt_t <0, 0, 0, 0, 0, 41h, 1>; 0
 		db    0
-aYouStillFace	db 'You still face ',0
+s_youStillFace	db 'You still face ',0
 s_continueQuestion	db 'Do you wish to continue?',0Ah,0
 s_butMisses	db ', but misses!',0Ah,0Ah,0
 s_periodNlNl	db '.', 0Ah, 0Ah,0
@@ -2277,12 +2277,11 @@ s_lost		db ' lost ',0
 		db    0
 s_voice		db ' voice!',0Ah,0Ah,0
 s_plays	db ' plays...',0Ah,0Ah,0
-aHostilePartyMembers db	'hostile party members!',0Ah,0Ah,0
+s_hostilePartyMembers db	'hostile party members!',0Ah,0Ah,0
 		db    0
-asc_473AE	db ',',0
-aAnd_1		db 'and ',0
+s_comma	db ',',0
+s_and		db 'and ',0
 		db 0
-a__1		db '.',0Ah,0Ah,0
 s_party		db 'Party',0
 aSorryBud	db 'Sorry, Bud',0
 		db    0
@@ -2338,13 +2337,13 @@ itemLevMask	db 0, 81h, 81h, 81h, 81h, 81h, 81h,	81h; 0
 		db 0, 0, 0, 0, 0, 0, 0,	0; 232
 		db 1, 1, 1, 1, 1, 1, 1,	1; 240
 		db 1, 0, 0, 0, 0, 0, 0,	0; 248
-battleCryString	dd aDissentionInYo	; 0
-		dd aWillThereEverB	; 1
-		dd aEnjoyYourNextL	; 2
-		dd aYourBattlecryI	; 3
-		dd aYourOnslaughtI	; 4
-		dd aNotAgainYouMoa	; 5
-		dd aGimmeABreakWhe	; 6
+g_battleCryList	dd s_dissentionInYourRanks	; 0
+		dd s_willThereBeAnEnd	; 1
+		dd s_enjoyYourNextLife	; 2
+		dd s_yourBattlecry	; 3
+		dd s_yourOnslaught	; 4
+		dd s_notAgainYouMoan	; 5
+		dd s_gimmeABreak	; 6
 s_memberOneToSeven	db 'member #(1-7)',0
 s_memberOne	db 'member #(1)',0
 s_or		db ' or ',0
@@ -2373,7 +2372,7 @@ s_inGold	db ' in gold.',0Ah,0Ah,0
 s_foundA		db ' found a ',0
 s_eachCharacterReceives db 'Each character receives ',0
 		db    0
-aThePartyDisbelieves_ db 'The party disbelieves...',0Ah,0Ah,0
+s_thePartyDisbelieves db 'The party disbelieves...',0Ah,0Ah,0
 		db    0
 
 include(`battle/chest/data.asm')
@@ -2418,7 +2417,7 @@ s_is		db 'is ',0
 a_for		db	' for ',0
 s_pointsOfDamage	db ' point/\s\ of damage',0
 align 2
-aAnd		db	'And ',0
+s_capitalAnd		db	'And ',0
 align 2
 s_partyFreezes	db 'and the party freezes',0
 s_butItHadNoEffect	db 'but it had no effect!',0Ah,0Ah,0
@@ -4393,7 +4392,7 @@ aWorkshop	db 'Workshop',0
 aWizardSGuild	db 'Wizard',27h,'s Guild',0
 align 2
 s_copyProtectIntro	db 'To traverse time and space, you must first recite the alignment value of ',0
-s_commaAnd		db ', and ',0
+s_comms_capitalAnd		db ', and ',0
 align 2
 s_commaSpace	db ', ',0
 align 2
