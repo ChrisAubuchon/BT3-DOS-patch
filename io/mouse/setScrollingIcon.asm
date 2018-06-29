@@ -53,7 +53,6 @@ loc_14F3A:
 	call	far ptr	vid_setMouseIcon
 	add	sp, 2
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 mouse_setScrollingIcon endp

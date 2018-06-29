@@ -56,7 +56,6 @@ l_returnSuccess:
 	mov	dx, word ptr [bp+dataP+2]
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 mfunc_utility endp

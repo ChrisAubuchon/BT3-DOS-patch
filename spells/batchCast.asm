@@ -18,8 +18,8 @@ _batchSpellCast proc far
 	shl	bx, 1
 	call	spellFuncList[bx]
 	add	sp, 4
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 _batchSpellCast endp
 

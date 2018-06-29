@@ -2,24 +2,17 @@
 
 bat_monCopyBuffer proc far
 
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
-	arg_4= word ptr	 0Ah
-	arg_6= word ptr	 0Ch
+	copySource= dword ptr	 6
+	copyDestination= dword ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
+	FUNC_ENTER
 	mov	ax, monStruSize
+
 	push	ax
-	push	[bp+arg_2]
-	push	[bp+arg_0]
-	push	[bp+arg_6]
-	push	[bp+arg_4]
-	call	memcpy
-	add	sp, 0Ah
-	mov	sp, bp
-	pop	bp
+	PUSH_STACK_DWORD(copySource)
+	PUSH_STACK_DWORD(copyDestination)
+	CALL(memcpy)
+
+	FUNC_EXIT
 	retf
 bat_monCopyBuffer endp

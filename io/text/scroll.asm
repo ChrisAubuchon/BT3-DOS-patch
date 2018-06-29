@@ -1,17 +1,15 @@
 ; Attributes: bp-based frame
 
 text_scroll proc far
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	mov	ax, 50h	
 	push	ax
-	call	far ptr	sub_3E980
+	call	far ptr	gfx_scrollTextWindow
 	add	sp, 2
 	mov	ax, 50h	
 	push	ax
-	call	far ptr	sub_3E980
+	call	far ptr	gfx_scrollTextWindow
 	add	sp, 2
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 text_scroll endp

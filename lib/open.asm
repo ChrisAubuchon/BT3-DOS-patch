@@ -5,8 +5,7 @@ open proc far
 	fileName= dword ptr  6
 	fileMode= byte ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	ds
 	lds	dx, [bp+fileName]
 	mov	al, [bp+fileMode]
@@ -20,6 +19,6 @@ open proc far
 
 l_return:
 	pop	ds
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 open endp

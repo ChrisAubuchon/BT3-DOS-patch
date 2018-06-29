@@ -53,7 +53,6 @@ loc_17513:
 	push	[bp+fd]
 	CALL(close)
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 map_readGraphics endp

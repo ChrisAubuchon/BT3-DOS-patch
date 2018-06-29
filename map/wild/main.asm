@@ -312,7 +312,6 @@ l_returnPartyDied:
 
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 wild_main endp

@@ -8,9 +8,9 @@ gfx_animate proc far
 	push	si
 
 	mov	al, byte ptr g_direction
-	mov	iconCurrentCell[1], al
+	mov	g_iconCurrentCell[1], al
 
-	cmp	gs:byte_422A0, 0
+	cmp	gs:g_hideMouseInBigpicFlag, 0
 	jz	short loc_17A34
 
 	mov	ax, gs:word_4245A
@@ -72,16 +72,16 @@ loc_17AA3:
 	cmp	lightDuration[bx], 0
 	jz	short l_increment
 
-	; Unsure what this block does because byte_44718 and iconCurrentCell shouldn't
+	; Unsure what this block does because byte_44718 and g_iconCurrentCell shouldn't
 	; ever be different.
 	mov	si, bx
 	mov	al, byte_44718[si]
-	cmp	iconCurrentCell[bx],	al
+	cmp	g_iconCurrentCell[bx],	al
 	jz	short loc_17AE0
-	mov	al, iconCurrentCell[si]
+	mov	al, g_iconCurrentCell[si]
 	mov	byte_44718[bx],	al
 	mov	bx, [bp+iconNumber]
-	mov	al, iconCurrentCell[bx]
+	mov	al, g_iconCurrentCell[bx]
 	cbw
 	push	ax
 	push	bx
@@ -89,26 +89,26 @@ loc_17AA3:
 
 loc_17AE0:
 	mov	bx, [bp+iconNumber]
-	cmp	iconAnimationDelay[bx],	0
+	cmp	g_iconAnimationDelay[bx],	0
 	jz	short l_increment
 
-	mov	al, iconCurrentDelay[bx]
-	dec	iconCurrentDelay[bx]
+	mov	al, g_iconCurrentDelay[bx]
+	dec	g_iconCurrentDelay[bx]
 	cmp	al, 1
 	jnz	short l_increment
 
 	mov	bx, [bp+iconNumber]
 	mov	si, bx
-	mov	al, iconAnimationDelay[si]
-	mov	iconCurrentDelay[bx], al		; Set up delay for next cell
+	mov	al, g_iconAnimationDelay[si]
+	mov	g_iconCurrentDelay[bx], al		; Set up delay for next cell
 
 	mov	bx, [bp+iconNumber]
-	inc	iconCurrentCell[bx]
-	mov	al, iconCurrentCell[bx]
+	inc	g_iconCurrentCell[bx]
+	mov	al, g_iconCurrentCell[bx]
 	mov	bx, [bp+iconNumber]
-	cmp	al, iconClearIndex[bx]
+	cmp	al, g_iconClearIndex[bx]
 	jnz	short l_increment
-	mov	iconCurrentCell[bx],	0
+	mov	g_iconCurrentCell[bx],	0
 
 l_increment:
 	inc	[bp+iconNumber]
@@ -117,7 +117,6 @@ l_increment:
 
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 gfx_animate endp

@@ -5,7 +5,7 @@
 ; return 1. Otherwise return -1.
 ; Attributes: bp-based frame
 
-sing_getSongSubtractor proc far
+song_getSubtractor proc far
 
 	partySlotNumber= word ptr	 6
 
@@ -32,7 +32,6 @@ l_returnZero:
 	sub	ax, ax
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
-sing_getSongSubtractor endp
+song_getSubtractor endp

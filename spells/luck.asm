@@ -13,7 +13,7 @@ sp_luckSpell proc far
 	push	bx
 	push	[bp+spellCaster]
 	CALL(sp_antiMagic, near)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 sp_luckSpell endp

@@ -76,7 +76,6 @@ loc_25C5D:
 	CALL(bards_printLyrics, near)
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bards_listen endp

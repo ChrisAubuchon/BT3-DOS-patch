@@ -246,7 +246,6 @@ l_clearAndReturn:
 
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 minimap_show endp

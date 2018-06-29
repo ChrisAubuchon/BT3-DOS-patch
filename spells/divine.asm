@@ -37,7 +37,6 @@ l_notIllusion:
 	push	[bp+spellCaster]
 	CALL(_batchSpellCast, near)
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_divineIntervention endp

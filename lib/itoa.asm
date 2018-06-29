@@ -116,8 +116,7 @@ loc_16175:
 	jmp	short $+2
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 itoa endp
 

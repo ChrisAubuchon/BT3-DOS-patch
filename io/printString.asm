@@ -153,7 +153,6 @@ loc_16506:
 
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 printString endp

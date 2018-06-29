@@ -8,7 +8,6 @@ bat_printOpponents proc	far
 	firstRoundFlag= word ptr	 6
 
 	FUNC_ENTER(10Ch)
-	call	someStackOperation
 
 	cmp	gs:g_batNoCryFlag, 0
 	jnz	short l_noBattleCry

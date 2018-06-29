@@ -21,7 +21,6 @@ l_loopNext:
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 7
 	jl	l_loopEnter
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_camaraderie endp

@@ -21,7 +21,6 @@ camp_saveAndExit proc far
 	CALL(writePartyFile, near)
 loc_13412:
 	CALL(text_clear)
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_saveAndExit endp

@@ -348,7 +348,6 @@ loc_12D6F:
 loc_12DAE:
 	pop	si
 	pop	di
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_createMember endp

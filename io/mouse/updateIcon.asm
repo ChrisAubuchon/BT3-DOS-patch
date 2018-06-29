@@ -119,7 +119,6 @@ l_setIconAndReturn:
 
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 mouse_updateIcon endp

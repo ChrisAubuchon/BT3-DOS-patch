@@ -10,7 +10,6 @@ printStringWClear proc far
 	push	[bp+inString]
 	PRINTSTRING
 
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 printStringWClear endp

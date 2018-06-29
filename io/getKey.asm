@@ -9,16 +9,16 @@ getKey proc far
 	FUNC_ENTER(2)
 
 	mov	spell_mouseClicked, 0
-	CALL(sub_1766A, near)
+	CALL(mouse_draw, near)
 l_loopEntry:
 	CALL(checkMouse)
 	cmp	mouse_moved, 0
 	jz	short l_skipMouseUpdate
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 
 	push	[bp+mouseLineCount]
 	CALL(mouse_updateIcon, near)
-	CALL(sub_1766A, near)
+	CALL(mouse_draw, near)
 
 l_skipMouseUpdate:
 	push	[bp+mouseLineCount]
@@ -26,7 +26,7 @@ l_skipMouseUpdate:
 	mov	[bp+inputKey], ax
 	or	ax, ax
 	jz	short l_skipMouseClick
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	mov	spell_mouseClicked, 1
 	mov	ax, [bp+inputKey]
 	jmp	short l_return
@@ -35,7 +35,7 @@ l_skipMouseClick:
 	CALL(checkKeyboard)
 	or	ax, ax
 	jz	short loc_14EBE
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 
 	CALL(_readChFromKeyboard)
 	mov	[bp+inputKey], ax

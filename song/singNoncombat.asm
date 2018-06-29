@@ -17,7 +17,7 @@ song_singNonCombat	proc far
 	jl	short l_return
 
 	push	ax
-	CALL(sing_getSongSubtractor, near)
+	CALL(song_getSubtractor, near)
 	mov	[bp+subtractor], ax
 
 	push	[bp+partySlotNumber]

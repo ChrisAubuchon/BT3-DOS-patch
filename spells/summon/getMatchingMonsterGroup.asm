@@ -38,7 +38,6 @@ l_returnFail:
 	mov	ax, 0FFFFh
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 summon_getMatchMonGroup endp

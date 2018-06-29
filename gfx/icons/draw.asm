@@ -2,52 +2,48 @@
 
 icon_draw proc far
 
-	var_4= word ptr	-4
-	var_2= word ptr	-2
-	arg_0= byte ptr	 6
-	arg_2= byte ptr	 8
+	dataP= dword ptr	-4
+	iconNumber= byte ptr	 6
+	cellNumber= byte ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 4
-	call	someStackOperation
+	FUNC_ENTER(4)
 	push	si
-	mov	bl, [bp+arg_0]
+
+	mov	bl, [bp+iconNumber]
 	sub	bh, bh
 	shl	bx, 1
 	shl	bx, 1
-	mov	ax, word ptr iconDataList[bx]
-	mov	dx, word ptr (iconDataList+2)[bx]
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
-loc_17B46:
-	mov	al, [bp+arg_2]
-	dec	[bp+arg_2]
+	mov	ax, word ptr g_iconDataPointers[bx]
+	mov	dx, word ptr (g_iconDataPointers+2)[bx]
+	SAVE_STACK_DWORD(dx, ax, dataP)
+
+l_getCellDataAddress:
+	mov	al, [bp+cellNumber]
+	dec	[bp+cellNumber]
 	or	al, al
-	jz	short loc_17B60
-	mov	bl, [bp+arg_0]
+	jz	short l_showIcon
+	mov	bl, [bp+iconNumber]
 	sub	bh, bh
 	shl	bx, 1
-	mov	ax, word_4470E[bx]
-	add	[bp+var_4], ax
-	jmp	short loc_17B46
-loc_17B60:
-	mov	al, [bp+arg_0]
+	mov	ax, g_iconCellDataLength[bx]
+	add	word ptr [bp+dataP], ax
+	jmp	short l_getCellDataAddress
+
+l_showIcon:
+	mov	al, [bp+iconNumber]
 	sub	ah, ah
 	mov	si, ax
-	mov	al, iconWidth[si]
+	mov	al, g_iconWidth[si]
 	push	ax
-	mov	al, iconHeight[si]
+	mov	al, g_iconHeight[si]
 	push	ax
-	mov	al, iconXOffset[si]
+	mov	al, g_iconXOffset[si]
 	push	ax
-	push	[bp+var_2]
-	push	[bp+var_4]
-	call	far ptr	sub_3E986
+	PUSH_STACK_DWORD(dataP)
+	call	far ptr	gfx_drawMagicIcon
 	add	sp, 0Ah
+
 	pop	si
-	mov	sp, bp
-	pop	bp
-locret_17B88:
+	FUNC_EXIT
 	retf
 icon_draw endp

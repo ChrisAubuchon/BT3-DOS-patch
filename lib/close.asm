@@ -4,8 +4,7 @@ close proc far
 
 	fileHandle= word ptr	 6
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	mov	bx, [bp+fileHandle]
 	mov	ah, 3Eh
 	int	21h		; DOS -	2+ - call(close) A FILE WITH HANDLE
@@ -15,6 +14,6 @@ close proc far
 	dec	ax
 
 l_return:
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 close endp

@@ -82,7 +82,6 @@ l_emptyPockets:
 l_waitAndReturn:
 	IOWAIT
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 useItem	endp

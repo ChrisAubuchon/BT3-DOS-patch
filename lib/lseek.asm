@@ -4,8 +4,7 @@ lseek proc far
 	offsetLo= word ptr	 8
 	offsetHi= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	ds
 	mov	bx, [bp+fileHandle]
 	mov	cx, [bp+offsetHi]
@@ -19,6 +18,6 @@ lseek proc far
 
 l_return:
 	pop	ds
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 lseek endp

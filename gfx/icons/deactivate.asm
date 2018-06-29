@@ -5,7 +5,7 @@ icon_deactivate proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+iconIndex]
-	mov	al, iconClearIndex[bx]
+	mov	al, g_iconClearIndex[bx]
 	sub	ah, ah
 	push	ax
 	push	bx

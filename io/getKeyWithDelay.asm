@@ -13,7 +13,7 @@ getKeyWithDelay proc far
 	mov	ax, [bp+delayTime]
 	add	ax, _clockTicks
 	mov	[bp+var_2], ax
-	CALL(sub_1766A, near)
+	CALL(mouse_draw, near)
 
 l_loopEntry:
 	CALL(checkKeyboard)
@@ -66,7 +66,7 @@ l_doPrint:
 	jmp	l_loopEntry
 
 l_skipFastCheck:
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	jmp	short l_return
 
 l_doTimeEvents:
@@ -76,17 +76,16 @@ l_doTimeEvents:
 	mov	ax, [bp+var_2]
 	cmp	_clockTicks, ax
 	jl	short loc_1550B
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	jmp	short l_return
 loc_1550B:
 	cmp	mouse_moved, 0
 	jz	short loc_15520
-	call	far ptr	sub_3E974
-	CALL(sub_1766A, near)
+	call	far ptr	gfx_disableMouseIcon
+	CALL(mouse_draw, near)
 loc_15520:
 	jmp	l_loopEntry
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 getKeyWithDelay endp

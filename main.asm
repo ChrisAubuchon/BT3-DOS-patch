@@ -177,7 +177,7 @@ loc_101E6:
 	add	ax, 0Dh
 	push	dx
 	push	ax
-	call	far ptr	sub_3E97D
+	call	far ptr	gfx_drawFullscreenImage
 	add	sp, 8
 	sub	ax, ax
 	push	ax
@@ -217,7 +217,7 @@ loc_10266:
 	add	ax, 0Dh
 	push	dx
 	push	ax
-	call	far ptr	sub_3E97D
+	call	far ptr	gfx_drawFullscreenImage
 	add	sp, 8
 	sub	ax, ax
 	push	ax
@@ -358,7 +358,7 @@ loc_1043E:
 	add	ax, 0Dh
 	push	dx
 	push	ax
-	call	far ptr	sub_3E97D
+	call	far ptr	gfx_drawFullscreenImage
 	add	sp, 8
 	push	gs:word_42564
 	push	gs:word_42562
@@ -373,7 +373,7 @@ loc_1043E:
 	push	g_mapRval
 	CALL(gameLoop, near)
 	CALL(cleanupAndExit, near)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 _main endp

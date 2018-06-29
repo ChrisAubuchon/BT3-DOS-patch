@@ -17,7 +17,7 @@ setTitle proc far
 	push	ax
 	mov	ax, 12h
 	push	ax
-	call	far ptr	sub_3E96B
+	call	far ptr	gfx_fillRectangle
 	add	sp, 0Ah
 
 	mov	ax, 70h	
@@ -35,7 +35,6 @@ setTitle proc far
 	push	[bp+inString]
 	CALL(writeStringAt, near)
 
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 setTitle endp

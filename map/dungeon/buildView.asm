@@ -140,7 +140,7 @@ loc_11462:
 loc_114C2:
 	jmp	short loc_1145F
 loc_114C4:
-	mov	gs:byte_422A0, 0
+	mov	gs:g_hideMouseInBigpicFlag, 0
 	push	gs:bigpicCellData_seg
 	push	gs:bigpicCellData_off
 	mov	ax, offset bigpicBuf

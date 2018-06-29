@@ -32,7 +32,8 @@ l_printHelp:
 	jmp	l_success
 
 l_debug:
-	CALL(bat_doChest)
+;	CALL(bat_init)
+	CALL(doVictoryMaybe)
 	jmp	l_success
 
 l_castSpell:
@@ -85,11 +86,11 @@ l_keySwitch:
 	add	ax, ax
 	xchg	ax, bx
 	jmp	cs:keyJumpTable[bx]
-keyJumpTable	dw offset l_singBardSong 
-		dw offset l_castSpell	
-		dw offset l_dropMember	
-;		dw offset l_fail	
-		dw offset l_debug
+keyJumpTable	dw offset l_singBardSong 		; B
+		dw offset l_castSpell			; C
+		dw offset l_dropMember			; D
+;		dw offset l_fail			; E
+		dw offset l_debug			; E
 		dw offset l_fail	
 		dw offset l_fail	
 		dw offset l_printHelp	
@@ -116,8 +117,7 @@ l_success:
 	mov	ax, 1
 
 l_exit:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 executeKeyboardCommand endp
 

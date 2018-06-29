@@ -52,7 +52,6 @@ loc_20118:
 	CALL(bat_doBreathAttack, near)
 	pop	si
 	pop	di
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_damageSpell endp

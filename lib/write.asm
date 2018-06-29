@@ -4,8 +4,7 @@ write proc far
 	sourceP= dword ptr  8
 	writeLength= word ptr	 0Ch
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	ds
 	mov	bx, [bp+fileHandle]
 	lds	dx, [bp+sourceP]
@@ -19,6 +18,6 @@ write proc far
 
 l_return:
 	pop	ds
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 write endp

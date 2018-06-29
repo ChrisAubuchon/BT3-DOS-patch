@@ -110,7 +110,6 @@ l_rosterFull:
 	jmp	l_incrementCounter
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 camp_insertParty endp

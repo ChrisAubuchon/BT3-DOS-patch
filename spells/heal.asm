@@ -33,8 +33,7 @@ l_healAllLoop:
 	cmp	gs:bat_curTarget, 7
 	jb	short l_healAllLoop
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_healSpell endp
 
@@ -191,8 +190,7 @@ statusJumpTable	dw offset l_return
 		dw offset l_healall
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _doHeal	endp
 
@@ -219,8 +217,7 @@ l_notDead:
 	mov	gs:party.hostileFlag[bx], 0
 	mov	bx, [bp+partySlotNumber]
 	mov	gs:g_charActionList[bx], 0
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _sp_postHeal endp
 

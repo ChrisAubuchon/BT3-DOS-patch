@@ -57,7 +57,6 @@ l_printNoRoom:
 	CALL(summon_printNoRoom)
 	
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 summon_monSummon endp

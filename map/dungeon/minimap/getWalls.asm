@@ -35,7 +35,6 @@ l_loopIncrement:
 	cmp	[bp+directionLoopCounter], 4
 	jl	short l_loopEntry
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 minimap_getWalls endp

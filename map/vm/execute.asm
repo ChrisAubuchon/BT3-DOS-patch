@@ -133,10 +133,8 @@ l_next:
 
 l_returnRval:
 	mov	ax, gs:mapRval
-	jmp	short $+2
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 vm_execute endp

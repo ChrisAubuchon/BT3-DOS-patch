@@ -12,7 +12,7 @@ sp_levitation proc far
 	mov	ax, icon_levitation
 	push	ax
 	CALL(icon_activate)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 sp_levitation endp

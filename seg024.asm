@@ -18,29 +18,29 @@ vid_setMode proc near
 vid_setMode endp
 
 ; Attributes: thunk
-sub_3E96B proc near
+gfx_fillRectangle proc near
 	jmp	near ptr sub_3EF35
-sub_3E96B endp
+gfx_fillRectangle endp
 
 ; Attributes: thunk
-sub_3E96E proc near
+gfx_highlightLine proc near
 	jmp	near ptr sub_3F426
-sub_3E96E endp
+gfx_highlightLine endp
 
 ; Attributes: thunk
-sub_3E971 proc near
+gfx_enableMouseIcon proc near
 	jmp	near ptr sub_3F603
-sub_3E971 endp
+gfx_enableMouseIcon endp
 
 ; Attributes: thunk
-sub_3E974 proc near
+gfx_disableMouseIcon proc near
 	jmp	near ptr sub_3F6A9
-sub_3E974 endp
+gfx_disableMouseIcon endp
 
 ; Attributes: thunk
-sub_3E977 proc near
+gfx_drawMouseIcon proc near
 	jmp	near ptr sub_3F714
-sub_3E977 endp
+gfx_drawMouseIcon endp
 
 ; Attributes: thunk
 gfx_writeCharacter proc near
@@ -48,23 +48,23 @@ gfx_writeCharacter proc near
 gfx_writeCharacter endp
 
 ; Attributes: thunk
-sub_3E97D proc near
+gfx_drawFullscreenImage proc near
 	jmp	near ptr sub_3F1CA
-sub_3E97D endp
+gfx_drawFullscreenImage endp
 
 ; Attributes: thunk
-sub_3E980 proc near
+gfx_scrollTextWindow proc near
 	jmp	near ptr sub_3F2C2
-sub_3E980 endp
+gfx_scrollTextWindow endp
 
 vid_drawBigpic proc near
 	jmp	near ptr _vid_drawBigpic
 vid_drawBigpic endp
 
 ; Attributes: thunk
-sub_3E986 proc near
+gfx_drawMagicIcon proc near
 	jmp	sub_3F490
-sub_3E986 endp
+gfx_drawMagicIcon endp
 
 ; Attributes: thunk
 
@@ -204,8 +204,8 @@ db 0, 0, 3, 192, 7, 224, 15, 240, 15, 248, 15, 248, 63,	248, 63, 248
 db 63, 248, 63,	248, 31, 248, 15, 240, 7, 224, 0, 0, 0,	0, 0, 0
 db 0, 0, 0, 0, 1, 64, 5, 64, 5,	80, 5, 80, 7, 240, 23, 240
 db 25, 240, 30,	240, 15, 240, 3, 224, 0, 0, 0, 0, 0, 0,	0, 0
-off_3EF0A dw offset byte_3EAAA
-off_3EF0C dw offset byte_3EAAA
+currentMouseIcon dw offset byte_3EAAA
+mouseIconList dw offset byte_3EAAA
 dw offset byte_3EB4A
 dw offset byte_3EBEA
 dw offset byte_3EC8A
@@ -262,11 +262,11 @@ arg_8= byte ptr	 0Eh
 	shl	ax, 1
 	shl	ax, 1
 	add	ax, bx
-	mov	cs:word_3E9B3, ax
+	mov	cs:word_3E9B3, ax	; word_3E9B3 = arg_2 * 40
 	mov	ax, [bp+arg_6]
 	sub	ax, cx
 	inc	ax
-	mov	cs:word_3E9B5, ax
+	mov	cs:word_3E9B5, ax	; word_3E9B5 = (arg_6 - arg_2) + 1
 	mov	al, [bp+arg_8]
 	not	al
 	mov	cs:byte_3E9B9, al
@@ -1306,11 +1306,13 @@ loc_3F682:		; EGA port: graphics controller	data register
 	out	dx, al
 	inc	al
 	mov	cx, bx
+
 loc_3F687:
 	movsw
 	movsb
 	add	si, bp
 	loop	loc_3F687
+
 	mov	si, es:vid_mouseIndex
 	cmp	al, ah
 	jnz	short loc_3F682
@@ -1319,7 +1321,7 @@ loc_3F687:
 	pop	ds
 	assume ds:dseg
 	push	cs
-	call	sub_3E977
+	call	gfx_drawMouseIcon
 	mov	bx, cs:byte_4EF7A_P
 	mov	byte ptr [bx], 0
 	pop	di
@@ -1418,7 +1420,7 @@ sub_3F714 proc far
 	and	al, 7
 	mov	ch, al
 loc_3F739:
-	mov	si, cs:off_3EF0A
+	mov	si, cs:currentMouseIcon
 	mov	dx, 3CFh
 	mov	al, bh
 	out	dx, al		; EGA port: graphics controller	data register
@@ -1747,8 +1749,8 @@ arg_0= word ptr	 6
 	mov	bp, sp
 	mov	bx, [bp+arg_0]
 	shl	bx, 1
-	mov	bx, cs:off_3EF0C[bx]
-	mov	cs:off_3EF0A, bx
+	mov	bx, cs:mouseIconList[bx]
+	mov	cs:currentMouseIcon, bx
 	pop	bp
 	retf
 _vid_setMouseIcon endp

@@ -5,8 +5,8 @@ endNoncombatSong proc far
 
 	CALL(song_endNoncombatEffect, near)
 	CALL(sound_stop)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 endNoncombatSong endp
 

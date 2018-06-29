@@ -31,7 +31,6 @@ l_loop:
 	jmp	short l_loop
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 character_learnSpellLevel endp

@@ -52,7 +52,6 @@ l_returnZero:
 	sub	ax, ax
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 spell_cast endp

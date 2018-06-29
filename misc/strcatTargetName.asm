@@ -16,8 +16,7 @@ strcatTargetName proc far
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	word ptr [bp+destString+2]
-	push	word ptr [bp+destString]
+	PUSH_STACK_DWORD(destString)
 	STRCAT(destString)
 	jmp	l_return
 
@@ -34,6 +33,7 @@ l_monTarget:
 	cmp	[bp+targetCount], 0
 	jz	short l_monSingular
 	PUSH_OFFSET(s_some)
+	PUSH_STACK_DWORD(destString)
 	STRCAT(destString)
 	jmp	short l_pluralize
 
@@ -52,8 +52,7 @@ l_appendSpace:
 
 l_pluralize:
 	push	[bp+targetCount]
-	push	word ptr [bp+destString+2]
-	push	word ptr [bp+destString]
+	PUSH_STACK_DWORD(destString)
 	PUSH_STACK_ADDRESS(monName)
 	PLURALIZE(destString)
 l_return:

@@ -30,7 +30,6 @@ printListItem proc far
 	STRCAT
 	PUSH_STACK_ADDRESS(stringBuf)
 	PRINTSTRING
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 printListItem endp

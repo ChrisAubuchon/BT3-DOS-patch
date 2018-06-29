@@ -14,7 +14,7 @@ sp_areaEnchant proc far
 	mov	ax, icon_areaEnchant
 	push	ax
 	CALL(icon_activate)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 sp_areaEnchant endp

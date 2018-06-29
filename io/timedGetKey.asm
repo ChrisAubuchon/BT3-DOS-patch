@@ -48,7 +48,6 @@ l_returnKey:
 l_returnSpace:
 	mov	ax, 20h	
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	ret
 timedGetKey endp

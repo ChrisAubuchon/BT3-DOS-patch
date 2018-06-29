@@ -2,31 +2,27 @@
 
 character_applyAgeStatus proc far
 
-	arg_0= dword ptr  6
-	arg_4= dword ptr  0Ah
-	arg_8= word ptr	 0Eh
+	attributeP= dword ptr  6
+	savedAttributeP= dword ptr  0Ah
+	attributeCount= word ptr	 0Eh
 
-	push	bp
-	mov	bp, sp
-	xor	ax, ax
-	call	someStackOperation
-	jmp	short loc_1E89E
-loc_1E89B:
-	dec	[bp+arg_8]
-loc_1E89E:
-	cmp	[bp+arg_8], 0
-	jl	short loc_1E8BF
-	lfs	bx, [bp+arg_0]
+	FUNC_ENTER
+
+l_loop:
+	cmp	[bp+attributeCount], 0
+	jl	short l_return
+	lfs	bx, [bp+attributeP]
 	mov	al, fs:[bx]
-	lfs	bx, [bp+arg_4]
-	inc	word ptr [bp+arg_4]
+	lfs	bx, [bp+savedAttributeP]
+	inc	word ptr [bp+savedAttributeP]
 	mov	fs:[bx], al
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+	lfs	bx, [bp+attributeP]
+	inc	word ptr [bp+attributeP]
 	mov	byte ptr fs:[bx], 1
-	jmp	short loc_1E89B
-loc_1E8BF:
-	mov	sp, bp
-	pop	bp
+	dec	[bp+attributeCount]
+	jmp	short l_loop
+
+l_return:
+	FUNC_EXIT
 	retf
 character_applyAgeStatus endp

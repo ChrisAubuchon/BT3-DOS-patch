@@ -47,8 +47,7 @@ l_giveGold:
 	mov	word ptr gs:party.gold[si], cx
 	mov	word ptr gs:(party.gold+2)[si], bx
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 doPoolGold endp
 

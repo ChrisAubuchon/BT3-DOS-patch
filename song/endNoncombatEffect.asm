@@ -52,8 +52,7 @@ l_songSwitch:
 	cmp	ax, song_shield
 	jz	short l_shield
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 song_endNoncombatEffect	endp
 

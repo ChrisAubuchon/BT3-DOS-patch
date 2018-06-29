@@ -14,8 +14,8 @@ _sp_useAcorn proc far
 	push	ax
 	push	word ptr [bp+spellCaster]
 	CALL(_batchSpellCast)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 _sp_useAcorn endp
 

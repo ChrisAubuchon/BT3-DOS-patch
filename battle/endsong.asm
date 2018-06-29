@@ -38,7 +38,6 @@ l_songSwitch:
 l_endAndReturn:
 	CALL(sound_stop)
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 bat_endCombatSong endp

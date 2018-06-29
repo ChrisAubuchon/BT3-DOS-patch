@@ -10,8 +10,9 @@ ifelse(`$1', `', `dnl', `	mov	ax, $1
 
 # Function exit code
 #
-define(`FUNC_EXIT', `mov	sp, bp
-	pop	bp')
+define(`FUNC_EXIT', `ifelse(`$#', `0', `mov	sp, bp
+	pop	bp', `pop	bp')')
+
 
 # PUSH(value)
 #

@@ -31,8 +31,7 @@ loc_14D81:
 	cmp	[bp+var_2], 0FFFFh
 	jz	short loc_14D40
 	mov	ax, [bp+var_2]
-	jmp	short $+2
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 openFile endp

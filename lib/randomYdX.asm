@@ -5,15 +5,13 @@
 randomYdX proc	far
 
 	rval= word ptr -8
-	counter= word ptr -6
+	loopCounter= word ptr -6
 	ndice= word ptr	-4
 	dieval=	word ptr -2
 	die= word ptr  6
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 8
-	call	someStackOperation
+	FUNC_ENTER(8)
+
 	mov	[bp+rval], 0
 	mov	ax, [bp+die]
 	mov	cl, 5
@@ -23,26 +21,24 @@ randomYdX proc	far
 	mov	ax, [bp+die]
 	and	ax, 1Fh
 	mov	[bp+ndice], ax
-	mov	[bp+counter], 0
-	jmp	short loc_1D333
-loc_1D330:
-	inc	[bp+counter]
-loc_1D333:
+	mov	[bp+loopCounter], 0
+
+l_loop:
 	mov	ax, [bp+ndice]
-	cmp	[bp+counter], ax
-	jg	short loc_1D356
-	call	random
+	cmp	[bp+loopCounter], ax
+	jg	short l_return
+	CALL(random)
 	mov	bx, [bp+dieval]
 	mov	cl, diceMaskList[bx]
 	sub	ch, ch
 	and	cx, ax
 	inc	cx
 	add	[bp+rval], cx
-	jmp	short loc_1D330
-loc_1D356:
+	inc	[bp+loopCounter]
+	jmp	short l_loop
+
+l_return:
 	mov	ax, [bp+rval]
-	jmp	short $+2
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 randomYdX endp

@@ -9,7 +9,7 @@ sp_antiMagic proc far
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, spellEffectFlags[bx]
 	add	gs:antiMagicFlag, al
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 sp_antiMagic endp

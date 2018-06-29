@@ -95,7 +95,6 @@ loc_2262F:
 loc_22632:
 	pop	si
 	pop	di
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _sp_useWeapon endp

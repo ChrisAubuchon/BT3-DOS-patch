@@ -150,8 +150,7 @@ l_nextCharacter:
 l_return:
 	mov	ax, word ptr [bp+destString]
 	mov	dx, word ptr [bp+destString+2]
-	jmp	short $+2
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 str_pluralize endp

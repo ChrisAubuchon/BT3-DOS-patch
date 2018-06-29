@@ -341,8 +341,7 @@ loc_21367:
 	jmp	short $+2
 loc_2136C:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _sp_doTeleport endp
 

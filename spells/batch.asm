@@ -26,7 +26,6 @@ l_loopEnter:
 	CALL(_batchSpellCast, near)
 	jmp	short l_loopEnter
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_batchspell endp

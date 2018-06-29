@@ -32,8 +32,8 @@ printStringAndThreeDigits proc far
 	mov	byte ptr fs:[bx], 0
 	PUSH_STACK_ADDRESS(var_24)
 	PRINTSTRING
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 printStringAndThreeDigits endp
 

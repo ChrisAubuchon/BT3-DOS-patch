@@ -6,8 +6,7 @@ bigpic_memcpy proc far
 	skyColor= word ptr  0Ah
 	grndColor= word	ptr  0Ch
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	di
 	push	es
 	les	di, [bp+arg_0]
@@ -21,6 +20,6 @@ bigpic_memcpy proc far
 	rep stosw
 	pop	es
 	pop	di
-	pop	bp
+	FUNC_EXIT
 	retf
 bigpic_memcpy endp

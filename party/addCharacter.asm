@@ -57,7 +57,6 @@ loc_14D2E:
 	jmp	short loc_14CB5
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 party_addCharacter endp

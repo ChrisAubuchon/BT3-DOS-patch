@@ -49,7 +49,6 @@ l_printMessage:
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_meleeMen endp

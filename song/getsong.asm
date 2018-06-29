@@ -120,8 +120,7 @@ l_badInput:
 	jmp	short l_getUserInput
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 song_getSong endp
 

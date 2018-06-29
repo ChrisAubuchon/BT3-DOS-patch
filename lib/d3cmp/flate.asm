@@ -5,8 +5,7 @@ d3cmp_flate proc far
 	srcP	= dword ptr 6
 	destP	= dword ptr 0Ah
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	di
 	push	si
 	push	ds
@@ -52,6 +51,6 @@ d3cmp_flate proc far
 	pop	ds
 	pop	si
 	pop	di
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 d3cmp_flate endp

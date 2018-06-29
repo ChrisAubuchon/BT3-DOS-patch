@@ -58,8 +58,7 @@ l_clearAndReturnZero:
 l_return:
 	pop	si
 	pop	di
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 getYesNo endp
 

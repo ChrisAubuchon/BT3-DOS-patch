@@ -19,8 +19,7 @@ l_monCaster:
 	and	bx, 3
 	sub	gs:g_monFreezeAcPenalty[bx], al
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_acBonus endp
 

@@ -12,8 +12,8 @@ sp_compassSpell	proc far
 	mov	ax, icon_compass
 	push	ax
 	CALL(icon_activate)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 sp_compassSpell	endp
 

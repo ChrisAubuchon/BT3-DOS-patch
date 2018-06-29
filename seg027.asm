@@ -81,7 +81,7 @@ g_chestExamined	dw 0
 byte_4229A	db 0
 sqRegenHPFlag	db 0
 monSpellToHitPenalty	db 4	dup(0)		   ; 0
-byte_422A0	db 0
+g_hideMouseInBigpicFlag	db 0
 align 2
 specialAttackVal	dw 0
 byte_422A4	db 0

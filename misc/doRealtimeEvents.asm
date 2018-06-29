@@ -130,7 +130,6 @@ l_setIsNight:
 	mov	gs:isNight, al
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 doRealtimeEvents endp

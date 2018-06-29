@@ -18,7 +18,7 @@ party_print proc far
 
 	CALL(party_update)
 	mov	byte ptr g_printPartyFlag,	1
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 
 	mov	[bp+slotNumber], 0
 l_charNumberLoopEntry:
@@ -214,7 +214,7 @@ l_charNumberLoopIncrement:
 	inc	[bp+slotNumber]
 	cmp	[bp+slotNumber], 7
 	jl	l_charNumberLoopEntry
-	CALL(sub_1766A, near)
+	CALL(mouse_draw, near)
 
 l_return:
 	pop	si

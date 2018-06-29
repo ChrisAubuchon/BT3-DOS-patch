@@ -13,7 +13,6 @@ disk1Swap proc far
 	lfs	bx, disk3
 	mov	byte ptr fs:[bx+5], '1'
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 disk1Swap endp

@@ -50,7 +50,6 @@ l_loop:
 	add	gs:g_currentCharPosition, al
 	jmp	short l_loop
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 text_writeString endp

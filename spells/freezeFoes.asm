@@ -26,8 +26,7 @@ l_monCaster:
 	mov	al, spellEffectFlags[bx]
 	add	gs:g_charFreezeAcPenalty, al
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_freezeFoes endp
 

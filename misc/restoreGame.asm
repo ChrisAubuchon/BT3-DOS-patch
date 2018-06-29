@@ -68,7 +68,6 @@ l_setIsNight:
 	mov	gs:isNight, al
 	mov	byte ptr g_printPartyFlag,	0
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 restoreGame endp

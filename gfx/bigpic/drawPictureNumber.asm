@@ -25,7 +25,7 @@ bigpic_drawPictureNumber proc far
 	push	ax
 	mov	ax, 11h
 	push	ax
-	call	far ptr	sub_3E96B
+	call	far ptr	gfx_fillRectangle
 	add	sp, 0Ah
 	jmp	l_return
 loc_171CF:
@@ -139,7 +139,7 @@ loc_1726A:
 loc_1734A:
 	sub	al, al
 loc_1734C:
-	mov	gs:byte_422A0, al
+	mov	gs:g_hideMouseInBigpicFlag, al
 	mov	gs:bigpicCellNumber, 0
 	sub	ax, ax
 	jmp	short $+2

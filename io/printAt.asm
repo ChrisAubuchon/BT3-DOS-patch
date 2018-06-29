@@ -26,7 +26,6 @@ l_loop:
 	inc	word ptr [bp+inString]
 	jmp	short l_loop
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 printAt endp

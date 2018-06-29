@@ -80,7 +80,6 @@ l_return:
 	PUSH_STACK_ADDRESS(var_100)
 	PRINTSTRING
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_earthMaw endp

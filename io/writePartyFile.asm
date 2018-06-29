@@ -23,7 +23,7 @@ writePartyFile proc far
 	CALL(write)
 	push	[bp+var_2]
 	CALL(close)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 writePartyFile endp

@@ -23,6 +23,7 @@ l_loopEnter:
 	CHARINDEX(ax, STACKVAR(spellCaster), si)
 	cmp	gs:(party.specAbil+3)[si], 0
 	jz	short l_nextChar
+
 	mov	ax, 0Ch
 	push	ax
 	PUSH_OFFSET(s_dopplganger)
@@ -43,13 +44,14 @@ l_monCaster:
 	jz	short l_monDisbelieve
 	or	gs:g_disbelieveFlags, disb_nosummon
 	jmp	short l_return
+
 l_monDisbelieve:
 	mov	al, byte ptr [bp+spellCaster]
 	mov	gs:monDisbelieveFlag, al
+
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_disbelieve endp
 

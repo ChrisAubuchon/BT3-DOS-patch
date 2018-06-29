@@ -33,7 +33,6 @@ l_checkKey:
 	mov	ax, [bp+var_2]
 	sub	ax, 31h	
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 getCharacterRace endp

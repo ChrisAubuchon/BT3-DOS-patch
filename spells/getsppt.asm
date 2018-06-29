@@ -38,9 +38,7 @@ l_checkHalf:
 	jmp	short l_return
 l_returnSppt:
 	mov	ax, [bp+sppt]
-	jmp	short $+2
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 getSpptRequired	endp

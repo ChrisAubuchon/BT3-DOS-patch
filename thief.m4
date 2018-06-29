@@ -235,8 +235,8 @@ include(`map/read.asm')
 include(`map/readGraphics.asm')
 include(`map/readMonsters.asm')
 include(`misc/printMessageAndExit.asm')
-
-include(`seg003.asm')
+include(`io/mouse/draw.asm')
+include(`io/mouse/inBigpic.asm')
 
 seg003 ends
 
@@ -592,16 +592,16 @@ seg011 segment word public 'CODE' use16
 algn_229C1:
 align 2
 
-include(`song/singnc.asm')
+include(`song/singNoncombat.asm')
 include(`song/cansing.asm')
 include(`song/canplay.asm')
-include(`song/getsubt.asm')
+include(`song/getSubtractor.asm')
 include(`song/getsong.asm')
 include(`song/playsong.asm')
 include(`song/stopsong.asm')
-include(`song/endhelpr.asm')
-include(`song/strtnonc.asm')
-include(`song/endnonc.asm')
+include(`song/endNoncombatSong.asm')
+include(`song/doNoncombatEffect.asm')
+include(`song/endNoncombatEffect.asm')
 
 seg011 ends
 

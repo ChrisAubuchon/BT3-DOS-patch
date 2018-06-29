@@ -37,9 +37,7 @@ loc_158F5:
 	jmp	short loc_158BC
 l_return:
 	mov	ax, [bp+var_2]
-	jmp	short $+2
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _mfunc_extractCh endp
 

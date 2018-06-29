@@ -15,8 +15,7 @@ song_stopPlaying proc far
 	jz	short l_return			; No song playing
 	CALL(endNoncombatSong, near)
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 song_stopPlaying endp
 

@@ -91,7 +91,7 @@ l_drawTopologyNext:
 	cmp	[bp+counter], 17
 	jl	short l_drawTopologyLoop
 
-	mov	gs:byte_422A0, 0
+	mov	gs:g_hideMouseInBigpicFlag, 0
 	cmp	gs:isNight, 0
 	jz	short l_return
 	mov	ax, offset bigpicBuf

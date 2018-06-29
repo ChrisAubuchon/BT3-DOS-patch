@@ -66,7 +66,6 @@ l_castIt:
 	CALL(spell_cast, near)
 	mov	ax, 1
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 doCastSpell endp

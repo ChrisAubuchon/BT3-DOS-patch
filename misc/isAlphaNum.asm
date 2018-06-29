@@ -25,7 +25,6 @@ l_returnTrue:
 l_returnFalse:
 	sub	ax, ax
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 isAlphaNum endp

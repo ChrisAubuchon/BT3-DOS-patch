@@ -78,9 +78,7 @@ l_loopTest:
 
 l_return:
 	mov	ax, [bp+itemListLength]
-	jmp	short $+2
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 storage_createItemList endp

@@ -44,7 +44,6 @@ l_returnOne:
 	mov	ax, 1
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _canSingSong endp

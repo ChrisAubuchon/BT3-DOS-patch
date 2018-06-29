@@ -7,14 +7,13 @@ db 80h,	90h, 0A0h, 0, 0C0h, 0D0h, 0E0h,	0F0h; 8
 
 bigpic_makeNight proc far
 
-	arg_0= dword ptr  6
+	bufferP= dword ptr  6
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	di
 	push	ds
 	push	es
-	les	di, [bp+arg_0]
+	les	di, [bp+bufferP]
 	mov	ax, cs
 	mov	ds, ax
 	assume ds:seg019
@@ -37,7 +36,7 @@ loc_27EBC:
 	pop	ds
 	assume ds:dseg
 	pop	di
-	pop	bp
+	FUNC_EXIT
 	retf
 bigpic_makeNight endp
 

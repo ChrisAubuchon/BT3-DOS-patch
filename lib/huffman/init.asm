@@ -2,8 +2,7 @@ huf_init proc far
 
 	fileHandle= word ptr	 6
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	ds
 	push	si
 	push	di
@@ -40,6 +39,6 @@ huf_init proc far
 	pop	si
 	pop	ds
 	assume ds:dseg
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 huf_init endp

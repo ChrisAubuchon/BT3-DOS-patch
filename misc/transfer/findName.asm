@@ -42,7 +42,6 @@ l_returnFailed:
 	mov	ax, 0FFFFh
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 transfer_findName endp

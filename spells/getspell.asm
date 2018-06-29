@@ -114,7 +114,6 @@ l_returnFailed:
 	mov	ax, 0FFFFh
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 getSpellNumber endp

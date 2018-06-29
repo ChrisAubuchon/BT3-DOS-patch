@@ -120,10 +120,8 @@ loc_151D5:
 	jz	short loc_151AD
 l_returnZero:
 	sub	ax, ax
-	jmp	short $+2
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 mouse_getClick endp

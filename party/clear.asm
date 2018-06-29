@@ -14,7 +14,7 @@ l_loopEnter:
 	inc	[bp+slotNo]
 	cmp	[bp+slotNo], 7
 	jl	short l_loopEnter
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 party_clear endp

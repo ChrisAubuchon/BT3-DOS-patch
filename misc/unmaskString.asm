@@ -28,7 +28,6 @@ l_loopEntry:
 	jl	short l_loopEntry
 l_return:
 	NULL_TERMINATE(STACKVAR(toBuffer))
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 unmaskString endp

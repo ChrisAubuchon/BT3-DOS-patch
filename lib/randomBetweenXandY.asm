@@ -10,10 +10,8 @@ randomBetweenXandY proc	far
 	_low= word ptr	6
 	_high= word ptr	 8
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 6
-	call	someStackOperation
+	FUNC_ENTER(6)
+
 	mov	ax, [bp+_high]
 	sub	ax, [bp+_low]
 	mov	[bp+var_4], ax
@@ -23,12 +21,10 @@ randomBetweenXandY proc	far
 	jmp	short loc_1D26E
 loc_1D246:
 	push	[bp+var_4]
-	push	cs
-	call	near ptr getRndDiceMask
-	add	sp, 2
+	CALL(getRndDiceMask, near)
 	mov	[bp+_mask], ax
 loc_1D253:
-	call	random
+	CALL(random)
 	and	ax, [bp+_mask]
 	mov	[bp+var_6], ax
 	mov	ax, [bp+var_4]
@@ -38,7 +34,6 @@ loc_1D253:
 	add	ax, [bp+_low]
 	jmp	short $+2
 loc_1D26E:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 randomBetweenXandY endp

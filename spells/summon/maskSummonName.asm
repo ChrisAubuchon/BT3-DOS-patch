@@ -32,7 +32,6 @@ l_copyLoop:
 
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 summon_maskSummonName endp

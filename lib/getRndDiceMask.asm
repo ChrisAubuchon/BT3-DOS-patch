@@ -5,17 +5,12 @@ getRndDiceMask proc far
 	var_2= word ptr	-2
 	arg_1= byte ptr	 7
 
-	push	bp
-	mov	bp, sp
-	mov	ax, 2
-	call	someStackOperation
+	FUNC_ENTER(2)
 	push	si
+
 	mov	[bp+arg_1], 0
 	mov	[bp+var_2], 0
-	jmp	short loc_1D2D2
 loc_1D2CF:
-	inc	[bp+var_2]
-loc_1D2D2:
 	cmp	[bp+var_2], 8
 	jge	short loc_1D2F1
 	mov	bx, [bp+var_2]
@@ -24,18 +19,16 @@ loc_1D2D2:
 	mov	si, ax
 	cmp	[bp+6],	si
 	ja	short loc_1D2EF
-	jmp	short loc_1D2FE
+	jmp	short l_return
 loc_1D2EF:
+	inc	[bp+var_2]
 	jmp	short loc_1D2CF
 loc_1D2F1:
-	mov	ax, offset aBadDiceMaskRange
-	push	ds
-	push	ax
-	call	printMessageAndExit
-	add	sp, 4
-loc_1D2FE:
+	PUSH_OFFSET(s_badDiceMaskRange)
+	CALL(printMessageAndExit)
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 getRndDiceMask endp

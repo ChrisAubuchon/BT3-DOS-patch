@@ -26,7 +26,7 @@ loc_16745:
 	jl	short loc_16745
 
 loc_1675E:
-	mov	gs:byte_422A0, 0
+	mov	gs:g_hideMouseInBigpicFlag, 0
 	mov	ax, 80E8h
 	push	ax
 	CALL(_mallocMaybe)
@@ -80,7 +80,7 @@ loc_167BC:
 	add	ax, 0Dh
 	push	dx
 	push	ax
-	call	far ptr	sub_3E97D
+	call	far ptr	gfx_drawFullscreenImage
 	add	sp, 8
 	IOWAIT
 	mov	[bp+var_25A], 0
@@ -122,7 +122,7 @@ loc_16879:
 	push	ax
 	mov	ax, 0Ah
 	push	ax
-	call	far ptr	sub_3E96B
+	call	far ptr	gfx_fillRectangle
 	add	sp, 0Ah
 	mov	[bp+var_264], 0
 
@@ -208,7 +208,7 @@ loc_1694C:
 	add	ax, 0Dh
 	push	dx
 	push	ax
-	call	far ptr	sub_3E97D
+	call	far ptr	gfx_drawFullscreenImage
 	add	sp, 8
 	push	[bp+var_25C]
 	push	[bp+var_25E]
@@ -217,7 +217,6 @@ loc_1694C:
 	mov	g_mapRval, 1
 
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 doVictoryMaybe endp

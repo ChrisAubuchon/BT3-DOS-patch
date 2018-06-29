@@ -31,7 +31,6 @@ loc_26868:
 	PRINTSTRING(true)
 	IOWAIT
 loc_26881:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 transfer_bt3Character endp

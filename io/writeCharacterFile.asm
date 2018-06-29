@@ -2,26 +2,26 @@
 
 writeCharacterFile proc far
 
-	var_2= word ptr	-2
-	arg_0= word ptr	 6
+	fd= word ptr	-2
+	slotNumber= word ptr	 6
 
 	FUNC_ENTER(2)
 
 	PUSH_OFFSET(s_thievesInf)
 	CALL(openFile, near)
-	mov	[bp+var_2], ax
-	CHARINDEX(ax, STACKVAR(arg_0))
+	mov	[bp+fd], ax
+	CHARINDEX(ax, STACKVAR(slotNumber))
 	inc	ax
 	push	ax
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	push	[bp+var_2]
+	push	[bp+fd]
 	CALL(write)
-	push	[bp+var_2]
+	push	[bp+fd]
 	CALL(close)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 writeCharacterFile endp

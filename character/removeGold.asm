@@ -18,12 +18,14 @@ character_removeGold	proc far
 	CHARINDEX(ax, STACKVAR(partySlotNumber), si)
 	cmp	word ptr gs:(party.gold+2)[si], bx
 	ja	short loc_13CEF
-	jb	short loc_13CEB
+	jb	short l_returnZero
 	cmp	word ptr gs:party.gold[si], cx
 	jnb	short loc_13CEF
-loc_13CEB:
+
+l_returnZero:
 	sub	ax, ax
-	jmp	short loc_13D0D
+	jmp	short l_return
+
 loc_13CEF:
 	mov	ax, [bp+arg_2]
 	mov	dx, bx
@@ -32,10 +34,9 @@ loc_13CEF:
 	sub	word ptr gs:party.gold[si], cx
 	sbb	word ptr gs:(party.gold+2)[si], bx
 	mov	ax, 1
-	jmp	short $+2
-loc_13D0D:
+
+l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 character_removeGold	endp

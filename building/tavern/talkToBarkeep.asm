@@ -98,7 +98,6 @@ l_returnZero:
 	sub	ax, ax
 
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 tavern_talkToBarkeep endp

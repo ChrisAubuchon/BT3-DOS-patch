@@ -18,7 +18,6 @@ l_monCaster:
 	PUSH_OFFSET(s_partyFreezes)
 	PRINTSTRING
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_haltFoe endp

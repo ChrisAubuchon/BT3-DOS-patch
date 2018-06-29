@@ -5,8 +5,7 @@ dungeon_getWallInDirection proc far
 	walls= word ptr	 6
 	direction= word ptr  8
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	mov	ax, [bp+direction]
 	and	al, 3
 	mov	cl, 2
@@ -15,7 +14,7 @@ dungeon_getWallInDirection proc far
 	mov	ax, [bp+walls]
 	rol	ax, cl
 	xor	dx, dx
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 dungeon_getWallInDirection endp
 

@@ -3,8 +3,7 @@ bigpic_initBuffers proc	far
 
 	backgroundValue= word ptr	 6
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	ds
 	mov	ax, seg	seg021
 	mov	ds, ax
@@ -42,6 +41,6 @@ loc_27CA4:
 	jns	short loc_27C7F
 	pop	ds
 	assume ds:dseg
-	pop	bp
+	FUNC_EXIT
 	retf
 bigpic_initBuffers endp

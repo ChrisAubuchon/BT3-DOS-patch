@@ -914,16 +914,16 @@ strg_inventory	db 0C3h, 0, 1, 0C3h, 0, 1, 0C3h, 0, 1, 0C3h; 0
 		db 0, 0FFh, 9Ch, 0, 0FFh, 9Dh, 0, 0FFh;	76
 bigpicLightOffset dw 0,	460h, 818h, 9A0h, 8C0h;	0
 bigpicLightSize	dw 1340h, 0A80h, 620h, 348h, 1C0h; 0
-iconXOffset	db 80, 92, 108, 124, 136, 0; 0
-iconHeight	db 19, 26, 17, 20, 16, 0; 0
-iconWidth	db 12, 16, 16, 12, 20, 0; 0
-iconDataList	dd	iconLight, iconCompass,	iconAreaEnchant, iconShield, iconLevitation; 0
-word_4470E	dw 0E4h, 1A0h, 110h,	0F0h, 140h; 0
+g_iconXOffset	db 80, 92, 108, 124, 136, 0; 0
+g_iconHeight	db 19, 26, 17, 20, 16, 0; 0
+g_iconWidth	db 12, 16, 16, 12, 20, 0; 0
+g_iconDataPointers	dd	iconLight, iconCompass,	iconAreaEnchant, iconShield, iconLevitation; 0
+g_iconCellDataLength	dw 0E4h, 1A0h, 110h,	0F0h, 140h; 0
 byte_44718	db 0, 0, 0, 0, 0, 0	   ; 0
-iconAnimationDelay	db 2, 0, 4, 0, 3, 0	   ; 0
-iconCurrentDelay db 0, 0, 0,	0, 0, 0	    ; 0
-iconClearIndex	db 4, 4, 4, 1, 4, 0	   ; 0
-iconCurrentCell	db 0, 0, 0, 0, 0, 0
+g_iconAnimationDelay	db 2, 0, 4, 0, 3, 0	   ; 0
+g_iconCurrentDelay db 0, 0, 0,	0, 0, 0	    ; 0
+g_iconClearIndex	db 4, 4, 4, 1, 4, 0	   ; 0
+g_iconCurrentCell	db 0, 0, 0, 0, 0, 0
 aMafl		db 'MAFL',0
 aMageFlame	db 'Mage Flame',0
 aArfi		db 'ARFI',0
@@ -2283,9 +2283,9 @@ s_comma	db ',',0
 s_and		db 'and ',0
 		db 0
 s_party		db 'Party',0
-aSorryBud	db 'Sorry, Bud',0
+s_sorryBud	db 'Sorry, Bud',0
 		db    0
-aAlasYourPartyHasExp db	'Alas, your party has expired, but gone to adventurer heaven.',0
+s_partyHasExpired db	'Alas, your party has expired, but gone to adventurer heaven.',0
 		db    0
 g_monkDamageDice	db 20h, 21h, 22h, 23h, 24h, 25h, 26h, 27h
 			db 68h, 69h, 6Ah, 6Bh, 6Ch, 6Dh, 6Eh, 8Fh
@@ -2353,7 +2353,7 @@ byte_475AE	db 5, 7, 7, 3	   ; 0
 		db 3, 0, 0, 5		; 4
 		db 5, 0Ah, 0Fh,	0Fh	; 8
 		db 16h			; 12
-aBadDiceMaskRange db 'Bad dice mask range',0
+s_badDiceMaskRange db 'Bad dice mask range',0
 		db    0
 g_batPartyOptionFunctions	dd bat_partyFightAction
 		dd bat_partyAdvanceAction

@@ -5,8 +5,7 @@ minimap_setSquare proc far
 	arg_0= dword ptr  6
 	arg_4= word ptr	 0Ah
 
-	push	bp
-	mov	bp, sp
+	FUNC_ENTER
 	push	di
 	push	si
 	push	ds
@@ -30,6 +29,6 @@ loc_27E58:
 	assume ds:dseg
 	pop	si
 	pop	di
-	pop	bp
+	FUNC_EXIT(false)
 	retf
 minimap_setSquare endp

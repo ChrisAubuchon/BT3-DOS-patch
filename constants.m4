@@ -69,6 +69,7 @@ define(`bigpic_temple', `49')
 define(`bigpic_destroyedBuilding', `50')
 define(`bigpic_treasure', `52')
 define(`bigpic_chest', `53')
+define(`bigpic_partyDied', `57')
 define(`bigpic_emptyBuilding', `69')
 define(`bigpic_tavern', `83')
 

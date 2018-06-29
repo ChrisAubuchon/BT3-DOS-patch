@@ -24,7 +24,7 @@ party_clearAndPrintLine proc far
 	push	ax
 	mov	ax, 0Bh
 	push	ax
-	call	far ptr	sub_3E96B
+	call	far ptr	gfx_fillRectangle
 	add	sp, 0Ah
 	mov	ax, 1
 	push	ax

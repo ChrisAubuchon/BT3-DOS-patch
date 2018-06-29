@@ -33,14 +33,14 @@ text_scrollingWindow proc far
 	mov	[bp+var_1E], ax
 	mov	[bp+var_10], ax
 	mov	[bp+var_E], 1
-	CALL(sub_1766A, near)
+	CALL(mouse_draw, near)
 
 loc_1597F:
 	cmp	[bp+var_E], 0
 	jz	l_doRealTimeEvents
 
 loc_15988:
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	PRINTSTRING(true)
@@ -111,9 +111,9 @@ loc_15A35:
 	add	ax, [bp+TxtNumLines]
 	sub	ax, [bp+var_12]
 	push	ax
-	call	far ptr	sub_3E96E			; This probably does the highlighting
+	call	far ptr	gfx_highlightLine			; This probably does the highlighting
 	add	sp, 2
-	CALL(sub_1766A, near)
+	CALL(mouse_draw, near)
 	mov	[bp+var_E], 0
 	jmp	short l_getInput
 
@@ -124,11 +124,11 @@ l_getInput:
 	CALL(checkMouse)
 	cmp	mouse_moved, 0
 	jz	short l_skipMouseIcon
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	push	[bp+var_4]
 	CALL(mouse_setScrollingIcon, near)
 	mov	[bp+var_2], 1
-	CALL(sub_1766A, near)
+	CALL(mouse_draw, near)
 
 l_skipMouseIcon:
 	push	[bp+var_4]
@@ -174,7 +174,7 @@ loc_15ACA:
 loc_15AFB:
 	cmp	[bp+var_10], 0
 	jz	short loc_15B0C
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	mov	ax, [bp+highlightedLine]
 	jmp	l_return
 loc_15B0C:
@@ -232,7 +232,7 @@ loc_15B81:
 loc_15B83:
 	cmp	[bp+var_10], 0
 	jz	short loc_15B94
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	mov	ax, 0FFFFh
 	jmp	l_return
 loc_15B94:
@@ -269,12 +269,12 @@ loc_15BDA:
 	jmp	l_keySwitch
 
 l_enterKey:
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	mov	ax, [bp+highlightedLine]
 	jmp	l_return
 
 l_escapeKey:
-	call	far ptr	sub_3E974
+	call	far ptr	gfx_disableMouseIcon
 	mov	ax, 0FFFFh
 	jmp	l_return
 

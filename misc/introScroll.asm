@@ -42,7 +42,7 @@ loc_16694:
 	push	ax
 	sub	ax, ax
 	push	ax
-	call	far ptr	sub_3E96B
+	call	far ptr	gfx_fillRectangle
 	add	sp, 0Ah
 	mov	[bp+var_25C], 0
 
@@ -84,7 +84,6 @@ loc_16717:
 	jnz	loc_16690
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 intro_scrollText endp

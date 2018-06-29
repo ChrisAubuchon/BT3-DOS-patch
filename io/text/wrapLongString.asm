@@ -124,7 +124,6 @@ l_nullTerminateAndReturn:
 	jmp	short $+2
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 text_wrapLongString endp

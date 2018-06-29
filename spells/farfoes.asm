@@ -74,8 +74,7 @@ l_outputString:
 	PRINTSTRING
 l_return:
 	DELAY
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 sp_farFoes endp
 
@@ -97,8 +96,7 @@ _sp_setMonDistance proc	far
 	mov	gs:monGroups.distance[si], al
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _sp_setMonDistance endp
 

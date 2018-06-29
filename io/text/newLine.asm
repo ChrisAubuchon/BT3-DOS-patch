@@ -11,7 +11,6 @@ txt_newLine proc far
 	CALL(text_scroll, near)
 	mov	gs:txt_numLines, 0Bh
 loc_16635:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 txt_newLine endp

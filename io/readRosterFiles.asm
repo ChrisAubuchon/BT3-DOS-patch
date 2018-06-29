@@ -97,9 +97,8 @@ loc_136AF:
 	push	[bp+fileDescriptor]
 	CALL(close)
 	mov	ax, [bp+characterCount]
-	jmp	short $+2
+
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 readRosterFiles endp

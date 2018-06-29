@@ -217,7 +217,6 @@ l_antiMagicCheck:
 	CALL(lib_maxFF, near)
 l_return:
 	pop	si
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 _savingThrowCheck endp

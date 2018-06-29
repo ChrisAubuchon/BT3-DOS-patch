@@ -145,16 +145,12 @@ loc_202B3:
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	push	ax
-	push	dx
-	push	word ptr [bp+outputStringP]
+	PUSH_STACK_DWORD(outputStringP)
 	CALL(strcatTargetName, near)
-	mov	word ptr [bp+outputStringP], ax
-	mov	word ptr [bp+outputStringP+2], dx
-	mov	ax, offset s_elipsisNl
-	push	ds
-	push	ax
-	push	dx
-	push	word ptr [bp+outputStringP]
+	SAVE_STACK_DWORD(dx, ax, outputStringP)
+
+	PUSH_OFFSET(s_elipsisNl)
+	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
 	jmp	short loc_20324
 l_enemyGroupGone:

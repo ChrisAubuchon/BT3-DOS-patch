@@ -33,8 +33,8 @@ scroll_printArrows proc far
 	push	ax
 	PUSH_OFFSET(s_esc)
 	CALL(writeStringAt, near)
-	mov	sp, bp
-	pop	bp
+
+	FUNC_EXIT
 	retf
 scroll_printArrows endp
 

@@ -2,18 +2,16 @@
 
 writeStringAt proc far
 
-	var_2= byte ptr	-2
 	inString= dword ptr  6
 	column= word ptr	 0Ah
 	row= word ptr	 0Ch
 	colorFlag= word ptr	 0Eh
 
-	FUNC_ENTER(2)
+	FUNC_ENTER
 
 l_loop:
 	lfs	bx, [bp+inString]
 	mov	al, fs:[bx]
-	mov	[bp+var_2], al
 	or	al, al
 	jz	short l_return
 	push	[bp+colorFlag]
@@ -33,7 +31,6 @@ l_loop:
 	inc	word ptr [bp+inString]
 	jmp	short l_loop
 l_return:
-	mov	sp, bp
-	pop	bp
+	FUNC_EXIT
 	retf
 writeStringAt endp
