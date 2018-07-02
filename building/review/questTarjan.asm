@@ -52,7 +52,7 @@ review_questTarjan proc far
 	PUSH_OFFSET(s_questTarjan_4)
 	PRINTSTRING(wait)
 
-	mov	ax, 4Ah	
+	mov	ax, bigpic_deadOldMan
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 

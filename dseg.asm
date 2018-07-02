@@ -229,55 +229,24 @@ s_thievesInf	db	'thieves.inf',0
 s_partiesInf	db	'parties.inf',0
 
 include(`building/tavern/data.asm')
+include(`building/temple/data.asm')
 
-s_templeGreeting	db 'Welcome, oh weary ones, to our humble temple.',0Ah
-			db 'Dost thou wish to...',0Ah
-			db 'Heal a character',0Ah
-			db 'Pool thy gold',0Ah
-			db 'Exit temple',0
-s_whomGathersGold	db 'Whom shall gather thy gold?',0
-s_hathAllTheGold	db ' now hath all the gold.',0
-s_whoNeedsHealing	db 'Who needeth healing?',0
-			db    0
-s_isInBadShape	db	' is in bad shape, indeed. ',0
-			db    0
-s_templeGoldForfeit	db ' in gold. Who will forfeit the gold?',0
-			db    0
-s_sorryButWithoutProper	db 'Sorry, but without proper sacrifice the prayer will fail.',0
-s_layHands	db 'The priests lay hands on ',0
-s_elipsis		db '...',0
-s_elipsisAnd		db '...and ',0
-s_isHealed		db ' is healed!',0
-s_drainedOfLife	db ' hath been drained of life force. ',0
-			db    0
-s_thouMustSacrifice	db	'Thou must sacrifice ',0
-			db    0
-s_dontNeedHealing	db ' does not require any healing.',0
-			db    0
-s_hasWounds	db ' has wounds which need tending. ',0
-			db    0
-s_donationWillBe	db 'The donation will be ',0
-temple_healPrice	dw 0, 400, 300, 900, 1120, 220, 500, 600, 900			; 8
-aHe		db 'he',0
-aShe		db 'she',0
-aIt		db 'it',0
-aHim		db 'him',0
-aHer		db 'her',0
-aHis		db 'his',0
-aIts		db 'its',0
-pronounString	dd aHe, aShe, aIt, aHim, aHer, aIt, aHis, aHer, aIts		; 7
-s_shrine		db 'Shrine',0
-s_forestLawn	db 'Forest Lawn',0
-s_alliria	db 'Alliria',0
-s_twilightTemple	db 'Twilight Tmp',0
-templeLoc	templeLoc_t <8, 1, 0,	0>; 0
-		templeLoc_t <10, 4, 3, 2>; 1
-		templeLoc_t <2,	7, 6, 4>; 2
-		templeLoc_t <255, 255, 255, 6>;	3
-templeTitles	dd s_shrine, s_forestLawn, s_alliria,	s_twilightTemple; 0
-templeStatusBitmasks	db 2, 1, 10h, 40h, 20h, 8, 4, 0; 0
-templeHealPriceIndex	db 2, 1, 5, 7, 6, 4,	3, 0; 0
-statusHealMask	db 0FFh,	0FEh, 0FDh, 3, 3, 0EFh,	0DFh, 0BFh, 0FFh, 0		; 8
+s_pronounHe		db 'he',0
+s_pronounShe		db 'she',0
+s_pronounIt		db 'it',0
+s_pronounHim		db 'him',0
+s_pronounHer		db 'her',0
+s_pronounHis		db 'his',0
+s_pronounIts		db 'its',0
+g_pronounList	dd s_pronounHe
+		dd s_pronounShe
+		dd s_pronounIt
+		dd s_pronounHim
+		dd s_pronounHer
+		dd s_pronounIt
+		dd s_pronounHis
+		dd s_pronounHer
+		dd s_pronounIts
 fgtrXPReq	dd 2000, 4000, 7000, 10000, 15000, 20000; 0
 		dd 30000, 50000, 80000,	110000,	150000,	200000;	6
 wizdXPReq	dd 20000, 50000, 80000, 120000, 160000, 200000; 0

@@ -67,8 +67,8 @@ loc_14564:
 	add	bx, [bp+arg_6]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (pronounString+2)[bx]
-	push	word ptr pronounString[bx]
+	push	word ptr (g_pronounList+2)[bx]
+	push	word ptr g_pronounList[bx]
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	STRCAT

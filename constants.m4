@@ -63,14 +63,17 @@ define(`specialAttack_unequip', `8')
 define(`specialAttack_spptDrain', `9')
 
 # Bigpic labels
+define(`bigpic_camp', `0')
 define(`bigpic_maleWarrior', `33')
 define(`bigpic_reviewBoard', `47')
 define(`bigpic_temple', `49')
 define(`bigpic_destroyedBuilding', `50')
 define(`bigpic_treasure', `52')
 define(`bigpic_chest', `53')
+define(`bigpic_wizardsHall', `54')
 define(`bigpic_partyDied', `57')
 define(`bigpic_emptyBuilding', `69')
+define(`bigpic_deadOldMan', `74')
 define(`bigpic_tavern', `83')
 
 # Location numbers

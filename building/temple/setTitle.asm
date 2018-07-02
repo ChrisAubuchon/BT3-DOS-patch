@@ -25,16 +25,16 @@ l_loopEntry:
 	mov	si, [bp+loopCounter]
 	mov	cl, 2
 	shl	si, cl
-	mov	al, byte ptr templeLoc.sqN[si]
+	mov	al, byte ptr g_templeLocations.sqN[si]
 	sub	ah, ah
 	cmp	ax, [bp+deltaNS]
 	jnz	short l_loopIncrement
 
-	mov	al, templeLoc.sqE[si]
+	mov	al, g_templeLocations.sqE[si]
 	cmp	ax, [bp+deltaEW]
 	jnz	short l_loopIncrement
 
-	mov	al, templeLoc.location[si]
+	mov	al, g_templeLocations.location[si]
 	cmp	ax, g_locationNumber
 	jnz	short l_loopIncrement
 

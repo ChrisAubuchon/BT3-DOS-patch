@@ -10,7 +10,7 @@ wizardHall_enter proc	far
 	PUSH_OFFSET(s_guild)
 	CALL(setTitle)
 
-	mov	ax, 36h	
+	mov	ax, bigpic_wizardsHall
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 

@@ -9,7 +9,7 @@ bards_enter proc far
 
 	PUSH_OFFSET(s_bardsHall)
 	CALL(setTitle)
-	mov	ax, 83
+	mov	ax, bigpic_tavern
 	push	ax
 	CALL(bigpic_drawPictureNumber)
 l_loop:
