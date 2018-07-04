@@ -88,7 +88,7 @@ l_noNewline:
 	mov	bl, gs:txt_numLines		; menu items
 	sub	bh, bh
 	shl	bx, 1
-	mov	ax, bitMask16bit[bx]
+	mov	ax, g_mouseLineMaskList[bx]
 	or	[bp+mouseBitmask], ax
 
 l_copyStringAfterAt:

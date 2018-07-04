@@ -16,8 +16,8 @@ getYesNo proc far
 	mov	si, ax
 	mov	di, si
 	shl	di, 1
-	mov	ax, (bitMask16bit+2)[di]
-	or	ax, bitMask16bit[di]
+	mov	ax, g_mouseLineMaskList[di+2]
+	or	ax, g_mouseLineMaskList[di]
 	mov	[bp+var_2], ax
 	mov	[bp+mouseOffset], si
 	PUSH_OFFSET(s_yesNo)

@@ -47,7 +47,7 @@ l_setMouseMask:
 
 	mov	bx, [bp+lineCount]
 	shl	bx, 1
-	mov	ax, bitMask16bit[bx]
+	mov	ax, g_mouseLineMaskList[bx]
 	or	[bp+mouseMask], ax
 	inc	[bp+lineCount]
 	jmp	short l_setMouseMask

@@ -59,7 +59,7 @@ l_checkListItem:
 	mov	ax, [bp+arg_0]
 	mov	bx, [bp+var_4]
 	shl	bx, 1
-	test	bitMask16bit[bx], ax
+	test	g_mouseLineMaskList[bx], ax
 	jz	short l_returnZero
 	mov	ax, [bp+var_4]
 	add	ax, 10Eh

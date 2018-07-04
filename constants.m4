@@ -38,6 +38,7 @@ define(`maxDrunkLevel', `0Ch')
 define(`inventorySize', `24h')
 define(`monStruSize', `30h')
 define(`charSize', `78h')
+define(`charMaxAttribute', `30')
 define(`c_spellCount', `7Eh')
 
 # Character Status bit masks
@@ -256,5 +257,33 @@ define(`charAction_use', `5')
 define(`charAction_hide', `6')
 define(`charAction_sing', `7')
 define(`charAction_possessed', `8')
+
+# Character equip masks
+define(`equip_warrior', `80h')
+define(`equip_wizard', `40h')
+define(`equip_sorcerer', `40h')
+define(`equip_conjurer', `40h')
+define(`equip_magician', `40h')
+define(`equip_rogue', `10h')
+define(`equip_bard', `8')
+define(`equip_paladin', `4')
+define(`equip_hunter', `2')
+define(`equip_monk', `1')
+define(`equip_archmage', `20h')
+define(`equip_chronomancer', `60h')
+define(`equip_geomancer', `0E0h')
+define(`equip_monster', `0')
+define(`equip_all', `0FFh')
+define(`equip_none', `0')
+
+# Dice indices
+define(`dice_d2',   `0')
+define(`dice_d4',   `1')
+define(`dice_d8',   `2')
+define(`dice_d16',  `3')
+define(`dice_d32',  `4')
+define(`dice_d64',  `5')
+define(`dice_d128', `6')
+define(`dice_d256', `7')
 
 divert`'dnl

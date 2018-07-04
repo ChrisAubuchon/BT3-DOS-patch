@@ -19,7 +19,7 @@ l_loop:
 	mov	si, ax
 	shl	si, 1
 	mov	ax, g_printPartyFlag[si]
-	or	ax, bitMask16bit[si]
+	or	ax, g_mouseLineMaskList[si]
 	mov	[bp+var_2], ax
 	CALL(getKey)
 	mov	[bp+var_4], ax

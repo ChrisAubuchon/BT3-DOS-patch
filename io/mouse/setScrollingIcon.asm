@@ -32,7 +32,7 @@ mouse_setScrollingIcon proc far
 	mov	ax, [bp+arg_0]
 	mov	bx, [bp+var_2]
 	shl	bx, 1
-	test	bitMask16bit[bx], ax
+	test	g_mouseLineMaskList[bx], ax
 	jz	short loc_14F2D
 	mov	ax, 5
 	jmp	short loc_14F30

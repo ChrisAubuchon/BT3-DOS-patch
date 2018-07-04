@@ -74,7 +74,7 @@ l_monsterOnlyLoop:
 	mov	si, ax
 	mov	bx, si
 	shl	bx, 1
-	mov	ax, (bitMask16bit+2)[bx]
+	mov	ax, g_mouseLineMaskList[bx+2]
 	or	[bp+mouseIoMask], ax
 	mov	al, byte ptr [bp+loopCounter]
 	add	al, 'A'
@@ -121,7 +121,7 @@ l_anyTargetMonsterLoop:
 	mov	si, ax
 	mov	bx, si
 	shl	bx, 1
-	mov	ax, (bitMask16bit+2)[bx]
+	mov	ax, g_mouseLineMaskList[bx+2]
 	or	[bp+mouseIoMask], ax
 	mov	al, byte ptr [bp+loopCounter]
 	add	al, 'A'

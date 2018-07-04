@@ -25,7 +25,7 @@ l_mouseLoop:
 	sub	bh, bh
 	sub	bx, [bp+loopCounter]
 	shl	bx, 1
-	mov	ax, bitMask16bit[bx]
+	mov	ax, g_mouseLineMaskList[bx]
 	or	[bp+mouseMask], ax
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 4

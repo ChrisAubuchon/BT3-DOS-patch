@@ -68,7 +68,7 @@ loc_1512C:
 	jmp	loc_151CE
 loc_15132:
 	mov	ax, [bp+arg_0]
-	test	bitMask16bit+1Eh, ax
+	test	g_mouseLineMaskList+1Eh, ax
 	jz	short l_returnZero
 	cmp	mouse_y, 2Dh 
 	jge	short loc_15154
@@ -96,7 +96,7 @@ loc_1517E:
 	mov	ax, [bp+arg_0]
 	mov	bx, [bp+var_6]
 	shl	bx, 1
-	test	bitMask16bit[bx], ax
+	test	g_mouseLineMaskList[bx], ax
 	jz	short l_returnZero
 	mov	ax, [bp+var_6]
 	add	ax, 10Eh

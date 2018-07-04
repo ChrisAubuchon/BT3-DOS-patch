@@ -134,4 +134,14 @@ define(`REGISTER_TRIPLE', `mov	$2, $1
 	shl	$1, 1
 	add	$1, $2')')
 
+define(`BITMASK', `_bitmask(`0', $@)')dnl
+#define(`_bitmask', `ifelse(`$#', `1', `convertBack(format(`0x%X', `$1'))', `ifelse(`$2', `', `$0($1)', `$0(`eval($1 | convertHex($2))', shift(shift($@)))')')')
+define(`_bitmask', `ifelse(`$#', `1', `convertBack(ifelse(regexp(`$1', `^[0-9]$'), `0', `$1', format(`0x%X', `$1')))', `ifelse(`$2', `', `$0($1)', `$0(`eval($1 | convertHex($2))', shift(shift($@)))')')')
+
+define(`convertHex', `ifelse(regexp(`$1', `[0-9]+$'), `0', `$1', `patsubst(patsubst(`$1', `h$'), `^', `0x')')')
+define(`convertBack', `ifelse(regexp(`$1', `^0x'), `0', ifelse(regexp(`$1', `^0x[A-F]'), `0', patsubst($1, `0x', `0')`h', patsubst($1, `0x')`h'), `$1')')
+
+dnldefine(`DICE_XDY', `convertBack(format(`0x%X', eval(eval($2 << 5) | eval($1 - 1))))')
+define(`DICE_XDY', `format(`%d', eval(eval($2 << 5) | eval($1 - 1)))')
+
 divert`'dnl

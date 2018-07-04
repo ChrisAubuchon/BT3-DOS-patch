@@ -92,7 +92,7 @@ l_convertLoop:
 	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
-	mov	ax, bitMask16bit[bx]
+	mov	ax, g_mouseLineMaskList[bx]
 	or	[bp+convertListMouseMask], ax
 
 l_convertNext:

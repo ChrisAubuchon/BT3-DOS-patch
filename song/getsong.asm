@@ -61,14 +61,14 @@ l_loopEnter:
 	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
-	mov	ax, bitMask16bit[bx]
+	mov	ax, g_mouseLineMaskList[bx]
 	or	[bp+var_12], ax
 l_next:
 	inc	[bp+counter]
 	cmp	[bp+counter], 8
 	jl	l_loopEnter
 
-	mov	ax, bitMask16bit+16h
+	mov	ax, g_mouseLineMaskList+16h
 	or	[bp+var_12], ax
 	cmp	[bp+songPlayingFlag], 0
 	jz	short l_getUserInput

@@ -100,11 +100,11 @@ loc_15A17:
 	mov	bx, [bp+var_1A]
 	add	bx, [bp+TxtNumLines]
 	shl	bx, 1
-	mov	ax, bitMask16bit[bx]
+	mov	ax, g_mouseLineMaskList[bx]
 	or	[bp+var_4], ax
 	jmp	short loc_15A14
 loc_15A35:
-	mov	ax, bitMask16bit+16h
+	mov	ax, g_mouseLineMaskList+16h
 	or	[bp+var_4], ax
 	CALL(scroll_printArrows, near)
 	mov	ax, [bp+highlightedLine]

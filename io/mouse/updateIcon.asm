@@ -43,7 +43,7 @@ l_loopExit:
 	; bigpic area. This is where the direction arrow icons are
 	; set
 	mov	ax, [bp+arg_0]
-	test	bitMask16bit+1Eh, ax		; 8000h
+	test	g_mouseLineMaskList+1Eh, ax		; 8000h
 	jz	short l_setIconSix
 	cmp	mouse_y, 2Dh 
 	jge	short loc_14FDE
@@ -68,7 +68,7 @@ loc_1500E:
 	mov	ax, [bp+arg_0]
 	mov	bx, [bp+var_6]
 	shl	bx, 1
-	test	bitMask16bit[bx], ax
+	test	g_mouseLineMaskList[bx], ax
 	jz	short l_setIconSix
 	jmp	short l_setIconFive
 

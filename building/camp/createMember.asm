@@ -3,7 +3,7 @@
 
 camp_createMember proc far
 
-	var_23A= byte ptr -23Ah
+	mouseSubtractor= byte ptr -23Ah
 	var_EC=	byte ptr -0ECh
 	var_EA=	word ptr -0EAh
 	var_E8=	word ptr -0E8h
@@ -11,21 +11,20 @@ camp_createMember proc far
 	var_34=	word ptr -34h
 	counter= word ptr -32h
 	var_30=	word ptr -30h
-	var_2E=	word ptr -2Eh
-	var_24=	word ptr -24h
-	var_22=	word ptr -22h
-	var_20=	dword ptr -20h
+	attributeValueList=	word ptr -2Eh
+	inKey=	word ptr -22h
+	dataP=	dword ptr -20h
 	var_1C=	word ptr -1Ch
 	var_8= word ptr	-8
 	raceGenderValue= word ptr -6
 	var_4= word ptr	-4
-	var_2= word ptr	-2
+	mouseBitMask= word ptr	-2
 
 	FUNC_ENTER(0ECh)
 	push	di
 	push	si
-	mov	word ptr [bp+var_20], offset newCharBuffer
-	mov	word ptr [bp+var_20+2],	seg seg027
+	mov	word ptr [bp+dataP], offset newCharBuffer
+	mov	word ptr [bp+dataP+2],	seg seg027
 loc_129B3:
 	mov	[bp+counter], 0
 	jmp	short loc_129BD
@@ -35,7 +34,7 @@ loc_129BD:
 	cmp	[bp+counter], 78h 
 	jge	short loc_129CF
 	mov	bx, [bp+counter]
-	lfs	si, [bp+var_20]
+	lfs	si, [bp+dataP]
 	mov	byte ptr fs:[bx+si], 0
 	jmp	short loc_129BA
 loc_129CF:
@@ -81,14 +80,14 @@ loc_12A1F:
 	add	ax, cx
 	mov	si, bx
 	shl	si, 1
-	mov	[bp+si+var_2E],	ax
+	mov	[bp+si+attributeValueList],	ax
 	mov	si, [bp+counter]
 	shl	si, 1
-	cmp	[bp+si+var_2E],	1Eh
+	cmp	[bp+si+attributeValueList],	charMaxAttribute
 	jle	short loc_12A58
 	mov	si, [bp+counter]
 	shl	si, 1
-	mov	[bp+si+var_2E],	1Eh
+	mov	[bp+si+attributeValueList],	charMaxAttribute
 loc_12A58:
 	jmp	short loc_12A1C
 loc_12A5A:
@@ -98,12 +97,11 @@ loc_12A5A:
 	mov	[bp+var_30], ax
 	mov	gs:newCharBuffer.currentHP, ax
 	mov	gs:newCharBuffer.maxHP,	ax
-	mov	[bp+var_24], ax
 	CALL(text_clear)
 	mov	ax, 5
 	push	ax
 	PUSH_STACK_ADDRESS(var_E8)
-	PUSH_STACK_ADDRESS(var_2E)
+	PUSH_STACK_ADDRESS(attributeValueList)
 	CALL(getAttributeString)
 
 	PUSH_STACK_ADDRESS(var_E8)
@@ -118,7 +116,7 @@ loc_12A5A:
 	mov	[bp+raceGenderValue], ax
 	sub	ax, ax
 	mov	[bp+var_EA], ax
-	mov	[bp+var_2], ax
+	mov	[bp+mouseBitMask], ax
 	mov	al, gs:txt_numLines
 	sub	ah, ah
 	mov	[bp+var_8], ax
@@ -136,8 +134,8 @@ loc_12AD8:
 	mov	bl, gs:txt_numLines
 	sub	bh, bh
 	shl	bx, 1
-	mov	ax, (bitMask16bit+2)[bx]
-	or	[bp+var_2], ax
+	mov	ax, g_mouseLineMaskList[bx+2]
+	or	[bp+mouseBitMask], ax
 	mov	bx, [bp+counter]
 	shl	bx, 1
 	shl	bx, 1
@@ -156,39 +154,39 @@ loc_12B30:
 	mov	[bp+var_4], 0
 	mov	[bp+var_34], 1
 loc_12B3A:
-	push	[bp+var_2]
+	push	[bp+mouseBitMask]
 	CALL(getKey)
-	mov	[bp+var_22], ax
+	mov	[bp+inKey], ax
 	mov	ax, [bp+var_8]
 	add	ax, 10Eh
-	cmp	ax, [bp+var_22]
+	cmp	ax, [bp+inKey]
 	jg	short loc_12B7B
 	mov	ax, [bp+var_EA]
 	add	ax, [bp+var_8]
 	add	ax, 10Eh
-	cmp	ax, [bp+var_22]
+	cmp	ax, [bp+inKey]
 	jl	short loc_12B7B
-	mov	si, [bp+var_22]
+	mov	si, [bp+inKey]
 	sub	si, [bp+var_8]
 	shl	si, 1
-	mov	al, [bp+si+var_23A]
+	mov	al, [bp+si+mouseSubtractor]
 	mov	gs:newCharBuffer.class,	al
 	mov	[bp+var_34], 0
 loc_12B7B:
-	cmp	[bp+var_22], 30h 
+	cmp	[bp+inKey], 30h 
 	jle	short loc_12BA4
 	mov	ax, [bp+var_EA]
 	add	ax, 30h	
-	cmp	ax, [bp+var_22]
+	cmp	ax, [bp+inKey]
 	jl	short loc_12BA4
-	mov	si, [bp+var_22]
+	mov	si, [bp+inKey]
 	shl	si, 1
 	mov	al, [bp+si+var_7E]
 	mov	gs:newCharBuffer.class,	al
 	mov	[bp+var_34], 0
 	jmp	short loc_12BB4
 loc_12BA4:
-	cmp	[bp+var_22], 1Bh
+	cmp	[bp+inKey], 1Bh
 	jnz	short loc_12BB4
 	mov	[bp+var_34], 0
 	mov	[bp+var_4], 1
@@ -261,8 +259,8 @@ loc_12C6E:
 	inc	[bp+counter]
 	jmp	short loc_12C6E
 loc_12C8A:
-	mov	word ptr [bp+var_20], offset newCharBuffer.strength
-	mov	word ptr [bp+var_20+2],	seg seg027
+	mov	word ptr [bp+dataP], offset newCharBuffer.strength
+	mov	word ptr [bp+dataP+2],	seg seg027
 	mov	[bp+counter], 0
 	jmp	short loc_12C9E
 loc_12C9B:
@@ -272,9 +270,9 @@ loc_12C9E:
 	jge	short loc_12CB7
 	mov	si, [bp+counter]
 	shl	si, 1
-	mov	al, byte ptr [bp+si+var_2E]
+	mov	al, byte ptr [bp+si+attributeValueList]
 	mov	bx, [bp+counter]
-	lfs	si, [bp+var_20]
+	lfs	si, [bp+dataP]
 	mov	fs:[bx+si], al
 	jmp	short loc_12C9B
 loc_12CB7:
