@@ -17,10 +17,10 @@ bat_doBreathAttack proc	far
 	var_2= word ptr	-2
 	partySlotNumber=	word ptr  6
 	specialAttackIndex= byte ptr	 8
-	arg_3= byte ptr	 9
-	arg_4= byte ptr	 0Ah
-	arg_5= byte ptr	 0Bh
-	arg_6= byte ptr	 0Ch
+	attackElement= byte ptr	 9
+	attackStringIndex= byte ptr	 0Ah
+	attackRepelFlags= byte ptr	 0Bh
+	diceIndex= byte ptr	 0Ch
 	breathFlags= byte ptr	 0Dh
 	levelMultiplier= byte ptr	 0Eh
 	spellRange= word ptr	 10h
@@ -174,7 +174,7 @@ loc_20345:
 	sub	ah, ah
 	cmp	ax, [bp+counter]
 	jbe	short loc_20379
-	mov	al, [bp+arg_6]
+	mov	al, [bp+diceIndex]
 	push	ax
 	CALL(randomYdX)
 	add	gs:g_damageAmount, ax
@@ -243,7 +243,7 @@ loc_2047F:
 	cmp	[bp+var_2], 0
 	jz	loc_2050C
 
-	cmp	[bp+arg_5], 0
+	cmp	[bp+attackRepelFlags], 0
 	jz	short loc_2050C
 
 	cmp	gs:bat_curTarget, 80h
@@ -266,7 +266,7 @@ loc_204B0:
 	sub	ah, ah
 loc_204CF:
 	mov	[bp+var_10C], ax
-	mov	al, [bp+arg_5]
+	mov	al, [bp+attackRepelFlags]
 	sub	ah, ah
 	test	[bp+var_10C], ax
 	jnz	short loc_2050C
@@ -332,7 +332,7 @@ loc_205B0:
 	sub	ah, ah
 loc_205CF:
 	mov	[bp+var_108], ax
-	mov	al, [bp+arg_3]
+	mov	al, [bp+attackElement]
 	sub	ah, ah
 	and	[bp+var_108], ax
 
@@ -369,7 +369,7 @@ loc_20631:
 	sub	ah, ah
 loc_20650:
 	mov	[bp+var_6], ax
-	mov	al, [bp+arg_3]
+	mov	al, [bp+attackElement]
 	sub	ah, ah
 	and	[bp+var_6], ax
 
@@ -396,7 +396,7 @@ loc_206A1:
 	PUSH_OFFSET(s_is)
 	PUSH_STACK_DWORD(outputStringP)
 	STRCAT(outputStringP)
-	mov	bl, [bp+arg_4]
+	mov	bl, [bp+attackStringIndex]
 	sub	bh, bh
 	and	bl, 0FEh
 	shl	bx, 1

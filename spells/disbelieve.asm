@@ -12,7 +12,7 @@ sp_disbelieve proc far
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	or	gs:g_disbelieveFlags, al
 
 	cmp	gs:g_disbelieveFlags, disb_disruptill
@@ -40,7 +40,7 @@ l_nextChar:
 
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
-	test	spellEffectFlags[bx], disb_nosummon
+	test	g_spellEffectData[bx], disb_nosummon
 	jz	short l_monDisbelieve
 	or	gs:g_disbelieveFlags, disb_nosummon
 	jmp	short l_return

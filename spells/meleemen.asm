@@ -1,12 +1,11 @@
 ; Attributes: bp-based frame
 
-; DWORD - var_2 & var_4
+; DWORD - stringBufferP+2 & stringBufferP
 
 sp_meleeMen proc far
 
 	stringBuffer=	word ptr -56h
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	stringBufferP= dword ptr	-4
 	spellCaster= word ptr	 6
 
 	FUNC_ENTER(56h)
@@ -25,6 +24,7 @@ sp_meleeMen proc far
 	push	ax
 	CALL(_sp_setMonDistance, near)
 	jmp	short l_printMessage
+
 l_partyCaster:
 	mov	ax, 1
 	push	ax
@@ -33,21 +33,19 @@ l_partyCaster:
 	and	ax, 3
 	push	ax
 	CALL(_sp_setMonDistance, near)
+
 l_printMessage:
 	PUSH_OFFSET(s_andTheFoesAre)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	STRCAT(stringBufferP)
+
 	PUSH_OFFSET(s_closer)
-	push	ax
-	push	dx
-	push	[bp+var_4]
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
+
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
+
 l_return:
 	FUNC_EXIT
 	retf

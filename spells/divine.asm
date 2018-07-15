@@ -23,16 +23,18 @@ l_notIllusion:
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 7
 	jl	short l_loopEnter
+
 	cmp	gs:byte_422A4, 0
 	jz	short l_return
-	mov	al, 14h
+
+	mov	al, 20
 	mov	gs:g_divineDamageBonus, al
 	mov	gs:g_charFreezeToHitBonus, al
 	mov	gs:antiMagicFlag, al
 	mov	gs:partySpellAcBonus, al
 	mov	gs:songExtraAttack, 8
 	mov	gs:bat_curTarget, 80h
-	mov	ax, 0CEh 
+	mov	ax, BITMASK(spell_mangarsMallet, 80h)
 	push	ax
 	push	[bp+spellCaster]
 	CALL(_batchSpellCast, near)

@@ -21,18 +21,18 @@ sp_wordOfFear proc far
 	mov	si, ax
 	and	si, 3
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	add	gs:monSpellToHitPenalty[si], al
 	mov	bx, [bp+spellIndexNumber]
 
 	; byte_41E50 isn't used anywhere else
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	add	gs:byte_41E50[si], al
 	jmp	short l_return
 
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	add	gs:g_monsterWOFBonus, al
 
 l_return:

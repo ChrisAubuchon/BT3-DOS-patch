@@ -8,7 +8,7 @@ sp_summonSpell proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	sub	ah, ah
 	push	ax
 	push	[bp+spellCaster]

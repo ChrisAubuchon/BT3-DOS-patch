@@ -48,7 +48,7 @@ loc_11D4B:
 	or	ax, ax
 	jz	short l_powerless
 	mov	bx, g_curSpellNumber
-	mov	al, spellCastFlags[bx]
+	mov	al, g_spellCastFlags[bx]
 	sub	ah, ah
 	and	ax, 7
 	mov	[bp+targetSlotNumber], ax

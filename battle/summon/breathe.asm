@@ -2,11 +2,13 @@
 
 bat_summonBreathAttack proc far
 
-	stringBufferP = dword ptr -114h
-	stringBuffer = word ptr -110h
-	argP= dword ptr	-10h
-	counter= word ptr -0Ah
-	argList= byte ptr -8
+	stringBufferP = dword ptr -118h
+	stringBuffer = word ptr -114h
+	argP= dword ptr	-14h
+	counter= word ptr -10h
+	argList= byte ptr -0Ch
+	var_A= byte ptr -0Ah
+	var_8= byte ptr -8
 	slotP= dword ptr -4
 	slotNumber=	word ptr  6
 	damage=	byte ptr  8
@@ -18,12 +20,8 @@ bat_summonBreathAttack proc far
 	; Get the breather's name
 	push	[bp+slotNumber]
 	PUSH_STACK_ADDRESS(stringBuffer)
-	lea	ax, [bp+stringBuffer]
-	push	ss
-	push	ax
 	CALL(bat_getAttackerName, near)
-	mov	word ptr [bp+stringBufferP], ax
-	mov	word ptr [bp+stringBufferP+2], dx
+	SAVE_STACK_DWORD(dx, ax, stringBufferP)
 
 	CHARINDEX(ax, STACKVAR(slotNumber))
 	add	ax, offset party
@@ -51,7 +49,7 @@ l_targetSet:
 	mov	[bp+counter], 0
 l_setAttackDataLoop:
 	mov	bx, [bp+counter]
-	mov	al, byte ptr breathAttack.effectStrIndex[bx]
+	mov	al, byte ptr breathAttack.specialAttack[bx]
 	lfs	si, [bp+argP]
 	mov	fs:[bx+si], al
 	inc	[bp+counter]
@@ -60,13 +58,13 @@ l_setAttackDataLoop:
 
 	lfs	bx, [bp+slotP]
 	mov	al, fs:[bx+summonStat_t.breathFlag]
+	mov	[bp+var_A], al
 
 	; Add the fire/breath string
 	sub	ah, ah
 	xor	al, 0Ah
 	push	ax
-	push	word ptr [bp+stringBufferP+2]
-	push	word ptr [bp+stringBufferP]
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_OFFSET(s_firesBreathes)
 	PLURALIZE(stringBufferP)
 
@@ -77,6 +75,8 @@ l_setAttackDataLoop:
 	PRINTSTRING
 	
 	mov	al, [bp+damage]
+	mov	[bp+var_8], al
+
 	lfs	bx, [bp+slotP]
 	mov	al, fs:[bx+summonStat_t.breathRange]
 	sub	ah, ah

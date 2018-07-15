@@ -13,9 +13,9 @@ mfunc_ifInBox proc far
 	FUNC_ENTER(0Ch)
 	push	si
 
-	mov	ax, sq_north
+	mov	ax, g_sqNorth
 	mov	[bp+sqN], ax
-	mov	ax, sq_east
+	mov	ax, g_sqEast
 	mov	[bp+sqE], ax
 	cmp	inDungeonMaybe, 0
 	jnz	short l_skipWildernessOffset

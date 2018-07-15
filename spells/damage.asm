@@ -4,7 +4,7 @@ sp_damageSpell proc far
 
 	attP= word ptr -10h
 	var_E= word ptr	-0Eh
-	var_C= word ptr	-0Ch
+	effectFlags= word ptr	-0Ch
 	counter= word ptr -0Ah
 	attStru= byte ptr -8
 	partySlotNumber=	word ptr  6
@@ -15,9 +15,9 @@ sp_damageSpell proc far
 	push	si
 
 	mov	bx, [bp+spellNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	sub	ah, ah
-	mov	[bp+var_C], ax
+	mov	[bp+effectFlags], ax
 	lea	ax, [bp+attStru]
 	mov	[bp+attP], ax
 	mov	[bp+var_E], ss
@@ -25,18 +25,20 @@ sp_damageSpell proc far
 	jmp	short loc_20100
 loc_200FD:
 	inc	[bp+counter]
+
 loc_20100:
 	cmp	[bp+counter], 7
 	jge	short loc_20118
-	mov	si, [bp+var_C]
+	mov	si, [bp+effectFlags]
 	mov	bx, [bp+counter]
-	mov	al, byte ptr damageSpellData.effectStrIndex[bx+si]
+	mov	al, byte ptr damageSpellData.specialAttack[bx+si]
 	lfs	si, dword ptr [bp+attP]
 	mov	fs:[bx+si], al
 	jmp	short loc_200FD
+
 loc_20118:
 	mov	bx, [bp+spellNumber]
-	mov	al, spellExtraFlags[bx]
+	mov	al, g_spellExtraData[bx]
 	sub	ah, ah
 	push	ax
 	sub	sp, 8

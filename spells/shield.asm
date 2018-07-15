@@ -10,16 +10,16 @@ sp_shieldSpell proc far
 	cmp	[bp+spellCaster], 80h
 	jl	short l_partyCaster
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellExtraFlags[bx]
+	mov	al, g_spellExtraData[bx]
 	mov	bx, [bp+spellCaster]
 	and	bx, 3
 	sub	gs:g_monFreezeAcPenalty[bx], al
 	jmp	short loc_215BE
 l_partyCaster:
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	shieldDuration, al
-	mov	al, spellExtraFlags[bx]
+	mov	al, g_spellExtraData[bx]
 	mov	shieldAcBonus, al
 	mov	ax, icon_shield
 	push	ax

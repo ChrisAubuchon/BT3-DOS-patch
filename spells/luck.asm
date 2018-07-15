@@ -8,7 +8,7 @@ sp_luckSpell proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+spelIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	add	gs:g_charFreezeToHitBonus, al
 	push	bx
 	push	[bp+spellCaster]

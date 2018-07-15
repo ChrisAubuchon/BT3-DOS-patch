@@ -24,7 +24,7 @@ l_loopEnter:
 	sub	ah, ah
 	and	ax, 0Fh
 	mov	bx, [bp+spellIndexNumber]
-	mov	cl, spellEffectFlags[bx]
+	mov	cl, g_spellEffectData[bx]
 	sub	ch, ch
 	add	ax, cx
 	mov	[bp+newDistance], ax
@@ -49,7 +49,7 @@ l_monCaster:
 	sub	ah, ah
 	and	ax, 0Fh
 	mov	bx, [bp+spellIndexNumber]
-	mov	cl, spellEffectFlags[bx]
+	mov	cl, g_spellEffectData[bx]
 	sub	ch, ch
 	add	ax, cx
 	mov	[bp+newDistance], ax

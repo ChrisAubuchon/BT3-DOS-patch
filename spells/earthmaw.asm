@@ -1,23 +1,18 @@
 ; Attributes: bp-based frame
 
-; DWORD var_104 & var_106
-
 sp_earthMaw proc far
 
 	loopCounter= word ptr -108h
-	var_106= word ptr -106h
-	var_104= word ptr -104h
+	stringBufferP= dword ptr -106h
 	var_102= word ptr -102h
-	var_100= word ptr -100h
+	stringBuffer= word ptr -100h
 
 	FUNC_ENTER(108h)
 	push	si
 
 	PUSH_OFFSET(s_earthSwallows)
-	PUSH_STACK_ADDRESS(var_100)
-	STRCAT
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT(stringBufferP)
 
 	cmp	gs:bat_curTarget, 80h
 	jnb	short l_monTarget
@@ -34,10 +29,8 @@ l_partyLoopEnter:
 
 	CALL(endNoncombatSong)
 	PUSH_OFFSET(s_theParty)
-	PUSH_STACK_ADDRESS(var_100)
-	STRCAT
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT(stringBufferP)
 	jmp	l_return
 
 l_monTarget:
@@ -52,11 +45,9 @@ l_monTarget:
 	dec	ax
 	push	ax
 	push	si
-	push	[bp+var_104]
-	push	[bp+var_106]
+	PUSH_STACK_DWORD(stringBufferP)
 	CALL(strcatTargetName, near)
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	SAVE_STACK_DWORD(dx, ax, stringBufferP)
 	mov	al, gs:bat_curTarget
 	sub	ah, ah
 	and	ax, 3
@@ -77,7 +68,7 @@ l_monLoopEnter:
 	cmp	[bp+loopCounter], 32
 	jl	short l_monLoopEnter
 l_return:
-	PUSH_STACK_ADDRESS(var_100)
+	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	pop	si
 	FUNC_EXIT

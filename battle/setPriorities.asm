@@ -62,7 +62,7 @@ loc_1C696:
 	CHARINDEX(ax, STACKVAR(loopCounter), si)
 	mov	bl, gs:party.class[si]
 	sub	bh, bh
-	mov	al, byte_475AE[bx]
+	mov	al, g_classBaseAttackPriority[bx]
 	mov	bx, [bp+loopCounter]
 	mov	gs:bat_charPriority[bx], al
 	CALL(random_2d16)

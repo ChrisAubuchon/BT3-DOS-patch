@@ -13,8 +13,7 @@ review_learnSpells	proc far
 	FUNC_ENTER(10Eh)
 	push	si
 
-	PUSH_OFFSET(s_whoSeeksKnowledge)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_whoSeeksKnowledge, clear)
 	CALL(readSlotNumber)
 	mov	[bp+slotNumber], ax
 	or	ax, ax
@@ -28,8 +27,7 @@ review_learnSpells	proc far
 	mov	[bp+spellBase],	ax
 	cmp	ax, 0FFh
 	jnz	short l_isSpellcaster
-	PUSH_OFFSET(s_thouArtNotASpellcaster)
-	PRINTSTRING(wait)
+	PRINTOFFSET(s_thouArtNotASpellcaster, wait)
 	jmp	l_return
 
 l_isSpellcaster:

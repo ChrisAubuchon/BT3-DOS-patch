@@ -11,7 +11,7 @@ writeInventoryStf proc far
 	mov	[bp+fd], ax
 	mov	ax, 54h	
 	push	ax
-	mov	ax, offset strg_inventory
+	mov	ax, offset g_storageInventory
 	mov	dx, seg	dseg
 	push	dx
 	push	ax

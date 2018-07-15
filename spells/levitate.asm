@@ -7,7 +7,7 @@ sp_levitation proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	levitationDuration, al
 	mov	ax, icon_levitation
 	push	ax

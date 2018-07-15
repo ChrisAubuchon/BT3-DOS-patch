@@ -64,12 +64,12 @@ loc_14A05:
 	shl	ax, 1
 	add	ax, cx
 	mov	si, ax
-	mov	al, (strg_inventory+2)[si]
+	mov	al, (g_storageInventory+2)[si]
 	sub	ah, ah
 	push	ax
-	mov	al, (strg_inventory+1)[si]
+	mov	al, (g_storageInventory+1)[si]
 	push	ax
-	mov	al, strg_inventory[si]
+	mov	al, g_storageInventory[si]
 	push	ax
 	push	[bp+arg_0]
 	CALL(inventory_addItem)
@@ -79,7 +79,7 @@ loc_14A05:
 	mov	ax, bx
 	shl	bx, 1
 	add	bx, ax
-	mov	strg_inventory[bx], 0
+	mov	g_storageInventory[bx], 0
 	PUSH_OFFSET(s_youPickUpItem)
 	PRINTSTRING(true)
 	jmp	short l_delayAndLoop

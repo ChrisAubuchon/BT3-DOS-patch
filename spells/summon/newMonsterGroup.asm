@@ -21,7 +21,7 @@ summon_newMonGroup proc far
 	mov	ax, 20h
 	push	ax
 	MONINDEX(ax, STACKVAR(arg_0))
-	add	ax, offset summonHpDice
+	add	ax, offset summonData+16
 	push	ds
 	push	ax
 	MONINDEX(ax, STACKVAR(arg_2), bx)

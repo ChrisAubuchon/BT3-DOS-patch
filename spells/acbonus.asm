@@ -9,12 +9,12 @@ sp_acBonus proc	far
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	add	gs:partySpellAcBonus, al
 	jmp	short l_return
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	bx, [bp+spellCaster]
 	and	bx, 3
 	sub	gs:g_monFreezeAcPenalty[bx], al

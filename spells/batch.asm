@@ -2,15 +2,14 @@
 
 sp_batchspell proc far
 
-	batchListIndex= word ptr	-4
-	var_2= word ptr	-2
+	batchListIndex= word ptr	-2
 	spellCaster= word ptr	 6
 	spellIndexNumber= word ptr	 8
 
-	FUNC_ENTER(4)
+	FUNC_ENTER(2)
 
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	sub	ah, ah
 	mov	[bp+batchListIndex], ax
 l_loopEnter:
@@ -18,7 +17,6 @@ l_loopEnter:
 	inc	[bp+batchListIndex]
 	mov	al, batchSpellList[bx]
 	sub	ah, ah
-	mov	[bp+var_2], ax
 	or	ax, ax
 	jz	short l_return
 	push	ax

@@ -14,8 +14,8 @@ sp_phaseDoor proc far
 
 	cmp	inDungeonMaybe, 0
 	jz	loc_216E2
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(dun_getWalls)
 	mov	[bp+var_2], ax
 	mov	ax, g_direction
@@ -35,14 +35,14 @@ sp_phaseDoor proc far
 loc_21671:
 	mov	gs:wallIsPhased, 1
 	mov	bx, [bp+spellIndexNumber]
-	cmp	spellEffectFlags[bx], 80h
+	cmp	g_spellEffectData[bx], 80h
 	jb	short loc_216E0
-	mov	bx, sq_north
+	mov	bx, g_sqNorth
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr gs:rowOffset[bx]
 	mov	dx, word ptr gs:(rowOffset+2)[bx]
-	mov	cx, sq_east
+	mov	cx, g_sqEast
 	mov	bx, cx
 	shl	cx, 1
 	shl	cx, 1

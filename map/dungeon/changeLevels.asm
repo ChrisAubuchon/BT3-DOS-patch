@@ -16,10 +16,10 @@ dun_changeLevels proc far
 	mov	dunLevelIndex, ax
 	mov	al, fs:[bx+dun_t.deltaSqN]
 	cbw
-	add	sq_north, ax
+	add	g_sqNorth, ax
 	mov	al, fs:[bx+dun_t.deltaSqE]
 	cbw
-	add	sq_east, ax
+	add	g_sqEast, ax
 	mov	gs:levelChangedFlag, 1
 	mov	g_mapRval, 4
 

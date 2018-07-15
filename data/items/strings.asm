@@ -242,7 +242,7 @@ s_itemStaffOfGods	db 'Staff of Gods',0
 s_itemHornOfGods	db 'Horn of Gods',0
 
 s_fluidWater		db 'Water',0
-s_fluidSpirits	db 'Spirits',0
+s_fluidSpirits		db 'Spirits',0
 s_fluidWaterOfLife	db 'Water of Life',0
 s_fluidDragonBlood	db 'Dragon Blood',0
 s_fluidMoltenTar	db 'Molten Tar',0
@@ -520,8 +520,8 @@ g_itemStringList	dd s_itemNothing		;   0
 			dd s_itemXChar			; 254
 			dd s_itemXChar			; 255
 
-wineskinString	dd s_fluidWater			; 0
-		dd s_fluidSpirits		; 1
-		dd s_fluidWaterOfLife		; 2
-		dd s_fluidDragonBlood		; 3
-		dd s_fluidMoltenTar		; 4
+g_wineskinContents	dd s_fluidWater			; 0
+			dd s_fluidSpirits		; 1
+			dd s_fluidWaterOfLife		; 2
+			dd s_fluidDragonBlood		; 3
+			dd s_fluidMoltenTar		; 4

@@ -1,78 +1,63 @@
-; DWORD - var_108 & var_10A, var_10E & var_10C
 ; Attributes: bp-based frame
 
 printLocation proc far
 
 	pacesNorth= word ptr -126h
 	unmaskedLocationName= word ptr -124h
-	var_110= word ptr -110h
-	var_10E= word ptr -10Eh
-	var_10C= word ptr -10Ch
-	var_10A= word ptr -10Ah
-	var_108= word ptr -108h
-	var_106= word ptr -106h
-	var_104= word ptr -104h
+	entranceIndex= word ptr -110h
+	levelP= dword ptr -10Eh
+	stringBufferP= dword ptr -10Ah
+	nsPluralFlag= word ptr -106h
+	timeIndex= word ptr -104h
 	pacesEast= word ptr -102h
 	stringBuffer= word ptr -100h
 
 	FUNC_ENTER(126h)
 
-	mov	[bp+var_10E], offset g_rosterCharacterBuffer
-	mov	[bp+var_10C], seg seg022
+	mov	[bp+levelP], offset g_rosterCharacterBuffer
+	mov	[bp+levelP+2], seg seg022
 	PUSH_OFFSET(s_youreIn)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	STRCAT(stringBufferP)
 
 	cmp	g_locationNumber, 0
 	jnz	short l_skipThe
 
 	PUSH_OFFSET(s_the)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 l_skipThe:
 	PUSH_STACK_ADDRESS(unmaskedLocationName)
-	push	[bp+var_10C]
-	push	[bp+var_10E]
+	PUSH_STACK_DWORD(levelP)
 	CALL(unmaskString)
 
 	PUSH_STACK_ADDRESS(unmaskedLocationName)
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 	mov	bx, g_locationNumber
-	mov	al, byte_428A6[bx]
+	mov	al, g_locationDeltaNorth[bx]
 	cbw
-	mov	cx, sq_north
+	mov	cx, g_sqNorth
 	sub	cx, ax
 	mov	[bp+pacesNorth], cx
 	or	cx, cx
 	jz	loc_121CD
 
 	PUSH_OFFSET(s_spAndsp)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	cmp	[bp+pacesNorth], 0
 	jge	short loc_1216A
 
 	mov	ax, [bp+pacesNorth]
 	neg	ax
 	mov	[bp+pacesNorth], ax
-	mov	[bp+var_106], 1
+	mov	[bp+nsPluralFlag], 1
 	jmp	short loc_12170
 loc_1216A:
-	mov	[bp+var_106], 0
+	mov	[bp+nsPluralFlag], 0
 loc_12170:
 	sub	ax, ax
 	push	ax
@@ -80,55 +65,43 @@ loc_12170:
 	cwd
 	push	dx
 	push	ax
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	CALL(itoa)
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
 
 	mov	ax, [bp+pacesNorth]
 	dec	ax
 	push	ax
-	push	dx
-	push	[bp+var_10A]
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_OFFSET(s_paces)
-	PLURALIZE
+	PLURALIZE(stringBufferP)
 
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
-	push	[bp+var_106]
-	push	dx
-	push	ax
+	push	[bp+nsPluralFlag]
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_OFFSET(s_northSouth)
-	PLURALIZE
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PLURALIZE(stringBufferP)
 
 loc_121CD:
 	mov	bx, g_locationNumber
-	mov	al, byte_428B0[bx]
+	mov	al, g_locationDeltaEast[bx]
 	cbw
-	mov	cx, sq_east
+	mov	cx, g_sqEast
 	sub	cx, ax
 	mov	[bp+pacesEast], cx
 	or	cx, cx
 	jz	loc_1228A
 
 	PUSH_OFFSET(s_spAndsp)
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	cmp	[bp+pacesEast], 0
 	jge	short loc_12227
 	mov	ax, [bp+pacesEast]
 	neg	ax
 	mov	[bp+pacesEast], ax
-	mov	[bp+var_106], 1
+	mov	[bp+nsPluralFlag], 1
 	jmp	short loc_1222D
 loc_12227:
-	mov	[bp+var_106], 0
+	mov	[bp+nsPluralFlag], 0
 loc_1222D:
 	sub	ax, ax
 	push	ax
@@ -136,75 +109,57 @@ loc_1222D:
 	cwd
 	push	dx
 	push	ax
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	ITOA
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
 	mov	ax, [bp+pacesEast]
 	dec	ax
 	push	ax
-	push	dx
-	push	[bp+var_10A]
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_OFFSET(s_paces)
-	PLURALIZE
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
-	push	[bp+var_106]
-	push	dx
-	push	ax
+	PLURALIZE(stringBufferP)
+
+	push	[bp+nsPluralFlag]
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_OFFSET(s_eastWest)
-	PLURALIZE
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PLURALIZE(stringBufferP)
 loc_1228A:
 	mov	bx, g_locationNumber
-	mov	al, byte_428BA[bx]
+	mov	al, g_locationReferenceMap[bx]
 	cbw
-	mov	[bp+var_110], ax
+	mov	[bp+entranceIndex], ax
+
 	mov	bl, g_currentHour
 	sub	bh, bh
-	mov	al, byte_428C4[bx]
+	mov	al, g_locationTimeMap[bx]
 	cbw
-	mov	[bp+var_104], ax
+	mov	[bp+timeIndex], ax
+
 	mov	ax, [bp+pacesEast]
 	or	ax, [bp+pacesNorth]
 	cmp	ax, 1
 	sbb	cx, cx
 	neg	cx
 	push	cx
-	push	[bp+var_108]
-	push	[bp+var_10A]
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_OFFSET(s_ofAtThe)
-	PLURALIZE
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
-	mov	bx, [bp+var_110]
+	PLURALIZE(stringBufferP)
+	mov	bx, [bp+entranceIndex]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (locationString+2)[bx]
-	push	word ptr locationString[bx]
-	push	dx
-	push	ax
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	push	word ptr (g_locationStrings+2)[bx]
+	push	word ptr g_locationStrings[bx]
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_itsNow)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
-	mov	bx, [bp+var_104]
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
+	mov	bx, [bp+timeIndex]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (timeOfDay+2)[bx]
-	push	word ptr timeOfDay[bx]
-	push	dx
-	push	ax
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	push	word ptr (g_timeOfDayList+2)[bx]
+	push	word ptr g_timeOfDayList[bx]
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING(true)
 	IOWAIT

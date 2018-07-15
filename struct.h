@@ -327,27 +327,25 @@ spellSaveHi db ?
 mon_t ends
 
 breathAtt_t struc ; (sizeof=0x7)
-effectStrIndex db ?
-elements db ?		; Damage is halved or doubled based on the bitmask
-			; here...
-breathFlag db ?
-	repelFlags db ?		; This field holds a bitmask for targetting certain
-			; types. If the	mask is	not set	in the target the
-			; target repels	the spell
-damage db ?
-targetFlags db ?
-levelMult db ?		; If this flag is zero then the	damage is multiplied
-			; by the character level
+	specialAttack	db ?
+	elements	db ?		; Damage is halved or doubled based on the bitmask
+					; here...
+	attackString	db ?
+	repelFlags	db ?
+	damage		db ?
+	breathFlags	db ?
+	levelMultiplier	db ?		; If this flag is zero then the	damage is multiplied
+					; by the character level
 breathAtt_t ends
 
-anotherBreathAtt_t struc ; (sizeof=0x6)
-effectStrIndex db ?
-elements db ?
-	repelFlags db ?
-damage db ?
-targetFlags db ?
-levelMult db ?
-anotherBreathAtt_t ends
+weaponDamage_t struc ; (sizeof=0x6)
+	specialAttack	db ?
+	elements	db ?
+	damage		db ?
+	breathFlags	db ?
+	levelMultiplier	db ?
+	attackRange	db ?
+weaponDamage_t ends
 
 spellAdvance struc ; (sizeof=0x2)
 levelBase db ?		; base 10

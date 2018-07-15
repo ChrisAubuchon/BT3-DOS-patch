@@ -1,17 +1,17 @@
 ; Attributes: bp-based frame
 sp_trapZap proc	far
 
-	_sq_east= word ptr -0Ah
+	sqE= word ptr -0Ah
 	loopCounter= word ptr	-8
-	_sq_north= word	ptr -6
+	sqN= word	ptr -6
 	dungeonSquareP= dword ptr -4
 
 	FUNC_ENTER(0Ah)
 
-	mov	ax, sq_north
-	mov	[bp+_sq_north],	ax
-	mov	ax, sq_east
-	mov	[bp+_sq_east], ax
+	mov	ax, g_sqNorth
+	mov	[bp+sqN],	ax
+	mov	ax, g_sqEast
+	mov	[bp+sqE], ax
 	cmp	inDungeonMaybe, 0
 	jz	l_return
 	mov	[bp+loopCounter], 4
@@ -19,29 +19,29 @@ l_loop:
 	mov	al, g_dunHeight
 	sub	ah, ah
 	push	ax
-	mov	ax, [bp+_sq_north]
+	mov	ax, [bp+sqN]
 	mov	bx, g_direction
 	shl	bx, 1
 	sub	ax, dirDeltaN[bx]
 	push	ax
 	CALL(wrapNumber)
-	mov	[bp+_sq_north],	ax
+	mov	[bp+sqN],	ax
 	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
 	mov	bx, g_direction
 	shl	bx, 1
 	mov	ax, dirDeltaE[bx]
-	add	ax, [bp+_sq_east]
+	add	ax, [bp+sqE]
 	push	ax
 	CALL(wrapNumber)
-	mov	[bp+_sq_east], ax
-	mov	bx, [bp+_sq_north]
+	mov	[bp+sqE], ax
+	mov	bx, [bp+sqN]
 	shl	bx, 1
 	shl	bx, 1
 	mov	ax, word ptr gs:rowOffset[bx]
 	mov	dx, word ptr gs:(rowOffset+2)[bx]
-	mov	cx, [bp+_sq_east]
+	mov	cx, [bp+sqE]
 	mov	bx, cx
 	shl	cx, 1
 	shl	cx, 1

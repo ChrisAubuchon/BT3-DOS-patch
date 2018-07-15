@@ -32,8 +32,7 @@ l_printHelp:
 	jmp	l_success
 
 l_debug:
-;	CALL(bat_init)
-	CALL(doVictoryMaybe)
+	CALL(bat_init)
 	jmp	l_success
 
 l_castSpell:

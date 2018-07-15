@@ -18,8 +18,8 @@ dunsq_battleCheck proc far
 	push	ax
 	mov	ax, 2
 	push	ax
-	push	sq_east
-	push	sq_north
+	push	g_sqEast
+	push	g_sqNorth
 	CALL(dun_maskSquare)
 
 loc_24DA7:

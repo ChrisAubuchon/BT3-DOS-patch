@@ -10,9 +10,9 @@ dun_setExitLocation proc far
 	lfs	bx, [bp+dungeonDataP]
 	mov	al, fs:[bx+dun_t.exitSqN]
 	sub	ah, ah
-	mov	sq_north, ax
+	mov	g_sqNorth, ax
 	mov	al, fs:[bx+dun_t.exitSqE]
-	mov	sq_east, ax
+	mov	g_sqEast, ax
 	mov	al, fs:[bx+dun_t.exitLocation]
 	mov	g_locationNumber, ax
 	mov	g_mapRval, 2

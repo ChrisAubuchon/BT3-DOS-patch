@@ -47,8 +47,8 @@ l_return:
 	push	ax
 	mov	ax, 3
 	push	ax
-	push	sq_east
-	push	sq_north
+	push	g_sqEast
+	push	g_sqNorth
 	CALL(dun_maskSquare)
 
 	FUNC_EXIT

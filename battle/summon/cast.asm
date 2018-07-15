@@ -14,7 +14,7 @@ bat_summonCast proc far
 	mov	word ptr [bp+slotP], ax
 	mov	word ptr [bp+slotP+2], seg seg027
 	mov	bx, [bp+spellNumber]
-	test	spellCastFlags[bx], 20h
+	test	g_spellCastFlags[bx], 20h
 	jz	short l_checkHostile
 
 	mov	ax, 7

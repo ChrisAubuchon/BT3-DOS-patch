@@ -106,7 +106,7 @@ l_spellFound:
 
 l_enoughSppt:
 	mov	bx, g_curSpellNumber
-	mov	al, spellCastFlags[bx]
+	mov	al, g_spellCastFlags[bx]
 	sub	ah, ah
 	and	ax, 7
 	jmp	short l_return

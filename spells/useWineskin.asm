@@ -1,13 +1,10 @@
 ; Attributes: bp-based frame
 
-; DWORD - var_102 & var_104
-
 _sp_useWineskin	proc far
 
 	var_106= word ptr -106h
-	var_104= word ptr -104h
-	var_102= word ptr -102h
-	var_100= word ptr -100h
+	stringBufferP= dword ptr -104h
+	stringBuffer= word ptr -100h
 	spellCaster= word ptr	 6
 
 	FUNC_ENTER(106h)
@@ -23,10 +20,9 @@ _sp_useWineskin	proc far
 	and	ax, 7
 	mov	[bp+var_106], ax
 	PUSH_OFFSET(s_drinksAndFeels)
-	PUSH_STACK_ADDRESS(var_100)
-	STRCAT
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT(stringBufferP)
+
 	mov	bx, [bp+var_106]
 	shl	bx, 1
 	shl	bx, 1
@@ -34,10 +30,9 @@ _sp_useWineskin	proc far
 	push	word ptr drinkStringList[bx]
 	push	dx
 	push	ax
-	STRCAT
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
-	PUSH_STACK_ADDRESS(var_100)
+	STRCAT(stringBufferP)
+
+	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	cmp	[bp+var_106], 1
 	jnz	short loc_2252F
@@ -45,17 +40,20 @@ _sp_useWineskin	proc far
 	CHARINDEX(ax, STACKVAR(spellCaster), si)
 	cmp	gs:party.class[si], class_bard
 	jnz	short loc_2252F
+
 	push	gs:party.level[si]
 	CALL(lib_maxFF, near)
 	mov	gs:party.specAbil[si],	al
 	jmp	short l_return
+
 loc_2252F:
 	mov	al, byte ptr [bp+spellCaster]
 	mov	gs:bat_curTarget, al
-	mov	ax, 94h	
+	mov	ax, 148
 	push	ax
 	push	[bp+spellCaster]
 	CALL(_batchSpellCast, near)
+
 l_return:
 	pop	si
 	FUNC_EXIT

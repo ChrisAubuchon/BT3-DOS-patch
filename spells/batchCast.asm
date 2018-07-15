@@ -1,8 +1,5 @@
 ; Attributes: bp-based frame
 
-; byte_4EEC3 and byte_4EEC4 don't seem to be
-; used for anything.
-
 _batchSpellCast proc far
 
 	spellCaster= word ptr	 6

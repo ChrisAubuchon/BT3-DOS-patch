@@ -7,7 +7,7 @@ sp_vorpalPlating proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	bl, gs:bat_curTarget
 	and	bx, 7Fh
 	add	gs:vorpalPlateBonus[bx], al

@@ -12,11 +12,11 @@ tav_setTitle proc far
 	mov	[bp+tavernIndex], 4
 	mov	si, g_direction
 	shl	si, 1
-	mov	ax, sq_north
+	mov	ax, g_sqNorth
 	sub	ax, dirDeltaN[si]
 	mov	[bp+deltaN], ax
 	mov	ax, dirDeltaE[si]
-	add	ax, sq_east
+	add	ax, g_sqEast
 	mov	[bp+deltaE], ax
 
 	mov	[bp+counter], 0

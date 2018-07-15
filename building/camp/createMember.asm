@@ -75,7 +75,7 @@ loc_12A1F:
 	mov	si, [bp+raceGenderValue]
 	mov	bx, [bp+counter]
 	mov	cx, ax
-	mov	al, byte ptr baseAttributes.male_st[bx+si]
+	mov	al, byte ptr g_raceBaseAttributes.male_st[bx+si]
 	cbw
 	add	ax, cx
 	mov	si, bx
@@ -129,7 +129,7 @@ loc_12AD8:
 	jge	short loc_12B30
 	mov	si, [bp+raceGenderValue]
 	mov	bx, [bp+counter]
-	cmp	byte ptr startingClasses.canBeWarrior[bx+si], 0
+	cmp	byte ptr g_raceStartingClasses.canBeWarrior[bx+si], 0
 	jz	short loc_12B2E
 	mov	bl, gs:txt_numLines
 	sub	bh, bh
@@ -244,15 +244,14 @@ loc_12C3B:
 loc_12C56:
 	mov	bl, gs:newCharBuffer.class
 	sub	bh, bh
-	mov	al, byte_4302E[bx]
+	mov	al, g_classStartingInventoryIndex[bx]
 	cbw
 	mov	[bp+raceGenderValue], ax
 	mov	[bp+counter], 0
 loc_12C6E:
 	mov	si, [bp+raceGenderValue]
 	mov	bx, [bp+counter]
-	mov	al, startingInventory[bx+si]
-	mov	[bp+var_EC], al
+	mov	al, g_classStartingInventory[bx+si]
 	cmp	al, 0FEh 
 	jz	short loc_12C8A
 	mov	gs:newCharBuffer.inventory.itemFlags[bx], al

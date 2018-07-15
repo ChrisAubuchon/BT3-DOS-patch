@@ -145,10 +145,10 @@ loc_21136:
 	mov	ax, g_dunLevelNum
 	add	ax, [bp+teleDeltaList+4]
 	push	ax
-	mov	ax, sq_east
+	mov	ax, g_sqEast
 	add	ax, [bp+teleDeltaList+2]
 	push	ax
-	mov	ax, sq_north
+	mov	ax, g_sqNorth
 	add	ax, [bp+teleDeltaList]
 	push	ax
 	CALL(_sp_doTeleport, near)
@@ -158,9 +158,9 @@ loc_21168:
 	PUSH_OFFSET(s_successfulTeleport)
 	PRINTSTRING
 	mov	ax, [bp+teleDeltaList]
-	add	sq_north, ax
+	add	g_sqNorth, ax
 	mov	ax, [bp+teleDeltaList+2]
-	add	sq_east, ax
+	add	g_sqEast, ax
 	mov	ax, [bp+teleDeltaList+4]
 	add	g_dunLevelNum,	ax
 	mov	di, g_dunLevelNum
@@ -174,10 +174,10 @@ loc_21168:
 	mov	g_mapRval, 4
 	mov	al, fs:[bx+dun_t.deltaSqN]
 	cbw
-	add	sq_north, ax
+	add	g_sqNorth, ax
 	mov	al, fs:[bx+dun_t.deltaSqE]
 	cbw
-	add	sq_east, ax
+	add	g_sqEast, ax
 	mov	gs:levelChangedFlag, 1
 loc_211F1:
 	jmp	short l_return

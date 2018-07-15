@@ -90,8 +90,8 @@ l_isContainer:
 	mov	bx, [bp+containerNumber]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (wineskinString+2)[bx]
-	push	word ptr wineskinString[bx]
+	push	word ptr (g_wineskinContents+2)[bx]
+	push	word ptr g_wineskinContents[bx]
 	CALL(printString)
 
 l_inputLoop:

@@ -18,12 +18,12 @@ mfunc_setWildFace proc far
 
 	mov	si, g_direction
 	shl	si, 1
-	mov	ax, sq_north
+	mov	ax, g_sqNorth
 	sub	ax, dirDeltaN[si]
 	mov	[bp+sqN], ax
 
 	mov	ax, dirDeltaE[si]
-	add	ax, sq_east
+	add	ax, g_sqEast
 	mov	[bp+sqE], ax
 
 	cmp	gs:g_wildWrapFlag, 0

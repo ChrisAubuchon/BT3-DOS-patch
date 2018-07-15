@@ -8,19 +8,19 @@ sp_lightSpell proc far
 	FUNC_ENTER(2)
 
 	mov	bx, [bp+spellNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	sub	ah, ah
 	mov	[bp+spellEffect], ax
 	mov	bx, ax
-	mov	al, lightDistList[bx]
+	mov	al, g_lightDistanceList[bx]
 	mov	lightDistance, al
-	mov	al, lightDurList[bx]
+	mov	al, g_lightDurationList[bx]
 	mov	lightDuration, al
 	sub	ax, ax
 	push	ax
 	CALL(icon_activate)
 	mov	bx, [bp+spellEffect]
-	mov	al, lightDetectList[bx]
+	mov	al, g_lightDetectionList[bx]
 	mov	gs:gl_detectSecretDoorFlag, al
 	PUSH_OFFSET(s_elipsisNl)
 	PRINTSTRING

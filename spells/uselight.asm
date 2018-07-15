@@ -7,8 +7,7 @@ _sp_useLightObj	proc far
 
 	FUNC_ENTER
 
-	PUSH_OFFSET(s_makesLight)
-	PRINTSTRING
+	PRINTOFFSET(s_makesLight)
 	push	[bp+spellIndexNumber]
 	push	[bp+spellCaster]
 	CALL(sp_lightSpell)

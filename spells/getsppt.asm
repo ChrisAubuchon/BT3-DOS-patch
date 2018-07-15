@@ -13,7 +13,7 @@ getSpptRequired	proc far
 	FUNC_ENTER(2)
 
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spptRequired[bx]
+	mov	al, g_requiredSpellpoints[bx]
 	sub	ah, ah
 	mov	[bp+sppt], ax
 	mov	ax, itemEff_quaterSpptUse

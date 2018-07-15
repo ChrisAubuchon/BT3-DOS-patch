@@ -134,14 +134,27 @@ define(`REGISTER_TRIPLE', `mov	$2, $1
 	shl	$1, 1
 	add	$1, $2')')
 
-define(`BITMASK', `_bitmask(`0', $@)')dnl
-#define(`_bitmask', `ifelse(`$#', `1', `convertBack(format(`0x%X', `$1'))', `ifelse(`$2', `', `$0($1)', `$0(`eval($1 | convertHex($2))', shift(shift($@)))')')')
-define(`_bitmask', `ifelse(`$#', `1', `convertBack(ifelse(regexp(`$1', `^[0-9]$'), `0', `$1', format(`0x%X', `$1')))', `ifelse(`$2', `', `$0($1)', `$0(`eval($1 | convertHex($2))', shift(shift($@)))')')')
 
-define(`convertHex', `ifelse(regexp(`$1', `[0-9]+$'), `0', `$1', `patsubst(patsubst(`$1', `h$'), `^', `0x')')')
-define(`convertBack', `ifelse(regexp(`$1', `^0x'), `0', ifelse(regexp(`$1', `^0x[A-F]'), `0', patsubst($1, `0x', `0')`h', patsubst($1, `0x')`h'), `$1')')
+# BITMASK(flag, ...)
+#   ORs all arguments into one number. Intel style hex numbers are converted
+# to base 10 numbers. The end result is converted back to an Intel style hex
+# string
+#
+define(`BITMASK', `toIntel(_bitmask(`0', $@))')dnl
+define(`_bitmask', `ifelse(`$#', `1', fromIntel($1), `ifelse(`$2', `', `$0($1)', `$0(`eval($1 | fromIntel($2))', shift(shift($@)))')')')
 
-dnldefine(`DICE_XDY', `convertBack(format(`0x%X', eval(eval($2 << 5) | eval($1 - 1))))')
-define(`DICE_XDY', `format(`%d', eval(eval($2 << 5) | eval($1 - 1)))')
+# DICE_XDY(number_of_dice, dice_value)
+#   e.g. DICE_XDY(10, dice_d4)
+#
+define(`DICE_XDY', `BITMASK(eval($2 << 5), eval($1 - 1))')
+
+
+# Convert a base 10 number to an Intel style hexadecimal number
+#
+define(`toIntel', `ifelse(regexp(`$1', `^[0-9]$'), `0', `$1', ifelse(regexp(format(`%X', `$1'), `^[A-F]'), `-1', format(`%Xh', `$1'), format(`0%Xh', `$1')))')
+
+# Convert an Intel style hexadecimal number to a base 10 number
+#
+define(`fromIntel', `ifelse(regexp(`$1', `h$'), `-1', `$1', format(`%d', eval(`0x'patsubst(`$1', `h$', `'))))')
 
 divert`'dnl

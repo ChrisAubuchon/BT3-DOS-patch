@@ -6,9 +6,9 @@ map_moveOneSquare proc	far
 	mov	si, g_direction
 	shl	si, 1
 	mov	ax, dirDeltaN[si]
-	sub	sq_north, ax
+	sub	g_sqNorth, ax
 	mov	ax, dirDeltaE[si]
-	add	sq_east, ax
+	add	g_sqEast, ax
 
 	pop	si
 	FUNC_EXIT

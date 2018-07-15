@@ -38,7 +38,7 @@ bat_charUseAction proc far
 	mov	bx, [bp+slotNumber]
 	mov	gs:g_batCharUseISlotNumber[bx], al
 	mov	bx, g_curSpellNumber
-	mov	al, spellCastFlags[bx]
+	mov	al, g_spellCastFlags[bx]
 	sub	ah, ah
 	and	ax, 7
 	mov	[bp+spellFlags], ax

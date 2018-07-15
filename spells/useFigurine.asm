@@ -8,8 +8,7 @@ _sp_useFigurine	proc far
 
 	FUNC_ENTER(4)
 
-	PUSH_OFFSET(s_invokesFigurine)
-	PRINTSTRING
+	PRINTOFFSET(s_invokesFigurine)
 	CHARINDEX(ax, STACKVAR(spellCaster), bx)
 	mov	al, gs:g_usedItemSlotNumber
 	sub	ah, ah
@@ -20,11 +19,11 @@ _sp_useFigurine	proc far
 	mov	[bp+loopCounter], 8
 l_loopEnter:
 	mov	bx, [bp+loopCounter]
-	mov	al, figurineItemNo[bx]
+	mov	al, g_figurineItemList[bx]
 	sub	ah, ah
 	cmp	ax, [bp+itemNo]
 	jnz	short l_loopNext
-	mov	al, byte_483AC[bx]
+	mov	al, g_figurineSummonList[bx]
 	push	ax
 	push	[bp+spellCaster]
 	CALL(summon_execute)

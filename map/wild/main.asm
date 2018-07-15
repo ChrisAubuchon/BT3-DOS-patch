@@ -130,8 +130,8 @@ loc_10E5B:
 	PUSH_STACK_ADDRESS(levelName)
 	CALL(setTitle)
 
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(wild_buildView)
 	mov	[bp+square], ax
 
@@ -151,8 +151,8 @@ loc_10E5B:
 	jnz	l_returnMapValue
 
 loc_10EC0:
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(wild_buildView)
 	mov	[bp+square], ax
 
@@ -188,10 +188,10 @@ l_noBuilding:
 	CALL(text_clear)
 	mov	si, g_direction
 	shl	si, 1
-	mov	ax, sq_north
+	mov	ax, g_sqNorth
 	sub	ax, dirDeltaN[si]
 	mov	[bp+var_8], ax
-	mov	ax, sq_east
+	mov	ax, g_sqEast
 	add	ax, dirDeltaE[si]
 	mov	[bp+var_2A], ax
 
@@ -203,14 +203,14 @@ l_noBuilding:
 	push	ax
 	push	[bp+var_8]
 	CALL(wrapNumber)
-	mov	sq_north, ax
+	mov	g_sqNorth, ax
 
 	mov	al, mapWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_2A]
 	CALL(wrapNumber)
-	mov	sq_east, ax
+	mov	g_sqEast, ax
 	jmp	l_loopStart
 
 l_forwardNoWrap:
@@ -230,9 +230,9 @@ l_forwardNoWrap:
 	jbe	l_loopStart
 
 	mov	ax, [bp+var_8]
-	mov	sq_north, ax
+	mov	g_sqNorth, ax
 	mov	ax, [bp+var_2A]
-	mov	sq_east, ax
+	mov	g_sqEast, ax
 	jmp	l_loopStart
 
 l_key_split:

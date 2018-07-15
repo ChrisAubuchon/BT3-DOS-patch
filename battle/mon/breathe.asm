@@ -33,7 +33,7 @@ bat_monBreathe proc far
 	mov	[bp+loopCounter], 0
 l_loop:
 	mov	bx, [bp+loopCounter]
-	mov	al, byte ptr breathAttack.effectStrIndex[bx]
+	mov	al, byte ptr breathAttack.specialAttack[bx]
 	lfs	si, [bp+argumentsP]
 	mov	fs:[bx+si], al
 	inc	[bp+loopCounter]

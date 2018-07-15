@@ -79,8 +79,8 @@ l_return:
 	mov	byte ptr g_printPartyFlag, 0
 	sub	ax, ax
 	push	ax
-	push	sq_east
-	push	sq_north
+	push	g_sqEast
+	push	g_sqNorth
 	CALL(spGeo_removeTrap)
 	mov	ax, [bp+var_102]
 

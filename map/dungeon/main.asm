@@ -63,13 +63,13 @@ dun_main proc far
 	cmp	gs:levelChangedFlag, 0
 	jz	short l_skipDeltaSQEN
 
-	; Add deltaSqN and deltaSqE to sq_north and sq_east
+	; Add deltaSqN and deltaSqE to g_sqNorth and g_sqEast
 	mov	al, fs:[bx+dun_t.deltaSqN]
 	cbw
-	sub	sq_north, ax
+	sub	g_sqNorth, ax
 	mov	al, fs:[bx+dun_t.deltaSqE]
 	cbw
-	sub	sq_east, ax
+	sub	g_sqEast, ax
 	mov	gs:levelChangedFlag, 0
 
 l_skipDeltaSQEN:
@@ -143,16 +143,16 @@ l_doBattle:
 	CALL(text_clear)
 
 loc_107BE:
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	push	seg027_x
 	push	offset rowOffset
 	CALL(dun_doSpecialSquare)
 
 	push	seg023_x
 	push	offset graphicsBuf
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(dun_buildView)
 	mov	[bp+var_E], ax
 
@@ -162,15 +162,15 @@ loc_107BE:
 	push	ax
 	mov	al, g_dunWidth
 	push	ax
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	push	seg027_x
 	push	offset rowOffset
 	CALL(dun_setSquareField4)
 
 	push	g_direction
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(dun_detectSquares)
 
 	PUSH_STACK_ADDRESS(dungeonName)
@@ -207,8 +207,8 @@ loc_108D5:
 	push	seg023_x
 	mov	ax, offset graphicsBuf
 	push	ax
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(dun_buildView)
 	mov	[bp+var_E], ax
 
@@ -244,8 +244,8 @@ l_checkMinimapKey:
 	push	ax
 	mov	al, g_dunWidth
 	push	ax
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	push	seg027_x
 	push	offset rowOffset
 	CALL(minimap_show)
@@ -255,8 +255,8 @@ l_checkAscendKey:
 	cmp	ax, 'E'
 	jnz	l_checkKickKey
 
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(dun_ascendPortal)
 	jmp	l_checkMapValue
 
@@ -269,8 +269,8 @@ l_checkDescendKey:
 	cmp	ax, 'W'
 	jnz	l_checkForwardKey
 
-	push	sq_north
-	push	sq_east
+	push	g_sqNorth
+	push	g_sqEast
 	CALL(dun_descendPortal)
 	jmp	l_checkMapValue
 
@@ -289,11 +289,11 @@ l_moveForward:
 	CALL(text_clear)
 	mov	si, g_direction
 	shl	si, 1
-	mov	ax, sq_north
+	mov	ax, g_sqNorth
 	sub	ax, dirDeltaN[si]
 	mov	[bp+var_8], ax
 	mov	ax, dirDeltaE[si]
-	add	ax, sq_east
+	add	ax, g_sqEast
 	mov	[bp+var_A], ax
 
 	mov	al, g_dunHeight
@@ -302,13 +302,13 @@ l_moveForward:
 	push	[bp+var_8]
 	CALL(wrapNumber)
 
-	mov	sq_north, ax
+	mov	g_sqNorth, ax
 	mov	al, g_dunWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_A]
 	CALL(wrapNumber)
-	mov	sq_east, ax
+	mov	g_sqEast, ax
 	mov	gs:wallIsPhased, 0
 	jmp	l_checkMapValue
 

@@ -40,6 +40,7 @@ define(`CALL', `ifelse(
 	`$1', `_sp_checkSPPT',				`__call($2)_sp_checkSPPT, 4)',
 	`$1', `_sp_doTeleport',				`__call($2)_sp_doTeleport, 6)',
 	`$1', `_sp_postHeal',				`__call($2)_sp_postHeal, 2)',
+	`$1', `_sp_useWeapon',				`__call($2)_sp_useWeapon, 2)',
 	`$1', `_sp_teleportPrintNum',			`__call($2)_sp_teleportPrintNum, 4)',
 	`$1', `_sp_convertMonToSummon',			`__call($2)_sp_convertMonToSummon, 6)',
 	`$1', `_sp_setMonDistance',			`__call($2)_sp_setMonDistance, 4)',

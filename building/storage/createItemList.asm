@@ -27,8 +27,10 @@ storage_createItemList proc far
 	CALL(checkProgressFlags)
 	or	ax, ax
 	jz	short l_flagNotSet
+
 	mov	ax, 28
 	jmp	short l_loopEntry
+
 l_flagNotSet:
 	mov	ax, 18
 
@@ -38,14 +40,13 @@ l_loopEntry:
 
 l_loopHead:
 	mov	bx, [bp+var_4]
-	mov	ax, bx
-	shl	bx, 1
-	add	bx, ax
-	mov	al, strg_inventory[bx]
+	REGISTER_TRIPLE(bx, ax)
+	mov	al, g_storageInventory[bx]
 	sub	ah, ah
 	mov	[bp+itemNumber], ax
 	or	ax, ax
 	jz	short l_loopTest
+
 	mov	bx, [bp+itemListLength]
 	shl	bx, 1
 	shl	bx, 1
@@ -59,8 +60,7 @@ l_loopHead:
 	shl	bx, 1
 	push	word ptr (g_itemStringList+2)[bx]
 	push	word ptr g_itemStringList[bx]
-	push	word ptr [bp+itemList+2]
-	push	word ptr [bp+itemList]
+	PUSH_STACK_DWORD(itemList)
 	STRCAT(itemList)
 	NULL_TERMINATE(STACKVAR(itemList))
 	mov	bx, [bp+itemListLength]

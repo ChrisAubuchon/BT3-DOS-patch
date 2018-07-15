@@ -11,7 +11,7 @@ readInventoryStf proc far
 	mov	[bp+fd], ax
 	mov	ax, 84
 	push	ax
-	mov	ax, offset strg_inventory
+	mov	ax, offset g_storageInventory
 	mov	dx, seg	dseg
 	push	dx
 	push	ax

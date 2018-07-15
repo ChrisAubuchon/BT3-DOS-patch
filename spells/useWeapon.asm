@@ -1,7 +1,4 @@
-
 ; Attributes: bp-based frame
-
-; UNUSED - var_2 & var_4
 
 _sp_useWeapon proc far
 
@@ -13,7 +10,7 @@ _sp_useWeapon proc far
 	var_A= byte ptr	-0Ah
 	var_9= byte ptr	-9
 	var_8= byte ptr	-8
-	var_6= word ptr	-6
+	itemNumber= word ptr	-6
 	var_4= word ptr	-4
 	var_2= word ptr	-2
 	spellCaster=	word ptr  6
@@ -27,7 +24,7 @@ _sp_useWeapon proc far
 	sub	ah, ah
 	add	bx, ax
 	mov	al, gs:party.inventory.itemNo[bx]
-	mov	[bp+var_6], ax
+	mov	[bp+itemNumber], ax
 	mov	[bp+var_10], 31
 	jmp	short loc_2259F
 loc_2259C:
@@ -38,41 +35,40 @@ loc_2259F:
 	jmp	loc_22632
 loc_225A8:
 	mov	bx, [bp+var_10]
-	mov	al, byte_48382[bx]
+	mov	al, g_useableWeaponList[bx]
 	sub	ah, ah
-	cmp	ax, [bp+var_6]
+	cmp	ax, [bp+itemNumber]
 	jnz	short loc_2262F
-	cmp	bx, 17h
+	cmp	bx, 23
 	jge	short loc_225C0
 	mov	ax, offset s_castsWeapon
 	jmp	short loc_225C3
 loc_225C0:
 	mov	ax, offset s_breathes
 loc_225C3:
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], ds
 	push	ds
 	push	ax
 	PRINTSTRING
+
 	mov	ax, [bp+var_10]
 	mov	cx, ax
 	shl	ax, 1
 	add	ax, cx
 	shl	ax, 1
 	mov	si, ax
-	mov	al, byte ptr weaponDamageList.effectStrIndex[si]
+	mov	al, byte ptr g_weaponDamageList.specialAttack[si]
 	mov	[bp+var_E], al
-	mov	al, weaponDamageList.elements[si]
+	mov	al, g_weaponDamageList.elements[si]
 	mov	[bp+var_D], al
 	mov	[bp+var_C], 10h
 	mov	[bp+var_B], 0
-	mov	al, weaponDamageList.repelFlags[si]
+	mov	al, g_weaponDamageList.damage[si]
 	mov	[bp+var_A], al
-	mov	al, weaponDamageList.damage[si]
+	mov	al, g_weaponDamageList.breathFlags[si]
 	mov	[bp+var_9], al
-	mov	al, weaponDamageList.targetFlags[si]
+	mov	al, g_weaponDamageList.levelMultiplier[si]
 	mov	[bp+var_8], al
-	mov	al, weaponDamageList.levelMult[si]
+	mov	al, g_weaponDamageList.attackRange[si]
 	sub	ah, ah
 	push	ax
 	sub	sp, 8

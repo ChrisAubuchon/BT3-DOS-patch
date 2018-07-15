@@ -4,10 +4,10 @@
 ; the party is on.
 ;
 ; There are some special values that affect function execution:
-;   A sqN value of 7Fh executes the function regardless of the current sq_north value
-;   A sqN value of FFh executes the function regardless of the current sq_north value iff
+;   A sqN value of 7Fh executes the function regardless of the current g_sqNorth value
+;   A sqN value of FFh executes the function regardless of the current g_sqNorth value iff
 ;     the vm_execute function is called as the result of a spell being cast. (spellFlag != 0)
-;   A sqE value of FFh executes the function regardless of the current sq_east value
+;   A sqE value of FFh executes the function regardless of the current g_sqEast value
 
 vm_execute proc far
 
@@ -60,14 +60,14 @@ l_compareNorthCoordinate:
 	cmp	[bp+sqN], 7Fh 			; A sqN value of 7Fh always succeeds
 	jz	short l_compareEastCoordinate	
 	mov	ax, [bp+sqN]
-	cmp	sq_north, ax
+	cmp	g_sqNorth, ax
 	jnz	l_next
 
 l_compareEastCoordinate:
 	cmp	[bp+sqE], 0FFh			; A sqE value of FFh always succeeds
 	jz	short l_getCodeAddress
 	mov	ax, [bp+sqE]
-	cmp	sq_east, ax
+	cmp	g_sqEast, ax
 	jnz	l_next
 
 l_getCodeAddress:

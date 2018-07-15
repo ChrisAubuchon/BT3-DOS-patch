@@ -10,7 +10,7 @@ sp_healSpell proc far
 	cmp	[bp+partySlotNumber], 80h
 	jge	short l_return
 	mov	bx, [bp+spellNo]
-	mov	al, spellExtraFlags[bx]
+	mov	al, g_spellExtraData[bx]
 	sub	ah, ah
 	cmp	ax, heal_allFlag
 	jge	short l_healAll
@@ -51,7 +51,7 @@ _doHeal	proc far
 	push	si
 
 	mov	bx, [bp+spellNo]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	sub	ah, ah
 	mov	[bp+effectFlag], ax
 	mov	[bp+hpToHeal], 0
@@ -99,7 +99,7 @@ l_setToMaxHp:
 	mov	gs:party.currentHP[si], ax
 l_cureStatus:
 	mov	bx, [bp+spellNo]
-	mov	al, spellExtraFlags[bx]
+	mov	al, g_spellExtraData[bx]
 	sub	ah, ah
 	and	ax, 7Fh
 	jmp	l_switchStatus

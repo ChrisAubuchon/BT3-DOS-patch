@@ -29,13 +29,13 @@ l_notMapSpell:
 	; I think this checks for spells that shouldn't be able
 	; to be cast from items
 	mov	bx, [bp+spellNo]
-	test	spellCastFlags[bx], spellcast_spellOnly
+	test	g_spellCastFlags[bx], spellcast_spellOnly
 	jz	l_returnZero
 	jmp	short l_callSpellFunction
 
 l_combatCheck:
 	mov	bx, [bp+spellNo]
-	test	spellCastFlags[bx], spellcast_combatOnly
+	test	g_spellCastFlags[bx], spellcast_noncombatCastable
 	jz	l_returnZero
 
 l_callSpellFunction:

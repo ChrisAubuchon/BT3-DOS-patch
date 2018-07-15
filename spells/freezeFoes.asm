@@ -15,7 +15,7 @@ sp_freezeFoes proc far
 	cmp	[bp+spellCaster], 80h
 	jge	short l_monCaster
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	bl, gs:bat_curTarget
 	and	bx, 3
 	add	gs:g_monFreezeAcPenalty[bx], al
@@ -23,7 +23,7 @@ sp_freezeFoes proc far
 	jmp	short l_return
 l_monCaster:
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	add	gs:g_charFreezeAcPenalty, al
 l_return:
 	FUNC_EXIT

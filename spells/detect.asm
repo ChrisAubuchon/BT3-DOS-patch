@@ -7,9 +7,9 @@ sp_areaEnchant proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	detectDuration, al
-	mov	al, spellExtraFlags[bx]
+	mov	al, g_spellExtraData[bx]
 	mov	g_detectType, al
 	mov	ax, icon_areaEnchant
 	push	ax

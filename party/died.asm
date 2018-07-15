@@ -16,8 +16,8 @@ party_died proc far
 	mov	g_partyAttackFlag, al
 	sub	ah, ah
 	mov	g_locationNumber, ax
-	mov	sq_north, 0Bh
-	mov	sq_east, 0Fh
+	mov	g_sqNorth, 0Bh
+	mov	g_sqEast, 0Fh
 	mov	g_direction, 0
 	mov	ax, 1
 	FUNC_EXIT

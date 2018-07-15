@@ -13,16 +13,16 @@ mfunc_teleport proc far
 	lfs	bx, [bp+dataP]
 	inc	word ptr [bp+dataP]
 
-	; Set new sq_north
+	; Set new g_sqNorth
 	mov	al, fs:[bx]
 	sub	ah, ah
-	mov	sq_north, ax
+	mov	g_sqNorth, ax
 
-	; Set new sq_east
+	; Set new g_sqEast
 	lfs	bx, [bp+dataP]
 	inc	word ptr [bp+dataP]
 	mov	al, fs:[bx]
-	mov	sq_east, ax
+	mov	g_sqEast, ax
 
 	lfs	bx, [bp+dataP]
 	inc	word ptr [bp+dataP]

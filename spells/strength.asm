@@ -10,14 +10,14 @@ sp_strengthBonus proc far
 	test	byte ptr [bp+spellCaster], 80h
 	jz	short l_partCaster
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	bx, [bp+spellCaster]
 	and	bx, 3
 	mov	gs:monAttackBonus[bx], al
 	jmp	short l_return
 l_partCaster:
 	mov	bx, [bp+spellIndexNumber]
-	mov	al, spellEffectFlags[bx]
+	mov	al, g_spellEffectData[bx]
 	mov	bl, gs:bat_curTarget
 	and	bx, 7
 	mov	gs:g_strengthSpellBonus[bx], al
