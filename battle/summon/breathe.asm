@@ -7,8 +7,6 @@ bat_summonBreathAttack proc far
 	argP= dword ptr	-14h
 	counter= word ptr -10h
 	argList= byte ptr -0Ch
-	var_A= byte ptr -0Ah
-	var_8= byte ptr -8
 	slotP= dword ptr -4
 	slotNumber=	word ptr  6
 	damage=	byte ptr  8
@@ -58,7 +56,9 @@ l_setAttackDataLoop:
 
 	lfs	bx, [bp+slotP]
 	mov	al, fs:[bx+summonStat_t.breathFlag]
-	mov	[bp+var_A], al
+	mov	[bp+argList+breathAtt_t.attackString], al
+	mov	al, [bp+damage]
+	mov	[bp+argList+breathAtt_t.damage], al
 
 	; Add the fire/breath string
 	sub	ah, ah
@@ -74,8 +74,6 @@ l_setAttackDataLoop:
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	
-	mov	al, [bp+damage]
-	mov	[bp+var_8], al
 
 	lfs	bx, [bp+slotP]
 	mov	al, fs:[bx+summonStat_t.breathRange]

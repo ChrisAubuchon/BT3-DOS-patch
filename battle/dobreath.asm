@@ -27,6 +27,13 @@ bat_doBreathAttack proc	far
 
 	FUNC_ENTER(11Ah)
 
+	sub	ax, ax
+	mov	al, [bp+diceIndex]
+	push	ax
+	PUSH_OFFSET(s_percentX)
+	CALL(printf)
+	IOWAIT
+
 	cmp	[bp+levelMultiplier], 0
 	jnz	short l_allFoesCheck
 
