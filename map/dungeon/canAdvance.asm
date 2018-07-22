@@ -2,8 +2,8 @@
 
 dun_canAdvance proc far
 
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
+	currentSquareWalls= word ptr	 6
+	localStuckFlag= word ptr	 8		; If non-zero, can't advance
 
 	FUNC_ENTER
 
@@ -14,12 +14,12 @@ dun_canAdvance proc far
 	jmp	l_returnZero
 
 l_notStuck:
-	mov	ax, [bp+arg_0]
+	mov	ax, [bp+currentSquareWalls]
 	mov	cl, 4
 	shr	ax, cl
 	and	ax, 0Fh
 	mov	bx, ax
-	mov	al, byte_44344[bx]
+	mov	al, g_dungeonPassableFaces[bx]
 	sub	ah, ah
 
 	or	ax, ax
@@ -31,7 +31,7 @@ l_notStuck:
 	cmp	ax, 2
 	jg	l_returnZero
 
-	cmp	[bp+arg_2], 0
+	cmp	[bp+localStuckFlag], 0
 	jz	l_returnZero
 
 l_success:

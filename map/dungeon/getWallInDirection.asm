@@ -1,5 +1,9 @@
-; Attributes: bp-based frame
-
+; This function returns the value passed in the walls parameter
+; rotated so that the wall in the direction to party is facing
+; is in the high nibble of the low byte.
+;
+; The walls word is ordered S,W,N,E
+;
 dungeon_getWallInDirection proc far
 
 	walls= word ptr	 6

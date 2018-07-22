@@ -72,14 +72,15 @@ loc_17AA3:
 	cmp	lightDuration[bx], 0
 	jz	short l_increment
 
-	; Unsure what this block does because byte_44718 and g_iconCurrentCell shouldn't
-	; ever be different.
+	; Only draw the icon if the current cell is different than
+	; the last drawn cell
+	;
 	mov	si, bx
-	mov	al, byte_44718[si]
+	mov	al, g_iconLastDrawnCell[si]
 	cmp	g_iconCurrentCell[bx],	al
 	jz	short loc_17AE0
 	mov	al, g_iconCurrentCell[si]
-	mov	byte_44718[bx],	al
+	mov	g_iconLastDrawnCell[bx],	al
 	mov	bx, [bp+iconNumber]
 	mov	al, g_iconCurrentCell[bx]
 	cbw
@@ -89,7 +90,7 @@ loc_17AA3:
 
 loc_17AE0:
 	mov	bx, [bp+iconNumber]
-	cmp	g_iconAnimationDelay[bx],	0
+	cmp	g_iconAnimationDelay[bx], 0
 	jz	short l_increment
 
 	mov	al, g_iconCurrentDelay[bx]

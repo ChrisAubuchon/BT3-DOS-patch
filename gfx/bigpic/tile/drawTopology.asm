@@ -3,19 +3,19 @@
 
 bigpic_drawTopology proc far
 
-	headerSize= word ptr -1Eh
-	height=	word ptr -1Ch
-	tileOffset= dword ptr -1Ah
-	gfxSourceBufferP= dword ptr -12h
-	row= word ptr -0Eh
-	column=	word ptr -0Ch
-	var_A= word ptr	-0Ah
-	tileIndexNumber= word ptr	-8
-	quadrantWidth= word ptr	-6
-	srcSkip= word ptr	-2
-	quadrant= word ptr  6
-	sq= word ptr  8
-	gfxSourceBuffer= dword ptr	 0Ah		; GFX source address
+	headerSize=		word ptr -1Eh
+	height=			word ptr -1Ch
+	tileOffset=		dword ptr -1Ah
+	gfxSourceBufferP=	dword ptr -12h
+	row=			word ptr -0Eh
+	column=			word ptr -0Ch
+	var_A=			word ptr -0Ah
+	tileIndexNumber=	word ptr -8
+	quadrantWidth=		word ptr -6
+	srcSkip=		word ptr -2
+	quadrant=		word ptr  6
+	sq=			word ptr  8
+	gfxSourceBuffer=	dword ptr 0Ah
 
 	FUNC_ENTER(1Eh)
 	push	di

@@ -34,7 +34,7 @@ dun_revealSpSquare proc	far
 	test	ax, cx
 	jz	short l_nextSquare
 	mov	bx, si
-	or	byte ptr fs:[bx+4], 4
+	or	byte ptr fs:[bx+dunSq_t.extraFlags], minimapFlag_special
 	jmp	short l_return
 l_nextSquare:
 	lfs	bx, [bp+sqP]

@@ -5,16 +5,16 @@ mouse_inBigpic proc far
 	FUNC_ENTER
 
 	mov	ax, mouseBoxes._left
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jl	short l_returnOne
 	mov	ax, mouseBoxes._right
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jge	short l_returnOne
 	mov	ax, mouseBoxes._top
-	cmp	mouse_y, ax
+	cmp	g_mouseY, ax
 	jl	short l_returnOne
 	mov	ax, mouseBoxes._bottom
-	cmp	mouse_y, ax
+	cmp	g_mouseY, ax
 	jl	short l_returnZero
 
 l_returnOne:

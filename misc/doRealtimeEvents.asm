@@ -9,13 +9,13 @@ doRealtimeEvents proc far
 	push	si
 
 	mov	ax, gs:word_42294
-	cmp	_clockTicks, ax
+	cmp	g_tockClicks, ax
 	jz	short loc_15256
-	mov	ax, _clockTicks
+	mov	ax, g_tockClicks
 	mov	gs:word_42294, ax
 	CALL(gfx_animate)
 loc_15256:
-	mov	ax, _clockTicks
+	mov	ax, g_tockClicks
 	mov	cl, 5
 	sar	ax, cl
 	mov	[bp+var_4], ax

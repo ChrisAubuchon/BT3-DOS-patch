@@ -24,35 +24,35 @@ l_asdf:
 	CALL(huf_init)
 	mov	ax, 474h
 	push	ax
-	mov	ax, offset iconLight
+	mov	ax, offset g_iconLight
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
 	CALL(huf_flate)
 	mov	ax, 820h
 	push	ax
-	mov	ax, offset iconCompass
+	mov	ax, offset g_iconCompass
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
 	CALL(huf_flate)
 	mov	ax, 550h
 	push	ax
-	mov	ax, offset iconAreaEnchant
+	mov	ax, offset g_iconAreaEnchant
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
 	CALL(huf_flate)
 	mov	ax, 1E0h
 	push	ax
-	mov	ax, offset iconShield
+	mov	ax, offset g_iconShield
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
 	CALL(huf_flate)
 	mov	ax, 640h
 	push	ax
-	mov	ax, offset iconLevitation
+	mov	ax, offset g_iconLevitation
 	mov	dx, seg	seg023
 	push	dx
 	push	ax

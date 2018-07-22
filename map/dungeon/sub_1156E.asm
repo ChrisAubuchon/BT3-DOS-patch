@@ -22,11 +22,7 @@ sub_1156E proc far
 	mov	[bp+sqN], ax
 
 	mov	bx, [bp+sqE]
-	mov	ax, bx
-	shl	bx, 1
-	shl	bx, 1
-	add	bx, ax
-	mov	ax, bx			; ax = sqE * 5
+	REGISTER_MULTIPLY_FIVE(bx, ax)	; ax = sqE * 5
 	mov	bx, [bp+sqN]
 	shl	bx, 1
 	shl	bx, 1			; bx = sqN * 4

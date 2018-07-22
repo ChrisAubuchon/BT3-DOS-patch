@@ -10,7 +10,7 @@ minimap_setSquare proc far
 	push	si
 	push	ds
 	push	es
-	mov	si, offset minimapWallBitmasks
+	mov	si, offset g_minimapCharacters
 	les	di, [bp+arg_0]
 	mov	ax, [bp+arg_4]
 	shl	ax, 1

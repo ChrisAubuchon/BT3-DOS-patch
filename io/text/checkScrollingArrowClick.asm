@@ -12,22 +12,22 @@ scroll_checkArrowClick proc far
 
 	; Check if the mouse is in the text window
 	mov	ax, mouseBoxes._left[1 * sizeof mouseBox_t]
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jl	l_return
 
 	mov	ax, mouseBoxes._right[1 * sizeof mouseBox_t]
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jge	short l_return
 
 	mov	ax, mouseBoxes._top[1 * sizeof mouseBox_t]
-	cmp	mouse_y, ax
+	cmp	g_mouseY, ax
 	jl	short l_return
 
 	mov	ax, mouseBoxes._bottom[1 * sizeof mouseBox_t]
-	cmp	mouse_y, ax
+	cmp	g_mouseY, ax
 	jge	short l_return
 
-	mov	ax, mouse_y
+	mov	ax, g_mouseY
 	sub	ax, 4
 	mov	cl, 3
 	sar	ax, cl
@@ -38,7 +38,7 @@ scroll_checkArrowClick proc far
 l_checkUpArrow:
 	mov	ax, mouseBoxes._left[1 * sizeof mouseBox_t]
 	add	ax, 32h	
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jge	short l_checkEsc
 	mov	ax, dosKeys_upArrow
 	jmp	short l_return
@@ -46,7 +46,7 @@ l_checkUpArrow:
 l_checkEsc:
 	mov	ax, mouseBoxes._right[1 * sizeof mouseBox_t]
 	sub	ax, 32h	
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jge	short l_checkDownArrow
 	mov	ax, dosKeys_ESC
 	jmp	short l_return

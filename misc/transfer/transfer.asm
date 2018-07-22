@@ -1,6 +1,6 @@
 ; Attributes: bp-based frame
 
-transferCharacter proc far
+camp_transferCharacter proc far
 
 	inKey= word ptr	-2
 
@@ -53,4 +53,4 @@ l_bt1:
 l_return:
 	FUNC_EXIT
 	retf
-transferCharacter endp
+camp_transferCharacter endp

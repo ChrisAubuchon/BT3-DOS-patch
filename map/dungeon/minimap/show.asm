@@ -29,39 +29,32 @@ l_loopEntry:
 	mov	gs:g_text_clearFlag, 1
 
 	mov	[bp+ewCounter], 0
-	jmp	short loc_1555E
-loc_1555B:
-	inc	[bp+ewCounter]
-loc_1555E:
-	cmp	[bp+ewCounter], 11h
-	jge	l_getInput
+l_ewLoop:
 	mov	ax, [bp+squareEW]
 	sub	ax, [bp+rightLeftValue]
 	add	ax, [bp+ewCounter]
 	mov	[bp+ewValue], ax
+
 	mov	[bp+nsCounter], 0
-	jmp	short loc_1557D
-loc_1557A:
-	inc	[bp+nsCounter]
-loc_1557D:
-	cmp	[bp+nsCounter], 0Ch
-	jge	loc_1555B
-loc_15586:
+l_nsLoop:
 	mov	ax, [bp+squareNS]
 	sub	ax, [bp+upDownValue]
 	add	ax, [bp+nsCounter]
 	mov	[bp+nsValue], ax
 	or	ax, ax
-	jl	loc_156F6
+	jl	l_nsLoopNext
+
 loc_15599:
 	mov	ax, [bp+downLimit]
 	cmp	[bp+nsValue], ax
-	jge	loc_156F6
+	jge	l_nsLoopNext
+
 loc_155A4:
 	cmp	[bp+ewValue], 0
 	jl	short loc_155AF
 	mov	ax, 1
 	jmp	short loc_155B1
+
 loc_155AF:
 	sub	ax, ax
 loc_155B1:
@@ -75,7 +68,7 @@ loc_155C0:
 	sub	ax, ax
 loc_155C2:
 	test	ax, si
-	jz	loc_156F6
+	jz	l_nsLoopNext
 loc_155C9:
 	mov	ax, [bp+nsCounter]
 	mov	cl, 3
@@ -87,7 +80,7 @@ loc_155C9:
 	shl	ax, cl
 	add	ax, 0A9h 
 	mov	[bp+screenX], ax
-	mov	ax, offset minimap_squareToDraw
+	mov	ax, offset g_minimapCharacterBuffer
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
@@ -104,36 +97,41 @@ loc_155C9:
 	lfs	si, [bp+rowPList]
 	lfs	si, fs:[bx+si]
 	mov	bx, ax
-	mov	al, fs:[bx+si+4]
+	mov	al, fs:[bx+si+dunSq_t.extraFlags]
 	sub	ah, ah
 	mov	[bp+squareFlags], ax
-	test	byte ptr [bp+squareFlags], 2
+	test	byte ptr [bp+squareFlags], minimapFlag_undiscovered
 	jnz	l_squareUndiscovered
 loc_15621:
-	test	byte ptr [bp+squareFlags], 1
+	test	byte ptr [bp+squareFlags], minimapFlag_discovered
 	jz	l_squareUndiscovered
 loc_1562A:
 	mov	ax, [bp+rightLeftValue]
 	cmp	[bp+ewCounter], ax
 	jnz	short loc_1564E
+
 	mov	ax, [bp+upDownValue]
 	cmp	[bp+nsCounter], ax
 	jnz	short loc_1564E
+
 	mov	ax, minimap_X
 	push	ax
-	mov	ax, offset minimap_squareToDraw
+	mov	ax, offset g_minimapCharacterBuffer
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
 	CALL(minimap_setSquare)
+
 loc_1564E:
-	cmp	word_43F12, 0
+	cmp	g_minimapShowVisited, 0
 	jz	short loc_15671
-	test	byte ptr [bp+squareFlags], 8
+
+	test	byte ptr [bp+squareFlags], minimapFlag_visited
 	jz	short loc_1566F
+
 	mov	ax, minimap_dot
 	push	ax
-	mov	ax, offset minimap_squareToDraw
+	mov	ax, offset g_minimapCharacterBuffer
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
@@ -141,11 +139,11 @@ loc_1564E:
 loc_1566F:
 	jmp	short loc_1568B
 loc_15671:
-	test	byte ptr [bp+squareFlags], 4
+	test	byte ptr [bp+squareFlags], minimapFlag_special
 	jz	short loc_1568B
 	mov	ax, minimap_dot
 	push	ax
-	mov	ax, offset minimap_squareToDraw
+	mov	ax, offset g_minimapCharacterBuffer
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
@@ -179,7 +177,7 @@ loc_1568B:
 l_squareUndiscovered:
 	mov	ax, minimap_undiscovered
 	push	ax
-	mov	ax, offset minimap_squareToDraw
+	mov	ax, offset g_minimapCharacterBuffer
 	mov	dx, seg	seg023
 	push	dx
 	push	ax
@@ -194,10 +192,19 @@ l_drawSquare:
 	push	[bp+screenY]
 	call	far ptr	gfx_writeCharacter
 	add	sp, 8
-loc_156F6:
-	jmp	loc_1557A
+
+l_nsLoopNext:
+	inc	[bp+nsCounter]
+	cmp	[bp+nsCounter], 0Ch
+	jl	l_nsLoop
+
+	inc	[bp+ewCounter]
+	cmp	[bp+ewCounter], 11h
+	jl	l_ewLoop
 
 l_getInput:
+	sub	ax, ax
+	push	ax
 	CALL(getKey, near)
 	cmp	ax, dosKeys_ESC
 	jz	short l_clearAndReturn

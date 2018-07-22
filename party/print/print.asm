@@ -190,9 +190,9 @@ l_printCurrentHp:
 	sub	ah, ah
 	mov	si, ax
 	shl	si, 1
-	mov	al, byte ptr classAbbreviations[si]
+	mov	al, byte ptr s_classAbbreviations[si]
 	mov	byte ptr [bp+partyLine], al
-	mov	al, byte ptr (classAbbreviations+1)[si]
+	mov	al, byte ptr (s_classAbbreviations+1)[si]
 	mov	byte ptr [bp+partyLine+1], al
 	mov	[bp+var_26], ah
 	mov	ax, 1

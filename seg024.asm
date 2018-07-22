@@ -3,10 +3,10 @@ seg024 segment para public 'DATA' use16
 	assume cs:seg024
 	assume es:nothing, ss:nothing, ds:dseg,	fs:nothing, gs:nothing
 
-mouseMovedP	dw offset mouse_moved
-mouseXP	dw offset mouse_x
-mouseYP	dw offset mouse_y
-byte_4EF5E_P	dw offset byte_4EF5E
+mouseMovedP	dw offset g_mouseMoved
+mouseXP	dw offset g_mouseX
+mouseYP	dw offset g_mouseY
+g_joystickPresentFlag_P	dw offset g_joystickPresentFlag
 byte_4EF79_P	dw offset byte_4EF79
 byte_4EF7A_P	dw offset byte_4EF7A
 off_3E95C	dd monsterBuf
@@ -1253,7 +1253,7 @@ sub_3F603 proc far
 	cmp	byte ptr [bx], 0
 	jz	short loc_3F5C3
 	mov	byte ptr [bx], 0
-	mov	bx, cs:byte_4EF5E_P
+	mov	bx, cs:g_joystickPresentFlag_P
 	cmp	byte ptr [bx], 0
 	jz	short loc_3F5C3
 	push	bp
@@ -1339,7 +1339,7 @@ sub_3F6A9 proc far
 	cmp	byte ptr [bx], 0
 	jnz	short loc_3F712
 	inc	byte ptr [bx]
-	mov	bx, cs:byte_4EF5E_P
+	mov	bx, cs:g_joystickPresentFlag_P
 	cmp	byte ptr [bx], 0
 	jz	short loc_3F712
 	mov	bx, cs:byte_4EF7A_P

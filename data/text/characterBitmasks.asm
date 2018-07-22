@@ -135,3 +135,4 @@ characterBitmasks db	0,	0,	0,	0,	0,	0,	0,	0	; 0
 		; 01111110
 		db	18h,	3Ch,	7Eh,	0FFh,	18h,	18h,	18h,	18h	; 97 
 		db	18h,	18h,	18h,	18h,	0FFh,	7Eh,	3Ch,	18h	; 98 
+g_minimapCharacterBuffer db 8, 8, 8, 89h, 8, 8, 8, 8;       0

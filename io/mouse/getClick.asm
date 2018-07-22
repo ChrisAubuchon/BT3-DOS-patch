@@ -14,9 +14,11 @@ mouse_getClick proc far
 	CALL(checkGamePort)
 	or	ax, ax
 	jnz	short loc_150AE
+
 	CALL(checkOtherGamePort)
 	or	ax, ax
 	jz	short loc_150B3
+
 loc_150AE:
 	mov	ax, 1
 	jmp	short loc_150B5
@@ -53,12 +55,12 @@ loc_150F3:
 	mov	si, [bp+var_4]
 	mov	cl, 3
 	shl	si, cl
-	mov	ax, mouse_x
+	mov	ax, g_mouseX
 	cmp	mouseBoxes._left[si],	ax
 	jg	short loc_150F0
 	cmp	mouseBoxes._right[si],	ax
 	jle	short loc_150F0
-	mov	ax, mouse_y
+	mov	ax, g_mouseY
 	cmp	mouseBoxes._top[si],	ax
 	jg	short loc_150F0
 	cmp	mouseBoxes._bottom[si],	ax
@@ -70,17 +72,17 @@ loc_15132:
 	mov	ax, [bp+arg_0]
 	test	g_mouseLineMaskList+1Eh, ax
 	jz	short l_returnZero
-	cmp	mouse_y, 2Dh 
+	cmp	g_mouseY, 2Dh 
 	jge	short loc_15154
 	mov	ax, dosKeys_upArrow
 	jmp	l_return
 loc_15154:
-	cmp	mouse_y, 4Bh 
+	cmp	g_mouseY, 4Bh 
 	jle	short loc_15164
 	mov	ax, dosKeys_downArrow
 	jmp	l_return
 loc_15164:
-	cmp	mouse_x, 4Ah 
+	cmp	g_mouseX, 4Ah 
 	jge	short loc_15177
 	mov	ax, dosKeys_leftArrow
 	jmp	short l_return
@@ -88,7 +90,7 @@ loc_15177:
 	mov	ax, dosKeys_rightArrow
 	jmp	short l_return
 loc_1517E:
-	mov	ax, mouse_y
+	mov	ax, g_mouseY
 	sub	ax, 4
 	mov	cl, 3
 	sar	ax, cl
@@ -104,7 +106,7 @@ loc_1517E:
 loc_151AD:
 	test	[bp+arg_0], 2000h
 	jz	short l_returnZero
-	mov	ax, mouse_y
+	mov	ax, g_mouseY
 	sub	ax, 88h	
 	mov	cl, 3
 	sar	ax, cl
@@ -118,8 +120,10 @@ loc_151D5:
 	jz	short loc_1517E
 	cmp	ax, 2
 	jz	short loc_151AD
+
 l_returnZero:
 	sub	ax, ax
+`
 l_return:
 	pop	si
 	FUNC_EXIT

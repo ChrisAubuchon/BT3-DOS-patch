@@ -310,7 +310,7 @@ loc_10366:
 loc_103D4:
 	push	[bp+var_4]
 	CALL(close)
-	CALL(sub_27F63)
+	CALL(initializeHardware)
 	mov	ax, 7
 	push	ax
 	mov	ax, 0FFh

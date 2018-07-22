@@ -275,6 +275,12 @@ deltaSqE db ?
 deltaSqN db ?
 dun_t ends
 
+dunSq_t struct ; (sizeof=0x5)
+	walls		dw ?
+	flags		dw ?
+	extraFlags	db ?
+dunSq_t ends
+
 viewStruct struc ; (sizeof=0x2)
 deltaEast db ?		; base 10
 deltaNorth db ?		; base 10

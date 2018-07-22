@@ -2,347 +2,28 @@ include(`data/config.asm')
 s_stuckEllipsis	db 'Stuck....',0
 s_facing		db 'facing ',0
 byte_42716	db 0, 2, 20h, 22h
-s_pausing	db 'pausing',0
-		db    0
-s_whoToDrop db 'Who will you drop?',0
-		db    0
-s_cantDropCharacter db 'You can',27h,'t drop a party member.',0
-		db    0
-
 include(`data/location.asm')
-
-s_whoUsesItem db 'Who will use an item?',0
-s_UseOn		db 'Use on ',0
-s_powerless	db 'Powerless.',0
-		db    0
-s_confirmRestore db 'Do you wish to restore your last saved game?',0
-		db    0
-s_confirmSave db 'Do you wish to save your game?',0
-		db    0
-s_savingTheGame	db 'Saving the game.',0
-		db    0
-s_gameHasBeenSaved	db 'Your game has been saved to disk.',0Ah, 0Ah
-			db 'Do you wish to exit to DOS?',0
-s_helpMessage1	db 'HELP for those in need:',0Ah, 0Ah
-			db '1-7 = Player info',0Ah
-			db 'Arrows = Move, turn',0Ah
-			db '? = Where are we',0Ah
-			db 'N = New march order',0Ah
-			db 'S = Save the game',0Ah
-			db 'T = Time out',0Ah
-			db 'V = Sound on/off',0Ah,0
-s_helpMessage2	db 'More HELP:',0Ah, 0Ah
-			db 'B = Play a Bard tune',0Ah
-			db 'C = Cast a spell',0Ah
-			db 'F1-F7 = Cast a spell',0Ah
-			db 'E = Ascend portal',0Ah
-			db 'W = Descend portal',0Ah
-			db 'P = Party combat',0Ah
-			db 'D = Drop special party member',0Ah
-			db 'U = Use an item',0Ah,0
-s_newOrder	db 'New Order:',0Ah,0Ah,0
-		db    0
-s_gtChar		db '>'
-byte_42AF5	db 78h				; XXX - Doesn't seem to be used
-		db 20h
-		db 0
-s_useThisOrder	db 0Ah,'Use this order?',0
-s_gameSav	db 'game.sav',0
-s_cantOpenGameSave	db 'Can',27h,'t open game save file',0
-			db    0
-g_soundActiveFlag	dw 1
-s_confirmQuit	db 'Quit the game?',0
-s_loseProgressConfirm	db 'You will lose your game status.',0Ah
-		db 0Ah, 0Ah, 0Ah
-		db '  Do you wish to quit?',0
-align 2
-
-s_campMenuString	db 'Thou art in the Camp of Skara Brae.'
-		db 0Ah
-		db 0Ah
-		db '@Add a member',0Ah
-		db '@Remove a member',0Ah
-		db '@Rename a member',0Ah
-		db '@Create a member',0Ah
-		db '@Transfer characters',0Ah
-		db '@Delete a member',0Ah
-		db '@Save the party',0Ah
-		db '@Leave the game',0Ah
-		db '@Enter wilderness',0
-s_saveAndExit	db 'Press <RETURN> to save off all char'
-		db 'acters and end game play. Or press '
-		db 'ESC to go back.',0
-s_genderOptions	db 'Do you wish your character to be',0Ah
-		db 'Male or',0Ah
-		db 'Female?',0
-align 2
-s_raceOptions	db 'Select a race for your new character:',0Ah,0Ah
-		db '1) Human',0Ah
-		db '2) Elf',0Ah
-		db '3) Dwarf',0Ah
-		db '4) Hobbit',0Ah
-		db '5) Half-Elf',0Ah
-		db '6) Half-Orc',0Ah
-		db '7) Gnome',0
-align 2
-s_nameYourCharacter	db 'Name your new character --',0
-align 2
-s_whichPartyMemberToRemove	db 'Select which party member to remove or...',0
-s_removeAll	db 'Remove them all!',0
-align 2
-s_askPartyName	db 'Name to save party under?',0
-s_deleteWho	db 'Delete Who?',0
-s_currentlyInParty	db ' is currently in the party. Remove from the party first.',0
-align 2
-s_confirmDelete	db 'Are you sure you want to delete ',0
-align 2
-s_noCharsOnDisk	db 'There are no characters on this disk.',0
-s_whoJoins	db 'Who shall join?',0
-s_alreadyInParty	db ' is already in the party.',0
-s_nameAlreadyExists	db 'There is already a character with that name in the party.',0
-align 2
-s_rosterIsFull	db 'The roster is full.',0
-s_noOneHereNamedThat	db 'There',27h,'s no one here named that!',0
-s_renameWho	db 'Rename Who?',0
-aYouCanTRenameA	db 'You can',27h,'t rename a party list!',0
-align 2
-s_whatIs		db 'What is ',0
-align 2
-s_newName	db 27h,'s new name?',0
-align 2
-
+include(`data/strings/commands.asm')
+include(`data/strings/camp.asm')
+include(`data/strings/classes.asm')
 include(`data/character/classes.asm')
-s_ruinTitle	db 'The Ruin',0
-g_campActionFunctions	dd camp_addMember
-		dd camp_removeMember
-		dd camp_renameMember
-		dd camp_createMember
-		dd transferCharacter
-		dd camp_deleteMember
-		dd camp_saveParty
-		dd camp_saveAndExit
-		dd camp_exit
-s_thievesInf	db	'thieves.inf',0
-s_partiesInf	db	'parties.inf',0
-
+include(`data/buildings/camp/functions.asm')
 include(`building/tavern/data.asm')
 include(`building/temple/data.asm')
-
-s_pronounHe		db 'he',0
-s_pronounShe		db 'she',0
-s_pronounIt		db 'it',0
-s_pronounHim		db 'him',0
-s_pronounHer		db 'her',0
-s_pronounHis		db 'his',0
-s_pronounIts		db 'its',0
-g_pronounList	dd s_pronounHe
-		dd s_pronounShe
-		dd s_pronounIt
-		dd s_pronounHim
-		dd s_pronounHer
-		dd s_pronounIt
-		dd s_pronounHis
-		dd s_pronounHer
-		dd s_pronounIts
-fgtrXPReq	dd 2000, 4000, 7000, 10000, 15000, 20000; 0
-		dd 30000, 50000, 80000,	110000,	150000,	200000;	6
-wizdXPReq	dd 20000, 50000, 80000, 120000, 160000, 200000; 0
-		dd 250000, 300000, 400000, 600000, 900000; 6
-		dd 1300000		; 11
-sorcXPReq	dd 7000, 15000, 25000, 40000,	60000, 80000; 0
-		dd 100000, 130000, 170000, 220000, 300000; 6
-		dd 400000		; 11
-magiXPReq	dd 1800, 4000, 6000, 10000, 14000, 19000; 0
-		dd 29000, 50000, 90000,	120000,	170000,	230000;	6
-archXPReq	dd 70000, 140000, 240000, 340000, 540000; 0
-		dd 740000, 1000000, 1400000, 1800000, 2200000; 5
-		dd 2600000, 3000000	; 10
-geomXPReq	dd 100000, 225000, 400000, 650000, 950000; 0
-		dd 1400000, 1800000, 2200000, 2600000, 3000000;	5
-		dd 3400000, 3800000	; 10
-classXPReqs	dd fgtrXPReq, wizdXPReq, sorcXPReq,	magiXPReq; 0
-		dd magiXPReq, fgtrXPReq, fgtrXPReq, fgtrXPReq; 4
-		dd fgtrXPReq, magiXPReq, archXPReq, archXPReq; 8
-		dd geomXPReq		; 12
-s_emptyBuilding	db 'You are in an empty building.',0
-s_building	db 'Building',0
-align 2
-s_storageMenu	db 'The party is inside a storage building.',0Ah
-		db 'Who wishes to inspect?',0Ah
-		db 0Ah, 0Ah, 0Ah
-		db 'ESC to exit building',0
-align 2
-s_would		db 'Would ',0
-align 2
-s_likeToPickup	db ' like to pickup...',0
-align 2
-s_buildingIsEmpty	db 'The building is empty.',0
-align 2
-aPickUp___	db 'Pick up...',0
-align 2
-s_allFull	db 'All full!',0
-s_youPickUpItem	db 'You pick up the item.',0
-
-a_inventoryStf	db 'inventor.stf',0
-align 2
-aWildwal_grp	db	'wildwal.grp',0
-aSkara_grp	db 'skara.grp',0
-aGdung_grp	db 'gdung.grp',0
-aDisk1		db 'Disk 1',0
-s_diskTwo		db 'Disk 2',0
-aDisk3		db 'Disk 3',0
-aMaps_lo	db 'maps.lo',0
-aMaps_hi	db 'maps.hi',0
-aMonsterl	db 'monsterl',0
-aMonsterh	db 'monsterh',0
-aLow_pic	db 'low.pic',0
-aHi_pic		db 'hi.pic',0
-align 2
-s_insertDisk	db 'Please insert disk ',0
-minimap_bitmaskOffsetList	db 0FFh, 0, 4, 8, 4, 0, 0, 4; 0
-		db 0, 0, 4, 8, 4, 0, 0,	4; 8
-s_statusAbbreviations	db 'Old PsndNutsPossParaDeadSton',0
-			db    0
-statusBitmaskList	db stat_old, stat_poisoned, stat_nuts, stat_possessed; 0
-		db stat_paralyzed, stat_dead, stat_stoned, 0; 4
-classAbbreviations	db 'WaWiSoCoMaRoBaPaHuMoArChGeMnIl',0
-			db    0
-word_43F12	dw 0
-mouseBoxes	mouseBox_t < 0Fh,  0Ah,  6Ah,  7Ah>	; Bigpic Window
-		mouseBox_t <   6, 0A8h,  66h, 132h>	; Text Window
-		mouseBox_t < 90h,  0Ch, 0C7h, 132h>	; Roster Area
-		db    0
-		db    0
-map_graphicsTable	dd aWildwal_grp, aSkara_grp; 0
-		dd aSkara_grp, aGdung_grp; 2
-		dd aGdung_grp, aGdung_grp; 4
-byte_43F4A	db 8 dup(0)
-disk1		dw offset aDisk1
-dseg_0		dw seg dseg
-disk2		dd s_diskTwo
-disk3		dd aDisk3
-mapFiles	dd aMaps_lo, aMaps_hi
-monsterFiles	dd	aMonsterl, aMonsterh
-levelPathTable	levelFile_t	<lev_monsterl, 0>; 0
-		levelFile_t <lev_monsterl, 1>;	1
-		levelFile_t <lev_monsterl, 2>;	2
-		levelFile_t <lev_monsterl, 3>;	3
-		levelFile_t <lev_monsterl, 4>;	4
-		levelFile_t <lev_monsterh, 0>;	5
-		levelFile_t <lev_monsterh, 1>;	6
-		levelFile_t <lev_monsterh, 2>;	7
-		levelFile_t <lev_monsterh, 3>;	8
-		levelFile_t <lev_monsterh, 4>;	9
-		levelFile_t <lev_monsterl, 5>;	10
-		levelFile_t <lev_monsterl, 6>;	11
-		levelFile_t <lev_monsterl, 7>;	12
-		levelFile_t <lev_monsterl, 8>;	13
-		levelFile_t <lev_monsterl, 9>;	14
-		levelFile_t <lev_monsterl, 10>; 15
-		levelFile_t <lev_monsterl, 11>; 16
-		levelFile_t <lev_monsterl, 12>; 17
-		levelFile_t <lev_monsterl, 13>; 18
-		levelFile_t <lev_monsterl, 14>; 19
-		levelFile_t <lev_monsterl, 15>; 20
-		levelFile_t <lev_monsterl, 16>; 21
-		levelFile_t <lev_monsterl, 17>; 22
-		levelFile_t <lev_monsterl, 18>; 23
-		levelFile_t <lev_monsterl, 19>; 24
-		levelFile_t <lev_monsterl, 20>; 25
-		levelFile_t <lev_monsterl, 21>; 26
-		levelFile_t <lev_monsterl, 22>; 27
-		levelFile_t <lev_monsterl, 23>; 28
-		levelFile_t <lev_monsterl, 24>; 29
-		levelFile_t <lev_monsterl, 25>; 30
-		levelFile_t <lev_monsterl, 26>; 31
-		levelFile_t <lev_monsterl, 27>; 32
-		levelFile_t <lev_monsterl, 28>; 33
-		levelFile_t <lev_monsterh, 5>;	34
-		levelFile_t <lev_monsterh, 6>;	35
-		levelFile_t <lev_monsterh, 7>;	36
-		levelFile_t <lev_monsterh, 8>;	37
-		levelFile_t <lev_monsterh, 9>;	38
-		levelFile_t <lev_monsterh, 10>; 39
-		levelFile_t <lev_monsterh, 11>; 40
-		levelFile_t <lev_monsterh, 12>; 41
-		levelFile_t <lev_monsterh, 13>; 42
-		levelFile_t <lev_monsterh, 14>; 43
-		levelFile_t <lev_monsterh, 15>; 44
-		levelFile_t <lev_monsterh, 16>; 45
-		levelFile_t <lev_monsterh, 17>; 46
-		levelFile_t <lev_monsterh, 18>; 47
-		levelFile_t <lev_monsterh, 19>; 48
-		levelFile_t <lev_monsterh, 20>; 49
-		levelFile_t <lev_monsterl, 29>; 50
-		levelFile_t <lev_monsterl, 30>; 51
-		levelFile_t <lev_monsterh, 21>; 52
-		levelFile_t <lev_monsterh, 22>; 53
-		levelFile_t <lev_monsterh, 23>; 54
-		levelFile_t <lev_monsterh, 24>; 55
-		levelFile_t <lev_monsterh, 25>; 56
-		levelFile_t <lev_monsterh, 26>; 57
-		levelFile_t <lev_monsterh, 27>; 58
-		levelFile_t <lev_monsterh, 28>; 59
-		levelFile_t <lev_monsterh, 29>; 60
-		levelFile_t <lev_monsterh, 30>; 61
-		levelFile_t <lev_monsterl, 31>; 62
-		levelFile_t <lev_monsterl, 32>; 63
-		levelFile_t <lev_monsterl, 33>; 64
-		levelFile_t <lev_monsterl, 34>; 65
-		levelFile_t <lev_monsterh, 31>; 66
-		levelFile_t <lev_monsterh, 32>; 67
-		levelFile_t <lev_monsterh, 33>; 68
-		levelFile_t <lev_monsterh, 34>; 69
-		levelFile_t <lev_monsterh, 35>; 70
-lowPic		dd aLow_pic
-		dd aHi_pic
-bigpicIndex	db 0, 1, 2, 3	    ; 0
-		db 4, 5, 6, 7		; 4
-		db 8, 9, 10, 11		; 8
-		db 12, 13, 14, 15	; 12
-		db 16, 17, 18, 19	; 16
-		db 20, 21, 255,	255	; 20
-		db 22, 255, 23,	255	; 24
-		db 255,	24, 25,	255	; 28
-		db 26, 27, 255,	255	; 32
-		db 255,	255, 28, 29	; 36
-		db 255,	255, 255, 30	; 40
-		db 255,	255, 31, 32	; 44
-		db 33, 34, 35, 36	; 48
-		db 37, 38, 39, 40	; 52
-		db 41, 42, 43, 44	; 56
-		db 255,	45, 255, 46	; 60
-		db 255,	255, 255, 255	; 64
-		db 255,	47, 48,	49	; 68
-		db 255,	255, 50, 255	; 72
-		db 255,	255, 51, 52	; 76
-		db 255,	255, 255, 53	; 80
-		db 255,	255, 255, 255	; 84
-		db 255,	255, 255, 0	; 88
-		db 255,	1, 255,	2	; 92
-		db 255,	3, 4, 255	; 96
-		db 255,	255, 5,	6	; 100
-		db 255,	255, 255, 255	; 104
-		db 255,	7, 8, 9		; 108
-		db 255,	10, 255, 255	; 112
-		db 11, 255, 255, 12	; 116
-		db 13, 255, 14,	15	; 120
-		db 16, 17, 18, 255	; 124
-		db 19, 20, 21, 255	; 128
-		db 22, 23, 255,	255	; 132
-		db 24, 255, 255, 25	; 136
-		db 26, 27, 28, 29	; 140
-		db 255,	255, 255, 255	; 144
-		db 30, 31, 32, 255	; 148
-		db 33, 34, 35, 36	; 152
-		db 37, 255, 255, 255	; 156
-		db 38, 39, 255,	40	; 160
-		db 41, 42, 43, 44	; 164
-		db 45, 255, 46,	255	; 168
-		db 47, 48, 255,	49	; 172
+include(`data/strings/pronouns.asm')
+include(`data/character/advancement.asm')
+g_soundActiveFlag	dw 1
+include(`data/buildings/empty.asm')
+include(`data/strings/storage.asm')
+include(`data/strings/disk.asm')
+include(`data/character/displayAbbreviations.asm')
+include(`data/character/statuses.asm')
+include(`data/gfx/dungeon/minimap.asm')
+include(`data/mouse.asm')
+include(`data/levelFileIndex.asm')
+include(`data/bigpic.asm')
 s_yesNo		db 'Yes',0Ah,'No',0
 		db    0
-word_440BC	dw 0
 _str_Loalphabet	db ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g'; 0
 		db 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p'; 8
 		db 'r', 's', 't', 'u', 'v', 'w', 'y', '.'; 16
@@ -357,33 +38,12 @@ _str_Hialphabet	db 'j', 'q', 'x', 'z', '0', '1', '2', '3'; 0
 		db '?', '<', '>', ':', ';', '-', '%', 0; 56
 s_esc		db 'ESC',0
 s_u		db '%U',0
-s_victory		db 'vict',0
-s_bardscr	db 'bardscr',0
-s_iconFilePath	db 'icons.bin',0
-s_getPictureError	db 'picture get error',0
-bigpicIndexMultiplier	dw 2
 word_4414E	dw 0FFh
 aNorth		db 'north',0
 aEast		db 'east',0
 aSouth		db 'south',0
 aWest		db 'west',0
 g_printPartyFlag	dw 1
-g_mouseLineMaskList	dw 1		; 0
-		dw 2		; 1
-		dw 4		; 2
-		dw 8		; 3
-		dw 10h		; 4
-		dw 20h		; 5
-		dw 40h		; 6
-		dw 80h		; 7
-		dw 100h		; 8
-		dw 200h		; 9
-		dw 400h		; 10
-		dw 800h		; 11
-		dw 1000h	; 12
-		dw 2000h	; 13
-		dw 4000h	; 14
-		dw 8000h	; 15
 byteMaskList	db 80h, 40h, 20h, 10h   ; 0
 		db 8, 4, 2, 1		; 4
 flagMaskList	db 7Fh, 0BFh, 0DFh, 0EFh; 0
@@ -395,272 +55,17 @@ diceMaskList	db 1, 3		     ; 0
 dirStringList	dd aNorth, aEast, aSouth,	aWest
 dirDeltaN	dw 0FFFFh, 0,	1, 0	  ; 0
 dirDeltaE	dw 0,	1, 0, 0FFFFh	  ; 0
-northDelta	viewStruct <253, 3>	   ; 0
-		viewStruct <254, 3>	; 1
-		viewStruct <255, 3>	; 2
-		viewStruct <0, 3>	; 3
-		viewStruct <1, 3>	; 4
-		viewStruct <2, 3>	; 5
-		viewStruct <3, 3>	; 6
-		viewStruct <253, 2>	; 7
-		viewStruct <254, 2>	; 8
-		viewStruct <255, 2>	; 9
-		viewStruct <0, 2>	; 10
-		viewStruct <1, 2>	; 11
-		viewStruct <2, 2>	; 12
-		viewStruct <3, 2>	; 13
-		viewStruct <254, 1>	; 14
-		viewStruct <255, 1>	; 15
-		viewStruct <0, 1>	; 16
-		viewStruct <1, 1>	; 17
-		viewStruct <2, 1>	; 18
-		viewStruct <255, 0>	; 19
-		viewStruct <1, 0>	; 20
-southDelta	viewStruct <3, 253>	   ; 0
-		viewStruct <2, 253>	; 1
-		viewStruct <1, 253>	; 2
-		viewStruct <0, 253>	; 3
-		viewStruct <255, 253>	; 4
-		viewStruct <254, 253>	; 5
-		viewStruct <253, 253>	; 6
-		viewStruct <3, 254>	; 7
-		viewStruct <2, 254>	; 8
-		viewStruct <1, 254>	; 9
-		viewStruct <0, 254>	; 10
-		viewStruct <255, 254>	; 11
-		viewStruct <254, 254>	; 12
-		viewStruct <253, 254>	; 13
-		viewStruct <2, 255>	; 14
-		viewStruct <1, 255>	; 15
-		viewStruct <0, 255>	; 16
-		viewStruct <255, 255>	; 17
-		viewStruct <254, 255>	; 18
-		viewStruct <1, 0>	; 19
-		viewStruct <255, 0>	; 20
-eastDelta	viewStruct <3, 3>	  ; 0
-		viewStruct <3, 2>	; 1
-		viewStruct <3, 1>	; 2
-		viewStruct <3, 0>	; 3
-		viewStruct <3, 255>	; 4
-		viewStruct <3, 254>	; 5
-		viewStruct <3, 253>	; 6
-		viewStruct <2, 3>	; 7
-		viewStruct <2, 2>	; 8
-		viewStruct <2, 1>	; 9
-		viewStruct <2, 0>	; 10
-		viewStruct <2, 255>	; 11
-		viewStruct <2, 254>	; 12
-		viewStruct <2, 253>	; 13
-		viewStruct <1, 2>	; 14
-		viewStruct <1, 1>	; 15
-		viewStruct <1, 0>	; 16
-		viewStruct <1, 255>	; 17
-		viewStruct <1, 254>	; 18
-		viewStruct <0, 1>	; 19
-		viewStruct <0, 255>	; 20
-westDelta	viewStruct <253, 253>	  ; 0
-		viewStruct <253, 254>	; 1
-		viewStruct <253, 255>	; 2
-		viewStruct <253, 0>	; 3
-		viewStruct <253, 1>	; 4
-		viewStruct <253, 2>	; 5
-		viewStruct <253, 3>	; 6
-		viewStruct <254, 253>	; 7
-		viewStruct <254, 254>	; 8
-		viewStruct <254, 255>	; 9
-		viewStruct <254, 0>	; 10
-		viewStruct <254, 1>	; 11
-		viewStruct <254, 2>	; 12
-		viewStruct <254, 3>	; 13
-		viewStruct <255, 254>	; 14
-		viewStruct <255, 255>	; 15
-		viewStruct <255, 0>	; 16
-		viewStruct <255, 1>	; 17
-		viewStruct <255, 2>	; 18
-		viewStruct <0, 255>	; 19
-		viewStruct <0, 1>	; 20
-g_wild_deltaList	dd northDelta, eastDelta, southDelta,	westDelta; 0
-g_tile_quadrantWidthList	db 3, 3, 3, 3, 3, 3,	3, 1, 1, 1; 0
-		db 1, 1, 1, 6, 6, 6, 6,	6, 6, 6; 10
-		db 10, 10, 10, 10, 10, 10, 2, 2, 2, 2; 20
-		db 10, 10, 10, 10, 10, 10, 10, 10, 10, 10; 30
-		db 10, 3, 3, 3,	3, 18, 18, 18, 10, 10; 40
-		db 10, 10, 10, 10, 6, 6, 32, 32, 32, 11; 50
-		db 11, 0		; 60
-g_tile_quadrantScaleFactor	db 6, 6, 6, 6, 6, 6,	6, 6
-		db 6, 6, 6, 6, 6, 12, 12, 12
-		db 12, 12, 12, 12, 64, 64, 64, 64
-		db 64, 64, 14, 14, 14, 14, 20, 20
-		db 20, 20, 20, 64, 64, 64, 64, 64
-		db 64, 20, 20, 20, 20, 36, 36, 36
-		db 64, 64, 64, 64, 64, 64, 36, 36
-		db 64, 64, 64, 64, 64, 0
-g_tile_quadrantAspectOffsetList	db 2, 2, 2, 2, 2 	; 0
-		db 2, 2, 0, 0, 0 	; 5
-		db 0, 0, 0, 2, 2	; 10
-		db 2, 2, 2, 2, 2	; 15
-		db 0, 0, 0, 2, 2	; 20
-		db 2, 0, 0, 0, 0	; 25
-		db 2, 2, 2, 2, 2	; 30
-		db 0, 0, 0, 2, 2	; 35
-		db 2, 0, 0, 0, 0	; 40
-		db 2, 2, 2, 0, 0	; 45
-		db 0, 2, 2, 2, 0	; 50
-		db 0, 2, 2, 2, 0	; 55
-		db 0, 0			; 60
-g_wild_viewSquareIndexList	db 1, 2, 3, 4
-		db 5, 9, 11, 9
-		db 10, 11, 15, 17
-		db 15, 16, 17, 19
-		db 20, 0
-byte_44344	db 0, 255, 1, 1	   ; 0
-		db 2, 255, 255,	1	; 4
-		db 3, 255, 1, 1		; 8
-		db 2, 255, 255,	1	; 12
-byte_44354	db 0, 0FFh, 0FFh, 0FFh  ; 0
-		db 0FFh, 0, 0FFh, 0FFh	; 4
-		db 0FFh, 0FFh, 0FFh, 0FFh; 8
-		db 0FFh, 0, 0FFh, 0FFh	; 12
-dun_deltaNorth	viewStruct <253,	4>     ; 0
-		viewStruct <254, 4>	; 1
-		viewStruct <255, 4>	; 2
-		viewStruct <0, 4>	; 3
-		viewStruct <1, 4>	; 4
-		viewStruct <2, 4>	; 5
-		viewStruct <3, 4>	; 6
-		viewStruct <253, 3>	; 7
-		viewStruct <254, 3>	; 8
-		viewStruct <255, 3>	; 9
-		viewStruct <0, 3>	; 10
-		viewStruct <1, 3>	; 11
-		viewStruct <2, 3>	; 12
-		viewStruct <3, 3>	; 13
-		viewStruct <254, 2>	; 14
-		viewStruct <255, 2>	; 15
-		viewStruct <0, 2>	; 16
-		viewStruct <1, 2>	; 17
-		viewStruct <2, 2>	; 18
-		viewStruct <255, 1>	; 19
-		viewStruct <0, 1>	; 20
-		viewStruct <1, 1>	; 21
-		viewStruct <255, 0>	; 22
-		viewStruct <0, 0>	; 23
-		viewStruct <1, 0>	; 24
-		viewStruct <255, 3>	; 25
-		viewStruct <0, 3>	; 26
-		viewStruct <1, 3>	; 27
-		viewStruct <255, 2>	; 28
-		viewStruct <0, 2>	; 29
-		viewStruct <1, 2>	; 30
-		viewStruct <255, 1>	; 31
-		viewStruct <0, 1>	; 32
-		viewStruct <1, 1>	; 33
-dun_deltaSouth	viewStruct <3, 252>     ; 0
-		viewStruct <2, 252>	; 1
-		viewStruct <1, 252>	; 2
-		viewStruct <0, 252>	; 3
-		viewStruct <255, 252>	; 4
-		viewStruct <254, 252>	; 5
-		viewStruct <253, 252>	; 6
-		viewStruct <3, 253>	; 7
-		viewStruct <2, 253>	; 8
-		viewStruct <1, 253>	; 9
-		viewStruct <0, 253>	; 10
-		viewStruct <255, 253>	; 11
-		viewStruct <254, 253>	; 12
-		viewStruct <253, 253>	; 13
-		viewStruct <2, 254>	; 14
-		viewStruct <1, 254>	; 15
-		viewStruct <0, 254>	; 16
-		viewStruct <255, 254>	; 17
-		viewStruct <254, 254>	; 18
-		viewStruct <1, 255>	; 19
-		viewStruct <0, 255>	; 20
-		viewStruct <255, 255>	; 21
-		viewStruct <1, 0>	; 22
-		viewStruct <0, 0>	; 23
-		viewStruct <255, 0>	; 24
-		viewStruct <1, 253>	; 25
-		viewStruct <0, 253>	; 26
-		viewStruct <255, 253>	; 27
-		viewStruct <1, 254>	; 28
-		viewStruct <0, 254>	; 29
-		viewStruct <255, 254>	; 30
-		viewStruct <1, 255>	; 31
-		viewStruct <0, 255>	; 32
-		viewStruct <255, 255>	; 33
-dun_deltaEast	viewStruct <4, 3>	      ;	0
-		viewStruct <4, 2>	; 1
-		viewStruct <4, 1>	; 2
-		viewStruct <4, 0>	; 3
-		viewStruct <4, 255>	; 4
-		viewStruct <4, 254>	; 5
-		viewStruct <4, 253>	; 6
-		viewStruct <3, 3>	; 7
-		viewStruct <3, 2>	; 8
-		viewStruct <3, 1>	; 9
-		viewStruct <3, 0>	; 10
-		viewStruct <3, 255>	; 11
-		viewStruct <3, 254>	; 12
-		viewStruct <3, 253>	; 13
-		viewStruct <2, 2>	; 14
-		viewStruct <2, 1>	; 15
-		viewStruct <2, 0>	; 16
-		viewStruct <2, 255>	; 17
-		viewStruct <2, 254>	; 18
-		viewStruct <1, 1>	; 19
-		viewStruct <1, 0>	; 20
-		viewStruct <1, 255>	; 21
-		viewStruct <0, 1>	; 22
-		viewStruct <0, 0>	; 23
-		viewStruct <0, 255>	; 24
-		viewStruct <3, 1>	; 25
-		viewStruct <3, 0>	; 26
-		viewStruct <3, 255>	; 27
-		viewStruct <2, 1>	; 28
-		viewStruct <2, 0>	; 29
-		viewStruct <2, 255>	; 30
-		viewStruct <1, 1>	; 31
-		viewStruct <1, 0>	; 32
-		viewStruct <1, 255>	; 33
-dun_deltaWest	viewStruct <252, 253>   ;	0
-		viewStruct <252, 254>	; 1
-		viewStruct <252, 255>	; 2
-		viewStruct <252, 0>	; 3
-		viewStruct <252, 1>	; 4
-		viewStruct <252, 2>	; 5
-		viewStruct <252, 3>	; 6
-		viewStruct <253, 253>	; 7
-		viewStruct <253, 254>	; 8
-		viewStruct <253, 255>	; 9
-		viewStruct <253, 0>	; 10
-		viewStruct <253, 1>	; 11
-		viewStruct <253, 2>	; 12
-		viewStruct <253, 3>	; 13
-		viewStruct <254, 254>	; 14
-		viewStruct <254, 255>	; 15
-		viewStruct <254, 0>	; 16
-		viewStruct <254, 1>	; 17
-		viewStruct <254, 2>	; 18
-		viewStruct <255, 255>	; 19
-		viewStruct <255, 0>	; 20
-		viewStruct <255, 1>	; 21
-		viewStruct <0, 255>	; 22
-		viewStruct <0, 0>	; 23
-		viewStruct <0, 1>	; 24
-		viewStruct <253, 255>	; 25
-		viewStruct <253, 0>	; 26
-		viewStruct <253, 1>	; 27
-		viewStruct <254, 255>	; 28
-		viewStruct <254, 0>	; 29
-		viewStruct <254, 1>	; 30
-		viewStruct <255, 255>	; 31
-		viewStruct <255, 0>	; 32
-		viewStruct <255, 1>	; 33
-g_dun_deltaList	dd dun_deltaNorth, dun_deltaEast, dun_deltaSouth, dun_deltaWest	; 3
-byte_44484	db 0, 1, 2, 2, 2, 0,	3, 4; 0
-		db 3, 3, 4, 4, 4, 0, 3,	4; 8
-byte_44494	db 3Dh, 38h,	2Dh, 1Eh, 0Dh, 0, 2, 2,	2, 2; 0
+include(`data/gfx/wild/viewDeltas.asm')
+include(`data/gfx/tile/quadrantWidth.asm')
+include(`data/gfx/tile/quadrantScaleFactor.asm')
+include(`data/gfx/tile/quadrantAspectOffset.asm')
+include(`data/gfx/wild/viewSquares.asm')
+include(`data/gfx/dungeon/passableFaces.asm')
+include(`data/gfx/dungeon/transparentFaces.asm')
+include(`data/gfx/dungeon/viewDeltas.asm')
+include(`data/gfx/dungeon/squareToFace.asm')
+include(`data/gfx/dungeon/lightBaseTopology.asm')
+		db 2, 2, 2, 2; 0
 		db 2, 2, 2, 16h, 16h, 4, 4, 16h, 16h, 6; 10
 		db 6, 6, 6, 6, 6, 6, 2Ch, 2Ah, 2Ch, 38h; 20
 		db 36h,	38h, 18h, 8, 8,	18h, 0Ah, 0Ah, 0Ah; 30
@@ -668,121 +73,16 @@ byte_44494	db 3Dh, 38h,	2Dh, 1Eh, 0Dh, 0, 2, 2,	2, 2; 0
 		db 0Ch,	0Ch, 0Ch, 0Ch, 0Eh, 0Eh, 0Eh, 34h; 47
 		db 32h,	34h, 40h, 3Eh, 40h, 10h, 10h, 12h; 55
 		db 12h,	12h, 14h, 14h, 0; 63
-g_quadrantRightFlagList	db 0, 0, 0, 0	   ; 0
-		db 0, 0, 0, 0		; 4
-		db 0, 0, -1, -1		; 8
-		db -1, 0, 0, 0		; 12
-		db 0, 0, 0, 0		; 16
-		db 0, 0, -1, 0		; 20
-		db 0, -1, 0, 0		; 24
-		db -1, -1, 0, 0		; 28
-		db 0, 0, 0, 0		; 32
-		db 0, -1, 0, 0		; 36
-		db -1, 0, 0, -1		; 40
-		db -1, 0, 0, 0		; 44
-		db 0, 0, -1, 0		; 48
-		db 0, -1, 0, -1		; 52
-		db 0, 0, 0, 0		; 56
-		db -1, 0		; 60
-byte_44516	db 0, 1, 2, 3, 4, 5,	6, 1, 2, 3, 3, 4, 5; 0
-		db 7, 8, 9, 0Ah, 0Bh, 0Ch, 0Dh,	19h, 1Ah; 13
-		db 1Bh,	19h, 1Ah, 1Bh, 9, 0Ah, 0Ah, 0Bh; 22
-		db 0Eh,	0Fh, 10h, 11h, 12h, 1Ch, 1Dh, 1Eh; 30
-		db 1Ch,	1Dh, 1Eh, 0Fh, 10h, 10h, 11h, 13h; 38
-		db 14h,	15h, 1Fh, 20h, 21h, 1Fh, 20h, 21h; 46
-		db 14h,	14h, 16h, 17h, 18h, 17h, 17h, 0; 54
-byte_44554	db 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 0, 0, 0; 0
-		db 4, 4, 4, 4, 4, 4, 4,	4, 4, 4, 0, 0, 0; 13
-		db 8, 8, 0, 0, 4, 4, 4,	4, 4, 4, 4, 4, 0; 26
-		db 0, 0, 8, 8, 0, 0, 4,	4, 4, 4, 4, 4, 0; 39
-		db 0, 0, 8, 0, 4, 4, 4,	8, 0, 0; 52
-g_tile_quadrantCoordinates	coordinate_t <12, 42>	   ; 0
-		coordinate_t <15, 42>	; 1
-		coordinate_t <18, 42>	; 2
-		coordinate_t <21, 42>	; 3
-		coordinate_t <24, 42>	; 4
-		coordinate_t <27, 42>	; 5
-		coordinate_t <30, 42>	; 6
-		coordinate_t <5, 38>	; 7
-		coordinate_t <12, 38>	; 8
-		coordinate_t <26, 38>	; 9
-		coordinate_t <29, 38>	; 10
-		coordinate_t <31, 38>	; 11
-		coordinate_t <39, 38>	; 12
-		coordinate_t <254, 38>	; 13
-		coordinate_t <5, 38>	; 14
-		coordinate_t <17, 44>	; 15
-		coordinate_t <24, 44>	; 16
-		coordinate_t <31, 44>	; 17
-		coordinate_t <33, 38>	; 18
-		coordinate_t <40, 38>	; 19
-		coordinate_t <13, 33>	; 20
-		coordinate_t <21, 33>	; 21
-		coordinate_t <31, 33>	; 22
-		coordinate_t <13, 55>	; 23
-		coordinate_t <21, 55>	; 24
-		coordinate_t <31, 55>	; 25
-		coordinate_t <255,	38>	; 26
-		coordinate_t <23, 38>	; 27
-		coordinate_t <31, 38>	; 28
-		coordinate_t <42, 38>	; 29
-		coordinate_t <2, 42>	; 30
-		coordinate_t <12, 42>	; 31
-		coordinate_t <23, 42>	; 32
-		coordinate_t <34, 42>	; 33
-		coordinate_t <45, 42>	; 34
-		coordinate_t <4, 21>	; 35
-		coordinate_t <20, 21>	; 36
-		coordinate_t <34, 21>	; 37
-		coordinate_t <4, 63>	; 38
-		coordinate_t <20, 63>	; 39
-		coordinate_t <34, 63>	; 40
-		coordinate_t <3, 35>	; 41
-		coordinate_t <19, 35>	; 42
-		coordinate_t <33, 35>	; 43
-		coordinate_t <48, 35>	; 44
-		coordinate_t <0, 35>	; 45
-		coordinate_t <18, 35>	; 46
-		coordinate_t <37, 35>	; 47
-		coordinate_t <0, 8>	; 48
-		coordinate_t <17, 4>	; 49
-		coordinate_t <44, 8>	; 50
-		coordinate_t <0, 77>	; 51
-		coordinate_t <17, 77>	; 52
-		coordinate_t <44, 77>	; 53
-		coordinate_t <12, 22>	; 54
-		coordinate_t <37, 22>	; 55
-		coordinate_t <235, 22>	; 56
-		coordinate_t <11, 22>	; 57
-		coordinate_t <43, 22>	; 58
-		coordinate_t <0, 0>	; 59
-		coordinate_t <44, 0>	; 60
-byte_4460C	db 0, 0, 0, 0, 0, 0,	0, 0, 0, 0, 0, 0, 0; 0
-		db 0, 0, 0FFh, 0FFh, 0FFh, 0, 0, 0, 0, 0; 13
-		db 0, 0, 0, 0, 0FFh, 0FFh, 0, 0, 0FFh, 0FFh; 23
-		db 0FFh, 0, 0, 0, 0, 0,	0, 0, 0, 0FFh, 0FFh; 33
-		db 0, 0FFh, 0FFh, 0FFh,	0, 0, 0, 0, 0, 0; 44
-		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh; 54
-		db 0			; 61
-g_wild_squareTopologyIndex	db 30, 31, 32, 33
-		db 34, 42, 43, 45
-		db 46, 47, 54, 55
-		db 56, 57, 58, 59
-		db 60, 0
+include(`data/gfx/tile/rightFlags.asm')
+include(`data/gfx/dungeon/topologyToSquare.asm')
+include(`data/gfx/dungeon/topologySquareShift.asm')
+include(`data/gfx/tile/quadrantCoordinates.asm')
+include(`data/gfx/dungeon/enableTopology.asm')
+include(`data/gfx/wild/topologyList.asm')
 include(`data/buildings/storage/inventory.asm')
 bigpicLightOffset dw 0,	460h, 818h, 9A0h, 8C0h;	0
 bigpicLightSize	dw 1340h, 0A80h, 620h, 348h, 1C0h; 0
-g_iconXOffset	db 80, 92, 108, 124, 136, 0; 0
-g_iconHeight	db 19, 26, 17, 20, 16, 0; 0
-g_iconWidth	db 12, 16, 16, 12, 20, 0; 0
-g_iconDataPointers	dd	iconLight, iconCompass,	iconAreaEnchant, iconShield, iconLevitation; 0
-g_iconCellDataLength	dw 0E4h, 1A0h, 110h,	0F0h, 140h; 0
-byte_44718	db 0, 0, 0, 0, 0, 0	   ; 0
-g_iconAnimationDelay	db 2, 0, 4, 0, 3, 0	   ; 0
-g_iconCurrentDelay db 0, 0, 0,	0, 0, 0	    ; 0
-g_iconClearIndex	db 4, 4, 4, 1, 4, 0	   ; 0
-g_iconCurrentCell	db 0, 0, 0, 0, 0, 0
-
+include(`data/gfx/icons/icons.asm')
 include(`data/spells/names.asm')
 
 s_spellPoints	db 'Spell Points:',0
@@ -954,22 +254,6 @@ aStoning	db ', stoning ',0
 aCriticallyHitt	db ', critically hitting ',0
 aStealing	db ', stealing ',0
 aPhazing	db ', phazing ',0
-aSwingsAt	db 'swings at',0
-aSlashesAt	db 'slashes at',0
-aKicksAt	db 'kicks at',0
-aPunchesAt	db 'punches at',0
-aClawsAt	db 'claws at',0
-aTearsAt	db 'tears at',0
-aBitesAt	db 'bites at',0
-aGnawsOn	db 'gnaws on',0
-aStabsAt	db 'stabs at',0
-aSlicesAt	db 'slices at',0
-aSlams		db 'slams',0
-aStrikesAt	db 'strikes at',0
-aGropesAt	db 'gropes at',0
-aReachesToward	db 'reaches toward',0
-aPeersAt	db 'peers at',0
-aStaresAt	db 'stares at',0
 s_dissentionInYourRanks	db 'Dissention in your ranks...',0Ah
 db 0Ah,0
 s_willThereBeAnEnd	db '"Will there ever be an end to them?" you shout. You see ',0
@@ -1048,22 +332,7 @@ s_sorryBud	db 'Sorry, Bud',0
 s_partyHasExpired db	'Alas, your party has expired, but gone to adventurer heaven.',0
 		db    0
 include(`data/character/monkDamage.asm')
-monMeleeAttString dd aSwingsAt		  ; 0
-		dd aSlashesAt		; 1
-		dd aKicksAt		; 2
-		dd aPunchesAt		; 3
-		dd aClawsAt		; 4
-		dd aTearsAt		; 5
-		dd aBitesAt		; 6
-		dd aGnawsOn		; 7
-		dd aStabsAt		; 8
-		dd aSlicesAt		; 9
-		dd aSlams		; 10
-		dd aStrikesAt		; 11
-		dd aGropesAt		; 12
-		dd aReachesToward	; 13
-		dd aPeersAt		; 14
-		dd aStaresAt		; 15
+include(`data/strings/melee.asm')
 itemLevMask	db 0, 81h, 81h, 81h, 81h, 81h, 81h,	81h; 0
 		db 81h,	81h, 81h, 81h, 81h, 81h, 81h, 81h; 8
 		db 81h,	81h, 81h, 81h, 81h, 81h, 0C1h, 41h; 16
@@ -1767,23 +1036,6 @@ s_andA		db 'and a ',0
 		db    0
 s_appears	db ' appears!',0Ah,0Ah,0
 include(`data/monsters/summonData.asm')
-s_nl	db  0Ah
-		db    0
-s_displayQuestion	db 'What type of display do you wish to use?',0
-s_videoOption1	db 0Ah,0Ah
-		db '1) Composite or TV monitor.',0
-s_videoOption2	db 0Ah,'2) RGB monitor.',0
-s_videoOption3	db 0Ah,'3) EGA monitor.',0
-s_videoOption4	db 0Ah,'4) Tandy computer with RGB monitor.',0
-s_videoQuestion	db 0Ah,0Ah
-		db 'Please enter the appropriate number for your system type:',0
-s_soundQuestion db 'What type of sound output device do you wish to use?',0
-s_soundOption1		db 0Ah,0Ah,'1) MT32.',0
-s_soundOption2	db 0Ah,'2) Ad Lib.',0
-s_soundOption3 db 0Ah,'3) Internal IBM speaker.',0
-s_soundOption4	db 0Ah,'4) Tandy.',0
-s_soundOption5		db 0Ah,'5) PS/1',0
-s_soundPrompt db 0Ah,0Ah,'Please enter the appropriate number for your system type:',0
 s_diskToTransferFrom	db 'Disk to transfer characters from?',0
 s_whoShallTransfer	db 'Who shall transfer?',0
 s_characterAlreadyExists	db 'This character already exists',0
@@ -1984,164 +1236,30 @@ g_monsterGroupCount	db 0
 g_partyAttackFlag	db 0
 shieldAcBonus	db 0
 byte_4EECC	db 0
-minimapWallBitmasks db	0FFh,	0,	0,	0,	0,	0,	0,	0	; 0
-		; 11111111
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		db	1,	1,	1,	1,	1,	1,	1,	1	; 1
-		; 00000001
-		; 00000001
-		; 00000001
-		; 00000001
-		; 00000001
-		; 00000001
-		; 00000001
-		; 00000001
-		db	0,	0,	0,	0,	0,	0,	0,	0FFh	; 2
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 11111111
-		db	80h,	80h,	80h,	80h,	80h,	80h,	80h,	80h	; 3
-		; 10000000
-		; 10000000
-		; 10000000
-		; 10000000
-		; 10000000
-		; 10000000
-		; 10000000
-		; 10000000
-		db	6Bh,	8,	0,	0,	0,	0,	0,	0	; 4
-		; 01101011
-		; 00001000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		db	1,	1,	0,	6,	6,	0,	1,	1	; 5
-		; 00000001
-		; 00000001
-		; 00000000
-		; 00000110
-		; 00000110
-		; 00000000
-		; 00000001
-		; 00000001
-		db	0,	0,	0,	0,	0,	0,	8,	6Bh	; 6
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00001000
-		; 01101011
-		db	80h,	80h,	0, 	30h,	30h,	0,	80h,	80h	; 7
-		; 10000000
-		; 10000000
-		; 00000000
-		; 00110000
-		; 00110000
-		; 00000000
-		; 10000000
-		; 10000000
-		db	55h,	0,	0,	0,	0,	0,	0,	0	; 8
-		; 01010101
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		db	1,	1,	0,	1,	1,	0,	1,	1	; 9
-		; 00000001
-		; 00000001
-		; 00000000
-		; 00000001
-		; 00000001
-		; 00000000
-		; 00000001
-		; 00000001
-		db	0,	0,	0,	0,	0,	0,	0,	55h	; 10
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 00000000
-		; 01010101
-		db	80h,	80h,	0,	80h,	80h,	0,	80h,	80h	; 11
-		; 10000000
-		; 10000000
-		; 00000000
-		; 10000000
-		; 10000000
-		; 00000000
-		; 10000000
-		; 10000000
-		db	0,	0,	8,	1Ch,	1Ch,	8,	0,	0	; 12
-		; 00000000
-		; 00000000
-		; 00001000
-		; 00011100
-		; 00011100
-		; 00001000
-		; 00000000
-		; 00000000
-		db 0, 66h, 3Ch, 18h, 18h, 3Ch, 66h, 0; 13 - minimap_X
-		; 00000000
-		; 01100110
-		; 00111100
-		; 00011000
-		; 00011000
-		; 00111100
-		; 01100110
-		; 00000000
-		db 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh, 0FFh ; 14
-		; 11111111
-		; 11111111
-		; 11111111
-		; 11111111
-		; 11111111
-		; 11111111
-		; 11111111
-		; 11111111
-		db 0, 0
+include(`data/text/minimapCharacters.asm')
 s_faster		db 0Ah,'<Faster...>',0Ah,0
 s_slower		db 0Ah,'<Slower...>',0Ah,0
 txtDelayTable	db 1, 4, 7, 0Bh, 0Eh, 11h, 14h, 17h, 1Ah, 1Dh
 txtDelayIndex	db 7
-_clockTicks	dw 0
-word_4EF49	dw 0
-byte_4EF4B	db 0
-byte_4EF4C	db 0
-byte_4EF4D	db 0
+g_tockClicks	dw 0
+g_totalClockTicks	dw 0
+g_mousePresentFlag1	db 0		; 1 when a mouse is detected
+g_mousePresentFlag2	db 0		; 0 when a mouse is detected
+g_mouseButtonDownFlag	db 0		; When 0, register the next mouse button press
+					; as a mouse input
 align 4
-byte_4EF50	db 0
+g_mouseButtonDown	db 0
 byte_4EF51	db 0
-byte_4EF52	db 0
+g_mouseButtonClicked	db 0		; When non-zero process the mouse click as an input
 byte_4EF53	db 0
 spell_mouseClicked	db 0
-mouse_moved	db 0
-mouse_x		dw 0DCh
-mouse_y		dw 0
+g_mouseMoved	db 0
+g_mouseX		dw 0DCh
+g_mouseY		dw 0
 word_4EF59	dw 0
 word_4EF5B	dw 0
 byte_4EF5D	db 0
-byte_4EF5E	db 0
+g_joystickPresentFlag	db 0
 		db    0
 		db    0
 		db    0

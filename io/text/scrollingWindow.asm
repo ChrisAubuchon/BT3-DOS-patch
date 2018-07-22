@@ -122,7 +122,7 @@ l_doRealTimeEvents:
 
 l_getInput:
 	CALL(checkMouse)
-	cmp	mouse_moved, 0
+	cmp	g_mouseMoved, 0
 	jz	short l_skipMouseIcon
 	call	far ptr	gfx_disableMouseIcon
 	push	[bp+var_4]

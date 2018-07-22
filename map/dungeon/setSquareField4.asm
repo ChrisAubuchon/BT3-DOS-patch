@@ -1,9 +1,8 @@
 ; Attributes: bp-based frame
 
-dun_setSquareField4 proc far
+dun_markDiscoveredSquares proc far
 
-	var_6= word ptr	-6
-	var_4= word ptr	-4
+	loopCounter= word ptr	-6
 	var_2= word ptr	-2
 	rowBuf=	dword ptr  6
 	sqE= word ptr  0Ah
@@ -29,35 +28,35 @@ dun_setSquareField4 proc far
 	lfs	si, [bp+rowBuf]
 	lfs	si, fs:[bx+si]
 	mov	bx, ax
-	or	byte ptr fs:[bx+si+4], 9
+	or	byte ptr fs:[bx+si+dunSq_t.extraFlags], BITMASK(minimapFlag_discovered, minimapFlag_visited)
 
-	mov	[bp+var_6], 0
-	jmp	short loc_10B74
-loc_10B71:
-	inc	[bp+var_6]
-loc_10B74:
+	; Mark all squares straight ahead as discovered if they are within
+	; the light distance. Stop at the light distance or if a wall is
+	; encountered straight ahead.
+	;
+	mov	[bp+loopCounter], 0
+l_lightDiscoveryLoop:
 	mov	al, lightDistance
 	sub	ah, ah
-	cmp	ax, [bp+var_6]
-	ja	short loc_10B86
-	jmp	loc_10C1E
-loc_10B86:
+	cmp	ax, [bp+loopCounter]
+	jna	l_return
+
 	push	[bp+sqN]
 	push	[bp+sqE]
 	CALL(dun_getWalls, near)
+
 	mov	[bp+var_2], ax
 	mov	ax, [bp+direction]
 	dec	ax
 	push	ax
 	push	[bp+var_2]
 	CALL(dungeon_getWallInDirection)
-	mov	[bp+var_4], ax
+
 	mov	bx, ax
 	and	bx, 0Fh
-	cmp	byte_44354[bx], 0
-	jz	short loc_10BBC
-	jmp	short loc_10C1E
-loc_10BBC:
+	cmp	g_transparentFaces[bx], 0
+	jnz	short l_return
+
 	push	[bp+_width]
 	mov	bx, [bp+direction]
 	shl	bx, 1
@@ -88,11 +87,12 @@ loc_10BBC:
 	lfs	si, [bp+rowBuf]
 	lfs	si, fs:[bx+si]
 	mov	bx, ax
-	or	byte ptr fs:[bx+si+4], 1
-	jmp	loc_10B71
+	or	byte ptr fs:[bx+si+dunSq_t.extraFlags], minimapFlag_discovered
+	inc	[bp+loopCounter]
+	jmp	l_lightDiscoveryLoop
 
-loc_10C1E:
+l_return:
 	pop	si
 	FUNC_EXIT
 	retf
-dun_setSquareField4 endp
+dun_markDiscoveredSquares endp

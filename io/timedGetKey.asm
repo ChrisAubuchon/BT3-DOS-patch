@@ -26,11 +26,11 @@ l_getkeyWithDelay:
 	shl	ax, 1
 	add	ax, cx
 	shl	ax, 1
-	add	ax, _clockTicks
+	add	ax, g_tockClicks
 	mov	[bp+var_4], ax
 l_timerLoop:
 	mov	ax, [bp+var_4]
-	cmp	_clockTicks, ax
+	cmp	g_tockClicks, ax
 	jz	short l_returnSpace
 	CALL(checkKeyboard)
 	or	ax, ax

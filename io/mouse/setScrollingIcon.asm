@@ -13,18 +13,18 @@ mouse_setScrollingIcon proc far
 	FUNC_ENTER(4)
 
 	mov	ax, mouseBoxes._left[1 * sizeof mouseBox_t]
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jl	short l_notInTextWindow
 	mov	ax, mouseBoxes._right[1 * sizeof mouseBox_t]
-	cmp	mouse_x, ax
+	cmp	g_mouseX, ax
 	jge	short l_notInTextWindow
 	mov	ax, mouseBoxes._top[1 * sizeof mouseBox_t]
-	cmp	mouse_y, ax
+	cmp	g_mouseY, ax
 	jl	short l_notInTextWindow
 	mov	ax, mouseBoxes._bottom[1 * sizeof mouseBox_t]
-	cmp	mouse_y, ax
+	cmp	g_mouseY, ax
 	jge	short l_notInTextWindow
-	mov	ax, mouse_y
+	mov	ax, g_mouseY
 	sub	ax, 4
 	mov	cl, 3
 	sar	ax, cl

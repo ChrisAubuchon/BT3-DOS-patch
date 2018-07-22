@@ -826,8 +826,17 @@ include(`map/dungeon/minimap/clearSquare.asm')
 include(`map/dungeon/minimap/setSquare.asm')
 include(`gfx/bigpic/memcpy.asm')
 include(`gfx/bigpic/makeNight.asm')
-include(`lib/stdlib.asm')
+include(`data/stdlib/interrupts.asm')
+include(`lib/stdlib/timerHandler.asm')
+include(`lib/stdlib/errorHandler.asm')
+include(`lib/stdlib/initializeHardware.asm')
+include(`lib/stdlib/restoreHardware.asm')
+include(`lib/stdlib/checkMouse.asm')
+include(`lib/stdlib/sub_28115.asm')
+include(`lib/stdlib/checkGamePort.asm')
+include(`lib/stdlib/checkOtherGamePort.asm')
 
+include(`lib/stdlib.asm')
 seg019 ends
 
 ; Segment type: Regular

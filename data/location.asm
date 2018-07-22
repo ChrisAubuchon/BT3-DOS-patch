@@ -1,5 +1,5 @@
 s_timeEarlyMorning	db 'early morning.',0
-s_timeMidMorning	db	'mid morning.',0
+s_timeMidMorning	db 'mid morning.',0
 s_timeNoon		db 'noon.',0
 s_timeAfternoon		db 'afternoon.',0
 s_timeDusk		db 'dusk.',0

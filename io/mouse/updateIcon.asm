@@ -18,12 +18,12 @@ l_loopEntry:
 	mov	si, [bp+loopCounter]
 	mov	cl, 3
 	shl	si, cl
-	mov	ax, mouse_x
+	mov	ax, g_mouseX
 	cmp	mouseBoxes._left[si],	ax
 	jg	short l_loopIncrement
 	cmp	mouseBoxes._right[si],	ax
 	jle	short l_loopIncrement
-	mov	ax, mouse_y
+	mov	ax, g_mouseY
 	cmp	mouseBoxes._top[si],	ax
 	jg	short l_loopIncrement
 	cmp	mouseBoxes._bottom[si],	ax
@@ -45,22 +45,22 @@ l_loopExit:
 	mov	ax, [bp+arg_0]
 	test	g_mouseLineMaskList+1Eh, ax		; 8000h
 	jz	short l_setIconSix
-	cmp	mouse_y, 2Dh 
+	cmp	g_mouseY, 2Dh 
 	jge	short loc_14FDE
 	jmp	l_setIconOne
 
 loc_14FDE:
-	cmp	mouse_y, 4Bh 
+	cmp	g_mouseY, 4Bh 
 	jle	short loc_14FED
 	jmp	short l_setIconTwo
 
 loc_14FED:
-	cmp	mouse_x, 4Ah 
+	cmp	g_mouseX, 4Ah 
 	jge	short l_setIconFour
 	jmp	short l_setIconThree
 
 loc_1500E:
-	mov	ax, mouse_y
+	mov	ax, g_mouseY
 	sub	ax, 4
 	mov	cl, 3
 	sar	ax, cl

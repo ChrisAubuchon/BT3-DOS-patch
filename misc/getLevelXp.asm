@@ -52,8 +52,8 @@ l_classSpecificXp:
 	sub	bh, bh
 	shl	bx, 1
 	shl	bx, 1
-	mov	ax, word ptr classXPReqs[bx]
-	mov	dx, word ptr (classXPReqs+2)[bx]
+	mov	ax, word ptr g_classAdvancementXp[bx]
+	mov	dx, word ptr (g_classAdvancementXp+2)[bx]
 	mov	word ptr [bp+var_8], ax
 	mov	word ptr [bp+var_8+2], dx
 	mov	bx, [bp+level]

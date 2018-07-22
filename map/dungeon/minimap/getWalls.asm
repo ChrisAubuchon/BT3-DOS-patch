@@ -25,7 +25,7 @@ l_loopEntry:
 	sub	ah, ah
 	or	ax, [bp+directionLoopCounter]
 	push	ax
-	mov	ax, offset minimap_squareToDraw
+	mov	ax, offset g_minimapCharacterBuffer
 	mov	dx, seg	seg023
 	push	dx
 	push	ax

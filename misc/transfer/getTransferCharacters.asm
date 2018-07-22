@@ -229,7 +229,7 @@ l_askWhoTransfers:
 loc_2671D:
 	mov	ax, [bp+var_1BC]
 	cmp	[bp+var_1C0], ax
-	jge	l_transferCharacter
+	jge	l_camp_transferCharacter
 
 l_transferParty:
 	mov	si, [bp+var_1C0]
@@ -275,7 +275,7 @@ loc_267AE:
 	jl	short loc_26748
 	jmp	l_askWhoTransfers
 
-l_transferCharacter:
+l_camp_transferCharacter:
 	mov	si, [bp+var_1C0]
 	shl	si, 1
 	shl	si, 1

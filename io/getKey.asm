@@ -12,7 +12,7 @@ getKey proc far
 	CALL(mouse_draw, near)
 l_loopEntry:
 	CALL(checkMouse)
-	cmp	mouse_moved, 0
+	cmp	g_mouseMoved, 0
 	jz	short l_skipMouseUpdate
 	call	far ptr	gfx_disableMouseIcon
 

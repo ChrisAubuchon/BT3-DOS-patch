@@ -256,7 +256,7 @@ define(`spellcast_spellOnly', `8')
 define(`spellcast_noncombatCastable', `10h')
 define(`spellcast_partyOnly', `20h')
 
-# Minimap bitmasks
+# Minimap character index
 define(`minimap_topWall', `0')
 define(`minimap_rightWall', `1')
 define(`minimap_bottomWall', `2')
@@ -430,4 +430,10 @@ define(`mattack_spell', `0')
 define(`mattack_breathe', `80h')
 define(`mattack_melee', `0F0h')
 define(`mattack_none', `0FFh')
+
+# Minimap flag values
+define(`minimapFlag_discovered', `1')
+define(`minimapFlag_undiscovered', `2')
+define(`minimapFlag_special', `4')
+define(`minimapFlag_visited', `8')
 divert`'dnl

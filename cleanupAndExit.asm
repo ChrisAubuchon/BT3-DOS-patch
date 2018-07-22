@@ -7,7 +7,7 @@ cleanupAndExit proc far
 
 	FUNC_ENTER(6)
 	CALL(sound_stop)
-	CALL(sub_2800B)
+	CALL(restoreHardware)
 	sub	ax, ax
 	push	ax
 	CALL(vid_setMode, far)

@@ -2,8 +2,7 @@
 
 bigpic_drawPictureNumber proc far
 
-	var_E= word ptr	-0Eh
-	var_C= word ptr	-0Ch
+	var_E= dword ptr	-0Eh
 	var_8= word ptr	-8
 	var_6= word ptr	-6
 	fd= word ptr -4
@@ -15,6 +14,7 @@ bigpic_drawPictureNumber proc far
 
 	cmp	[bp+indexNo], 0FEh
 	jnz	short loc_171CF
+
 	mov	ax, 7
 	push	ax
 	mov	ax, 66h	
@@ -28,54 +28,56 @@ bigpic_drawPictureNumber proc far
 	call	far ptr	gfx_fillRectangle
 	add	sp, 0Ah
 	jmp	l_return
+
 loc_171CF:
 	mov	ax, 88
-	imul	bigpicIndexMultiplier
+	imul	g_bigpicIndexMultiplier
 	mov	si, ax
 	mov	bx, [bp+indexNo]
-	cmp	bigpicIndex[bx+si-58h],	0FFh
+	cmp	g_bigpicIndexList[bx+si-58h],	0FFh
 	jnz	short loc_171E7
-	xor	byte ptr bigpicIndexMultiplier, 3
+	xor	byte ptr g_bigpicIndexMultiplier, 3
+
 loc_171E7:
 	mov	ax, 88
-	imul	bigpicIndexMultiplier
+	imul	g_bigpicIndexMultiplier
 	mov	si, ax
-	cmp	bigpicIndex[bx+si-58h],	0FFh
+	cmp	g_bigpicIndexList[bx+si-58h],	0FFh
 	jnz	short loc_17206
-	PUSH_OFFSET(s_getPictureError)
-	PRINTSTRING
+
+	PRINTOFFSET(s_getPictureError)
 	jmp	l_return
 
 loc_17206:
 	mov	ax, 88
-	imul	bigpicIndexMultiplier
+	imul	g_bigpicIndexMultiplier
 	mov	si, ax
 	mov	bx, [bp+indexNo]
-	mov	al, bigpicIndex[bx+si-58h]
+	mov	al, g_bigpicIndexList[bx+si-58h]
 	sub	ah, ah
 	mov	[bp+var_2], ax
 
 loc_1721B:
 	sub	ax, ax
 	push	ax
-	mov	bx, bigpicIndexMultiplier
+	mov	bx, g_bigpicIndexMultiplier
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr lowPic[bx-2]
-	push	word ptr lowPic[bx-4]
+	push	word ptr g_bigpicFileList[bx-2]
+	push	word ptr g_bigpicFileList[bx-4]
 	CALL(open)
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_1726A
-	PUSH_OFFSET(s_insertDisk)
-	PRINTSTRING
-	mov	bx, bigpicIndexMultiplier
+	PRINTOFFSET(s_insertDisk)
+	mov	bx, g_bigpicIndexMultiplier
 	shl	bx, 1
 	shl	bx, 1
 	push	dseg_0[bx]
 	push	disk1[bx]
 	PRINTSTRING
 	IOWAIT
+
 loc_1726A:
 	cmp	[bp+fd], 0FFFFh
 	jz	short loc_1721B
@@ -94,36 +96,40 @@ loc_1726A:
 	PUSH_STACK_ADDRESS(var_8)
 	push	[bp+fd]
 	CALL(read)
+
 	mov	ax, 0FFFFh
 	push	ax
 	push	[bp+var_6]
 	push	[bp+var_8]
 	push	[bp+fd]
 	CALL(lseek)
+
 	mov	ax, 19712
 	push	ax
 	CALL(_mallocMaybe)
-	mov	[bp+var_E], ax
-	mov	[bp+var_C], dx
+	SAVE_STACK_DWORD(dx,ax,var_E)
+
 	mov	ax, 19712
 	push	ax
-	push	dx
-	push	[bp+var_E]
+	PUSH_STACK_DWORD(var_E)
 	push	[bp+fd]
 	CALL(read)
+
 	push	gs:bigpicCellData_seg
 	push	gs:bigpicCellData_off
-	push	[bp+var_C]
-	push	[bp+var_E]
+	PUSH_STACK_DWORD(var_E)
 	CALL(d3cmp_flate)
-	push	[bp+var_C]
-	push	[bp+var_E]
+
+	PUSH_STACK_DWORD(var_E)
 	CALL(_freeMaybe)
+
 	push	[bp+fd]
 	CALL(close)
+
 	push	gs:bigpicCellData_seg
 	push	gs:bigpicCellData_off
 	CALL(bigpic_configureCells, near)
+
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021
 	push	dx
@@ -136,13 +142,15 @@ loc_1726A:
 	jz	short loc_1734A
 	mov	al, 1
 	jmp	short loc_1734C
+
 loc_1734A:
 	sub	al, al
+
 loc_1734C:
 	mov	gs:g_hideMouseInBigpicFlag, al
 	mov	gs:bigpicCellNumber, 0
 	sub	ax, ax
-	jmp	short $+2
+
 l_return:
 	pop	si
 	FUNC_EXIT

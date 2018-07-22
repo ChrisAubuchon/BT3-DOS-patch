@@ -23,7 +23,7 @@ spGeo_revealSquare proc far
 	mov	word ptr [bp+squareP], ax
 	mov	word ptr [bp+squareP+2], dx
 	lfs	bx, [bp+squareP]
-	or	byte ptr fs:[bx], 1
+	or	byte ptr fs:[bx], minimapFlag_discovered
 
 	FUNC_EXIT
 	retf

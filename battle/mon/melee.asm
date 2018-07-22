@@ -155,8 +155,8 @@ l_inMeleeRange:
 	mov	bx, ax
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (monMeleeAttString+2)[bx]
-	push	word ptr monMeleeAttString[bx]
+	push	word ptr (g_meleeAttackString+2)[bx]
+	push	word ptr g_meleeAttackString[bx]
 	push	word ptr [bp+stringBufferP+2]
 	push	word ptr [bp+stringBufferP]
 	STRCAT(stringBufferP)

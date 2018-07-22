@@ -36,15 +36,14 @@ l_listInitialization:
 	cmp	[bp+loopCounter], 7
 	jl	l_listInitialization
 
-	PUSH_OFFSET(s_newOrder)
-	PRINTSTRING
+	PRINTOFFSET(s_newOrder)
 	mov	[bp+loopCounter], 0
 
 l_newOrderIoEntry:
 	mov	al, byte ptr [bp+loopCounter]
 	add	al, '1'
-	mov	byte_42AF5, al
-	PUSH_OFFSET(s_gtChar)
+	mov	byte ptr s_reorderListItem+1, al
+	PUSH_OFFSET(s_reorderListItem)
 	CALL(text_nlWriteString)
 
 l_retryReadSlot:
@@ -97,8 +96,8 @@ loc_119C9:
 	mov	[bp+si+emptySlot], ax
 	mov	al, byte ptr [bp+emptySlot]
 	add	al, '0'
-	mov	byte_42AF5, al
-	PUSH_OFFSET(s_gtChar)
+	mov	byte ptr s_reorderListItem+1, al
+	PUSH_OFFSET(s_reorderListItem)
 	CALL(text_nlWriteString)
 	CHARINDEX(ax, STACKVAR(var_14), bx)
 	lea	ax, party._name[bx]

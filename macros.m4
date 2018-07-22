@@ -132,7 +132,17 @@ define(`RANGE_WITH_MAX', `sub	$2, $1
 #
 define(`REGISTER_TRIPLE', `mov	$2, $1
 	shl	$1, 1
-	add	$1, $2')')
+	add	$1, $2')
+
+# REGISTER_MULTIPLY_FIVE(srcReg, destReg)
+#
+# Multiply srcReg by 5 without using mul/imul
+#
+define(`REGISTER_MULTIPLY_FIVE', `mov	$2, $1
+	shl	$1, 1
+	shl	$1, 1
+	add	$1, $2
+	mov	$2, $1')
 
 
 # BITMASK(flag, ...)

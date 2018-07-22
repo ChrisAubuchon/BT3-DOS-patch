@@ -5,7 +5,7 @@ dun_main proc far
 	var_26=	dword ptr -24h
 	var_20=	word ptr -20h
 	dungeonName=	word ptr -1Eh
-	var_E= word ptr	-0Eh
+	currentSquareWalls= word ptr	-0Eh
 	var_C= word ptr	-0Ch
 	var_A= word ptr	-0Ah
 	var_8= word ptr	-8
@@ -154,7 +154,7 @@ loc_107BE:
 	push	g_sqNorth
 	push	g_sqEast
 	CALL(dun_buildView)
-	mov	[bp+var_E], ax
+	mov	[bp+currentSquareWalls], ax
 
 	push	g_direction
 	mov	al, g_dunHeight
@@ -166,7 +166,7 @@ loc_107BE:
 	push	g_sqEast
 	push	seg027_x
 	push	offset rowOffset
-	CALL(dun_setSquareField4)
+	CALL(dun_markDiscoveredSquares)
 
 	push	g_direction
 	push	g_sqNorth
@@ -210,7 +210,7 @@ loc_108D5:
 	push	g_sqNorth
 	push	g_sqEast
 	CALL(dun_buildView)
-	mov	[bp+var_E], ax
+	mov	[bp+currentSquareWalls], ax
 
 	PUSH_STACK_ADDRESS(dungeonName)
 	CALL(setTitle)
@@ -281,7 +281,7 @@ l_checkForwardKey:
 l_moveForward:
 	mov	ax, 1
 	push	ax
-	push	[bp+var_E]
+	push	[bp+currentSquareWalls]
 	CALL(dun_canAdvance)
 	or	ax, ax
 	jz	l_checkMapValue
