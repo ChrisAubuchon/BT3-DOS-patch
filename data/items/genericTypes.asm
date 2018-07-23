@@ -219,7 +219,7 @@ itemTypeList	db ITEM_TYPE(itType_item)				;   0
 		db ITEM_TYPE(itType_weapon)				; 214
 		db ITEM_TYPE(itType_item0)				; 215
 		db ITEM_TYPE(itType_armor)				; 216
-		db ITEM_TYPE(itType_instrument)				; 217
+		db ITEM_TYPE(itType_armor)				; 217
 		db ITEM_TYPE(itType_helm)				; 218
 		db ITEM_TYPE(itType_weapon)				; 219
 		db ITEM_TYPE(itType_item0)				; 220
