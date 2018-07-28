@@ -12,7 +12,7 @@ convertSpellLevel proc far
 	cmp	[bp+spLevel], 0
 	jz	short l_return
 	mov	bx, [bp+arg_0]
-	mov	al, mageSpellIndex[bx]
+	mov	al, g_classSpellIndex[bx]
 	sub	ah, ah
 	mov	[bp+var_2], ax
 	cmp	ax, 0FFh

@@ -14,7 +14,7 @@ loc_1D2CF:
 	cmp	[bp+var_2], 8
 	jge	short loc_1D2F1
 	mov	bx, [bp+var_2]
-	mov	al, diceMaskList[bx]
+	mov	al, g_diceMasks[bx]
 	sub	ah, ah
 	mov	si, ax
 	cmp	[bp+6],	si

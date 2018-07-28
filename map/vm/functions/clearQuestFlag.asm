@@ -31,7 +31,7 @@ l_loop:
 	cmp	byte ptr gs:party._name[si], 0
 	jz	short l_next
 	mov	bx, [bp+questMaskIndex]
-	mov	al, flagMaskList[bx]
+	mov	al, g_questFlagMasks[bx]
 	mov	bx, [bp+questByteNumber]
 	add	bx, si
 	and	gs:party.chronoQuest[bx], al

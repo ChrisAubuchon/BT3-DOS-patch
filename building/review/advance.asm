@@ -26,7 +26,7 @@ review_advance proc far
 	CHARINDEX(ax, STACKVAR(charNo), bx)
 	mov	bl, gs:party.class[bx]
 	sub	bh, bh
-	mov	al, hpLevelBonusMask[bx]
+	mov	al, g_hpIncreaseMask[bx]
 	sub	ah, ah
 	and	ax, cx
 	mov	cl, gs:party.constitution[si]
@@ -236,8 +236,8 @@ l_printIncreasedAttribute:
 	mov	bx, [bp+attributeIndex]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (fullAttributeString+2)[bx]
-	push	word ptr fullAttributeString[bx]
+	push	word ptr (g_reviewAttributeList+2)[bx]
+	push	word ptr g_reviewAttributeList[bx]
 	push	dx
 	push	ax
 	STRCAT(arg_2)

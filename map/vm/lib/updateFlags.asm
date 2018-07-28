@@ -23,12 +23,12 @@ _updateFlags proc far
 	mov	al, g_gameProgressFlags[bx]
 	sub	ah, ah
 	mov	bx, [bp+flagMaskIndex]
-	mov	cl, flagMaskList[bx]
+	mov	cl, g_questFlagMasks[bx]
 	sub	ch, ch
 	and	ax, cx
 	mov	[bp+flagMask], ax
 
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	and	al, [bp+initialMask]
 	or	al, byte ptr [bp+flagMask]
 	mov	bx, [bp+flagNumber]

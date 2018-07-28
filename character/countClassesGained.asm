@@ -4,7 +4,7 @@
 ; classes before changing to a wizard.
 ; Attributes: bp-based frame
 
-mage_countClassesGained	proc far
+character_countClassesGained	proc far
 
 	classCount= word ptr -4
 	loopCounter= word ptr -2
@@ -24,7 +24,7 @@ l_loop:
 	shl	ax, 1
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_hasBeenClass, near)
+	CALL(character_hasBeenClass, near)
 	or	ax, ax
 	jz	short l_next
 	inc	[bp+classCount]
@@ -37,4 +37,4 @@ l_next:
 	mov	ax, [bp+classCount]
 	FUNC_EXIT
 	retf
-mage_countClassesGained	endp
+character_countClassesGained	endp

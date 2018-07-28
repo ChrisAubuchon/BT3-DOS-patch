@@ -346,7 +346,7 @@ loc_205CF:
 	mov	[bp+counter], 0
 loc_205E4:
 	mov	bx, [bp+counter]
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	sub	ah, ah
 	test	[bp+var_108], ax
 	jz	short loc_2060D
@@ -383,7 +383,7 @@ loc_20650:
 	mov	[bp+counter], 0
 loc_20663:
 	mov	bx, [bp+counter]
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	sub	ah, ah
 	test	[bp+var_6], ax
 	jz	short loc_2068B
@@ -407,8 +407,8 @@ loc_206A1:
 	sub	bh, bh
 	and	bl, 0FEh
 	shl	bx, 1
-	push	word ptr (breathEffectStr+2)[bx]
-	push	word ptr breathEffectStr[bx]
+	push	word ptr (g_breathEffectStringList+2)[bx]
+	push	word ptr g_breathEffectStringList[bx]
 	push	dx
 	push	ax
 	STRCAT(outputStringP)

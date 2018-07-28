@@ -202,7 +202,7 @@ l_noLuckBonus:
 	CALL(randomYdX)
 	mov	bl, gs:party.class[si]
 	sub	bh, bh
-	mov	cl, classSavingBonus[bx]
+	mov	cl, g_classSaveBonus[bx]
 	sub	ch, ch
 	mov	dl, gs:party.luck[si]
 	sub	dh, dh

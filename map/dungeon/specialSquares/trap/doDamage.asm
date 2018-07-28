@@ -16,7 +16,7 @@ trap_doDamage proc far
 	jnz	short l_return
 	mov	al, byte ptr [bp+arg_0]
 	mov	gs:bat_curTarget, al
-	mov	bx, gs:trapIndex
+	mov	bx, gs:g_trapIndex
 	mov	al, trapSpecialAttackValue[bx]
 	and	ax, 7Fh
 	mov	gs:specialAttackVal, ax

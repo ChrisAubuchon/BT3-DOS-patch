@@ -1,15 +1,12 @@
 ; Attributes: bp-based frame
 ;
-; DWORD var_2 & var_4, var_8 & var_A
 
 review_checkXp proc far
 
 	stringBuffer= word ptr -10Ah
-	var_A= word ptr	-0Ah
-	var_8= word ptr	-8
+	xpDelta= word ptr	-0Ah
 	slotNumber= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	stringBufferP= dword ptr	-4
 
 	FUNC_ENTER(10Ah)
 
@@ -24,46 +21,36 @@ l_loop:
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	test	gs:party.status[bx], 0Ch
 	jz	short l_ableMember
+
 	PUSH_OFFSET(s_elderDeadCharacter)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	STRCAT(stringBufferP)
 	jmp	l_printBuffer
 
 l_ableMember:
 	PUSH_OFFSET(s_guildElderDeems)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	STRCAT(stringBufferP)
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	[bp+var_2]
-	push	[bp+var_4]
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	cmp	gs:party.class[bx], class_monster
 	jnz	short l_notMonster
 
 	PUSH_OFFSET(s_cannotBeRaised)
-	push	[bp+var_2]
-	push	[bp+var_4]
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	jmp	l_printBuffer
 
 l_notMonster:
 	push	[bp+slotNumber]
 	CALL(review_getXpDelta, near)
-	mov	[bp+var_A], ax
-	mov	[bp+var_8], dx
+	SAVE_STACK_DWORD(dx,ax,xpDelta)
 	or	dx, dx
 	jg	short l_notYet
 	jl	short l_earnedLevel
@@ -72,41 +59,28 @@ l_notMonster:
 
 l_earnedLevel:
 	PUSH_OFFSET(s_hathEarnedLevel)
-	push	[bp+var_2]
-	push	[bp+var_4]
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
-	push	dx
-	push	ax
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
+
+	PUSH_STACK_DWORD(stringBufferP)
 	push	[bp+slotNumber]
 	CALL(review_advance, near)
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	SAVE_STACK_DWORD(dx,ax,stringBufferP)
 	jmp	short l_printBuffer
 
 l_notYet:
 	PUSH_OFFSET(s_stillNeedeth)
-	push	[bp+var_2]
-	push	[bp+var_4]
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	sub	ax, ax
 	push	ax
-	push	[bp+var_8]
-	push	[bp+var_A]
-	push	dx
-	push	[bp+var_4]
-	CALL(itoa)
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(xpDelta)
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
+
 	PUSH_OFFSET(s_experiencePoints)
-	push	dx
-	push	[bp+var_4]
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 l_printBuffer:
 	PUSH_STACK_ADDRESS(stringBuffer)

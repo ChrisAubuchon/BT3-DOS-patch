@@ -57,7 +57,7 @@ l_loop:
 	mov	al, gs:party.chronoQuest[bx]
 	sub	ah, ah
 	mov	bx, [bp+questMaskIndex]
-	mov	cl, byteMaskList[bx]
+	mov	cl, g_byteMaskList[bx]
 	sub	ch, ch
 	test	ax, cx
 	jz	short l_next

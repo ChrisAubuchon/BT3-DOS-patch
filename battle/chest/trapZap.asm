@@ -37,7 +37,7 @@ define(`charP', `si')
 
 l_castSpell:
 	sub	gs:party.currentSppt[charP], 2
-	mov	gs:trapIndex, 0
+	mov	gs:g_trapIndex, 0
 	mov	byte ptr g_printPartyFlag,	0
 	PRINTOFFSET(s_youDisarmedIt, clear)
 	IOWAIT

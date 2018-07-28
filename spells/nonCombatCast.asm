@@ -16,8 +16,7 @@ noncombatCast proc far
 	mov	[bp+castSlotNumber], ax
 	jmp	short l_checkCaster
 l_askForCaster:
-	PUSH_OFFSET(s_whoWillCast)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_whoWillCast, true)
 	CALL(readSlotNumber)
 	mov	[bp+castSlotNumber], ax
 l_checkCaster:
@@ -31,11 +30,10 @@ l_checkCaster:
 	CHARINDEX(ax, STACKVAR(castSlotNumber), bx)
 	mov	bl, gs:party.class[bx]
 	sub	bh, bh
-	cmp	mageSpellIndex[bx], 0FFh
+	cmp	g_classSpellIndex[bx], 0FFh
 	jnz	short l_isSpellCaster
 
-	PUSH_OFFSET(s_notSpellcaster)
-	PRINTSTRING(4)
+	PRINTOFFSET(s_notSpellcaster, true)
 	IOWAIT
 	jmp	short l_returnZero
 l_isSpellCaster:

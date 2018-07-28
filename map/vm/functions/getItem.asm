@@ -1,11 +1,8 @@
 ; Attributes: bp-based frame
-;
-; DWORD - var_10A & var_10C
 
 mfunc_getItem proc far
 
-	var_10C= word ptr -10Ch
-	var_10A= word ptr -10Ah
+	stringBufferP= dword ptr -10Ch
 	var_108= word ptr -108h
 	stringBuffer= word ptr -106h
 	var_6= word ptr	-6
@@ -35,16 +32,12 @@ l_retry:
 	CALL(text_clear)
 	PUSH_OFFSET(s_whoWantsToGetThe)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	STRCAT(stringBufferP)
 	push	[bp+var_108]
 	push	[bp+var_2]
-	push	dx
-	push	ax
+	PUSH_STACK_DWORD(stringBufferP)
 	CALL(inventory_getItemName)
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	SAVE_STACK_DWORD(dx,ax,stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	CALL(readSlotNumber)
@@ -65,29 +58,24 @@ l_addItem:
 	push	[bp+slotNumber]
 	CALL(inventory_addItem)
 	or	ax, ax
-	jz	short l_inventoryFull
+	jz	l_inventoryFull
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	STRCAT(stringBufferP)
+
 	PUSH_OFFSET(s_gotThe)
-	push	dx
-	push	[bp+var_10C]
-	STRCAT
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
+
 	push	[bp+var_108]
 	push	[bp+var_2]
-	push	dx
-	push	ax
+	PUSH_STACK_DWORD(stringBufferP)
 	CALL(inventory_getItemName)
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	SAVE_STACK_DWORD(dx,ax,stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	mov	ax, 1
@@ -100,25 +88,17 @@ l_addItem:
 l_inventoryFull:
 	PUSH_OFFSET(s_sorryBut)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	STRCAT(stringBufferP)
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	[bp+var_10A]
-	push	[bp+var_10C]
-	STRCAT
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_cantCarryAnyMore)
-	push	dx
-	push	[bp+var_10C]
-	STRCAT
-	mov	[bp+var_10C], ax
-	mov	[bp+var_10A], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	jmp	l_retry

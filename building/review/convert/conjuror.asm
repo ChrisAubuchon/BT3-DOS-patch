@@ -8,7 +8,7 @@ mage_convertConjurorCheck proc far
 	sub	ax, ax
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_hasBeenClass, near)
+	CALL(character_hasBeenClass, near)
 	mov	cx, ax
 	cmp	cx, 1
 	sbb	ax, ax

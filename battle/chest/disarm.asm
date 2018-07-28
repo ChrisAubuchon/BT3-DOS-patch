@@ -24,7 +24,7 @@ define(`slotNumber', `di')
 	push	ax
 	PUSH_STACK_ADDRESS(stringBuffer)
 	CALL(readString)
-	mov	bx, gs:trapIndex
+	mov	bx, gs:g_trapIndex
 	mov	al, g_chestTrapIndexToName[bx]
 	cbw
 	mov	bx, ax
@@ -46,7 +46,7 @@ define(`slotNumber', `di')
 	jb	short l_disarmFailed
 
 	PRINTOFFSET(s_youDisarmedIt, clear)
-	mov	gs:trapIndex, 0
+	mov	gs:g_trapIndex, 0
 	jmp	short l_returnOne
 
 l_disarmFailed:

@@ -15,7 +15,7 @@ chest_setOffTrap proc far
 	PUSH_STACK_ADDRESS(stringBuffer)
 	STRCAT(stringBufferP)
 
-	mov	bx, gs:trapIndex
+	mov	bx, gs:g_trapIndex
 	mov	al, g_chestTrapIndexToName[bx]
 	cbw
 	mov	bx, ax
@@ -27,19 +27,19 @@ chest_setOffTrap proc far
 	push	word ptr [bp+stringBufferP]
 	STRCAT(stringBufferP)
 
-	mov	bx, gs:trapIndex
+	mov	bx, gs:g_trapIndex
 	mov	al, g_chestTrapDice[bx]
 	sub	ah, ah
 	push	ax
 	CALL(randomYdX)
 	mov	[bp+var_108], ax
-	mov	si, gs:trapIndex
+	mov	si, gs:g_trapIndex
 	shl	si, 1
 	mov	al, byte ptr g_chestTrapSaveData.lo[si]
 	mov	gs:monGroups.breathSaveLo, al
 	mov	al, g_chestTrapSaveData.hi[si]
 	mov	gs:monGroups.breathSaveHi, al
-	mov	bx, gs:trapIndex
+	mov	bx, gs:g_trapIndex
 	test	g_chestTrapFlags[bx], 80h
 	jz	short l_affectWholeParty
 
@@ -59,7 +59,7 @@ l_damageLoop:
 	jl	short l_damageLoop
 
 l_return:
-	mov	gs:trapIndex, 0
+	mov	gs:g_trapIndex, 0
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	mov	byte ptr g_printPartyFlag,	0

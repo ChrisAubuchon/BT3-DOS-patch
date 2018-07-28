@@ -65,7 +65,7 @@ l_copyStats:
 	mov	gs:newCharBuffer.maxSppt, ax
 	mov	bl, fs:[bx+bii_char_t.class]
 	sub	bh, bh
-	mov	al, bii_classMap[bx]
+	mov	al, g_bt2ClassMap[bx]
 	mov	gs:newCharBuffer.class,	al
 	lfs	bx, [bp+arg_0]
 	mov	al, fs:[bx+bii_char_t.race]
@@ -90,7 +90,7 @@ l_copyInventory:
 	lfs	bx, [bp+arg_0]
 	mov	bl, byte ptr fs:[bx+si+bii_char_t.inventory]
 	sub	bh, bh
-	mov	al, bii_inventoryMap[bx]
+	mov	al, g_bt2InventoryMap[bx]
 	cbw
 	mov	[bp+var_2], ax
 	or	ax, ax

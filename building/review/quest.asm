@@ -12,7 +12,7 @@ l_loop:
 	mov	bx, [bp+loopCounter]
 	shl	bx, 1
 	shl	bx, 1
-	call	questFuncs[bx]
+	call	g_reviewQuestFunctions[bx]
 	or	ax, ax
 	jz	short l_next
 

@@ -26,7 +26,7 @@ l_loopEnter:
 	mov	al, gs:(party.specAbil+1)[bx]
 	sub	ah, ah
 	mov	bx, [bp+counter]
-	mov	cl, byteMaskList[bx]
+	mov	cl, g_byteMaskList[bx]
 	sub	ch, ch
 	test	ax, cx
 	jz	short l_next
@@ -51,8 +51,8 @@ l_loopEnter:
 	mov	bx, [bp+counter]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (songNames+2)[bx]
-	push	word ptr songNames[bx]
+	push	word ptr (g_songNameList+2)[bx]
+	push	word ptr g_songNameList[bx]
 	push	word ptr [bp+songListStringP+2]
 	push	word ptr [bp+songListStringP]
 	STRCAT(songListStringP)

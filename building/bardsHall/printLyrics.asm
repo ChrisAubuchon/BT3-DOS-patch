@@ -17,7 +17,7 @@ l_loop:
 	mov	bx, [bp+songNumber]
 	shl	bx, 1
 	shl	bx, 1
-	lfs	bx, bardSongLyrics[bx]
+	lfs	bx, g_bardSongLyricsList[bx]
 	push	word ptr fs:[bx+si+2]
 	push	word ptr fs:[bx+si]
 	PRINTSTRING

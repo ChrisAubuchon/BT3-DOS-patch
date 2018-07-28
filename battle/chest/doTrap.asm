@@ -16,7 +16,7 @@ chest_doTrap proc	far
 
 	mov	al, byte ptr [bp+arg_0]
 	mov	gs:bat_curTarget, al
-	mov	bx, gs:trapIndex
+	mov	bx, gs:g_trapIndex
 	mov	al, g_chestTrapFlags[bx]
 	sub	ah, ah
 	and	ax, 7Fh

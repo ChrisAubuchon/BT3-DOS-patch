@@ -51,8 +51,8 @@ loc_268F2:
 	mov	bx, [bp+arg_0]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (oldCharFilters+2)[bx]
-	push	word ptr oldCharFilters[bx]
+	push	word ptr (g_oldCharacterFilters+2)[bx]
+	push	word ptr g_oldCharacterFilters[bx]
 	push	[bp+var_22]
 	push	[bp+var_24]
 	CALL(strcat)
@@ -143,7 +143,6 @@ loc_26A3E:
 	shl	si, 1
 	push	[bp+si+var_176]
 	push	[bp+si+var_178]
-	push	cs
 	CALL(transfer_bt2Character, near)
 	add	sp, 4
 	jmp	short loc_26A74

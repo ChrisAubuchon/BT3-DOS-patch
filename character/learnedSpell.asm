@@ -16,7 +16,7 @@ character_learnedSpell proc far
 	sub	ah, ah
 	mov	bx, [bp+spellNumber]
 	and	bx, 7
-	mov	cl, byteMaskList[bx]
+	mov	cl, g_byteMaskList[bx]
 	sub	ch, ch
 	and	ax, cx
 

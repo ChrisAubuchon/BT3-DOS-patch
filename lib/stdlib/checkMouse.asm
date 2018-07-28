@@ -5,7 +5,7 @@ checkMouse proc	far
 	push	ds
 	push	es
 	cmp	g_mousePresentFlag1, 0
-	jz	short l_noMousePresent
+	jz	short l_return
 
 	mov	g_mouseButtonDown, 0
 	mov	ax, 5			; 5: Get Mouse Button Press Information
@@ -66,45 +66,6 @@ loc_280B1:
 	mov	dx, 194 
 loc_280BA:
 	mov	g_mouseY, dx
-	jmp	short l_setMouseMoved
-
-l_noMousePresent:
-	cmp	g_joystickPresentFlag, 0
-	jz	short l_return
-
-	cmp	g_mousePresentFlag2, 0
-	jz	short l_return
-
-	sti
-	call	sub_28115
-	or	ax, ax
-	jz	short l_return
-
-	mov	ax, g_mouseX
-	cmp	ax, 130h
-	jbe	short loc_280E6
-
-	mov	ax, 130h
-	jmp	short loc_280EE
-align 2
-loc_280E6:
-	cmp	ax, 1
-	jnb	short loc_280EE
-	mov	ax, 1
-loc_280EE:
-	mov	g_mouseX, ax
-	mov	ax, g_mouseY
-	cmp	ax, 0C2h 
-	jbe	short loc_280FF
-	mov	ax, 0C2h 
-	jmp	short loc_28107
-db 90h
-loc_280FF:
-	cmp	ax, 1
-	jnb	short loc_28107
-	mov	ax, 1
-loc_28107:
-	mov	g_mouseY, ax
 
 l_setMouseMoved:
 	mov	g_mouseMoved, 1

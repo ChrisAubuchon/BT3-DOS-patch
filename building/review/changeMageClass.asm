@@ -35,7 +35,7 @@ l_spellcasterCheck:
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	bl, gs:party.class[bx]
 	sub	bh, bh
-	mov	al, mageSpellIndex[bx]
+	mov	al, g_classSpellIndex[bx]
 	sub	ah, ah
 	mov	[bp+currentClassSpellIndex], ax
 	cmp	ax, 0FFh
@@ -80,8 +80,8 @@ l_convertLoop:
 	mov	bx, [bp+loopCounter]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (magicUserString+2)[bx]
-	push	word ptr magicUserString[bx]
+	push	word ptr (g_reviewClassList+2)[bx]
+	push	word ptr g_reviewClassList[bx]
 	push	[bp+convertList]
 	CALL(printListItem)
 	mov	si, [bp+convertList]
@@ -146,7 +146,7 @@ l_checkKey:
 	PRINTOFFSET(s_arboriaSpellText, wait)
 	PRINTOFFSET(s_arboriaSpellLocation, wait)
 	push	[bp+slotNumber]
-	CALL(mage_removeAllSpells, near)
+	CALL(character_removeAllSpells, near)
 
 l_changeClass:
 	CHARINDEX(ax, STACKVAR(slotNumber), si)
@@ -166,7 +166,7 @@ l_changeClass:
 	mov	al, byte ptr [bp+newClass]
 	mov	gs:party.class[si], al
 	mov	bx, [bp+newClass]
-	mov	al, mageSpellIndex[bx]
+	mov	al, g_classSpellIndex[bx]
 	sub	ah, ah
 	push	ax
 	sub	ax, ax

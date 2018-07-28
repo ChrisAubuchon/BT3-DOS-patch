@@ -2,26 +2,25 @@
 
 dunsq_doTrap proc far
 
-	var_10C= word ptr -10Ch
-	var_10A= word ptr -10Ah
-	var_108= word ptr -108h
-	var_106= word ptr -106h
-	var_104= word ptr -104h
-	var_102= word ptr -102h
+	damageAmount= word ptr -10Ch
+	trapNumber= word ptr -10Ah
+	loopCounter= word ptr -108h
+	stringBufferP= dword ptr -106h
+	trapHitFlag= word ptr -102h
 	stringBuffer= word ptr -100h
 
 	FUNC_ENTER(10Ch)
 	push	si
 
 	CALL(trap_levitationCheck, near)
-	mov	[bp+var_102], ax
+	mov	[bp+trapHitFlag], ax
 	or	ax, ax
 	jz	l_return
 
 loc_24DCB:
 	CALL(random)
 	and	ax, 3
-	mov	[bp+var_10A], ax
+	mov	[bp+trapNumber], ax
 	cmp	ax, 3
 	jz	short loc_24DCB
 
@@ -30,49 +29,46 @@ loc_24DCB:
 	and	ax, 7
 	shl	ax, 1
 	shl	ax, 1
-	or	ax, [bp+var_10A]
-	mov	gs:trapIndex, ax
+	or	ax, [bp+trapNumber]
+	mov	gs:g_trapIndex, ax
 	PUSH_OFFSET(s_hitTrap)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	CALL(strcat)
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
-	mov	bx, gs:trapIndex
+	STRCAT(stringBufferP)
+
+	mov	bx, gs:g_trapIndex
 	mov	al, g_trapIndexByLevel[bx]
 	cbw
 	mov	bx, ax
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (trapTypeString+2)[bx]
-	push	word ptr trapTypeString[bx]
-	push	dx
-	push	[bp+var_106]
-	CALL(strcat)
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	push	word ptr (g_trapNameList+2)[bx]
+	push	word ptr g_trapNameList[bx]
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
+
 	PUSH_STACK_ADDRESS(stringBuffer)
-	PRINTSTRING(true)
-	mov	bx, gs:trapIndex
-	mov	al, byte_4B258[bx]
+	PRINTSTRING(clear)
+	mov	bx, gs:g_trapIndex
+	mov	al, g_trapDiceList[bx]
 	cbw
 	push	ax
 	CALL(randomYdX)
-	mov	[bp+var_10C], ax
+	mov	[bp+damageAmount], ax
 
-	mov	si, gs:trapIndex
+	mov	si, gs:g_trapIndex
 	shl	si, 1
-	mov	al, trapSaveList._low[si]
+	mov	al, g_trapSaveList._low[si]
 	mov	gs:monGroups.breathSaveLo, al
-	mov	al, trapSaveList._high[si]
+	mov	al, g_trapSaveList._high[si]
 	mov	gs:monGroups.breathSaveHi, al
 
-	mov	[bp+var_108], 0
+	mov	[bp+loopCounter], 0
 loc_24E97:
-	push	[bp+var_10C]
-	push	[bp+var_108]
+	push	[bp+damageAmount]
+	push	[bp+loopCounter]
 	CALL(trap_doDamage)
-	inc	[bp+var_108]
-	cmp	[bp+var_108], 7
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
 	jl	short loc_24E97
 
 l_return:
@@ -82,7 +78,7 @@ l_return:
 	push	g_sqEast
 	push	g_sqNorth
 	CALL(spGeo_removeTrap)
-	mov	ax, [bp+var_102]
+	mov	ax, [bp+trapHitFlag]
 
 	pop	si
 	FUNC_EXIT

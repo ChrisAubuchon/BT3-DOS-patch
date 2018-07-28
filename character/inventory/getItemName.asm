@@ -1,11 +1,8 @@
 ; Attributes: bp-based frame
-;
-; DWORD - arg_0 & arg_2
 
 inventory_getItemName proc far
 
 	arg_0= word ptr	 6
-	arg_2= word ptr	 8
 	itemNumber=	word ptr  0Ah
 	itemFlags= byte	ptr  0Ch
 
@@ -23,8 +20,7 @@ inventory_getItemName proc far
 	shl	bx, 1
 	push	word ptr (g_itemGenericStringList+2)[bx]
 	push	word ptr g_itemGenericStringList[bx]
-	push	[bp+arg_2]
-	push	[bp+arg_0]
+	PUSH_STACK_DWORD(arg_0)
 	STRCAT
 	jmp	short l_return
 
@@ -34,8 +30,7 @@ l_identifiedItem:
 	shl	bx, 1
 	push	word ptr (g_itemStringList+2)[bx]
 	push	word ptr g_itemStringList[bx]
-	push	[bp+arg_2]
-	push	[bp+arg_0]
+	PUSH_STACK_DWORD(arg_0)
 	STRCAT
 
 l_return:

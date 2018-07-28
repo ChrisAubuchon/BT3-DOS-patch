@@ -8,7 +8,7 @@ bigpic_setBackground	proc far
 
 	FUNC_ENTER(4)
 
-	test	g_levelFlags, 20h
+	test	g_levelFlags, dunLevel_isOutdoors
 	jz	l_inDungeon
 
 	mov	ax, 44h			; Outdoor sky color
@@ -70,10 +70,10 @@ l_inDungeon:
 	sub	ah, ah
 	mov	si, ax
 	shl	si, 1
-	push	bigpicLightSize[si]
+	push	g_bigpicLightLength[si]
 	sub	ax, ax
 	push	ax
-	mov	bx, bigpicLightOffset[si]
+	mov	bx, g_bigpicLightBase[si]
 	lea	ax, bigpicBuf[bx]
 	mov	dx, seg	seg021
 	push	dx

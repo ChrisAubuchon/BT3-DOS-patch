@@ -42,10 +42,10 @@ song_playSong proc far
 	mov	al, g_instrumentType[bx]
 	cbw
 	mov	[bp+var_2], ax
-	jmp	short loc_22D5E
+	jmp	short l_startSound
 loc_22D59:
 	mov	[bp+var_2], 0
-loc_22D5E:
+l_startSound:
 	push	[bp+var_2]
 	mov	ax, offset byte_40420
 	mov	dx, seg	seg026

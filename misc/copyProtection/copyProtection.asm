@@ -1,25 +1,22 @@
-; DWORD - var_130 & var_132
-;
 ; Attributes: bp-based frame
 
 copyProtection proc	far
 
-	var_14C= word ptr -14Ch
-	var_14A= word ptr -14Ah
+	resultHigh= word ptr -14Ch
+	inputString= word ptr -14Ah
 	var_136= word ptr -136h
 	random16_3= word ptr -134h
-	var_132= word ptr -132h
-	var_130= word ptr -130h
+	stringBufferP= word ptr -132h
 	var_12E= word ptr -12Eh
 	var_12C= word ptr -12Ch
-	var_12A= word ptr -12Ah
+	stringBuffer= word ptr -12Ah
 	random16_1= word ptr -2Ah
-	var_28=	word ptr -28h
+	loopCounter=	word ptr -28h
 	var_26=	word ptr -26h
-	var_24=	word ptr -24h
+	resultLow=	word ptr -24h
 	random16_2= word ptr -22h
-	var_20=	word ptr -20h
-	var_1E=	word ptr -1Eh
+	resultLength=	word ptr -20h
+	cpString=	word ptr -1Eh
 	var_A= word ptr	-0Ah
 	random16_4= word ptr -6
 	var_4= word ptr	-4
@@ -37,10 +34,10 @@ copyProtection proc	far
 	CALL(random)
 	and	ax, 0Fh
 	mov	[bp+random16_3], ax
-
 	CALL(random)
 	and	ax, 0Fh
 	mov	[bp+random16_4], ax
+
 	mov	bx, ax
 	mov	al, byte_4CA18[bx]
 	sub	ah, ah
@@ -59,7 +56,7 @@ copyProtection proc	far
 	mov	cx, [bp+random16_2]
 	and	cx, 1
 	or	ax, cx				
-	mov	[bp+var_12E], ax		;   var_12E = ((var_A & 7) << 1) | (random16_2 & 1))
+	mov	[bp+var_12E], ax		;   var_12E = (((var_A & 7) << 1) | (random16_2 & 1))
 
 	mov	bx, ax
 	mov	al, byte_4CA28[bx]
@@ -121,186 +118,161 @@ loc_27189:
 	mov	ah, byte ptr [bp+var_2]
 	sub	al, al
 	add	ax, [bp+var_2]
-	mov	[bp+var_24], ax			; var_24 = (var_2 & 0F0h) + var_2
+	mov	[bp+resultLow], ax			; resultLow = (var_2 << 8) + var_2
 
-	mov	[bp+var_28], 0Fh		; var_28 = 0Fh
+	mov	[bp+loopCounter], 0Fh		; loopCounter = 0Fh
 loc_271A9:					; do {
-	mov	ax, [bp+var_24]
+	mov	ax, [bp+resultLow]
 	and	ax, 1
-	mov	[bp+var_4], ax			;   var_4 = var_24 & 1
-	shr	[bp+var_24], 1			;   var_24 >> 1
+	mov	[bp+var_4], ax			;   var_4 = resultLow & 1
+	shr	[bp+resultLow], 1			;   resultLow >> 1
 	or	ax, ax				;   if var_4 != 0
-	jz	short loc_271C6			;     var_24 += 0B400
-	add	byte ptr [bp+var_24+1],	0B4h
+	jz	short loc_271C6			;     resultLow += 0B400
+	add	byte ptr [bp+resultLow+1], 0B4h
 loc_271C6:
-	dec	[bp+var_28]			; } while (--var_28 > 0)
-	cmp	[bp+var_28], 0
+	dec	[bp+loopCounter]			; } while (--loopCounter > 0)
+	cmp	[bp+loopCounter], 0
 	jg	short loc_271A9
 
 loc_271C8:
-	mov	al, byte ptr [bp+var_24+1]
+	mov	al, byte ptr [bp+resultLow+1]
 	sub	ah, ah
-	mov	[bp+var_14C], ax
+	mov	[bp+resultHigh], ax
 	mov	ax, [bp+var_2]
 	and	ax, 7
 	mov	si, ax
 	shr	si, 1
-	mov	al, byte_4CA38[si]
+	mov	al, g_copyProtectionLengthMask[si]
 	sub	ah, ah
-	and	[bp+var_14C], ax
+	and	[bp+resultHigh], ax
 	mov	ax, si
 	xor	al, 3
-	mov	[bp+var_20], ax
+	mov	[bp+resultLength], ax
 
 
-	; Zero 20 bytes of var_1E
-	mov	[bp+var_28], 0
+	; Zero 20 bytes of cpString
+	mov	[bp+loopCounter], 0
 loc_271F3:
-	mov	si, [bp+var_28]
-	mov	byte ptr [bp+si+var_1E], 0
-	inc	[bp+var_28]
-	cmp	[bp+var_28], 20
+	mov	si, [bp+loopCounter]
+	mov	byte ptr [bp+si+cpString], 0
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 20
 	jl	short loc_271F3
 
-	mov	[bp+var_28], 0
+	mov	[bp+loopCounter], 0
 
-	mov	ax, [bp+var_14C]
+	mov	ax, [bp+resultHigh]
 	mov	cl, 7
 	shr	ax, cl
 	push	ax
 	CALL(cp_toDigit, near)
-	mov	si, [bp+var_28]
-	inc	[bp+var_28]
-	mov	byte ptr [bp+si+var_1E], al			; var_1E[0] = ((var_14C >> 7) & 7) | 0x30
+	mov	si, [bp+loopCounter]
+	inc	[bp+loopCounter]
+	mov	byte ptr [bp+si+cpString], al			; cpString[0] = ((resultHigh >> 7) & 7) | 0x30
 
-	mov	ax, [bp+var_14C]
+	mov	ax, [bp+resultHigh]
 	mov	cl, 4
 	shr	ax, cl
 	push	ax
 	CALL(cp_toDigit, near)
-	mov	si, [bp+var_28]
-	inc	[bp+var_28]
-	mov	byte ptr [bp+si+var_1E], al			; var_1E[1] = ((var_14C >> 4) & 7) | 0x30
+	mov	si, [bp+loopCounter]
+	inc	[bp+loopCounter]
+	mov	byte ptr [bp+si+cpString], al			; cpString[1] = ((resultHigh >> 4) & 7) | 0x30
 
-	mov	ax, [bp+var_14C]
+	mov	ax, [bp+resultHigh]
 	shr	ax, 1
 	push	ax
 	CALL(cp_toDigit, near)
-	mov	si, [bp+var_28]
-	inc	[bp+var_28]
-	mov	byte ptr [bp+si+var_1E], al			; var_1E[2] = ((var_14C >> 1) & 7) | 0x30
+	mov	si, [bp+loopCounter]
+	inc	[bp+loopCounter]
+	mov	byte ptr [bp+si+cpString], al			; cpString[2] = ((resultHigh >> 1) & 7) | 0x30
 
-	mov	ax, [bp+var_24]
+	mov	ax, [bp+resultLow]
 	mov	cl, 6
 	shr	ax, cl
 	push	ax
 	CALL(cp_toDigit, near)
-	mov	si, [bp+var_28]
-	inc	[bp+var_28]
-	mov	byte ptr [bp+si+var_1E], al			; var_1E[3] = ((var_24 >> 6) & 7) | 0x30
+	mov	si, [bp+loopCounter]
+	inc	[bp+loopCounter]
+	mov	byte ptr [bp+si+cpString], al			; cpString[3] = ((resultLow >> 6) & 7) | 0x30
 
-	mov	ax, [bp+var_24]
+	mov	ax, [bp+resultLow]
 	mov	cl, 3
 	shr	ax, cl
 	push	ax
 	CALL(cp_toDigit, near)
-	mov	si, [bp+var_28]
-	inc	[bp+var_28]
-	mov	byte ptr [bp+si+var_1E], al			; var_1E[4] = ((var_24 >> 3) & 7 | 0x30
+	mov	si, [bp+loopCounter]
+	inc	[bp+loopCounter]
+	mov	byte ptr [bp+si+cpString], al			; cpString[4] = ((resultLow >> 3) & 7 | 0x30
 
-	push	[bp+var_24]
+	push	[bp+resultLow]
 	CALL(cp_toDigit, near)
-	mov	si, [bp+var_28]
-	inc	[bp+var_28]
-	mov	byte ptr [bp+si+var_1E], al			; var_1E[5] = (var_24 & 7) | 0x30
+	mov	si, [bp+loopCounter]
+	inc	[bp+loopCounter]
+	mov	byte ptr [bp+si+cpString], al			; cpString[5] = (resultLow & 7) | 0x30
 
 	PUSH_OFFSET(s_copyProtectIntro)
-	PUSH_STACK_ADDRESS(var_12A)
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT(stringBufferP)
 
 	mov	bx, [bp+random16_1]
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (g_cpLocationOne+2)[bx]
 	push	word ptr g_cpLocationOne[bx]
-	push	dx
-	push	ax
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 	PUSH_OFFSET(s_commaSpace)
-	push	dx
-	push	[bp+var_132]
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 	mov	bx, [bp+random16_2]
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (g_cpLocationTwo+2)[bx]
 	push	word ptr g_cpLocationTwo[bx]
-	push	dx
-	push	ax
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 	PUSH_OFFSET(s_commaSpace)
-	push	dx
-	push	[bp+var_132]
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 	mov	bx, [bp+random16_3]
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (g_cpLocationThree+2)[bx]
 	push	word ptr g_cpLocationThree[bx]
-	push	dx
-	push	ax
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
-	PUSH_OFFSET(s_comms_capitalAnd)
-	push	dx
-	push	[bp+var_132]
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_OFFSET(s_commaCapitalAnd)
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
 	mov	bx, [bp+random16_4]
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (g_cpLocationFour+2)[bx]
 	push	word ptr g_cpLocationFour[bx]
-	push	dx
-	push	ax
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
-	PUSH_OFFSET(s_period)
-	push	dx
-	push	[bp+var_132]
-	CALL(strcat)
-	mov	[bp+var_132], ax
-	mov	[bp+var_130], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 
-	PUSH_STACK_ADDRESS(var_12A)
+	PUSH_OFFSET(s_period)
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
+
+	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	mov	ax, 10h
 	push	ax
-	PUSH_STACK_ADDRESS(var_14A)
+	PUSH_STACK_ADDRESS(inputString)
 	CALL(readString)
 
-	push	[bp+var_20]
-	PUSH_STACK_ADDRESS(var_1E)
-	PUSH_STACK_ADDRESS(var_14A)
+	push	[bp+resultLength]
+	PUSH_STACK_ADDRESS(cpString)
+	PUSH_STACK_ADDRESS(inputString)
 	CALL(cp_compareStrings, near)
 
 	pop	si

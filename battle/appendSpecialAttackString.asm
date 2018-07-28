@@ -9,8 +9,8 @@ bat_appendSpecialAttackString proc far
 	mov	bx, gs:specialAttackVal
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (specialAttString+2)[bx]
-	push	word ptr specialAttString[bx]
+	push	word ptr (g_specialAttackStringList+2)[bx]
+	push	word ptr g_specialAttackStringList[bx]
 	PUSH_STACK_DWORD(arg_0)
 	STRCAT
 

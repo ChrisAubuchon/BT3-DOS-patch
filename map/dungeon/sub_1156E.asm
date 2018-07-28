@@ -35,7 +35,7 @@ sub_1156E proc far
 	mov	cl, 5
 	shr	bx, cl
 	and	bx, 3
-	mov	al, byte_42716[bx]
+	mov	al, g_portalSquareValueList[bx]
 	cbw
 
 	pop	si

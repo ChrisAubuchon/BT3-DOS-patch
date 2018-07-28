@@ -18,7 +18,7 @@ checkProgressFlags proc far
 	mov	al, g_gameProgressFlags[bx]
 	sub	ah, ah
 	mov	bx, [bp+var_2]
-	mov	cl, byteMaskList[bx]
+	mov	cl, g_byteMaskList[bx]
 	sub	ch, ch
 	and	ax, cx
 	FUNC_EXIT

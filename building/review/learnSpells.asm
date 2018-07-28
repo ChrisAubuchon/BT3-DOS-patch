@@ -22,7 +22,7 @@ review_learnSpells	proc far
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	bl, gs:party.class[bx]
 	sub	bh, bh
-	mov	al, mageSpellIndex[bx]
+	mov	al, g_classSpellIndex[bx]
 	sub	ah, ah
 	mov	[bp+spellBase],	ax
 	cmp	ax, 0FFh
@@ -88,7 +88,7 @@ l_ioLoop:
 	STRCAT(stringBufferP)
 	mov	bx, [bp+loopCounter]
 	shl	bx, 1
-	mov	ax, spellLevelCost[bx]
+	mov	ax, g_reviewSpellLevelCost[bx]
 	mov	[bp+levelCost], ax
 	sub	ax, ax
 	push	ax

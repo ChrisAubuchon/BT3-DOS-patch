@@ -9,7 +9,7 @@ bat_partyApplyPoison proc	far
 
 	mov	bl, g_levelNumber
 	sub	bh, bh
-	mov	al, poisonDmg[bx]
+	mov	al, g_battlePoisonDamage[bx]
 	cbw
 	mov	[bp+damageAmount], ax
 	mov	[bp+slotNumber], 0

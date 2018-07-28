@@ -27,7 +27,7 @@ bat_doChest proc far
 	shl	cx, 1
 	shl	cx, 1
 	add	cx, ax
-	mov	gs:trapIndex, cx
+	mov	gs:g_trapIndex, cx
 	mov	gs:g_chestExamined, 0
 
 	sub	si, si

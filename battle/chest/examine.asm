@@ -19,7 +19,7 @@ chest_examine proc far
 	jnb	l_returnZero
 
 	mov	bx, [bp+slotNumber]
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	sub	ah, ah
 	test	gs:g_chestExamined, ax
 	jz	short l_newExaminer
@@ -29,7 +29,7 @@ chest_examine proc far
 
 l_newExaminer:
 	mov	bx, [bp+slotNumber]
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	sub	ah, ah
 	or	gs:g_chestExamined, ax
 
@@ -53,7 +53,7 @@ l_foundTrap:
 	PUSH_OFFSET(s_looksLike)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	STRCAT(stringBufferP)
-	mov	bx, gs:trapIndex
+	mov	bx, gs:g_trapIndex
 	mov	al, g_chestTrapIndexToName[bx]
 	cbw
 	mov	bx, ax

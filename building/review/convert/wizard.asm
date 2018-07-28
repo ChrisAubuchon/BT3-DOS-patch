@@ -9,12 +9,12 @@ mage_convertWizardCheck proc far
 	mov	ax, 2Ah
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_hasBeenClass, near)
+	CALL(character_hasBeenClass, near)
 	or	ax, ax
 	jnz	short l_returnZero
 
 	push	[bp+slotNumber]
-	CALL(mage_countClassesGained, near)
+	CALL(character_countClassesGained, near)
 	cmp	ax, 2
 	jl	short l_returnZero
 

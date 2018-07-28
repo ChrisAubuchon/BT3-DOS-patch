@@ -26,8 +26,8 @@ _sp_useWineskin	proc far
 	mov	bx, [bp+var_106]
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (drinkStringList+2)[bx]
-	push	word ptr drinkStringList[bx]
+	push	word ptr (g_drinkStringList+2)[bx]
+	push	word ptr g_drinkStringList[bx]
 	push	dx
 	push	ax
 	STRCAT(stringBufferP)

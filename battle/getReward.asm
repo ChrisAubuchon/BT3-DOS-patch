@@ -16,7 +16,7 @@ bat_getReward proc far
 
 	DELAY(2)
 	CALL(text_clear)
-	mov	gs:trapIndex, 0
+	mov	gs:g_trapIndex, 0
 	mov	ax, gs:batRewardLo
 	or	ax, gs:batRewardHi
 	jz	l_returnZero
@@ -58,7 +58,7 @@ loc_1F255:
 	push	word ptr [bp+stringBufferP]
 	STRCAT(stringBufferP)
 
-	cmp	gs:trapIndex, 0
+	cmp	gs:g_trapIndex, 0
 	jz	short loc_1F2F1
 	sub	ax, ax
 	cwd
@@ -112,7 +112,7 @@ loc_1F38E:
 	or	ax, ax
 	jnz	l_itemLoopNext
 
-	cmp	gs:trapIndex, 0
+	cmp	gs:g_trapIndex, 0
 	jnz	short l_getRewardItemNumber
 	DELAY(1)
 
@@ -129,10 +129,10 @@ l_checkLevelMask:
 	mov	[bp+newItemNumber], ax
 	mov	bl, g_levelNumber
 	sub	bh, bh
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	sub	ah, ah
 	mov	bx, [bp+newItemNumber]
-	mov	cl, itemLevMask[bx]
+	mov	cl, g_itemRewardTable[bx]
 	sub	ch, ch
 	test	ax, cx
 	jz	short l_getRewardItemNumber

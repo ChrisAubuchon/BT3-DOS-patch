@@ -8,12 +8,12 @@ mage_convertChronomancerCheck proc far
 	mov	ax, 46h	
 	push	ax
 	push	[bp+slotNumber]
-	CALL(mage_hasBeenClass)
+	CALL(character_hasBeenClass)
 	or	ax, ax
 	jnz	short l_returnZero
 
 	push	[bp+slotNumber]
-	CALL(mage_countClassesGained, near)
+	CALL(character_countClassesGained, near)
 	cmp	ax, 2
 	jl	short l_returnZero
 

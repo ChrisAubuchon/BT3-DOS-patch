@@ -138,11 +138,7 @@ l_skipMouseIcon:
 	jz	l_checkKeyboard
 	CALL(checkGamePort)
 	or	ax, ax
-	jnz	short loc_15AB4
-	CALL(checkOtherGamePort)
-	or	ax, ax
 	jz	short loc_15AB9
-loc_15AB4:
 	mov	ax, 1
 	jmp	short loc_15ABB
 loc_15AB9:

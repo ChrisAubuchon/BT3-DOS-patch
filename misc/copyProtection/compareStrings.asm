@@ -2,26 +2,26 @@
 
 cp_compareStrings proc far
 
-	var_2= word ptr	-2
-	arg_0= dword ptr  6
-	arg_4= dword ptr  0Ah
-	arg_8= word ptr	 0Eh
+	loopCounter= word ptr	-2
+	inString= dword ptr  6
+	keyString= dword ptr  0Ah
+	resultLength= word ptr	 0Eh
 
 	FUNC_ENTER(2)
 	push	si
 
-	mov	ax, [bp+arg_8]
-	mov	[bp+var_2], ax
+	mov	ax, [bp+resultLength]
+	mov	[bp+loopCounter], ax
 l_loop:
-	lfs	bx, [bp+arg_0]
-	inc	word ptr [bp+arg_0]
+	lfs	bx, [bp+inString]
+	inc	word ptr [bp+inString]
 	mov	al, fs:[bx]
-	mov	bx, [bp+var_2]
-	lfs	si, [bp+arg_4]
+	mov	bx, [bp+loopCounter]
+	lfs	si, [bp+keyString]
 	cmp	fs:[bx+si], al
 ;	jnz	short l_returnFail		; Uncomment to enable copy protection
-	inc	[bp+var_2]
-	cmp	[bp+var_2], 7
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
 	jl	short l_loop
 	jmp	short l_returnSuccess
 

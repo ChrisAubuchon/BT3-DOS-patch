@@ -9,7 +9,7 @@ character_learnSpell	proc far
 
 	mov	bx, [bp+spellNumber]
 	and	bx, 7
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	mov	cx, ax
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	ax, [bp+spellNumber]

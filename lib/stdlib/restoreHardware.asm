@@ -15,9 +15,9 @@ restoreHardware proc far
 	xchg	al, ah
 	out	40h, al		; Timer	8253-5 (AT: 8254.2).
 	mov	di, 90h	
-	mov	ax, cs:g_savedDosErrorInterrupt
+	mov	ax, word ptr cs:g_savedDosErrorInterrupt
 	mov	es:[di], ax
-	mov	ax, cs:g_savedDosErrorInterrupt+2
+	mov	ax, word ptr cs:g_savedDosErrorInterrupt+2
 	mov	es:[di+2], ax
 	sti
 	pop	es

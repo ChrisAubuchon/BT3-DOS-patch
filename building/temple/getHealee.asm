@@ -1,14 +1,11 @@
 ; Attributes: bp-based frame
 
-; DWORD - var_108 & var_10A
-
 temple_getHealee proc far
 
 	deltaHP= word ptr -112h
 	payee= word ptr	-110h
 	statusAilment= word ptr	-10Eh
-	var_10A= word ptr -10Ah
-	var_108= word ptr -108h
+	stringBufferP= dword ptr -10Ah
 	stringBuffer= word ptr -104h
 	healeeSlotNumber= word ptr	-4
 	healCost= word ptr -2
@@ -35,9 +32,7 @@ temple_getHealee proc far
 	push	dx
 	push	ax
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	STRCAT(stringBufferP)
 
 	push	[bp+healeeSlotNumber]
 	CALL(temple_getStatusAilment, near)
@@ -45,17 +40,11 @@ temple_getHealee proc far
 	or	ax, ax
 	jz	short l_noStatusAilment
 	PUSH_OFFSET(s_isInBadShape)
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_thouMustSacrifice)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	push	[bp+statusAilment]
 	push	[bp+healeeSlotNumber]
 	CALL(temple_getHealPrice, near)
@@ -74,22 +63,16 @@ l_noStatusAilment:
 	jnz	short l_healLevelDrain
 
 	PUSH_OFFSET(s_dontNeedHealing)
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING(true)
 	jmp	l_return
 
 l_healLevelDrain:
 	PUSH_OFFSET(s_drainedOfLife)
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	mov	ax, 8
 	push	ax
 	push	[bp+healeeSlotNumber]
@@ -98,11 +81,8 @@ l_healLevelDrain:
 	jmp	short l_getPayer
 l_healHpAmount:
 	PUSH_OFFSET(s_hasWounds)
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	mov	ax, [bp+deltaHP]
 	mov	cx, ax
 	shl	ax, 1
@@ -111,11 +91,8 @@ l_healHpAmount:
 	shl	ax, 1
 	mov	[bp+healCost], ax
 	PUSH_OFFSET(s_donationWillBe)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 l_getPayer:
 	sub	ax, ax
 	push	ax
@@ -123,18 +100,12 @@ l_getPayer:
 	cwd
 	push	dx
 	push	ax
-	push	[bp+var_108]
-	push	[bp+var_10A]
-	ITOA
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
 	PUSH_OFFSET(s_templeGoldForfeit)
 	push	ax
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING(true)
 	CALL(readSlotNumber, near)
@@ -182,46 +153,31 @@ l_healHp:
 l_layHands:
 	PUSH_OFFSET(s_layHands)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	STRCAT(stringBufferP)
 	xor	ax, ax
 	push	ax
 	mov	ax, 3
 	push	ax
 	push	[bp+healeeSlotNumber]
-	push	dx
-	push	[bp+var_10A]
+	PUSH_STACK_DWORD(stringBufferP)
 	CALL(printCharPronoun, near)
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	SAVE_STACK_DWORD(dx,ax,stringBufferP)
 	PUSH_OFFSET(s_elipsis)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_elipsisAnd)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	sub	ax, ax
 	push	ax
 	push	ax
 	push	[bp+healeeSlotNumber]
-	push	dx
-	push	[bp+var_10A]
+	PUSH_STACK_DWORD(stringBufferP)
 	CALL(printCharPronoun, near)
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	SAVE_STACK_DWORD(dx,ax,stringBufferP)
 	PUSH_OFFSET(s_isHealed)
-	push	dx
-	push	[bp+var_10A]
-	STRCAT
-	mov	[bp+var_10A], ax
-	mov	[bp+var_108], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING(true)
 l_return:

@@ -25,7 +25,7 @@ l_hialphabetChar:
 	push	ax
 	CALL(_mfunc_extractCh, near)
 	mov	bx, ax
-	mov	al, _str_Hialphabet[bx]
+	mov	al, g_packedCharactersHigh[bx]
 	cbw
 	cmp	_str_capFlag, 0
 	jz	short l_return
@@ -34,7 +34,7 @@ l_hialphabetChar:
 
 l_loalphabetChar:
 	mov	bx, ax
-	mov	al, _str_Loalphabet[bx-1]
+	mov	al, g_packedCharactersLow[bx-1]
 	cbw
 	cmp	_str_capFlag, 0
 	jz	short l_return

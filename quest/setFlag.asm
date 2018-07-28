@@ -27,7 +27,7 @@ l_loop:
 	cmp	byte ptr gs:party._name[si], 0
 	jz	short l_next
 	mov	bx, [bp+questMaskIndex]
-	mov	al, byteMaskList[bx]
+	mov	al, g_byteMaskList[bx]
 	mov	bx, [bp+questByteNumber]
 	add	bx, si
 	or	gs:party.chronoQuest[bx], al

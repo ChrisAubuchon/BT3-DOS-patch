@@ -29,8 +29,8 @@ sp_scrySight proc far
 	mov	bx, g_direction
 	shl	bx, 1
 	shl	bx, 1
-	push	word ptr (dirStringList+2)[bx]
-	push	word ptr dirStringList[bx]
+	push	word ptr (g_directionStringList+2)[bx]
+	push	word ptr g_directionStringList[bx]
 	push	dx
 	push	ax
 	STRCAT(stringBufferP)

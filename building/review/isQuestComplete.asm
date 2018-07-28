@@ -17,7 +17,7 @@ review_isQuestComplete proc far
 	sub	ah, ah
 	mov	bx, [bp+questByte]
 	and	bx, 7
-	mov	cl, byteMaskList[bx]
+	mov	cl, g_byteMaskList[bx]
 	sub	ch, ch
 	and	ax, cx
 	FUNC_EXIT

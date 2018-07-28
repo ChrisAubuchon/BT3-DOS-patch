@@ -28,7 +28,7 @@ define(`slotNumber', `di')
 	jmp	short l_returnOne
 
 l_noTrap:
-	mov	gs:trapIndex, 0
+	mov	gs:g_trapIndex, 0
 	mov	gs:word_42560, 1
 
 l_returnOne:

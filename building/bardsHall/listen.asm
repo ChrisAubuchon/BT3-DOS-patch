@@ -5,7 +5,7 @@ bards_listen proc far
 	validMouseKeys=	word ptr -2Eh
 	validKeys=	word ptr -1Ah
 	loopCounter=	word ptr -10h
-	var_E= word ptr	-0Eh
+	mouseMask= word ptr	-0Eh
 	var_C= word ptr	-0Ch
 	inKey= word ptr	-2
 
@@ -23,14 +23,15 @@ loc_25BCE:
 	push	ax
 	CALL(bards_configOptionList, near)
 	CALL(text_clear)
+
 	PUSH_STACK_ADDRESS(validMouseKeys)
 	PUSH_STACK_ADDRESS(validKeys)
 	PUSH_STACK_ADDRESS(var_C)
 	PUSH_OFFSET(s_songTitleList)
 	CALL(printVarString)
-	mov	[bp+var_E], ax
+	mov	[bp+mouseMask], ax
 l_readKey:
-	push	[bp+var_E]
+	push	[bp+mouseMask]
 	CALL(getKey)
 	mov	[bp+inKey], ax
 	cmp	ax, dosKeys_ESC
@@ -56,8 +57,8 @@ l_songSelected:
 	mov	bx, [bp+loopCounter]
 	shl	bx, 1
 	shl	bx, 1
-	mov	ax, word ptr bardSongLyrics[bx]
-	or	ax, word ptr (bardSongLyrics+2)[bx]
+	mov	ax, word ptr g_bardSongLyricsList[bx]
+	or	ax, word ptr (g_bardSongLyricsList+2)[bx]
 	jnz	short loc_25C5D
 	cmp	[bp+loopCounter], 2
 	jnz	short loc_25C51

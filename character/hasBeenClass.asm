@@ -2,7 +2,7 @@
 ; at least one level of	a certain mage class
 ; Attributes: bp-based frame
 
-mage_hasBeenClass proc far
+character_hasBeenClass proc far
 
 	loopCounter= word ptr -2
 	slotNumber=	word ptr  6
@@ -31,4 +31,4 @@ l_returnZero:
 l_return:
 	FUNC_EXIT
 	retf
-mage_hasBeenClass endp
+character_hasBeenClass endp

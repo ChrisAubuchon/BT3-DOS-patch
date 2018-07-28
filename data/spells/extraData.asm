@@ -6,7 +6,7 @@ divert(`-1')
 define(`RANGE', `ifelse(`$2', `diminishing', `BITMASK($1, 80h)', `$1')')
 
 # A detection spell (Area Enchant, Locate Traps) stores a number that is
-# an index into the detectByteStartList array. 
+# an index into the g_detectStartList array. 
 define(`DETECT_INDEX', `$1')
 
 # Shield spells store the AC bonus

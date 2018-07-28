@@ -1,13 +1,12 @@
-; DWORD - var_2 & var_4
+; DWORD - stringBufferP+2 & stringBufferP
 ; Attributes: bp-based frame
 
 bards_learnSong	proc far
 
 	stringBuffer= word ptr -108h
 	partySlotNumber= word ptr	-8
-	var_6= word ptr	-6
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	loopCounter= word ptr	-6
+	stringBufferP= dword ptr	-4
 	songNumber= word ptr	 6
 
 	FUNC_ENTER(108h)
@@ -18,9 +17,7 @@ bards_learnSong	proc far
 	IOWAIT
 	PUSH_OFFSET(s_itWillCostYou)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	STRCAT(stringBufferP)
 	sub	ax, ax
 	push	ax
 	mov	bx, [bp+songNumber]
@@ -28,17 +25,13 @@ bards_learnSong	proc far
 	shl	bx, 1
 	push	word ptr (bardSongPrice+2)[bx]
 	push	word ptr bardSongPrice[bx]
-	push	dx
-	push	[bp+var_4]
-	CALL(itoa)
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
+
 	PUSH_OFFSET(s_inGoldWhoWillPay)
-	push	dx
-	push	[bp+var_4]
-	STRCAT
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
+
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	CALL(readSlotNumber)
@@ -75,17 +68,17 @@ loc_25DA2:
 	CHARINDEX(ax, STACKVAR(partySlotNumber), si)
 	sub	word ptr gs:party.gold[si], cx
 	sbb	word ptr gs:(party.gold+2)[si], bx
-	mov	[bp+var_6], 0
+	mov	[bp+loopCounter], 0
 l_loop:
-	CHARINDEX(ax, STACKVAR(var_6), si)
+	CHARINDEX(ax, STACKVAR(loopCounter), si)
 	cmp	gs:party.class[si], class_bard
 	jnz	short l_increment
 	mov	bx, [bp+songNumber]
-	mov	al, byte_4BDF0[bx]
+	mov	al, g_bardSongMask[bx]
 	or	gs:(party.specAbil+1)[si], al
 l_increment:
-	inc	[bp+var_6]
-	cmp	[bp+var_6], 7
+	inc	[bp+loopCounter]
+	cmp	[bp+loopCounter], 7
 	jl	short l_loop
 
 l_playSong:

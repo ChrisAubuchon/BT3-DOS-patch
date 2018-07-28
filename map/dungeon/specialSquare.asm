@@ -37,19 +37,19 @@ dun_doSpecialSquare proc far
 	mov	[bp+counter], 0
 l_loop:
 	mov	bx, [bp+counter]
-	mov	bl, specialSquareByteIndexList[bx]
+	mov	bl, g_specialSquareByteList[bx]
 	sub	bh, bh
 	lfs	si, [bp+squareDataP]
 	mov	al, fs:[bx+si]
 	sub	ah, ah
 	mov	bx, [bp+counter]
-	mov	cl, specialSquareMaskList[bx]
+	mov	cl, g_specialSquareMaskList[bx]
 	sub	ch, ch
 	test	ax, cx
 	jz	short l_next
 	shl	bx, 1
 	shl	bx, 1
-	call	specialSquareFunctionList[bx]
+	call	g_specialSquareFunctions[bx]
 
 l_next:
 	inc	[bp+counter]

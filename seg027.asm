@@ -16,7 +16,7 @@ byte_41E63	db 0
 g_charActionList db 7	dup(0)		   ; 0
 unk_41E6B	db	0
 word_41E6C	dw 0
-trapIndex	dw 0
+g_trapIndex	dw 0
 g_charFreezeToHitBonus	db 0
 byte_41E71	db 0
 g_strengthSpellBonus	db 7 dup(0)	      ;	0

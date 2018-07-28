@@ -29,7 +29,7 @@ l_loop:
 	jg	short l_return
 	CALL(random)
 	mov	bx, [bp+dieval]
-	mov	cl, diceMaskList[bx]
+	mov	cl, g_diceMasks[bx]
 	sub	ch, ch
 	and	cx, ax
 	inc	cx

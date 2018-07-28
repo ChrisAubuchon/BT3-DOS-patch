@@ -1,3 +1,4 @@
+include(`macros.m4')
 ; Attributes: bp-based frame
 
 mouse_getClick proc far
@@ -13,13 +14,8 @@ mouse_getClick proc far
 
 	CALL(checkGamePort)
 	or	ax, ax
-	jnz	short loc_150AE
-
-	CALL(checkOtherGamePort)
-	or	ax, ax
 	jz	short loc_150B3
 
-loc_150AE:
 	mov	ax, 1
 	jmp	short loc_150B5
 loc_150B3:
@@ -123,7 +119,7 @@ loc_151D5:
 
 l_returnZero:
 	sub	ax, ax
-`
+
 l_return:
 	pop	si
 	FUNC_EXIT

@@ -63,7 +63,7 @@ l_copyStats:
 	mov	ax, fs:[bx+bi_char_t.maxSppt]
 	mov	gs:newCharBuffer.maxSppt, ax
 	mov	bx, fs:[bx+bi_char_t.class]
-	mov	al, bii_classMap[bx]
+	mov	al, g_bt2ClassMap[bx]
 	mov	gs:newCharBuffer.class,	al
 	lfs	bx, [bp+arg_0]
 	mov	al, byte ptr fs:[bx+bi_char_t.race]
@@ -81,15 +81,13 @@ l_copyStats:
 	mov	gs:newCharBuffer.status, ah
 	mov	[bp+var_6], 0
 	mov	[bp+var_4], 0
-	jmp	short loc_26F55
 loc_26F52:
-loc_26F55:
 	mov	si, [bp+var_4]
 	shl	si, 1
 	lfs	bx, [bp+arg_0]
 	mov	bl, byte ptr fs:[bx+si+bi_char_t.inventory]
 	sub	bh, bh
-	mov	al, bi_inventoryMap[bx]
+	mov	al, g_bt1InventoryMap[bx]
 	cbw
 	mov	[bp+var_2], ax
 	or	ax, ax

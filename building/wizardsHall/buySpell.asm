@@ -24,7 +24,7 @@ wizardHall_buySpell proc far
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	mov	bl, gs:party.class[bx]
 	sub	bh, bh
-	cmp	mageSpellIndex[bx], 0FFh
+	cmp	g_classSpellIndex[bx], 0FFh
 	jnz	short l_isSpellcaster
 	PUSH_OFFSET(s_thouArtNotASpellcaster)
 	PRINTSTRING(true)

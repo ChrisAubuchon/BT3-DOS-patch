@@ -95,7 +95,7 @@ loc_113D2:
 	jz	short loc_11444
 	and	byte ptr [bp+currentSquareP], 0Fh
 loc_11444:
-	test	g_levelFlags, 20h
+	test	g_levelFlags, dunLevel_isOutdoors
 	jz	loc_dun_buildView_inDungeon
 
 	mov	ax, 4

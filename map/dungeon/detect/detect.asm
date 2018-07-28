@@ -44,26 +44,26 @@ loc_256DB:
 	CALL(detect_getSquares, near)
 	mov	bl, g_detectType
 	sub	bh, bh
-	mov	al, detectByteStartList[bx]
+	mov	al, g_detectStartList[bx]
 	cbw
 	mov	[bp+detectIndex], ax
 
 l_loop:
 	mov	bx, [bp+detectIndex]
-	mov	al, detectByte[bx]
+	mov	al, g_detectByte[bx]
 	sub	ah, ah
 	cmp	ax, 0FFh
 	jge	short l_return
 	mov	si, ax
 	mov	al, byte ptr [bp+si+aheadFlags]
 	cbw
-	mov	cl, detectMask[bx]
+	mov	cl, g_detectMask[bx]
 	sub	ch, ch
 	test	ax, cx
 	jz	short l_next
 
 	mov	bx, [bp+detectIndex]
-	mov	al, detectMsgIndex[bx]
+	mov	al, g_detectMessageIndex[bx]
 	cbw
 	mov	bx, ax
 	shl	bx, 1
