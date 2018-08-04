@@ -1,16 +1,13 @@
 ; Attributes: bp-based frame
 
 ; Create the party in the roster's party buffer
-;
-; DWORD - arg_2 & arg_4
 
 roster_makeParty proc far
 
 	var_6= word ptr	-6
 	partyBufP= dword ptr -4
 	partyIndexNumber= word ptr	 6
-	arg_2= word ptr	 8
-	arg_4= word ptr	 0Ah
+	arg_2= dword ptr	 8
 
 	FUNC_ENTER(6)
 
@@ -22,8 +19,7 @@ roster_makeParty proc far
 	mov	word ptr [bp+partyBufP+2], seg seg022
 	lfs	bx, [bp+partyBufP]
 	mov	byte ptr fs:[bx], '>'
-	push	[bp+arg_4]
-	push	[bp+arg_2]
+	PUSH_STACK_DWORD(arg_2)
 	mov	ax, word ptr [bp+partyBufP]
 	mov	dx, word ptr [bp+partyBufP+2]
 	inc	ax

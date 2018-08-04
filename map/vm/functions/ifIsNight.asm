@@ -5,7 +5,7 @@ mfunc_ifIsNight	proc far
 	dataP= dword ptr	 6
 
 	FUNC_ENTER
-	cmp	gs:isNight, 1
+	cmp	gs:g_isNightFlag, 1
 	sbb	ax, ax
 	neg	ax
 	push	ax

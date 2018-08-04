@@ -24,7 +24,7 @@ l_monTarget:
 	and	[bp+targetIndexNumber], 3
 	PUSH_STACK_ADDRESS(monName)
 	MONINDEX(ax, STACKVAR(targetIndexNumber), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

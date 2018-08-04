@@ -12,7 +12,7 @@ bat_monMeleeRoll proc far
 	FUNC_ENTER(4)
 	push	si
 
-	mov	gs:specialAttackVal, 0
+	mov	gs:g_specialAttackValue, 0
 	mov	gs:g_damageAmount, 0
 	mov	bx, [bp+target]
 	cmp	gs:g_characterMeleeDistance[bx], 0
@@ -22,7 +22,7 @@ bat_monMeleeRoll proc far
 	mov	al, gs:party.ac[bx]
 	cbw
 	mov	bx, [bp+monNo]
-	mov	cl, gs:monSpellToHitPenalty[bx]
+	mov	cl, gs:g_monsterSpellToHitPenalty[bx]
 	sub	ch, ch
 	add	ax, cx
 	mov	[bp+var_2], ax
@@ -32,10 +32,10 @@ bat_monMeleeRoll proc far
 
 l_underMax:
 	MONINDEX(ax, bx, si)
-	mov	al, gs:monGroups.toHitHi[si]
+	mov	al, gs:g_monGroups.toHitHi[si]
 	sub	ah, ah
 	push	ax
-	mov	al, gs:monGroups.toHitLo[si]
+	mov	al, gs:g_monGroups.toHitLo[si]
 	push	ax
 	CALL(randomBetweenXandY, near)
 	mov	bx, [bp+monNo]
@@ -49,7 +49,7 @@ l_underMax:
 
 	; Add monster special attack
 	mov	ax, [bp+spAttack]
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 
 	push	[bp+field_17]
 	CALL(randomYdX, near)

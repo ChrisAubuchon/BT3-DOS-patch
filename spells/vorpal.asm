@@ -10,7 +10,7 @@ sp_vorpalPlating proc far
 	mov	al, g_spellEffectData[bx]
 	mov	bl, gs:bat_curTarget
 	and	bx, 7Fh
-	add	gs:vorpalPlateBonus[bx], al
+	add	gs:g_vorpalPlateBonus[bx], al
 
 	FUNC_EXIT
 	retf

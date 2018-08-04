@@ -1,7 +1,5 @@
 ; Attributes: bp-based frame
 
-; DWORD: arg_2 & goldAmount
-
 character_removeGold	proc far
 
 	partySlotNumber= word ptr	 6

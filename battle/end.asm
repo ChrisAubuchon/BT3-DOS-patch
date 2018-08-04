@@ -12,13 +12,13 @@ bat_end	proc far
 
 	sub	al, al
 	mov	gs:g_nonRandomBattleFlag, al
-	mov	byte_4EECC, al
+	mov	g_battleNoChest, al
 	mov	g_partyAttackFlag, al
 	mov	[bp+loopCounter], 0
 l_resetMonsterGRoups:
 	MONINDEX(ax, STACKVAR(loopCounter), si)
-	mov	byte ptr gs:monGroups._name[si], 0
-	mov	gs:monGroups.groupSize[si], 0
+	mov	byte ptr gs:g_monGroups._name[si], 0
+	mov	gs:g_monGroups.groupSize[si], 0
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 4
 	jl	short l_resetMonsterGRoups

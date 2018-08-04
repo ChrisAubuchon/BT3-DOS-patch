@@ -54,7 +54,7 @@ l_noBattleCry:
 l_initStringBuffer:
 	lea	ax, [bp+stringBuffer]
 	SAVE_STACK_DWORD(ss, ax, stringBufferP)
-	test	gs:monGroups.groupSize,	1Fh
+	test	gs:g_monGroups.groupSize,	1Fh
 	jnz	short l_printFirstMonsterGroup
 
 	PRINTOFFSET(s_hostilePartyMembers)
@@ -72,7 +72,7 @@ l_printFirstMonsterGroup:
 
 l_monGroupLoop:
 	MONINDEX(ax, STACKVAR(loopCounter), bx)
-	test	gs:monGroups.groupSize[bx], 1Fh
+	test	gs:g_monGroups.groupSize[bx], 1Fh
 	jz	short l_terminateString
 
 	cmp	[bp+loopCounter], 4

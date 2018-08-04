@@ -6,7 +6,7 @@ dunsq_antiMagic	proc far
 
 	FUNC_ENTER(2)
 
-	inc	gs:sq_antiMagicFlag
+	inc	gs:g_squareAntiMagicFlag
 
 	; Change to 1 to skip over lightDuration
 	mov	[bp+l_effectIndex], 1

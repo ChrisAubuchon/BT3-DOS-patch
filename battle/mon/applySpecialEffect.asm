@@ -15,10 +15,10 @@ bat_monApplySpecialEffect proc far
 	shl	ax, 1
 	add	bx, ax
 	and	gs:bat_monBeenHitList[bx], 0FEh
-	cmp	gs:specialAttackVal, specialAttack_stone
+	cmp	gs:g_specialAttackValue, specialAttack_stone
 	jz	short l_killMonster
 
-	cmp	gs:specialAttackVal, specialAttack_critical
+	cmp	gs:g_specialAttackValue, specialAttack_critical
 	jnz	short l_damageMonster
 
 l_killMonster:

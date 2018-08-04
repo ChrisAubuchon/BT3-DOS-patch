@@ -9,7 +9,7 @@ review_questTarjan proc far
 
 	mov	ax, 0FFh
 	push	ax
-	mov	ax, 3Eh	
+	mov	ax, QUESTFLAG(questBit_2, questByte_7)
 	push	ax
 	CALL(_updateFlags)
 

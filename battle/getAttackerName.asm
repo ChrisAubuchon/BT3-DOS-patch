@@ -24,7 +24,7 @@ l_enemyAttacker:
 	APPEND_CHAR(STACKVAR(stringBufferP), 'a')
 	PUSH_STACK_ADDRESS(unmaskedName)
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

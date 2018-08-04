@@ -24,7 +24,7 @@ icon_deactivate proc far
 l_light:
 	sub	al, al
 	mov	lightDistance, al
-	mov	gs:gl_detectSecretDoorFlag, al
+	mov	gs:g_detectSecretDoorFlag, al
 	jmp	short l_return
 
 l_detect:

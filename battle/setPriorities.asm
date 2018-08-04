@@ -12,17 +12,17 @@ bat_setPriorities proc far
 	FUNC_ENTER(0Eh)
 	push	si
 
-	cmp	gs:partyFrozenFlag, 0
+	cmp	gs:g_partyFrozenFlag, 0
 	jz	short l_getCharPriorities
 
 	mov	[bp+loopCounter], 0
 l_partyFrozenLoop:
 	mov	bx, [bp+loopCounter]
-	mov	gs:bat_charPriority[bx], 0
+	mov	gs:g_battleCharacterPriorities[bx], 0
 	inc	[bp+loopCounter]
 	cmp	[bp+loopCounter], 7
 	jl	short l_partyFrozenLoop
-	mov	gs:partyFrozenFlag, 0
+	mov	gs:g_partyFrozenFlag, 0
 	jmp	l_getMonsterPriorities
 
 l_getCharPriorities:
@@ -47,7 +47,7 @@ l_characterLoop:
 	push	ax
 	CALL(randomBetweenXandY, near)
 	mov	bx, [bp+loopCounter]
-	mov	fs:bat_charPriority[bx], al
+	mov	fs:g_battleCharacterPriorities[bx], al
 	jmp	l_characterLoopNext
 
 l_notSummon:
@@ -55,7 +55,7 @@ l_notSummon:
 	cmp	gs:g_charActionList[bx], charAction_hide
 	jnz	short loc_1C696
 
-	mov	gs:bat_charPriority[bx], 0FFh
+	mov	gs:g_battleCharacterPriorities[bx], 0FFh
 	jmp	short l_characterLoopNext
 
 loc_1C696:
@@ -64,7 +64,7 @@ loc_1C696:
 	sub	bh, bh
 	mov	al, g_classBaseAttackPriority[bx]
 	mov	bx, [bp+loopCounter]
-	mov	gs:bat_charPriority[bx], al
+	mov	gs:g_battleCharacterPriorities[bx], al
 	CALL(random_2d16)
 	mov	cx, gs:party.level[si]
 	shr	cx, 1
@@ -73,18 +73,18 @@ loc_1C696:
 	add	cl, dl
 	add	cl, al
 	mov	bx, [bp+loopCounter]
-	add	gs:bat_charPriority[bx], cl
+	add	gs:g_battleCharacterPriorities[bx], cl
 	mov	bx, [bp+loopCounter]
-	cmp	gs:bat_charPriority[bx], 0FFh
+	cmp	gs:g_battleCharacterPriorities[bx], 0FFh
 	jbe	short l_setMinimumPriority
-	mov	gs:bat_charPriority[bx], 0FFh
+	mov	gs:g_battleCharacterPriorities[bx], 0FFh
 	jmp	short l_characterLoopNext
 
 l_setMinimumPriority:
 	mov	bx, [bp+loopCounter]
-	cmp	gs:bat_charPriority[bx], 0
+	cmp	gs:g_battleCharacterPriorities[bx], 0
 	jnz	short l_characterLoopNext
-	mov	gs:bat_charPriority[bx], 1
+	mov	gs:g_battleCharacterPriorities[bx], 1
 
 l_characterLoopNext:
 	inc	[bp+loopCounter]
@@ -96,16 +96,16 @@ l_getMonsterPriorities:
 
 l_monsterGroupLoop:
 	MONINDEX(ax, STACKVAR(loopCounter), si)
-	mov	al, gs:monGroups.groupSize[si]
+	mov	al, gs:g_monGroups.groupSize[si]
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+monsterGroupSize], ax
 	or	ax, ax
 	jz	short l_monsterGroupNext
-	mov	al, gs:monGroups.oppPriorityLo[si]
+	mov	al, gs:g_monGroups.oppPriorityLo[si]
 	sub	ah, ah
 	mov	[bp+monsterPriorityLo], ax
-	mov	al, gs:monGroups.oppPriorityHi[si]
+	mov	al, gs:g_monGroups.oppPriorityHi[si]
 	mov	[bp+monsterPriorityHi], ax
 	mov	[bp+currentMonster], 0
 

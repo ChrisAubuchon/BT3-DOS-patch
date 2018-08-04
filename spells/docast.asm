@@ -43,7 +43,7 @@ l_spptCheck:
 	CALL(_sp_checkSPPT, near)
 	or	ax, ax
 	jz	short l_fizzled
-	mov	al, gs:sq_antiMagicFlag
+	mov	al, gs:g_squareAntiMagicFlag
 	sub	ah, ah
 	or	ax, ax
 	jz	short l_castIt

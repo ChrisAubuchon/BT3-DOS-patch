@@ -2,66 +2,70 @@
 
 doRealtimeEvents proc far
 
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	loopCounter= word ptr	-2
 
-	FUNC_ENTER(4)
+	FUNC_ENTER(2)
 	push	si
 
-	mov	ax, gs:word_42294
-	cmp	g_tockClicks, ax
-	jz	short loc_15256
-	mov	ax, g_tockClicks
-	mov	gs:word_42294, ax
+	; Only update the animation when g_clockTicks has been updated.
+	;
+	mov	ax, gs:g_animationClockTimer
+	cmp	g_clockTicks, ax
+	jz	short l_checkPoisonTimer
+
+	mov	ax, g_clockTicks
+	mov	gs:g_animationClockTimer, ax
 	CALL(gfx_animate)
-loc_15256:
-	mov	ax, g_tockClicks
+
+l_checkPoisonTimer:
+	mov	ax, g_clockTicks
 	mov	cl, 5
 	sar	ax, cl
-	mov	[bp+var_4], ax
-	cmp	gs:word_42410, ax
-	jz	short loc_15296
-	mov	gs:word_42410, ax
+	cmp	gs:g_twoSecondTimer, ax
+	jz	short l_check15sTimer
+
+	mov	gs:g_twoSecondTimer, ax
 	mov	si, ax
 	mov	cl, 4
 	sar	si, cl
 
-	cmp	gs:word_41E6C, si
-	jz	short loc_15296
-	mov	gs:word_41E6C, si
+	cmp	gs:g_thirtySecondTimer, si
+	jz	short l_check15sTimer
+	mov	gs:g_thirtySecondTimer, si
 
 	cmp	gs:advanceTimeFlag, 0
-	jnz	short loc_15296
+	jnz	short l_check15sTimer
 	CALL(bat_partyApplyPoison)
-loc_15296:
+
+l_check15sTimer:
 	cmp	gs:advanceTimeFlag, 0
-	jz	short loc_152A5
-	jmp	loc_1538E
-loc_152A5:
-	mov	si, gs:word_42410
+	jnz	l_checkTwoMinuteTimer
+
+	mov	si, gs:g_twoSecondTimer
 	mov	cl, 4
 	sar	si, cl
-	cmp	gs:word_42456, si
-	jz	loc_1538E
-	mov	gs:word_42456, si
+	cmp	gs:g_fifteenSecondTimer, si
+	jz	l_checkTwoMinuteTimer
+	mov	gs:g_fifteenSecondTimer, si
 
 	cmp	g_songDuration, 0		; Song timer
-	jz	short loc_152E3
+	jz	short l_checkIconTimers
 	mov	al, g_songDuration
 	dec	g_songDuration
 	cmp	al, 1
-	jnz	short loc_152E3
+	jnz	short l_checkIconTimers
 	CALL(endNoncombatSong)
 
-loc_152E3:
-	mov	ax, gs:word_4233E
-	dec	gs:word_4233E
+l_checkIconTimers:
+	mov	ax, gs:g_iconAnimationTimer
+	dec	gs:g_iconAnimationTimer
 	cmp	ax, 1
-	jg	short loc_1533E
-	mov	gs:word_4233E, 0Ah
-	mov	[bp+var_2], 0
+	jg	short l_checkSpptRegenTimer
+	mov	gs:g_iconAnimationTimer, 10
+	mov	[bp+loopCounter], 0
+
 l_iconLoopEntry:
-	mov	bx, [bp+var_2]
+	mov	bx, [bp+loopCounter]
 	cmp	lightDuration[bx], 0
 	jz	short l_iconLoopIncrement
 	cmp	lightDuration[bx], 0FFh
@@ -70,64 +74,76 @@ l_iconLoopEntry:
 	dec	lightDuration[bx]
 	cmp	al, 1
 	jnz	short l_iconLoopIncrement
-	push	[bp+var_2]
+	push	[bp+loopCounter]
 	CALL(icon_deactivate)
 l_iconLoopIncrement:
-	inc	[bp+var_2]
-	cmp	[bp+var_2], 5
+	inc	[bp+loopCounter]
+
+	cmp	[bp+loopCounter], 5
 	jl	short l_iconLoopEntry
 
-loc_1533E:
+l_checkSpptRegenTimer:
 	cmp	inDungeonMaybe, 0
-	jnz	short loc_15356
-	cmp	gs:isNight, 0
-	jz	short loc_15362
-loc_15356:
+	jnz	short l_checkOnRegenSquare
+
+	cmp	gs:g_isNightFlag, 0
+	jz	short l_applySpptRegen
+
+l_checkOnRegenSquare:
 	cmp	gs:regenSpptSq,	0
-	jz	short loc_15378
-loc_15362:
+	jz	short l_applyEquipmentEffects
+
+l_applySpptRegen:
 	CALL(party_applySpptRegen)
-	cmp	gs:songRegenSppt, 0
-	jz	short loc_15378
+	cmp	gs:g_songRegenerateSppt, 0
+	jz	short l_applyEquipmentEffects
 	CALL(party_applySpptRegen)
-loc_15378:
+
+l_applyEquipmentEffects:
 	CALL(party_applyEquipmentEffects)
-	cmp	gs:sqRegenHPFlag, 0
-	jz	loc_doRealtimeEvents_label_1
+	cmp	gs:g_squareHpRegenFlag, 0
+	jz	l_unusedDrainHpCheck
 	CALL(party_regenHp)
 
-loc_doRealtimeEvents_label_1:
-	cmp	gs:byte_41E81, 0
-	jz	short loc_1538E
+l_unusedDrainHpCheck:
+	cmp	gs:g_unusedDrainHpFlag, 0
+	jz	short l_checkTwoMinuteTimer
+
 	CALL(dunsq_drainHp)
-loc_1538E:
-	mov	ax, gs:word_42410
+
+l_checkTwoMinuteTimer:
+	mov	ax, gs:g_twoSecondTimer
 	mov	cl, 6
 	sar	ax, cl
-	mov	[bp+var_4], ax
-	cmp	gs:word_42330, ax
+	cmp	gs:g_twoMinuteTimer, ax
 	jz	short l_return
-	mov	gs:word_42330, ax
+	mov	gs:g_twoMinuteTimer, ax
 	cmp	gs:advanceTimeFlag, 0
 	jnz	short l_return
 
 	mov	al, g_currentHour
 	inc	g_currentHour
 	cmp	al, 23
-	jb	short loc_153CF
+	jb	short l_checkTimeOfDayChange
 	mov	g_currentHour, 0		; Set to midnight
-loc_153CF:
+
+l_checkTimeOfDayChange:
 	cmp	g_currentHour, 6
-	jb	short l_setIsNightTonight
+	jb	short l_setIsNightToNight
+
 	cmp	g_currentHour, 18
 	jbe	short l_setIsNightToDay
-l_setIsNightTonight:
+
+l_setIsNightToNight:
 	mov	al, 1
 	jmp	short l_setIsNight
+
 l_setIsNightToDay:
 	sub	al, al
+
 l_setIsNight:
-	mov	gs:isNight, al
+	mov	gs:g_isNightFlag, al
+
 l_return:
 	pop	si
 	FUNC_EXIT

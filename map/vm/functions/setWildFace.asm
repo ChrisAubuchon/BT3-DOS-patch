@@ -28,13 +28,13 @@ mfunc_setWildFace proc far
 
 	cmp	gs:g_wildWrapFlag, 0
 	jz	short l_skipWrap
-	mov	al, gs:mapHeight
+	mov	al, gs:g_wildMapHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+sqN]
 	CALL(wrapNumber)
 	mov	[bp+sqN], ax
-	mov	al, gs:mapWidth
+	mov	al, gs:g_wildMapWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+sqE]
@@ -44,19 +44,19 @@ mfunc_setWildFace proc far
 l_skipWrap:
 	cmp	[bp+sqN], 0
 	jl	short l_return
-	mov	al, gs:mapHeight
+	mov	al, gs:g_wildMapHeight
 	sub	ah, ah
 	cmp	ax, [bp+sqN]
 	jb	short l_return
 	cmp	[bp+sqE], 0
 	jl	short l_return
-	mov	al, gs:mapWidth
+	mov	al, gs:g_wildMapWidth
 	cmp	ax, [bp+sqE]
 	jb	short l_return
 	mov	bx, [bp+sqN]
 	shl	bx, 1
 	shl	bx, 1
-	lfs	bx, gs:rowOffset[bx]
+	lfs	bx, gs:g_rowOffset[bx]
 	mov	si, [bp+sqE]
 	mov	al, byte ptr [bp+newFace]
 	mov	fs:[bx+si], al

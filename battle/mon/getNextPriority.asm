@@ -26,7 +26,7 @@ bat_monGetNextPriority proc far
 
 l_groupLoop:
 	MONINDEX(ax, STACKVAR(groupNo), bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+groupSize], ax

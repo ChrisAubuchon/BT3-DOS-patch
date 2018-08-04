@@ -28,7 +28,7 @@ l_notActive:
 	cmp	[bp+loopCounter], 5
 	jl	short l_durationSpellLoopEntry
 
-	mov	gs:gl_detectSecretDoorFlag, 0
+	mov	gs:g_detectSecretDoorFlag, 0
 	mov	gs:g_songAcBonus,	0
 	CALL(readRosterFiles, near)
 	CALL(roster_writeParty, near)

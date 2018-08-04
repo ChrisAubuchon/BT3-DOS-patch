@@ -10,12 +10,12 @@ bat_monMoveGroup proc far
 	FUNC_ENTER
 
 	MONINDEX(ax, STACKVAR(destinationSlotNumber), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	MONINDEX(ax, STACKVAR(sourceSlotNumber), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -42,7 +42,7 @@ bat_monMoveGroup proc far
 	sub	ax, ax
 	push	ax
 	MONINDEX(ax, STACKVAR(sourceSlotNumber), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

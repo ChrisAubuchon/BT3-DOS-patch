@@ -13,7 +13,7 @@ timerIntHandler proc far
 	mov	ax, g_totalClockTicks
 	and	ax, 3
 	jnz	short l_return
-	inc	g_tockClicks
+	inc	g_clockTicks
 	pop	ax
 	pop	ds
 	pop	es

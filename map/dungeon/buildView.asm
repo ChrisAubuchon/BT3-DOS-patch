@@ -79,7 +79,7 @@ loc_113D2:
 	push	ax
 	push	[bp+deltaSqN]
 	push	[bp+deltaSqE]
-	mov	ax, offset rowOffset
+	mov	ax, offset g_rowOffset
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -91,7 +91,7 @@ loc_113D2:
 
 	PUSH_STACK_DWORD(graphicsBuffer)
 	CALL(bigpic_setBackground)
-	cmp	gs:wallIsPhased, 0
+	cmp	gs:g_wallPhasedFlag, 0
 	jz	short loc_11444
 	and	byte ptr [bp+currentSquareP], 0Fh
 loc_11444:

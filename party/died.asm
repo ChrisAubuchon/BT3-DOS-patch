@@ -3,7 +3,7 @@
 party_died proc far
 	FUNC_ENTER
 	mov	byte ptr g_printPartyFlag,	0
-	mov	gs:byte_42296, 0FFh
+	mov	gs:g_noPauseFlag, 0FFh
 	mov	ax, bigpic_partyDied
 	push	ax
 	CALL(bigpic_drawPictureNumber)

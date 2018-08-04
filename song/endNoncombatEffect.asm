@@ -21,14 +21,14 @@ l_sanctuary:
 	mov	byte ptr g_printPartyFlag,	0
 	jmp	short l_return
 l_duotime:
-	mov	gs:songRegenSppt, 0
+	mov	gs:g_songRegenerateSppt, 0
 	jmp	short l_return
 l_watchwood:
 	mov	lightDistance, 0
 	sub	ax, ax
 	push	ax
 	CALL(icon_deactivate)
-	mov	gs:gl_detectSecretDoorFlag, 0
+	mov	gs:g_detectSecretDoorFlag, 0
 	jmp	short l_return
 l_overture:
 	mov	ax, 1

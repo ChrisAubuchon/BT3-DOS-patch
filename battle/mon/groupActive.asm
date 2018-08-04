@@ -9,7 +9,7 @@ bat_monGroupActive proc far
 	mov	[bp+loopCounter], 0
 l_loop:
 	MONINDEX(ax, STACKVAR(loopCounter), bx)
-	test	gs:monGroups.groupSize[bx], 1Fh
+	test	gs:g_monGroups.groupSize[bx], 1Fh
 	jz	short l_next
 	mov	ax, 1
 	jmp	short l_return

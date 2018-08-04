@@ -29,11 +29,11 @@ l_setEncounterLoop:
 	lfs	bx, [bp+dataP]
 	inc	word ptr [bp+dataP]
 	mov	al, fs:[bx]
-	mov	byte ptr gs:monGroups._name[si], al
+	mov	byte ptr gs:g_monGroups._name[si], al
 	lfs	bx, [bp+dataP]
 	inc	word ptr [bp+dataP]
 	mov	al, fs:[bx]
-	mov	gs:monGroups.groupSize[si], al
+	mov	gs:g_monGroups.groupSize[si], al
 	inc	[bp+loopCounter]
 	jmp	short l_setEncounterLoop
 

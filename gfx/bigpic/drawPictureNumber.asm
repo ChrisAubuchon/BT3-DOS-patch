@@ -148,7 +148,7 @@ loc_1734A:
 
 loc_1734C:
 	mov	gs:g_hideMouseInBigpicFlag, al
-	mov	gs:bigpicCellNumber, 0
+	mov	gs:g_bigpicAnimationCelNumber, 0
 	sub	ax, ax
 
 l_return:

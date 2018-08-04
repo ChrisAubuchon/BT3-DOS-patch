@@ -47,7 +47,7 @@ l_doSave:
 	push	[bp+fd]
 	CALL(write)
 
-	mov	ax, offset byte_4EECC
+	mov	ax, offset g_battleNoChest
 	mov	cx, offset g_locationNumber
 	mov	bx, seg	dseg
 	sub	ax, cx

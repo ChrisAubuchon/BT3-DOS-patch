@@ -1,7 +1,5 @@
 ; Attributes: bp-based frame
 
-; DWORD - arg_0 & arg_2, arg_4 & arg_6
-
 copyCharacterBuf proc far
 
 	arg_0= dword ptr	 6

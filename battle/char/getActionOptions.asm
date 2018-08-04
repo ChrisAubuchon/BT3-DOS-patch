@@ -9,7 +9,7 @@ bat_charGetActionOptions proc	far
 	cmp	g_partyAttackFlag, 0
 	jnz	short l_noMeleeAttack
 
-	test	gs:monGroups.groupSize,	1Fh
+	test	gs:g_monGroups.groupSize,	1Fh
 	jz	short l_noMeleeAttack
 
 	cmp	[bp+slotNumber], 4

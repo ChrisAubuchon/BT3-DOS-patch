@@ -158,6 +158,11 @@ define(`_bitmask', `ifelse(`$#', `1', fromIntel($1), `ifelse(`$2', `', `$0($1)',
 #
 define(`DICE_XDY', `BITMASK(eval($2 << 5), eval($1 - 1))')
 
+# QUESTFLAG(bit, byte)
+#   e.g. QUESTFLAG(questBit_2, questByte_7)
+#
+define(`QUESTFLAG', `BITMASK(eval($2 << 3), $1)')
+
 
 # Convert a base 10 number to an Intel style hexadecimal number
 #

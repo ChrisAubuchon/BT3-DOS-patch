@@ -22,7 +22,7 @@ l_bringaround:
 	mov	gs:songRegenHP,	0
 	jmp	short l_endAndReturn
 l_duotime:
-	mov	gs:songExtraAttack, 0
+	mov	gs:g_songExtraAttackFlag, 0
 	jmp	short l_endAndReturn
 l_songSwitch:
 	or	ax, ax

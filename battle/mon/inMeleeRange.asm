@@ -15,9 +15,9 @@ bat_monGroupInMeleeRange proc far
 
 l_loop:
 	MONINDEX(ax, STACKVAR(loopCounter), si)
-	test	gs:monGroups.groupSize[si], 1Fh
+	test	gs:g_monGroups.groupSize[si], 1Fh
 	jz	short l_next
-	mov	al, gs:monGroups.distance[si]
+	mov	al, gs:g_monGroups.distance[si]
 	and	al, 0Fh
 	cmp	al, 2
 	jnb	short l_next

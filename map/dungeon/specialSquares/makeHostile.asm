@@ -33,7 +33,7 @@ l_makeHostileLoop:
 	jnz	short l_makeHostileNext
 	CHARINDEX(ax, STACKVAR(var_2), bx)
 	mov	gs:party.hostileFlag[bx], 1
-	mov	byte_4EECC, 1
+	mov	g_battleNoChest, 1
 
 l_makeHostileNext:
 	inc	[bp+var_2]

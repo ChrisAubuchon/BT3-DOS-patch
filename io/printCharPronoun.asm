@@ -21,7 +21,7 @@ printCharPronoun proc far
 	and	ax, 3
 	MONINDEX(cx, cx)
 	mov	si, ax
-	mov	al, gs:monGroups.packedGenAc[si]
+	mov	al, gs:g_monGroups.packedGenAc[si]
 	sub	ah, ah
 	mov	cl, 6
 	shr	ax, cl
@@ -32,7 +32,7 @@ printCharPronoun proc far
 	lea	ax, [bp+var_16]
 	push	ss
 	push	ax
-	lea	ax, monGroups._name[si]
+	lea	ax, g_monGroups._name[si]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

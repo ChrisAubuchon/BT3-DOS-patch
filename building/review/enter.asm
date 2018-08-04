@@ -1,5 +1,6 @@
 ; Attributes: bp-based frame
 
+define(`tarjanQuestFlag', `g_gameProgressFlags+7')dnl
 review_enter proc far
 
 	loopCounter= word ptr	-6
@@ -9,13 +10,13 @@ review_enter proc far
 	FUNC_ENTER(6)
 
 loc_23001:
-	and	byte_4EE71, 0FDh
+	and	tarjanQuestFlag, 0FDh
 	CALL(review_setTitle, near)
-	test	byte_4EE71, 2
+	test	tarjanQuestFlag, 2
 	jnz	l_return
 
 	CALL(review_quest, near)
-	test	byte_4EE71, 2
+	test	tarjanQuestFlag, 2
 	jnz	short loc_23001
 
 l_ioLoop:
@@ -103,3 +104,4 @@ l_return:
 	FUNC_EXIT
 	retf
 review_enter endp
+undefine(`tarjanQuestFlag')dnl

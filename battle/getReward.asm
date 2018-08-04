@@ -17,14 +17,14 @@ bat_getReward proc far
 	DELAY(2)
 	CALL(text_clear)
 	mov	gs:g_trapIndex, 0
-	mov	ax, gs:batRewardLo
-	or	ax, gs:batRewardHi
+	mov	ax, word ptr gs:g_battleXpReward
+	or	ax, word ptr gs:g_battleXpReward+2
 	jz	l_returnZero
 
 	cmp	inDungeonMaybe, 0
 	jz	short loc_1F255
 
-	cmp	byte_4EECC, 0
+	cmp	g_battleNoChest, 0
 	jz	short loc_1F255
 
 	CALL(bat_doChest, near)
@@ -34,8 +34,8 @@ loc_1F255:
 	cmp	ax, 7
 	jg	l_returnOne
 
-	mov	ax, gs:batRewardLo
-	or	ax, gs:batRewardHi
+	mov	ax, word ptr gs:g_battleXpReward
+	or	ax, word ptr gs:g_battleXpReward+2
 	jz	l_returnZero
 
 	PUSH_OFFSET(s_eachCharacterReceives)
@@ -44,8 +44,8 @@ loc_1F255:
 
 	sub	ax, ax
 	push	ax
-	push	gs:batRewardHi
-	push	gs:batRewardLo
+	push	word ptr gs:g_battleXpReward+2
+	push	word ptr gs:g_battleXpReward
 	CALL(bat_giveExperience, near)
 
 	push	dx
@@ -69,8 +69,8 @@ loc_1F2F1:
 	cwd
 	push	dx
 	push	ax
-	push	gs:batRewardHi
-	push	gs:batRewardLo
+	push	word ptr gs:g_battleXpReward+2
+	push	word ptr gs:g_battleXpReward
 	CALL(__32bitDivide)
 
 loc_1F30A:

@@ -19,7 +19,7 @@ bat_charGetNextPriority proc far
 	mov	[bp+slotNumber], 0
 l_loop:
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:bat_charPriority[bx]
+	mov	al, gs:g_battleCharacterPriorities[bx]
 	sub	ah, ah
 	mov	si, ax
 	cmp	[bp+highestPriority], si

@@ -51,7 +51,7 @@ bat_monSwapGroups proc far
 	mov	ax, monStruSize
 	push	ax
 	MONINDEX(ax, STACKVAR(sourceBuffer), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -61,12 +61,12 @@ bat_monSwapGroups proc far
 	mov	ax, monStruSize
 	push	ax
 	MONINDEX(ax, STACKVAR(destinationBuffer), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	MONINDEX(ax, STACKVAR(sourceBuffer), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -76,7 +76,7 @@ bat_monSwapGroups proc far
 	push	ax
 	PUSH_STACK_ADDRESS(tmpBuffer)
 	MONINDEX(ax, STACKVAR(destinationBuffer), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

@@ -1,4 +1,3 @@
-; DWORD - stringBufferP+2 & stringBufferP
 ; Attributes: bp-based frame
 
 bards_learnSong	proc far

@@ -11,7 +11,7 @@ bat_monGetName proc far
 
 	PUSH_STACK_ADDRESS(nameBuffer)
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

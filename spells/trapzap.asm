@@ -39,8 +39,8 @@ l_loop:
 	mov	bx, [bp+sqN]
 	shl	bx, 1
 	shl	bx, 1
-	mov	ax, word ptr gs:rowOffset[bx]
-	mov	dx, word ptr gs:(rowOffset+2)[bx]
+	mov	ax, word ptr gs:g_rowOffset[bx]
+	mov	dx, word ptr gs:(g_rowOffset+2)[bx]
 	mov	cx, [bp+sqE]
 	mov	bx, cx
 	shl	cx, 1

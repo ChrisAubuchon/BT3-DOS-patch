@@ -2,7 +2,7 @@
 
 sub_1156E proc far
 
-	rowOffsetP= dword ptr  6
+	g_rowOffsetP= dword ptr  6
 	sqE= word ptr	 0Ah
 	sqN= word ptr	 0Ch
 	dunWidth= word ptr	 0Eh
@@ -26,7 +26,7 @@ sub_1156E proc far
 	mov	bx, [bp+sqN]
 	shl	bx, 1
 	shl	bx, 1			; bx = sqN * 4
-	lfs	si, [bp+rowOffsetP]	; fs:si = sqN row pointer
+	lfs	si, [bp+g_rowOffsetP]	; fs:si = sqN row pointer
 	lfs	si, fs:[bx+si]		; fs:si = sqN row
 	mov	bx, ax
 	mov	al, fs:[bx+si+2]	; al = flags for (sqN, sqE)

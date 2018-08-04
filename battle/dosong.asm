@@ -65,7 +65,7 @@ loc_1CFA7:
 	jmp	short l_return
 
 l_duotime:
-	mov	gs:songExtraAttack, 1
+	mov	gs:g_songExtraAttackFlag, 1
 	jmp	short l_return
 
 l_overture:

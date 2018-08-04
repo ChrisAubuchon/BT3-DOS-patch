@@ -11,7 +11,7 @@ dunsq_battleCheck proc far
 	mov	[bp+var_2], ax
 	or	ax, ax
 	jz	short loc_24DA7
-	inc	byte_4EECC
+	inc	g_battleNoChest
 
 	; Add code to mask the encounter out
 	mov	ax, 7Fh

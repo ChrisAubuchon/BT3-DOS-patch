@@ -53,10 +53,13 @@ loc_11EBC:
 	CALL(character_hasTypeEquipped)
 	or	ax, ax
 	jnz	short l_return
-	cmp	gs:byte_422A4, 0
+
+	cmp	gs:g_inBattleFlag, 0
 	jz	short loc_11F12
+
 	CALL(bat_endCombatSong)
 	jmp	short l_return
+
 loc_11F12:
 	CALL(endNoncombatSong)
 	jmp	short l_return

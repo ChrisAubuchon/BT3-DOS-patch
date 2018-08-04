@@ -8,7 +8,7 @@ bat_charApplySpecialEffect proc far
 	FUNC_ENTER(2)
 	push	si
 
-	mov	ax, gs:specialAttackVal
+	mov	ax, gs:g_specialAttackValue
 	cmp	ax, 9
 	ja	l_returnZero
 	add	ax, ax

@@ -10,10 +10,10 @@ bat_partyDisbelieves proc far
 	mov	[bp+loopCounter], 3
 l_monsterGroupLoop:
 	MONINDEX(ax, STACKVAR(loopCounter), si)
-	test	gs:monGroups.groupSize[si], 1Fh
+	test	gs:g_monGroups.groupSize[si], 1Fh
 	jz	short l_monsterGroupNext
 
-	test	gs:monGroups.flags[si],	mon_isIllusion
+	test	gs:g_monGroups.flags[si],	mon_isIllusion
 	jz	short l_monsterGroupNext
 
 	mov	gs:bat_curTarget, 0
@@ -29,9 +29,9 @@ l_monsterGroupLoop:
 	jnz	short l_monsterGroupNext
 
 l_doDisbelieve:
-	mov	gs:specialAttackVal, specialAttack_stone
+	mov	gs:g_specialAttackValue, specialAttack_stone
 	MONINDEX(ax, STACKVAR(loopCounter), bx)
-	mov	gs:monGroups.groupSize[bx], 1
+	mov	gs:g_monGroups.groupSize[bx], 1
 	push	[bp+loopCounter]
 	CALL(bat_monDamageHp)
 	PRINTOFFSET(s_thePartyDisbelieves)

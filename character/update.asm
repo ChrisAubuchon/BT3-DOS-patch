@@ -67,7 +67,7 @@ l_songBonusExit:
 	mov	al, gs:party.acBase[bx]
 	sub	ah, ah
 	mov	bx, [bp+slotNumber]
-	mov	dl, gs:byte_42444[bx]
+	mov	dl, gs:g_unusedBattleAcBonus[bx]
 	sub	dh, dh
 	add	ax, dx
 	add	ax, cx

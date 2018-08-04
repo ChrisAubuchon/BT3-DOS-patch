@@ -14,11 +14,11 @@ l_again:
 
 l_loop:
 	MONINDEX(ax, STACKVAR(loopCounter), si)
-	test	gs:monGroups.groupSize[si], 1Fh
+	test	gs:g_monGroups.groupSize[si], 1Fh
 	jz	short l_next
-	mov	al, gs:monGroups.distance[si]-monStruSize
+	mov	al, gs:g_monGroups.distance[si]-monStruSize
 	and	al, 0Fh
-	mov	cl, gs:monGroups.distance[si]
+	mov	cl, gs:g_monGroups.distance[si]
 	and	cl, 0Fh
 	cmp	al, cl
 	jbe	short l_next

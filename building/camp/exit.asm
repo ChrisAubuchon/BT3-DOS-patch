@@ -15,7 +15,7 @@ camp_exit	proc far
 	mov	g_currentHour, 6
 	sub	al, al
 	mov	g_levelNumber, al
-	mov	gs:isNight, al
+	mov	gs:g_isNightFlag, al
 	mov	g_mapRval, 2
 
 	FUNC_EXIT

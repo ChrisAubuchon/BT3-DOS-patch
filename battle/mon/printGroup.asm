@@ -16,7 +16,7 @@ bat_monPrintGroup proc far
 	FUNC_ENTER(16h)
 
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+groupSize], ax
@@ -34,7 +34,7 @@ bat_monPrintGroup proc far
 	mov	byte ptr fs:[bx], ' '
 	PUSH_STACK_ADDRESS(unmaskedString)
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -55,7 +55,7 @@ bat_monPrintGroup proc far
 	mov	ax, 2
 	push	ax
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	mov	al, gs:monGroups.distance[bx]
+	mov	al, gs:g_monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
 	sub	dx, dx

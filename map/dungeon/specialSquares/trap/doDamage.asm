@@ -19,7 +19,7 @@ trap_doDamage proc far
 	mov	bx, gs:g_trapIndex
 	mov	al, trapSpecialAttackValue[bx]
 	and	ax, 7Fh
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 	mov	ax, [bp+arg_2]
 	mov	gs:g_damageAmount, ax
 	sub	ax, ax

@@ -13,7 +13,7 @@ bat_monKill proc far
 	mov	[bp+loopCounter], ax
 l_loop:
 	MONINDEX(ax, STACKVAR(groupNumber), bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
 	cmp	ax, [bp+loopCounter]
@@ -33,26 +33,26 @@ l_loop:
 
 l_decrementGroupSize:
 	MONINDEX(ax, STACKVAR(groupNumber), si)
-	dec	gs:monGroups.groupSize[si]
-	test	gs:monGroups.groupSize[si], 1Fh
+	dec	gs:g_monGroups.groupSize[si]
+	test	gs:g_monGroups.groupSize[si], 1Fh
 	jnz	short l_updateReward
-	and	gs:monGroups.flags[si],	0FEh
+	and	gs:g_monGroups.flags[si],	0FEh
 
 l_updateReward:
 	MONINDEX(ax, STACKVAR(groupNumber), si)
-	mov	ah, gs:monGroups.rewardMid[si]
+	mov	ah, gs:g_monGroups.rewardMid[si]
 	sub	al, al
-	mov	dl, gs:monGroups.rewardHi[si]
+	mov	dl, gs:g_monGroups.rewardHi[si]
 	sub	dh, dh
 	mov	cl, 10h
 	shl	dx, cl
 	add	ax, dx
-	mov	cl, gs:monGroups.rewardLo[si]
+	mov	cl, gs:g_monGroups.rewardLo[si]
 	sub	ch, ch
 	add	ax, cx
 	sub	dx, dx
-	add	gs:batRewardLo,	ax
-	adc	gs:batRewardHi,	dx
+	add	word ptr gs:g_battleXpReward, ax
+	adc	word ptr gs:g_battleXpReward+2, dx
 
 	pop	si
 	FUNC_EXIT

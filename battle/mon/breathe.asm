@@ -41,7 +41,7 @@ l_loop:
 	jl	short l_loop
 
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	mov	al, gs:monGroups.breathFlag[bx]
+	mov	al, gs:g_monGroups.breathFlag[bx]
 	mov	[bp+var_10C], al
 	sub	ah, ah
 	xor	al, 0Ah
@@ -60,7 +60,7 @@ l_loop:
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	mov	al, gs:monGroups.breathRange[bx]
+	mov	al, gs:g_monGroups.breathRange[bx]
 	sub	ah, ah
 	push	ax
 	sub	sp, 8

@@ -51,13 +51,13 @@ l_setBonusIfZero:
 	jmp	l_return
 
 l_duotime:
-	mov	gs:songRegenSppt, 1
+	mov	gs:g_songRegenerateSppt, 1
 	jmp	l_return
 
 l_watchwood:
 	mov	lightDistance, 5
 	mov	lightDuration, 0FFh
-	mov	gs:gl_detectSecretDoorFlag, 0FFh
+	mov	gs:g_detectSecretDoorFlag, 0FFh
 	sub	ax, ax
 	push	ax
 	CALL(icon_activate)

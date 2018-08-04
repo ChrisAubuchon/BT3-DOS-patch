@@ -27,7 +27,7 @@ restoreGame proc far
 	push	[bp+fd]
 	CALL(read)
 
-	mov	ax, offset byte_4EECC
+	mov	ax, offset g_battleNoChest
 	mov	cx, offset g_locationNumber
 	mov	bx, seg	dseg
 	sub	ax, cx
@@ -56,16 +56,16 @@ l_doNotActivate:
 	jl	l_durationSpellLoopEntry
 
 	cmp	g_currentHour, 6
-	jb	short l_isNight
+	jb	short l_g_isNightFlag
 	cmp	g_currentHour, 12h
 	jbe	short l_isDay
-l_isNight:
+l_g_isNightFlag:
 	mov	al, 1
 	jmp	short l_setIsNight
 l_isDay:
 	sub	al, al
 l_setIsNight:
-	mov	gs:isNight, al
+	mov	gs:g_isNightFlag, al
 	mov	byte ptr g_printPartyFlag,	0
 l_return:
 	FUNC_EXIT

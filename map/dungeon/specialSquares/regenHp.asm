@@ -2,7 +2,7 @@
 
 dunsq_regenHP proc far
 	FUNC_ENTER
-	inc	gs:sqRegenHPFlag
+	inc	gs:g_squareHpRegenFlag
 	FUNC_EXIT
 	retf
 dunsq_regenHP endp

@@ -1,11 +1,8 @@
 ; Attributes: bp-based frame
-;
-; DWORD var_102 & 104
 
 mfunc_printOffset proc far
 
-	var_104= word ptr -104h
-	var_102= word ptr -102h
+	var_104= dword ptr -104h
 	stringBuffer= word ptr -100h
 	dataP= dword ptr	 6
 
@@ -14,12 +11,10 @@ mfunc_printOffset proc far
 	push	word ptr [bp+dataP+2]
 	push	word ptr [bp+dataP]
 	CALL(map_getDataOffsetP)
-	mov	[bp+var_104], ax
-	mov	[bp+var_102], dx
+	SAVE_STACK_DWORD(dx,ax,var_104)
 	add	[bp+dataP], 2
 	PUSH_STACK_ADDRESS(stringBuffer)
-	push	dx
-	push	[bp+var_104]
+	PUSH_STACK_DWORD(var_104)
 	CALL(_mfunc_getString)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING

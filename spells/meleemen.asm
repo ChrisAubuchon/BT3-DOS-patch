@@ -1,7 +1,5 @@
 ; Attributes: bp-based frame
 
-; DWORD - stringBufferP+2 & stringBufferP
-
 sp_meleeMen proc far
 
 	stringBuffer=	word ptr -56h

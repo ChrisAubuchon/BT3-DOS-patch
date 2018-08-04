@@ -13,18 +13,20 @@ gfx_animate proc far
 	cmp	gs:g_hideMouseInBigpicFlag, 0
 	jz	short loc_17A34
 
-	mov	ax, gs:word_4245A
-	inc	gs:word_4245A
+	; Only increment the cel number every 3 iterations
+	;
+	mov	ax, gs:g_bigpicCelTimer
+	inc	gs:g_bigpicCelTimer
 	test	al, 3
 	jnz	short loc_17A34
 
-	inc	gs:bigpicCellNumber
-	and	gs:bigpicCellNumber, 3
+	inc	gs:g_bigpicAnimationCelNumber
+	and	gs:g_bigpicAnimationCelNumber, 3
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	mov	al, gs:bigpicCellNumber
+	mov	al, gs:g_bigpicAnimationCelNumber
 	sub	ah, ah
 	mov	cx, 1340h
 	mul	cx
@@ -34,27 +36,29 @@ gfx_animate proc far
 	push	ax
 	call	far ptr	vid_drawBigpic
 	add	sp, 8
-	jmp	short loc_17A9C
+	jmp	short l_drawSpellIcons
 
 loc_17A34:
-	cmp	gs:word_42560, 0
-	jz	short loc_17A9C
+	cmp	gs:g_bigpicLongerCelDelay, 0
+	jz	short l_drawSpellIcons
 
-	mov	ax, gs:word_4245A
-	inc	gs:word_4245A
+	mov	ax, gs:g_bigpicCelTimer
+	inc	gs:g_bigpicCelTimer
 	test	al, 7
-	jnz	short loc_17A9C
-	inc	gs:bigpicCellNumber
-	cmp	gs:bigpicCellNumber, 3
+	jnz	short l_drawSpellIcons
+
+	inc	gs:g_bigpicAnimationCelNumber
+	cmp	gs:g_bigpicAnimationCelNumber, 3
 	jnz	short loc_17A6D
-	mov	gs:word_42560, 0
+
+	mov	gs:g_bigpicLongerCelDelay, 0
 
 loc_17A6D:
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021
 	push	dx
 	push	ax
-	mov	al, gs:bigpicCellNumber
+	mov	al, gs:g_bigpicAnimationCelNumber
 	sub	ah, ah
 	mov	cx, 1340h
 	mul	cx
@@ -65,12 +69,12 @@ loc_17A6D:
 	call	far ptr	vid_drawBigpic
 	add	sp, 8
 
-loc_17A9C:
+l_drawSpellIcons:
 	mov	[bp+iconNumber], 0
-loc_17AA3:
+l_drawIconLoop:
 	mov	bx, [bp+iconNumber]
 	cmp	lightDuration[bx], 0
-	jz	short l_increment
+	jz	short l_drawIconNext
 
 	; Only draw the icon if the current cell is different than
 	; the last drawn cell
@@ -78,7 +82,7 @@ loc_17AA3:
 	mov	si, bx
 	mov	al, g_iconLastDrawnCell[si]
 	cmp	g_iconCurrentCell[bx],	al
-	jz	short loc_17AE0
+	jz	short l_skipDrawIcon
 	mov	al, g_iconCurrentCell[si]
 	mov	g_iconLastDrawnCell[bx],	al
 	mov	bx, [bp+iconNumber]
@@ -88,15 +92,15 @@ loc_17AA3:
 	push	bx
 	CALL(icon_draw, near)
 
-loc_17AE0:
+l_skipDrawIcon:
 	mov	bx, [bp+iconNumber]
 	cmp	g_iconAnimationDelay[bx], 0
-	jz	short l_increment
+	jz	short l_drawIconNext
 
 	mov	al, g_iconCurrentDelay[bx]
 	dec	g_iconCurrentDelay[bx]
 	cmp	al, 1
-	jnz	short l_increment
+	jnz	short l_drawIconNext
 
 	mov	bx, [bp+iconNumber]
 	mov	si, bx
@@ -108,13 +112,13 @@ loc_17AE0:
 	mov	al, g_iconCurrentCell[bx]
 	mov	bx, [bp+iconNumber]
 	cmp	al, g_iconClearIndex[bx]
-	jnz	short l_increment
+	jnz	short l_drawIconNext
 	mov	g_iconCurrentCell[bx],	0
 
-l_increment:
+l_drawIconNext:
 	inc	[bp+iconNumber]
 	cmp	[bp+iconNumber], 5
-	jl	short loc_17AA3
+	jl	short l_drawIconLoop
 
 l_return:
 	pop	si

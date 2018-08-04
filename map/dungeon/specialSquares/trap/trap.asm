@@ -58,9 +58,9 @@ loc_24DCB:
 	mov	si, gs:g_trapIndex
 	shl	si, 1
 	mov	al, g_trapSaveList._low[si]
-	mov	gs:monGroups.breathSaveLo, al
+	mov	gs:g_monGroups.breathSaveLo, al
 	mov	al, g_trapSaveList._high[si]
-	mov	gs:monGroups.breathSaveHi, al
+	mov	gs:g_monGroups.breathSaveHi, al
 
 	mov	[bp+loopCounter], 0
 loc_24E97:

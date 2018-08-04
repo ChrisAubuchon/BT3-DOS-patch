@@ -19,7 +19,7 @@ loc_2600B:
 	push	ds
 	push	ax
 	MONINDEX(ax, STACKVAR(groupCounter), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

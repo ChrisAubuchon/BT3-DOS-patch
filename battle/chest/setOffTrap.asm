@@ -36,9 +36,9 @@ chest_setOffTrap proc far
 	mov	si, gs:g_trapIndex
 	shl	si, 1
 	mov	al, byte ptr g_chestTrapSaveData.lo[si]
-	mov	gs:monGroups.breathSaveLo, al
+	mov	gs:g_monGroups.breathSaveLo, al
 	mov	al, g_chestTrapSaveData.hi[si]
-	mov	gs:monGroups.breathSaveHi, al
+	mov	gs:g_monGroups.breathSaveHi, al
 	mov	bx, gs:g_trapIndex
 	test	g_chestTrapFlags[bx], 80h
 	jz	short l_affectWholeParty

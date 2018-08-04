@@ -13,7 +13,7 @@ summon_newMonGroup proc far
 	push	ds
 	push	ax
 	MONINDEX(ax, STACKVAR(arg_2), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -25,7 +25,7 @@ summon_newMonGroup proc far
 	push	ds
 	push	ax
 	MONINDEX(ax, STACKVAR(arg_2), bx)
-	lea	ax, monGroups.hpDice[bx]
+	lea	ax, g_monGroups.hpDice[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -33,7 +33,7 @@ summon_newMonGroup proc far
 
 	; FIXED: Set the group size to 0. 
 	MONINDEX(ax, STACKVAR(arg_2), bx)
-	mov	monGroups.groupSize[bx], 0
+	mov	g_monGroups.groupSize[bx], 0
 
 	FUNC_EXIT
 	retf

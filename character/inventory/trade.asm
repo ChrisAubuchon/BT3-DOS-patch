@@ -1,15 +1,12 @@
 ; Attributes: bp-based frame
 ;
-; DWORD - var_42 & var_44
-;
 inventory_trade proc	far
 
 	tradeeSlotNumber=	word ptr -4Ch
 	var_4C=	word ptr -4Ah
 	var_4A=	word ptr -48h
 	var_46=	word ptr -46h
-	var_44=	word ptr -44h
-	var_42=	word ptr -42h
+	stringBufferP=	dword ptr -44h
 	stringBuffer=	word ptr -40h
 	slotNumber= word ptr	 6
 	inventorySlotNumber= word ptr	 8
@@ -18,25 +15,17 @@ inventory_trade proc	far
 
 	PUSH_OFFSET(s_whoDoes)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_44], ax
-	mov	[bp+var_42], dx
+	STRCAT(stringBufferP)
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	[bp+var_42]
-	push	[bp+var_44]
-	STRCAT
-	mov	[bp+var_44], ax
-	mov	[bp+var_42], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_wantToGiveItTo)
-	push	dx
-	push	[bp+var_44]
-	STRCAT
-	mov	[bp+var_44], ax
-	mov	[bp+var_42], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	CALL(readSlotNumber)

@@ -24,15 +24,15 @@ l_notIllusion:
 	cmp	[bp+loopCounter], 7
 	jl	short l_loopEnter
 
-	cmp	gs:byte_422A4, 0
+	cmp	gs:g_inBattleFlag, 0
 	jz	short l_return
 
 	mov	al, 20
 	mov	gs:g_divineDamageBonus, al
 	mov	gs:g_charFreezeToHitBonus, al
-	mov	gs:antiMagicFlag, al
+	mov	gs:g_spellAntiMagicValue, al
 	mov	gs:partySpellAcBonus, al
-	mov	gs:songExtraAttack, 8
+	mov	gs:g_songExtraAttackFlag, 8
 	mov	gs:bat_curTarget, 80h
 	mov	ax, BITMASK(spell_mangarsMallet, 80h)
 	push	ax

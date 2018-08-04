@@ -54,9 +54,9 @@ l_selectMonsterRetry:
 	PUSH_STACK_ADDRESS(pluralizedName)
 	CALL(setTitle)
 
-	mov	gs:monGroups.groupSize,	1
+	mov	gs:g_monGroups.groupSize,	1
 	mov	al, byte ptr [bp+monsterIndex]
-	mov	byte ptr gs:monGroups._name, al
+	mov	byte ptr gs:g_monGroups._name, al
 
 	mov	[bp+loopCounter], 0
 l_setOptionListLoop:

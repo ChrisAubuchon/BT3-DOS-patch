@@ -6,6 +6,9 @@ word_4414E	dw 0FFh
 g_printPartyFlag	dw 1
 g_soundActiveFlag	dw 1
 randomSeed	dw 0
+
+; Save game writes from g_locationNumber to word_4EECC
+;
 g_locationNumber dw	0
 dunLevelIndex	dw 0
 g_dunLevelNum	dw 0
@@ -16,16 +19,7 @@ inDungeonMaybe	dw 0
 g_mapRval dw 0
 g_sameSquareFlag	dw 0
 g_curSpellNumber	dw 0
-g_gameProgressFlags	db 7 dup(0)     ; 0
-byte_4EE71	db 0
-		db    0
-		db    0
-		db    0
-		db    0
-		db    0
-		db    0
-		db    0
-		db    0
+g_gameProgressFlags	db 16 dup(0)     ; 0
 g_vm_registers	dw 20h dup(0)	    ; 0
 g_currentHour	db 0
 lightDistance	db 0
@@ -43,13 +37,16 @@ g_dunHeight	db 0
 g_monsterGroupCount	db 0
 g_partyAttackFlag	db 0
 shieldAcBonus	db 0
-byte_4EECC	db 0
+g_battleNoChest	db 0
+; End save game data
+;
+
 include(`data/text/minimapCharacters.asm')
 s_faster		db 0Ah,'<Faster...>',0Ah,0
 s_slower		db 0Ah,'<Slower...>',0Ah,0
 txtDelayTable	db 1, 4, 7, 0Bh, 0Eh, 11h, 14h, 17h, 1Ah, 1Dh
 txtDelayIndex	db 7
-g_tockClicks	dw 0
+g_clockTicks	dw 0
 g_totalClockTicks	dw 0
 g_mousePresentFlag1	db 0		; 1 when a mouse is detected
 g_mouseButtonDownFlag	db 0		; When 0, register the next mouse button press

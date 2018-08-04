@@ -13,7 +13,7 @@ bat_setOpponents proc far
 	push	si
 
 	CALL(bat_reset, near)
-	mov	gs:byte_422A4, 1
+	mov	gs:g_inBattleFlag, 1
 
 	cmp	gs:bat_curSong,	0
 	jz	short l_skipSongConversion
@@ -56,14 +56,14 @@ l_setGroupLoop:
 	jz	short l_selectRandomMonsterGroup
 
 	MONINDEX(ax, STACKVAR(currentGroupIndex), si)
-	mov	al, byte ptr gs:monGroups._name[si]	; Monster type index is stored in the
+	mov	al, byte ptr gs:g_monGroups._name[si]	; Monster type index is stored in the
 	sub	ah, ah					; first byte of the _name field for
 	mov	[bp+monsterTypeIndex], ax		; hardcoded encounters
 	MONINDEX(ax, STACKVAR(monsterTypeIndex))
 	add	ax, offset monsterBuf
 	mov	word ptr [bp+monsterDataP], ax
 	mov	word ptr [bp+monsterDataP+2], seg seg023
-	mov	al, gs:monGroups.groupSize[si]
+	mov	al, gs:g_monGroups.groupSize[si]
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+currentGroupSize], ax
@@ -116,7 +116,7 @@ l_setGroupSize:
 
 l_copyMonsterData:
 	MONINDEX(ax, STACKVAR(currentGroupIndex), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -127,16 +127,16 @@ l_copyMonsterData:
 	or	al, byte ptr [bp+currentGroupSize]
 	mov	cx, ax
 	MONINDEX(ax, STACKVAR(currentGroupIndex), bx)
-	mov	gs:monGroups.groupSize[bx], cl
+	mov	gs:g_monGroups.groupSize[bx], cl
 
 	mov	[bp+currentMonsterIndex], 0
 l_setGroupHpLoop:
 	MONINDEX(ax, STACKVAR(currentGroupIndex), si)
-	mov	al, gs:monGroups.hpDice[si]
+	mov	al, gs:g_monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
 	CALL(randomYdX, near)
-	mov	cx, gs:monGroups.hpBase[si]
+	mov	cx, gs:g_monGroups.hpBase[si]
 	add	cx, ax
 	mov	bx, [bp+currentGroupIndex]
 	mov	ax, cx

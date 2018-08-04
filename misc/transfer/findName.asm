@@ -1,5 +1,3 @@
-; DWORD - arg_0 & arg_2, arg_4 & arg_6
-;
 ; Only used when attempting to transfer a party. Since a party
 ; definition can have names that don't exist in the thieves.inf
 ; file, this function searches the thieves.inf for the given
@@ -10,22 +8,19 @@
 transfer_findName proc far
 
 	var_2= word ptr	-2
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
-	arg_4= word ptr	 0Ah
-	arg_6= word ptr	 0Ch
+	arg_0= dword ptr  6
+	arg_4= dword ptr  0Ah
 
 	FUNC_ENTER(2)
 	mov	[bp+var_2], 0
 
 l_loop:
 	CHARINDEX(ax, STACKVAR(var_2))
-	add	ax, [bp+arg_4]
-	mov	dx, [bp+arg_6]
+	add	ax, word ptr [bp+arg_4]
+	mov	dx, word ptr [bp+arg_4+2]
 	push	dx
 	push	ax
-	push	[bp+arg_2]
-	push	[bp+arg_0]
+	PUSH_STACK_DWORD(arg_0)
 	CALL(strcmp)
 	or	ax, ax
 	jz	short l_returnValue

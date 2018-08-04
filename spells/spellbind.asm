@@ -43,14 +43,14 @@ l_monTarget:
 	mov	cx, 30h	
 	mul	cx
 	mov	si, ax
-	test	gs:monGroups.groupSize[si], 1Fh
+	test	gs:g_monGroups.groupSize[si], 1Fh
 	jz	short l_printNoEffect
 
-	test	gs:monGroups.flags[si],	10h
+	test	gs:g_monGroups.flags[si],	10h
 	jz	short l_printNoEffect
 
-	dec	gs:monGroups.groupSize[si]
-	lea	ax, monGroups._name[si]
+	dec	gs:g_monGroups.groupSize[si]
+	lea	ax, g_monGroups._name[si]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

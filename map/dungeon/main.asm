@@ -76,8 +76,8 @@ l_skipDeltaSQEN:
 	mov	ax, bx
 	mov	dx, word ptr [bp+levP+2]
 	add	ax, 24h	
-	mov	gs:mapDataOff, ax
-	mov	gs:mapDataSeg, dx
+	mov	word ptr gs:g_mapData, ax
+	mov	word ptr gs:g_mapData+2, dx
 	mov	[bp+var_C], 0
 	mov	dl, g_dunHeight
 	sub	dh, dh
@@ -87,9 +87,9 @@ l_popRowLoop_enter:
 	jbe	short l_popRowLoop_exit
 	mov	ax, [bp+var_C]
 	shl	ax, 1
-	add	ax, gs:mapDataOff
+	add	ax, word ptr gs:g_mapData
 	mov	word ptr [bp+var_26], ax
-	mov	ax, gs:mapDataSeg
+	mov	ax, word ptr gs:g_mapData+2
 	mov	word ptr [bp+var_26+2],	ax
 	lfs	bx, [bp+var_26]
 	mov	ah, fs:[bx+1]
@@ -101,8 +101,8 @@ l_popRowLoop_enter:
 	mov	bx, [bp+var_C]
 	shl	bx, 1
 	shl	bx, 1
-	mov	word ptr gs:rowOffset[bx], ax
-	mov	word ptr gs:(rowOffset+2)[bx], seg seg022
+	mov	word ptr gs:g_rowOffset[bx], ax
+	mov	word ptr gs:(g_rowOffset+2)[bx], seg seg022
 	inc	[bp+var_C]
 	jmp	short l_popRowLoop_enter
 
@@ -110,8 +110,8 @@ l_popRowLoop_exit::
 	mov	ax, word ptr [bp+levP]
 	mov	dx, word ptr [bp+levP+2]
 	add	ax, 22h	
-	mov	gs:mapDataOff, ax
-	mov	gs:mapDataSeg, dx
+	mov	word ptr gs:g_mapData, ax
+	mov	word ptr gs:g_mapData+2, dx
 
 l_wander_check:
 	CALL(random)
@@ -123,14 +123,14 @@ l_battleCheck:
 	cmp	g_partyAttackFlag, 0
 	jnz	short l_doBattle
 
-	cmp	byte_4EECC, 0
+	cmp	g_battleNoChest, 0
 	jnz	short l_doBattle
 
 	CALL(random)
 	test	al, 3Fh
 	jnz	short loc_107BE
 
-	cmp	gs:byte_42296, 0FFh
+	cmp	gs:g_noPauseFlag, 0FFh
 	jz	short loc_107BE
 
 	cmp	gs:songAntiMonster, 0
@@ -146,7 +146,7 @@ loc_107BE:
 	push	g_sqNorth
 	push	g_sqEast
 	push	seg027_x
-	push	offset rowOffset
+	push	offset g_rowOffset
 	CALL(dun_doSpecialSquare)
 
 	push	seg023_x
@@ -165,7 +165,7 @@ loc_107BE:
 	push	g_sqNorth
 	push	g_sqEast
 	push	seg027_x
-	push	offset rowOffset
+	push	offset g_rowOffset
 	CALL(dun_markDiscoveredSquares)
 
 	push	g_direction
@@ -178,8 +178,8 @@ loc_107BE:
 
 	sub	ax, ax
 	push	ax
-	push	gs:mapDataSeg
-	push	gs:mapDataOff
+	push	word ptr gs:g_mapData+2
+	push	word ptr gs:g_mapData
 	CALL(vm_execute)
 
 l_ioLoop:
@@ -247,7 +247,7 @@ l_checkMinimapKey:
 	push	g_sqNorth
 	push	g_sqEast
 	push	seg027_x
-	push	offset rowOffset
+	push	offset g_rowOffset
 	CALL(minimap_show)
 	jmp	l_checkMapValue
 
@@ -309,7 +309,7 @@ l_moveForward:
 	push	[bp+var_A]
 	CALL(wrapNumber)
 	mov	g_sqEast, ax
-	mov	gs:wallIsPhased, 0
+	mov	gs:g_wallPhasedFlag, 0
 	jmp	l_checkMapValue
 
 l_checkLeftArrowKey:
@@ -334,7 +334,7 @@ l_incDirFacing:
 	add	ax, bx
 	and	ax, 3
 	mov	g_direction, ax
-	mov	gs:wallIsPhased, 0
+	mov	gs:g_wallPhasedFlag, 0
 	CALL(text_clear)
 
 l_checkMapValue:

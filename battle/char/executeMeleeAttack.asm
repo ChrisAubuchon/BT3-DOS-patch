@@ -66,7 +66,7 @@ l_monsterTarget:
 	and	ax, 3
 	mov	[bp+monsterTargetGroup], ax
 	MONINDEX(ax, STACKVAR(monsterTargetGroup), ax)
-	mov	al, gs:monGroups.distance[bx]
+	mov	al, gs:g_monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
 	mov	[bp+targetGroupDistance], ax			; if targetGroupDistance == 0
@@ -83,12 +83,12 @@ l_monsterTarget:
 
 l_inMeleeRange:
 	MONINDEX(ax, STACKVAR(monsterTargetGroup), si)
-	mov	al, gs:monGroups.packedGenAc[si]
+	mov	al, gs:g_monGroups.packedGenAc[si]
 	sub	ah, ah
 	and	ax, 3Fh
 	mov	[bp+targetAc], ax				; targetAc = monsterType.Ac
 
-	mov	al, gs:monGroups.flags[si]			; Apply a bonus/penalty to the
+	mov	al, gs:g_monGroups.flags[si]			; Apply a bonus/penalty to the
 	sub	ah, ah						; targetAc based on the monster
 	mov	cl, 6						; flags.
 	shr	ax, cl						;
@@ -98,7 +98,7 @@ l_inMeleeRange:
 	cbw
 	add	[bp+targetAc], ax				; targetAc += AcBonus
 
-	mov	al, gs:monGroups.distance[si]			; Apply a bonus/penalty to the
+	mov	al, gs:g_monGroups.distance[si]			; Apply a bonus/penalty to the
 	sub	ah, ah						; targetAc based on the monster's
 	mov	cl, 4						; advance speed.
 	shr	ax, cl						;
@@ -126,7 +126,7 @@ l_getSourceAttackValue:
 	sub	ah, ah						; e.g. stoning, criticial hit
 	mov	cl, 4
 	shr	ax, cl
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 
 	mov	al, item_acBonWeapDam[bx]			; Some weapons provide an to-hit bonus
 	sub	ah, ah						; to the attacker. Deduct the bonus amount
@@ -137,7 +137,7 @@ l_getSourceAttackValue:
 
 l_noWeaponEquipped:
 	mov	[bp+weaponBonusDamage], 0
-	mov	gs:specialAttackVal, 0
+	mov	gs:g_specialAttackValue, 0
 
 loc_1DFC8:
 	mov	al, gs:g_monsterWOFBonus			; Add bonus from monsters casting
@@ -215,7 +215,7 @@ l_applyToHitBonuses:
 	jb	short l_calcCharacterDamage
 
 	mov	ax, gs:summonMeleeType
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 	mov	ax, gs:summonMeleeDamage
 	mov	[bp+damageDice], ax
 	jmp	short l_hiddenRogueOneAttack
@@ -269,7 +269,7 @@ l_notRogue:
 
 l_countAttackNumber:
 	mov	[bp+loopCounter], ax
-	mov	al, gs:songExtraAttack
+	mov	al, gs:g_songExtraAttackFlag
 	sub	ah, ah
 	add	[bp+loopCounter], ax
 	inc	[bp+loopCounter]
@@ -293,7 +293,7 @@ l_calculateDamageLoop:
 	mov	[bp+vorpalLoopCounter], 0
 l_addVorpalPlateBonus:
 	mov	bx, [bp+slotNumber]
-	mov	al, gs:vorpalPlateBonus[bx]
+	mov	al, gs:g_vorpalPlateBonus[bx]
 	sub	ah, ah
 	cmp	ax, [bp+vorpalLoopCounter]
 	jbe	short l_calculateDamageNext
@@ -324,7 +324,7 @@ l_calculateDamageNext:
 l_failHiddenCrit:
 	sub	ax, ax
 l_saveHiddenCrit:
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 	jmp	short l_returnSuccess
 
 l_checkHunterCrit:
@@ -342,7 +342,7 @@ l_zeroSpecialAttack:
 	sub	ax, ax
 
 l_setSpecialAttack:
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 
 l_returnSuccess:
 	mov	ax, [bp+numberOfAttacks]

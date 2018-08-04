@@ -15,7 +15,7 @@ bat_charIsAttackable proc far
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	cmp	gs:party.class[bx], class_illusion
 	jnz	short l_notIllusion
-	cmp	gs:monDisbelieveFlag, 0
+	cmp	gs:g_monsterDisbelieveFlag, 0
 	jz	l_returnZero
 
 l_notIllusion:

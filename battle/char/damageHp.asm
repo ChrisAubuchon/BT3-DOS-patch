@@ -14,7 +14,7 @@ bat_charDamageHp proc far
 	test	gs:party.status[si], stat_dead
 	jz	short loc_1E5FA
 
-	cmp	gs:specialAttackVal, specialAttack_possess
+	cmp	gs:g_specialAttackValue, specialAttack_possess
 	jnz	l_returnZero
 
 	push	[bp+slotNumber]

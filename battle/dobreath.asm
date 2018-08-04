@@ -123,7 +123,7 @@ l_targetIsEnemy:
 	mov	cx, monStruSize
 	mul	cx
 	mov	bx, ax
-	test	gs:monGroups.groupSize[bx], 1Fh
+	test	gs:g_monGroups.groupSize[bx], 1Fh
 	jz	l_enemyGroupGone
 loc_20289:
 	test	[bp+breathFlags], breath_oneGroup
@@ -133,7 +133,7 @@ loc_20289:
 	and	ax, 3
 	mul	cx
 	mov	bx, ax
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
 	dec	ax
@@ -269,7 +269,7 @@ loc_204B0:
 	mov	cx, monStruSize
 	mul	cx
 	mov	bx, ax
-	mov	al, gs:monGroups.repelFlags[bx]
+	mov	al, gs:g_monGroups.repelFlags[bx]
 	sub	ah, ah
 loc_204CF:
 	mov	[bp+var_10C], ax
@@ -295,7 +295,7 @@ loc_2050C:
 	cmp	ax, 2
 	jnz	short loc_2053B
 
-	mov	gs:byte_41E63, 4
+	mov	gs:g_diminishingEffectSaveBonus, 4
 loc_2053B:
 	mov	al, [bp+breathFlags]
 	sub	ah, ah
@@ -335,7 +335,7 @@ loc_205B0:
 	mov	cx, monStruSize
 	mul	cx
 	mov	bx, ax
-	mov	al, gs:monGroups.strongElement[bx]
+	mov	al, gs:g_monGroups.strongElement[bx]
 	sub	ah, ah
 loc_205CF:
 	mov	[bp+var_108], ax
@@ -372,7 +372,7 @@ loc_20631:
 	mov	cx, monStruSize
 	mul	cx
 	mov	bx, ax
-	mov	al, gs:monGroups.weakElement[bx]
+	mov	al, gs:g_monGroups.weakElement[bx]
 	sub	ah, ah
 loc_20650:
 	mov	[bp+var_6], ax
@@ -435,7 +435,7 @@ loc_206A1:
 	PLURALIZE(outputStringP)
 	mov	al, [bp+specialAttackIndex]
 	sub	ah, ah
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 	mov	al, gs:bat_curTarget
 	push	ax
 	CALL(bat_damageHp)

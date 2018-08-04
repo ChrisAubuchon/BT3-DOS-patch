@@ -32,7 +32,7 @@ l_enemyTarget:
 	and	ax, 3
 	MONINDEX(cx, cx)
 	mov	bx, ax
-	test	gs:monGroups.groupSize[bx], 1Fh
+	test	gs:g_monGroups.groupSize[bx], 1Fh
 	jz	l_return
 
 loc_1BF3E:

@@ -22,7 +22,7 @@ sp_wordOfFear proc far
 	and	si, 3
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, g_spellEffectData[bx]
-	add	gs:monSpellToHitPenalty[si], al
+	add	gs:g_monsterSpellToHitPenalty[si], al
 	mov	bx, [bp+spellIndexNumber]
 
 	; byte_41E50 isn't used anywhere else

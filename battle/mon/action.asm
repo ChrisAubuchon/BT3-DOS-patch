@@ -23,10 +23,10 @@ bat_monAction	proc far
 	mov	[bp+var_6], ax
 	MONINDEX(ax, STACKVAR(monsterNumber), si)
 	add	si, [bp+var_6]
-	mov	al, gs:monGroups.attackType._type[si]
+	mov	al, gs:g_monGroups.attackType._type[si]
 	sub	ah, ah
 	mov	[bp+var_2], ax
-	mov	al, gs:monGroups.attackType.damage[si]
+	mov	al, gs:g_monGroups.attackType.damage[si]
 	mov	[bp+var_4], ax
 	cmp	[bp+var_2], 80h
 	jge	short l_checkMelee

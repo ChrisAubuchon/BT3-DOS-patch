@@ -1,11 +1,8 @@
-; DWORD - var_4 & var_6
-
 ; Attributes: bp-based frame
 
 doPoolGold proc	far
 
-	var_6= word ptr	-6
-	var_4= word ptr	-4
+	var_6= dword ptr	-6
 	loopCounter= word ptr	-2
 	poolTarget= word ptr	 6
 	lastSlot= word ptr	 8
@@ -14,8 +11,8 @@ doPoolGold proc	far
 	push	si
 
 	sub	ax, ax
-	mov	[bp+var_4], ax
-	mov	[bp+var_6], ax
+	mov	word ptr [bp+var_6+2], ax
+	mov	word ptr [bp+var_6], ax
 	mov	[bp+loopCounter], ax
 
 l_loopEntry:
@@ -29,8 +26,8 @@ l_loopEntry:
 
 	mov	ax, word ptr gs:party.gold[si]
 	mov	dx, word ptr gs:(party.gold+2)[si]
-	add	[bp+var_6], ax
-	adc	[bp+var_4], dx
+	add	word ptr [bp+var_6], ax
+	adc	word ptr [bp+var_6+2], dx
 	sub	ax, ax
 	mov	word ptr gs:(party.gold+2)[si], ax
 	mov	word ptr gs:party.gold[si], ax
@@ -39,8 +36,8 @@ l_loopIncrement:
 	jmp	short l_loopEntry
 
 l_giveGold:
-	mov	ax, [bp+var_6]
-	mov	dx, [bp+var_4]
+	mov	ax, word ptr [bp+var_6]
+	mov	dx, word ptr [bp+var_6+2]
 	mov	cx, ax
 	mov	bx, dx
 	CHARINDEX(ax, STACKVAR(poolTarget), si)

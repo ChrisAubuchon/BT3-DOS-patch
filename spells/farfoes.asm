@@ -20,7 +20,7 @@ sp_farFoes proc	far
 	mov	[bp+loopCounter], 0
 l_loopEnter:
 	MONINDEX(ax, STACKVAR(loopCounter), bx)
-	mov	al, gs:monGroups.distance[bx]
+	mov	al, gs:g_monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
 	mov	bx, [bp+spellIndexNumber]
@@ -45,7 +45,7 @@ l_monCaster:
 	and	ax, 3
 	mov	[bp+loopCounter], ax
 	MONINDEX(ax, STACKVAR(loopCounter), bx)
-	mov	al, gs:monGroups.distance[bx]
+	mov	al, gs:g_monGroups.distance[bx]
 	sub	ah, ah
 	and	ax, 0Fh
 	mov	bx, [bp+spellIndexNumber]
@@ -88,12 +88,12 @@ _sp_setMonDistance proc	far
 	push	si
 
 	MONINDEX(ax, STACKVAR(monsterGroupIndex), si)
-	cmp	byte ptr gs:monGroups._name[si], 0
+	cmp	byte ptr gs:g_monGroups._name[si], 0
 	jz	short l_return
-	mov	al, gs:monGroups.distance[si]
+	mov	al, gs:g_monGroups.distance[si]
 	and	al, 0F0h
 	or	al, [bp+newDistance]
-	mov	gs:monGroups.distance[si], al
+	mov	gs:g_monGroups.distance[si], al
 l_return:
 	pop	si
 	FUNC_EXIT

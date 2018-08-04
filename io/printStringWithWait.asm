@@ -1,16 +1,12 @@
-; DWORD - arg_0 & arg_2
-
 ; Attributes: bp-based frame
 printStringWithWait proc	far
 
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
+	arg_0= dword ptr	 6
 
 	FUNC_ENTER
 
 	CALL(text_clear)
-	push	[bp+arg_2]
-	push	[bp+arg_0]
+	PUSH_STACK_DWORD(arg_0)
 	PRINTSTRING
 	IOWAIT
 

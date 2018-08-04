@@ -19,7 +19,7 @@ bat_summonAction proc	far
 	cmp	fs:[bx+summonStat_t.class], class_illusion
 	jnz	short l_notIllusion
 
-	cmp	gs:monDisbelieveFlag, 0
+	cmp	gs:g_monsterDisbelieveFlag, 0
 	jnz	l_return
 
 l_notIllusion:

@@ -6,15 +6,12 @@
 ;     add "(level * 400,00) - 4,400,000" to
 ;   the class specific values for levels 2-11
 
-; DWORD - var_2 & var_4
-
 ; Attributes: bp-based frame
 
 getLevelXp proc far
 
 	var_8= dword ptr -8
-	var_4= word ptr	-4
-	var_2= word ptr	-2
+	var_4= dword ptr -4
 	playerNo= word ptr  6
 	level= word ptr	 8
 
@@ -36,15 +33,15 @@ getLevelXp proc far
 	CALL(_level32bitMult)
 	sub	ax, 2380h		; 4,400,000
 	sbb	dx, 43h	
-	mov	[bp+var_4], ax
-	mov	[bp+var_2], dx
+	mov	word ptr [bp+var_4], ax
+	mov	word ptr [bp+var_4+2], dx
 	mov	[bp+level], 11
 	jmp	short l_classSpecificXp
 
 l_levelUnderTwelve:
 	sub	ax, ax
-	mov	[bp+var_2], ax
-	mov	[bp+var_4], ax
+	mov	word ptr [bp+var_4+2], ax
+	mov	word ptr [bp+var_4], ax
 
 l_classSpecificXp:
 	CHARINDEX(ax, STACKVAR(playerNo), bx)
@@ -62,8 +59,8 @@ l_classSpecificXp:
 	lfs	si, [bp+var_8]
 	mov	ax, fs:[bx+si]
 	mov	dx, fs:[bx+si+2]
-	add	ax, [bp+var_4]
-	adc	dx, [bp+var_2]
+	add	ax, word ptr [bp+var_4]
+	adc	dx, word ptr [bp+var_4+2]
 
 	pop	si
 	FUNC_EXIT

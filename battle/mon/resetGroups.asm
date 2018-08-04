@@ -15,7 +15,7 @@ loc_1C9AA:
 	sub	ax, ax
 	push	ax
 	MONINDEX(ax, STACKVAR(loopCounter), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax

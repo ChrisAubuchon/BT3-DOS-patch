@@ -29,7 +29,7 @@ l_partyTarget:
 	jmp	short l_doAttack
 
 l_checkEnemyGroup:
-	cmp	byte ptr gs:monGroups._name, 0
+	cmp	byte ptr gs:g_monGroups._name, 0
 	jz	short l_return
 
 l_enemyTarget:

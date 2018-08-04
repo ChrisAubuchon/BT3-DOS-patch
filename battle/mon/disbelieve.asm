@@ -35,7 +35,7 @@ l_loop:
 	or	ax, ax
 	jz	short l_next
 
-	inc	gs:monDisbelieveFlag
+	inc	gs:g_monsterDisbelieveFlag
 	PRINTOFFSET(s_theyDisbelieve)
 	DELAY
 	jmp	short l_return

@@ -92,7 +92,7 @@ l_drawTopologyNext:
 	jl	short l_drawTopologyLoop
 
 	mov	gs:g_hideMouseInBigpicFlag, 0
-	cmp	gs:isNight, 0
+	cmp	gs:g_isNightFlag, 0
 	jz	short l_return
 	mov	ax, offset bigpicBuf
 	mov	dx, seg	seg021

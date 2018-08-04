@@ -21,7 +21,7 @@ sp_lightSpell proc far
 	CALL(icon_activate)
 	mov	bx, [bp+spellEffect]
 	mov	al, g_lightDetectionList[bx]
-	mov	gs:gl_detectSecretDoorFlag, al
+	mov	gs:g_detectSecretDoorFlag, al
 	PUSH_OFFSET(s_elipsisNl)
 	PRINTSTRING
 	DELAY(2)

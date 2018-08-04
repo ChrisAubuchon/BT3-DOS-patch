@@ -15,14 +15,14 @@ wild_getSquare proc far
 	cmp	gs:g_wildWrapFlag, 0
 	jz	short l_noWrap
 
-	mov	al, gs:mapWidth
+	mov	al, gs:g_wildMapWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+sqEast]
 	CALL(wrapNumber, near)
 	mov	[bp+sqEast], ax
 
-	mov	al, gs:mapHeight
+	mov	al, gs:g_wildMapHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+sqNorth]
@@ -33,13 +33,13 @@ wild_getSquare proc far
 l_noWrap:
 	cmp	[bp+sqEast], 0
 	jl	short l_returnZero
-	mov	al, gs:mapWidth
+	mov	al, gs:g_wildMapWidth
 	sub	ah, ah
 	cmp	ax, [bp+sqEast]
 	jbe	short l_returnZero
 	cmp	[bp+sqNorth], 0
 	jl	short l_returnZero
-	mov	al, gs:mapHeight
+	mov	al, gs:g_wildMapHeight
 	cmp	ax, [bp+sqNorth]
 	ja	short loc_11649
 
@@ -51,7 +51,7 @@ loc_11649:
 	mov	bx, [bp+sqNorth]
 	shl	bx, 1
 	shl	bx, 1
-	lfs	bx, gs:rowOffset[bx]
+	lfs	bx, gs:g_rowOffset[bx]
 	mov	si, [bp+sqEast]
 	mov	al, fs:[bx+si]
 	sub	ah, ah

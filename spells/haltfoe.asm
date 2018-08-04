@@ -14,7 +14,7 @@ sp_haltFoe proc	far
 	inc	gs:monFrozenFlag
 	jmp	short l_return
 l_monCaster:
-	inc	gs:partyFrozenFlag
+	inc	gs:g_partyFrozenFlag
 	PUSH_OFFSET(s_partyFreezes)
 	PRINTSTRING
 l_return:

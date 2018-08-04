@@ -4,8 +4,7 @@
 getTransferCharacters proc far
 
 	var_1CA= dword ptr -1CAh
-	var_1C6= word ptr -1C6h
-	var_1C4= word ptr -1C4h
+	var_1C6= dword ptr -1C6h
 	var_1C2= word ptr -1C2h
 	var_1C0= word ptr -1C0h
 	var_1BC= word ptr -1BCh
@@ -13,12 +12,10 @@ getTransferCharacters proc far
 	var_1B6= word ptr -1B6h
 	var_1B4= word ptr -1B4h
 	fd= word ptr -182h
-	var_180= word ptr -180h
-	var_17E= word ptr -17Eh
+	var_180= dword ptr -180h
 	var_17C= word ptr -17Ch
 	var_17A= dword ptr -17Ah
-	var_26=	word ptr -26h
-	var_24=	word ptr -24h
+	var_26=	dword ptr -26h
 	var_22=	word ptr -22h
 	var_20=	word ptr -20h
 	var_1E=	word ptr -1Eh
@@ -29,21 +26,20 @@ getTransferCharacters proc far
 	mov	ax, 9000
 	push	ax
 	CALL(_mallocMaybe)
-	mov	[bp+var_1C6], ax
-	mov	[bp+var_1C4], dx
+	mov	word ptr [bp+var_1C6], ax
+	mov	word ptr [bp+var_1C6+2], dx
 
 	mov	ax, 500h
 	push	ax
 	CALL(_mallocMaybe)
-	mov	[bp+var_180], ax
-	mov	[bp+var_17E], dx
+	SAVE_STACK_DWORD(dx,ax,var_180)
 
 loc_2649C:
 	PUSH_OFFSET(s_diskToTransferFrom)
 	PRINTSTRING(true)
 	lea	ax, [bp+var_1B4]
-	mov	[bp+var_26], ax
-	mov	[bp+var_24], ss
+	mov	word ptr [bp+var_26], ax
+	mov	word ptr [bp+var_26+2], ss
 	mov	ax, 18h
 	push	ax
 	PUSH_STACK_ADDRESS(var_1E)
@@ -51,19 +47,13 @@ loc_2649C:
 	or	ax, ax
 	jz	short loc_264E1
 	PUSH_STACK_ADDRESS(var_1E)
-	push	[bp+var_24]
-	push	[bp+var_26]
-	CALL(strcat)
-	mov	[bp+var_26], ax
-	mov	[bp+var_24], dx
+	PUSH_STACK_DWORD(var_26)
+	STRCAT(var_26)
 
 loc_264E1:
 	PUSH_OFFSET(s_thievesInf)
-	push	[bp+var_24]
-	push	[bp+var_26]
-	CALL(strcat)
-	mov	[bp+var_26], ax
-	mov	[bp+var_24], dx
+	PUSH_STACK_DWORD(var_26)
+	STRCAT(var_26)
 
 	sub	ax, ax
 	push	ax
@@ -81,8 +71,8 @@ loc_264E1:
 	jmp	loc_2649C
 
 loc_2653C:
-	mov	ax, [bp+var_1C6]
-	mov	dx, [bp+var_1C4]
+	mov	ax, word ptr [bp+var_1C6]
+	mov	dx, word ptr [bp+var_1C6+2]
 	mov	word ptr [bp+var_1BA], ax
 	mov	word ptr [bp+var_1BA+2], dx
 
@@ -97,8 +87,8 @@ loc_26554:
 
 	mov	ax, 9000
 	push	ax
-	push	[bp+var_1C4]
-	push	[bp+var_1C6]
+	push	word ptr [bp+var_1C6+2]
+	push	word ptr [bp+var_1C6]
 	push	[bp+fd]
 	CALL(read)
 
@@ -107,19 +97,14 @@ loc_26554:
 
 	PUSH_STACK_ADDRESS(var_1E)
 	PUSH_STACK_ADDRESS(var_1B4)
-	CALL(strcat)
-	mov	[bp+var_26], ax
-	mov	[bp+var_24], dx
+	STRCAT(var_26)
 
 	PUSH_OFFSET(s_partiesInf)
-	push	dx
-	push	[bp+var_26]
-	CALL(strcat)
-	mov	[bp+var_26], ax
-	mov	[bp+var_24], dx
+	PUSH_STACK_DWORD(var_26)
+	STRCAT(var_26)
 
-	mov	ax, [bp+var_180]
-	mov	dx, [bp+var_17E]
+	mov	ax, word ptr [bp+var_180]
+	mov	dx, word ptr [bp+var_180+2]
 	mov	word ptr [bp+var_1BA], ax
 	mov	word ptr [bp+var_1BA+2], dx
 
@@ -141,8 +126,7 @@ loc_265DE:
 	mov	[bp+fd], ax
 	inc	ax
 	jnz	short loc_2663C
-	PUSH_OFFSET(s_noPartiesFoundOn)
-	PRINTSTRING(true)
+	PRINTOFFSET(s_noPartiesFoundOn, clear)
 	PUSH_STACK_ADDRESS(var_1B4)
 	PRINTSTRING
 	IOWAIT
@@ -151,8 +135,7 @@ loc_265DE:
 loc_2663C:
 	mov	ax, 500h
 	push	ax
-	push	[bp+var_17E]
-	push	[bp+var_180]
+	PUSH_STACK_DWORD(var_180)
 	push	[bp+fd]
 	CALL(read)
 
@@ -168,8 +151,8 @@ loc_2665A:
 	mov	ax, [bp+var_1C2]
 	mov	cl, 7
 	shl	ax, cl
-	add	ax, [bp+var_180]
-	mov	dx, [bp+var_17E]
+	add	ax, word ptr [bp+var_180]
+	mov	dx, word ptr [bp+var_180+2]
 	mov	word ptr [bp+si+var_17A], ax
 	mov	word ptr [bp+si+var_17A+2], dx
 	mov	si, [bp+var_1C2]
@@ -193,8 +176,8 @@ loc_2669C:
 	mov	ax, [bp+var_1C2]
 	sub	ax, [bp+var_1BC]
 	CHARINDEX(cx, cx)
-	add	ax, [bp+var_1C6]
-	mov	dx, [bp+var_1C4]
+	add	ax, word ptr [bp+var_1C6]
+	mov	dx, word ptr [bp+var_1C6+2]
 	mov	si, [bp+var_1C2]
 	shl	si, 1
 	shl	si, 1
@@ -219,11 +202,9 @@ l_askWhoTransfers:
 	mov	[bp+var_1C0], ax
 	or	ax, ax
 	jge	short loc_2671D
-	push	[bp+var_1C4]
-	push	[bp+var_1C6]
+	PUSH_STACK_DWORD(var_1C6)
 	CALL(_freeMaybe)
-	push	[bp+var_17E]
-	push	[bp+var_180]
+	PUSH_STACK_DWORD(var_180)
 	CALL(_freeMaybe)
 	jmp	l_return
 loc_2671D:
@@ -253,8 +234,7 @@ loc_26748:
 	lfs	bx, [bp+var_1CA]
 	cmp	byte ptr fs:[bx], 0
 	jz	l_askWhoTransfers
-	push	[bp+var_1C4]
-	push	[bp+var_1C6]
+	PUSH_STACK_DWORD(var_1C6)
 	push	dx
 	push	ax
 	CALL(transfer_findName, near)
@@ -263,8 +243,8 @@ loc_26748:
 	jl	short loc_267AE
 
 	CHARINDEX(ax, STACKVAR(var_1B6))
-	add	ax, [bp+var_1C6]
-	mov	dx, [bp+var_1C4]
+	add	ax, word ptr [bp+var_1C6]
+	mov	dx, word ptr [bp+var_1C6+2]
 	push	dx
 	push	ax
 	CALL(transfer_bt3Character, near)

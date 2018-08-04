@@ -45,7 +45,7 @@ review_questLanatir proc	far
 
 	mov	ax, 0FFh
 	push	ax
-	mov	ax, 3Fh	
+	mov	ax, QUESTFLAG(questBit_1, questByte_7)
 	push	ax
 	CALL(_updateFlags)
 

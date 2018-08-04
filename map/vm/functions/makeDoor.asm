@@ -1,6 +1,4 @@
 ; Attributes: bp-based frame
-;
-; DWORD rowOffsetSeg & rowOffsetOff, charBufOff & charBufSeg
 
 mfunc_makeDoor proc far
 
@@ -9,23 +7,21 @@ mfunc_makeDoor proc far
 	squareNumber=	word ptr -14h
 	var_12=	dword ptr -12h
 	rowNumber= word ptr	-0Eh
-	charBufOff= word ptr -0Ch
-	charBufSeg= word ptr -0Ah
+	charBufferP= dword ptr -0Ch
 	var_8= word ptr	-8
-	rowOffsetOff= word ptr	-6
-	rowOffsetSeg= word ptr	-4
+	g_rowOffsetP= dword ptr	-6
 	var_2= word ptr	-2
 	dataP= dword ptr  6
 
 	FUNC_ENTER(1Ch)
 
-	mov	[bp+charBufOff], offset	g_rosterCharacterBuffer
-	mov	[bp+charBufSeg], seg seg022
-	mov	ax, [bp+charBufOff]
-	mov	dx, [bp+charBufSeg]
-	add	ax, 24h					; 24h == rowOffset
-	mov	[bp+rowOffsetOff], ax
-	mov	[bp+rowOffsetSeg], dx
+	mov	word ptr [bp+charBufferP], offset	g_rosterCharacterBuffer
+	mov	word ptr [bp+charBufferP+2], seg seg022
+	mov	ax, word ptr [bp+charBufferP]
+	mov	dx, word ptr [bp+charBufferP+2]
+	add	ax, 24h					; 24h == g_rowOffset
+	mov	word ptr [bp+g_rowOffsetP], ax
+	mov	word ptr [bp+g_rowOffsetP+2], dx
 
 	lfs	bx, [bp+dataP]
 	inc	word ptr [bp+dataP]
@@ -45,7 +41,7 @@ mfunc_makeDoor proc far
 
 	mov	ax, [bp+rowNumber]
 	shl	ax, 1
-	add	ax, [bp+rowOffsetOff]
+	add	ax, word ptr [bp+g_rowOffsetP]
 	mov	word ptr [bp+squareP], ax
 	mov	word ptr [bp+squareP+2], dx
 	lfs	bx, [bp+squareP]

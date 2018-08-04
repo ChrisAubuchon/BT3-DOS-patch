@@ -1,12 +1,9 @@
-; DWORD - stringBuffer & var_104
-;
 ; Attributes: bp-based frame
 
 summon_addMonToGroup proc far
 
 	var_116= word ptr -116h
-	var_106= word ptr -106h
-	var_104= word ptr -104h
+	stringBufferP= dword ptr -106h
 	stringBuffer= word ptr -102h
 	groupSize= word	ptr -2
 	arg_0= byte ptr	 6
@@ -16,7 +13,7 @@ summon_addMonToGroup proc far
 	push	si
 
 	MONINDEX(ax, STACKVAR(arg_2), bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+groupSize],	ax
@@ -26,12 +23,12 @@ summon_addMonToGroup proc far
 	jmp	l_return
 loc_2607B:
 	MONINDEX(ax, STACKVAR(arg_2), si)
-	inc	gs:monGroups.groupSize[si]
-	mov	al, gs:monGroups.hpDice[si]
+	inc	gs:g_monGroups.groupSize[si]
+	mov	al, gs:g_monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
 	CALL(randomYdX)
-	mov	cx, gs:monGroups.hpBase[si]
+	mov	cx, gs:g_monGroups.hpBase[si]
 	add	cx, ax
 	mov	bx, [bp+arg_2]
 	mov	ax, cx
@@ -51,38 +48,30 @@ loc_2607B:
 	test	[bp+arg_0], 80h
 	jz	short loc_260EF
 	MONINDEX(ax, STACKVAR(arg_2), bx)
-	or	gs:monGroups.flags[bx],	10h
+	or	gs:g_monGroups.flags[bx],	10h
 	jmp	short loc_26101
 loc_260EF:
 	MONINDEX(ax, STACKVAR(arg_2), bx)
-	and	gs:monGroups.flags[bx],	0EFh
+	and	gs:g_monGroups.flags[bx],	0EFh
 loc_26101:
 	PUSH_STACK_ADDRESS(var_116)
 	MONINDEX(ax, STACKVAR(arg_2), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
 	CALL(unmaskString)
 	PUSH_OFFSET(s_andA)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	CALL(strcat)
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	STRCAT(stringBufferP)
 	sub	ax, ax
 	push	ax
-	push	dx
-	push	[bp+var_106]
+	PUSH_STACK_DWORD(stringBufferP)
 	PUSH_STACK_ADDRESS(var_116)
-	CALL(str_pluralize)
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	PLURALIZE(stringBufferP)
 	PUSH_OFFSET(s_appears)
-	push	dx
-	push	[bp+var_106]
-	CALL(strcat)
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING
 	mov	ax, 1

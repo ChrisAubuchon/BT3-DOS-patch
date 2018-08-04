@@ -11,9 +11,9 @@ bat_partyAdvanceAction proc far
 
 l_decrementMonsterDistanceLoop:
 	MONINDEX(ax, STACKVAR(loopCounter), si)
-	test	gs:monGroups.groupSize[si], 1Fh
+	test	gs:g_monGroups.groupSize[si], 1Fh
 	jz	short l_decrementMonsterDistanceNext
-	dec	gs:monGroups.distance[si]
+	dec	gs:g_monGroups.distance[si]
 
 l_decrementMonsterDistanceNext:
 	inc	[bp+loopCounter]

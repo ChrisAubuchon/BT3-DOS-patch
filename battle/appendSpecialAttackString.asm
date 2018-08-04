@@ -6,7 +6,7 @@ bat_appendSpecialAttackString proc far
 
 	FUNC_ENTER
 
-	mov	bx, gs:specialAttackVal
+	mov	bx, gs:g_specialAttackValue
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (g_specialAttackStringList+2)[bx]

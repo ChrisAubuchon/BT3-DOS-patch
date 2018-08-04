@@ -1,11 +1,11 @@
 ; Attributes: bp-based frame
+define(`slotNumber', `di')dnl
 chest_open proc	far
 
 	FUNC_ENTER(2)
 	push	si
 	push	di
 
-define(`slotNumber', `di')
 	PRINTOFFSET(s_whoWillOpen, clear)
 	CALL(readSlotNumber)
 	mov	slotNumber, ax
@@ -29,7 +29,7 @@ define(`slotNumber', `di')
 
 l_noTrap:
 	mov	gs:g_trapIndex, 0
-	mov	gs:word_42560, 1
+	mov	gs:g_bigpicLongerCelDelay, 1
 
 l_returnOne:
 	DELAY(5)
@@ -45,5 +45,4 @@ l_return:
 	FUNC_EXIT
 	retf
 chest_open endp
-
-undefine(`slotNumber')
+undefine(`slotNumber')dnl

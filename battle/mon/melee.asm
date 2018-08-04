@@ -21,7 +21,7 @@ bat_monMelee proc far
 
 	PUSH_STACK_ADDRESS(groupName)
 	MONINDEX(ax, STACKVAR(monNo), bx)
-	lea	ax, monGroups._name[bx]
+	lea	ax, g_monGroups._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -32,14 +32,14 @@ bat_monMelee proc far
 	mov	word ptr [bp+stringBufferP+2], ss
 
 	MONINDEX(ax, STACKVAR(monNo), si)
-	mov	al, gs:monGroups.distance[si]
+	mov	al, gs:g_monGroups.distance[si]
 	and	al, 0Fh
 	cmp	al, 2
 	jb	l_inMeleeRange
 
 	; A value of 0C0 in packedGenAc indicates that the source's name
 	; is unique. (e.g. Tarjan)
-	mov	al, gs:monGroups.packedGenAc[si]
+	mov	al, gs:g_monGroups.packedGenAc[si]
 	and	al, 0C0h
 	cmp	al, 0C0h
 	jnz	short l_addIndefiniteArticle
@@ -49,7 +49,7 @@ bat_monMelee proc far
 
 l_addIndefiniteArticle:
 	MONINDEX(ax, STACKVAR(monNo), bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	and	al, 1Fh
 	cmp	al, 2
 	jnb	short l_pluralAdvance
@@ -92,7 +92,7 @@ l_advance:
 	PUSH_OFFSET(s_advances)
 	PLURALIZE(stringBufferP)
 	MONINDEX(ax, STACKVAR(monNo), bx)
-	mov	al, gs:monGroups.distance[bx]
+	mov	al, gs:g_monGroups.distance[bx]
 	mov	[bp+groupDistance], al
 	sub	ah, ah
 	mov	si, ax
@@ -120,7 +120,7 @@ l_setDistance:
 	add	al, cl
 	mov	cx, ax
 	MONINDEX(ax, STACKVAR(monNo), bx)
-	mov	gs:monGroups.distance[bx], cl
+	mov	gs:g_monGroups.distance[bx], cl
 
 	mov	[bp+loopCounter], 0
 l_clearPriorityLoop:
@@ -147,7 +147,7 @@ l_inMeleeRange:
 	and	ax, 1
 	mov	cx, ax
 	MONINDEX(ax, STACKVAR(monNo), bx)
-	mov	al, gs:monGroups.flags[bx]
+	mov	al, gs:g_monGroups.flags[bx]
 	sub	ah, ah
 	and	ax, mon_attackStr
 	shl	ax, 1

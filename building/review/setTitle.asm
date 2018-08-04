@@ -1,12 +1,10 @@
 ; Attributes: bp-based frame
-;
-; DWORD titleSTring+2 & titleSTring
 
 review_setTitle proc far
 
 	bigpicNumber= word ptr	-8
 	boardActiveFlag= word ptr	-6
-	titleSTring= dword ptr	-4
+	titleString= dword ptr	-4
 
 	FUNC_ENTER(8)
 
@@ -38,12 +36,12 @@ l_useReviewTitle:
 	mov	ax, offset s_reviewBoard
 
 l_setTitle:
-	mov	word ptr [bp+titleSTring], ax
-	mov	word ptr [bp+titleSTring+2], ds
+	mov	word ptr [bp+titleString], ax
+	mov	word ptr [bp+titleString+2], ds
 	push	[bp+bigpicNumber]
 	CALL(bigpic_drawPictureNumber)
 
-	PUSH_STACK_DWORD(titleSTring)
+	PUSH_STACK_DWORD(titleString)
 	CALL(setTitle)
 
 	cmp	[bp+boardActiveFlag], 0

@@ -13,11 +13,11 @@ dun_doSpecialSquare proc far
 	push	si
 
 	sub	al, al
-	mov	gs:sqRegenHPFlag, al
+	mov	gs:g_squareHpRegenFlag, al
 	mov	gs:stuckFlag, al
-	mov	gs:sq_antiMagicFlag, al
+	mov	gs:g_squareAntiMagicFlag, al
 	mov	gs:regenSpptSq,	al
-	mov	byte_4EECC, al
+	mov	g_battleNoChest, al
 	mov	bx, [bp+sqNorth]
 	shl	bx, 1
 	shl	bx, 1

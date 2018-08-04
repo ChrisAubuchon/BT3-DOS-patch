@@ -54,16 +54,16 @@ wild_main proc far
 	and	al, 7
 	mov	g_levelNumber, al
 	mov	al, fs:[bx+map_t._width]
-	mov	gs:mapWidth, al
+	mov	gs:g_wildMapWidth, al
 	mov	al, fs:[bx+map_t._height]
-	mov	gs:mapHeight, al
+	mov	gs:g_wildMapHeight, al
 	mov	al, fs:[bx+map_t.wrapFlag]
 	and	al, 2
 	mov	gs:g_wildWrapFlag, al
-	mov	gs:mapDataOff, map_t.rowOffset
-	mov	gs:mapDataSeg, seg seg022
+	mov	word ptr gs:g_mapData, map_t.rowOffset
+	mov	word ptr gs:g_mapData+2, seg seg022
 	mov	[bp+var_2C], 0
-	mov	dl, mapHeight
+	mov	dl, g_wildMapHeight
 	sub	dh, dh
 
 l_rowPopLoop_start:
@@ -71,9 +71,9 @@ l_rowPopLoop_start:
 	jbe	short l_rowPopLoop_exit
 	mov	ax, [bp+var_2C]
 	shl	ax, 1
-	add	ax, gs:mapDataOff
+	add	ax, word ptr gs:g_mapData
 	mov	word ptr [bp+var_4A], ax
-	mov	ax, gs:mapDataSeg
+	mov	ax, word ptr gs:g_mapData+2
 	mov	word ptr [bp+var_4A+2],	ax
 	lfs	bx, [bp+var_4A]
 	mov	ah, fs:[bx+1]
@@ -85,14 +85,14 @@ l_rowPopLoop_start:
 	mov	bx, [bp+var_2C]
 	shl	bx, 1
 	shl	bx, 1
-	mov	word ptr gs:rowOffset[bx], ax
-	mov	word ptr gs:(rowOffset+2)[bx], seg seg022
+	mov	word ptr gs:g_rowOffset[bx], ax
+	mov	word ptr gs:(g_rowOffset+2)[bx], seg seg022
 	inc	[bp+var_2C]
 	jmp	short l_rowPopLoop_start
 
 l_rowPopLoop_exit:
-	mov	gs:mapDataOff, map_t.dataOffset
-	mov	gs:mapDataSeg, seg seg022
+	mov	word ptr gs:g_mapData, map_t.dataOffset
+	mov	word ptr gs:g_mapData+2, seg seg022
 
 l_loopStart:
 	cmp	g_partyAttackFlag, 0
@@ -118,8 +118,8 @@ l_battleCheck:
 l_mapExecute:
 	sub	ax, ax
 	push	ax
-	push	gs:mapDataSeg
-	push	gs:mapDataOff
+	push	word ptr gs:g_mapData+2
+	push	word ptr gs:g_mapData
 	CALL(vm_execute)
 
 loc_10E48:
@@ -198,14 +198,14 @@ l_noBuilding:
 	test	g_wildWrapFlag, 2
 	jz	l_forwardNoWrap
 
-	mov	al, mapHeight
+	mov	al, g_wildMapHeight
 	sub	ah, ah
 	push	ax
 	push	[bp+var_8]
 	CALL(wrapNumber)
 	mov	g_sqNorth, ax
 
-	mov	al, mapWidth
+	mov	al, g_wildMapWidth
 	sub	ah, ah
 	push	ax
 	push	[bp+var_2A]
@@ -217,7 +217,7 @@ l_forwardNoWrap:
 	cmp	[bp+var_8], 0
 	jl	l_loopStart
 
-	mov	al, mapHeight
+	mov	al, g_wildMapHeight
 	sub	ah, ah
 	cmp	ax, [bp+var_8]
 	jbe	l_loopStart
@@ -225,7 +225,7 @@ l_forwardNoWrap:
 	cmp	[bp+var_2A], 0
 	jl	l_loopStart
 
-	mov	al, mapWidth
+	mov	al, g_wildMapWidth
 	cmp	ax, [bp+var_2A]
 	jbe	l_loopStart
 

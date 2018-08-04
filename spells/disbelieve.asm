@@ -47,7 +47,7 @@ l_monCaster:
 
 l_monDisbelieve:
 	mov	al, byte ptr [bp+spellCaster]
-	mov	gs:monDisbelieveFlag, al
+	mov	gs:g_monsterDisbelieveFlag, al
 
 l_return:
 	pop	si

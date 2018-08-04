@@ -24,7 +24,7 @@ bat_init proc far
 
 	mov	[bp+var_8], 0
 	sub	al, al
-	mov	gs:partyFrozenFlag, al
+	mov	gs:g_partyFrozenFlag, al
 	mov	gs:g_runAwayFlag,	al
 
 l_roundStart:
@@ -34,7 +34,7 @@ l_roundStart:
 	inc	[bp+var_8]
 	CALL(bat_printOpponents, near)
 
-	cmp	gs:partyFrozenFlag, 0
+	cmp	gs:g_partyFrozenFlag, 0
 	jnz	short l_doRound
 
 	CALL(bat_partyGetActions, near)
@@ -55,7 +55,7 @@ l_doRound:
 	mov	gs:txt_numLines, 0Bh
 	CALL(bat_doRound)
 	CALL(bat_partyDisbelieves)
-	cmp	gs:monDisbelieveFlag, 0
+	cmp	gs:g_monsterDisbelieveFlag, 0
 	jnz	short l_noDisbelieve
 	CALL(bat_monGroupActive)
 	or	ax, ax
@@ -69,7 +69,7 @@ l_noDisbelieve:
 	sub	ah, ah
 	push	ax
 	CALL(bat_partyApplyHpRegen)
-	mov	al, gs:monDisbelieveFlag
+	mov	al, gs:g_monsterDisbelieveFlag
 	sub	ah, ah
 	push	ax
 	CALL(bat_postRound)

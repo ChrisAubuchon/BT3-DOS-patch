@@ -109,7 +109,7 @@ l_monsterGroupLoop:
 	jl	short l_return
 
 	MONINDEX(ax, STACKVAR(loopCounter), bx)
-	test	gs:monGroups.groupSize[bx], 1Fh
+	test	gs:g_monGroups.groupSize[bx], 1Fh
 	jnz	short l_monsterGroupNext
 
 	mov	ax, [bp+loopCounter]

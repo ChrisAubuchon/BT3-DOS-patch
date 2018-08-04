@@ -58,7 +58,7 @@ l_dropMember:
 	jmp	l_success
 
 l_pauseGame:
-	cmp	gs:byte_42296, 0FFh
+	cmp	gs:g_noPauseFlag, 0FFh
 	jz	l_fail
 	mov	gs:advanceTimeFlag, 1
 	PUSH_OFFSET(s_pausing)

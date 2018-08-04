@@ -8,7 +8,7 @@ sp_antiMagic proc far
 
 	mov	bx, [bp+spellIndexNumber]
 	mov	al, g_spellEffectData[bx]
-	add	gs:antiMagicFlag, al
+	add	gs:g_spellAntiMagicValue, al
 
 	FUNC_EXIT
 	retf

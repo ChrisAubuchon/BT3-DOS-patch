@@ -20,7 +20,7 @@ song_playSong proc far
 	mov	gs:g_currentSong, al
 	CALL(sound_stop)
 
-	mov	ax, offset byte_40420
+	mov	ax, offset g_currentSongBuffer
 	mov	dx, seg	seg026
 	push	dx
 	push	ax
@@ -47,7 +47,7 @@ loc_22D59:
 	mov	[bp+var_2], 0
 l_startSound:
 	push	[bp+var_2]
-	mov	ax, offset byte_40420
+	mov	ax, offset g_currentSongBuffer
 	mov	dx, seg	seg026
 	push	dx
 	push	ax

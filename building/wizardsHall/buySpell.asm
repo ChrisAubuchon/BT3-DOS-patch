@@ -1,13 +1,10 @@
 ; Attributes: bp-based frame
-;
-; DWORD var_104 & var_106
 
 wizardHall_buySpell proc far
 
 	var_10A= word ptr -10Ah
 	payeeSlotNumber= word ptr -108h
-	var_106= word ptr -106h
-	var_104= word ptr -104h
+	stringBufferP= dword ptr -106h
 	slotNumber= word ptr -102h
 	stringBuffer= word ptr -100h
 
@@ -54,19 +51,14 @@ loc_24C2A:
 loc_24C3E:
 	PUSH_OFFSET(s_thouMayLearn)
 	PUSH_STACK_ADDRESS(stringBuffer)
-	STRCAT
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	STRCAT(stringBufferP)
 	mov	bx, [bp+var_10A]
 	shl	bx, 1
 	shl	bx, 1
 	push	word ptr (g_spellsForSaleList+2)[bx]
 	push	word ptr g_spellsForSaleList[bx]
-	push	dx
-	push	ax
-	STRCAT
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	sub	ax, ax
 	push	ax
 	mov	bx, [bp+var_10A]
@@ -74,17 +66,11 @@ loc_24C3E:
 	shl	bx, 1
 	push	word ptr (g_spellsForSalePrice+2)[bx]
 	push	word ptr g_spellsForSalePrice[bx]
-	push	dx
-	push	[bp+var_106]
-	ITOA
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	ITOA(stringBufferP)
 	PUSH_OFFSET(s_inGoldWhoWillPay)
-	push	dx
-	push	[bp+var_106]
-	STRCAT
-	mov	[bp+var_106], ax
-	mov	[bp+var_104], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_STACK_ADDRESS(stringBuffer)
 	PRINTSTRING(true)
 	CALL(readSlotNumber)

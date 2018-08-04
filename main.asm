@@ -28,7 +28,7 @@ _main proc far
 loc_10039:
 	mov	ax, 6
 	push	ax
-	mov	ax, offset word_4243A
+	mov	ax, offset g_configuredFlag
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -36,21 +36,22 @@ loc_10039:
 	CALL(read)
 	push	[bp+var_4]
 	CALL(close)
+
 	mov	gs, seg027_x
-	push	gs:word_4243E
+	push	gs:g_unusedConfiguration
 	CALL(disk1Swap)
-	add	sp, 2
+
 	cmp	[bp+arg_0], 1
 	jg	short loc_1007E
-	cmp	gs:word_4243A, 0
+	cmp	gs:g_configuredFlag, 0
 	jnz	short loc_100E7
 loc_1007E:
-	mov	gs:word_4243A, 1
+	mov	gs:g_configuredFlag, 1
 	push	[bp+arg_4]
 	push	[bp+arg_2]
 	push	[bp+arg_0]
 	CALL(configureBT3)
-	mov	gs:word_4243C, ax
+	mov	gs:g_avConfiguration, ax
 	mov	ax, 2
 	push	ax
 	PUSH_OFFSET(s_thiefCfg)
@@ -65,7 +66,7 @@ loc_1007E:
 loc_100C5:
 	mov	ax, 4
 	push	ax
-	mov	ax, offset word_4243A
+	mov	ax, offset g_configuredFlag
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -76,7 +77,7 @@ loc_100C5:
 loc_100E7:
 	sub	ax, ax
 	push	ax
-	mov	bx, gs:word_4243C
+	mov	bx, gs:g_avConfiguration
 	and	bx, 0Fh
 	shl	bx, 1
 	shl	bx, 1
@@ -159,8 +160,8 @@ loc_101E6:
 	mov	ax, 33000
 	push	ax
 	CALL(_mallocMaybe)
-	mov	gs:word_42562, ax
-	mov	gs:word_42564, dx
+	mov	word ptr gs:word_42562, ax
+	mov	word ptr gs:word_42562+2, dx
 	push	dx
 	push	ax
 	mov	ax, offset g_rosterCharacterBuffer
@@ -172,8 +173,8 @@ loc_101E6:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	mov	ax, gs:word_42562
-	mov	dx, gs:word_42564
+	mov	ax, word ptr gs:word_42562
+	mov	dx, word ptr gs:word_42562+2
 	add	ax, 0Dh
 	push	dx
 	push	ax
@@ -186,8 +187,8 @@ loc_101E6:
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_10266
-	push	gs:word_42564
-	push	gs:word_42562
+	push	word ptr gs:word_42562+2
+	push	word ptr gs:word_42562
 	CALL(_freeMaybe)
 	CALL(cleanupAndExit, near)
 loc_10266:
@@ -201,8 +202,8 @@ loc_10266:
 	CALL(read)
 	push	[bp+var_4]
 	CALL(close)
-	push	gs:word_42564
-	push	gs:word_42562
+	push	word ptr gs:word_42562+2
+	push	word ptr gs:word_42562
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -212,8 +213,8 @@ loc_10266:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	mov	ax, gs:word_42562
-	mov	dx, gs:word_42564
+	mov	ax, word ptr gs:word_42562
+	mov	dx, word ptr gs:word_42562+2
 	add	ax, 0Dh
 	push	dx
 	push	ax
@@ -226,14 +227,14 @@ loc_10266:
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_102FB
-	push	gs:word_42564
-	push	gs:word_42562
+	push	word ptr gs:word_42562+2
+	push	word ptr gs:word_42562
 	CALL(_freeMaybe)
 	CALL(cleanupAndExit, near)
 loc_102FB:
 	mov	ax, 0FFFFh
 	push	ax
-	mov	ax, gs:word_4243C
+	mov	ax, gs:g_avConfiguration
 	mov	cl, 7
 	sar	ax, cl
 	add	ax, 10h
@@ -327,8 +328,8 @@ loc_103D4:
 	mov	[bp+var_4], ax
 	inc	ax
 	jnz	short loc_1043E
-	push	gs:word_42564
-	push	gs:word_42562
+	push	word ptr gs:word_42562+2
+	push	word ptr gs:word_42562
 	CALL(_freeMaybe)
 	CALL(cleanupAndExit, near)
 loc_1043E:
@@ -342,8 +343,8 @@ loc_1043E:
 	CALL(read)
 	push	[bp+var_4]
 	CALL(close)
-	push	gs:word_42564
-	push	gs:word_42562
+	push	word ptr gs:word_42562+2
+	push	word ptr gs:word_42562
 	mov	ax, offset g_rosterCharacterBuffer
 	mov	dx, seg	seg022
 	push	dx
@@ -353,15 +354,15 @@ loc_1043E:
 	mov	dx, seg	seg022
 	push	dx
 	push	ax
-	mov	ax, gs:word_42562
-	mov	dx, gs:word_42564
+	mov	ax, word ptr gs:word_42562
+	mov	dx, word ptr gs:word_42562+2
 	add	ax, 0Dh
 	push	dx
 	push	ax
 	call	far ptr	gfx_drawFullscreenImage
 	add	sp, 8
-	push	gs:word_42564
-	push	gs:word_42562
+	push	word ptr gs:word_42562+2
+	push	word ptr gs:word_42562
 	CALL(_freeMaybe)
 	mov	ax, 4D0Ah
 	push	ax

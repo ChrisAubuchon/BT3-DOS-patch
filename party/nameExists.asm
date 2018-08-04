@@ -2,16 +2,13 @@
 ; Returns -1 if	there is no character by the provided
 ; name in the party
 ;
-; DWORD - _offset & _segment
-;
 
 ; Attributes: bp-based frame
 
 party_nameExists	proc far
 
 	loopCounter= word ptr	-2
-	_offset= word ptr  6
-	_segment= word ptr  8
+	inName= dword ptr  6
 
 	FUNC_ENTER(2)
 
@@ -22,8 +19,7 @@ l_loopEntry:
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	[bp+_segment]
-	push	[bp+_offset]
+	PUSH_STACK_DWORD(inName)
 	CALL(strcmp)
 	or	ax, ax
 	jz	l_returnValue

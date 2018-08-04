@@ -9,7 +9,7 @@ bat_setBigpic proc far
 
 	FUNC_ENTER(26h)
 
-	mov	al, gs:monGroups.groupSize
+	mov	al, gs:g_monGroups.groupSize
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+monsterGroupSize], ax
@@ -25,7 +25,7 @@ bat_setBigpic proc far
 
 l_notPartyAttack:
 	PUSH_STACK_ADDRESS(unmaskedString)
-	mov	ax, offset monGroups
+	mov	ax, offset g_monGroups
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
@@ -43,7 +43,7 @@ l_notPartyAttack:
 	PUSH_STACK_ADDRESS(titleString)
 	CALL(setTitle)
 
-	mov	al, gs:monGroups.picIndex
+	mov	al, gs:g_monGroups.picIndex
 	sub	ah, ah
 	push	ax
 	CALL(bigpic_drawPictureNumber)

@@ -39,7 +39,7 @@ l_monTarget:
 	mov	si, ax
 	and	ax, 3
 	MONINDEX(cx, cx, bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Eh
 	dec	ax
@@ -53,7 +53,7 @@ l_monTarget:
 	and	ax, 3
 	mov	[bp+var_102], ax
 	MONINDEX(ax, STACKVAR(var_102), bx)
-	and	gs:monGroups.groupSize[bx], 0E0h
+	and	gs:g_monGroups.groupSize[bx], 0E0h
 	mov	[bp+loopCounter], 0
 l_monLoopEnter:
 	jge	short l_return

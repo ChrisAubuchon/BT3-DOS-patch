@@ -15,7 +15,7 @@ l_entry:
 
 l_searchForEmptyGroup:
 	MONINDEX(ax, STACKVAR(groupNo), bx)
-	test	gs:monGroups.groupSize[bx], 1Fh
+	test	gs:g_monGroups.groupSize[bx], 1Fh
 	jz	short l_makeNewMonsterGroup
 	inc	[bp+groupNo]
 	cmp	[bp+groupNo], 4

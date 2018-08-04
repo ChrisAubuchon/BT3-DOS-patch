@@ -1,6 +1,4 @@
 ; Attributes: bp-based frame
-; 
-; DWORD - var_204 & var_206
 
 character_printAbilities proc	far
 

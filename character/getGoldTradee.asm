@@ -1,11 +1,8 @@
 ; Attributes: bp-based frame
-;
-; DWORD - var_4 & var_6
 
 character_getGoldTradee proc far
 
-	var_6= word ptr	-6
-	var_4= word ptr	-4
+	var_6= dword ptr	-6
 	tradeeSlotNumber= word ptr	-2
 	slotNumber= word ptr	 6
 	lastSlotNumber= word ptr	 8
@@ -29,13 +26,11 @@ character_getGoldTradee proc far
 	PUSH_OFFSET(s_howMuchGoldToTrade)
 	PRINTSTRING
 	CALL(readGold)
-	mov	[bp+var_6], ax
-	mov	[bp+var_4], dx
+	SAVE_STACK_DWORD(dx,ax,var_6)
 	or	dx, ax
 	jz	short l_return
 
-	push	[bp+var_4]
-	push	[bp+var_6]
+	PUSH_STACK_DWORD(var_6)
 	push	[bp+slotNumber]
 	CALL(character_removeGold)
 	or	ax, ax
@@ -47,8 +42,8 @@ character_getGoldTradee proc far
 	jmp	short l_return
 
 l_enoughGold:
-	mov	ax, [bp+var_6]
-	mov	dx, [bp+var_4]
+	mov	ax, word ptr [bp+var_6]
+	mov	dx, word ptr [bp+var_6+2]
 	mov	cx, ax
 	mov	bx, dx
 	CHARINDEX(ax, STACKVAR(tradeeSlotNumber), si)

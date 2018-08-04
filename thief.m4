@@ -538,7 +538,9 @@ include(`battle/dobreath.asm')
 include(`battle/char/isBreathAttackable.asm')
 include(`spells/trapzap.asm')
 include(`spells/freezeFoes.asm')
-include(`spells/savingThrow.asm')
+include(`spells/savingThrow/spellHelper.asm')
+include(`spells/savingThrow/check.asm')
+include(`spells/savingThrow/calculate.asm')
 include(`lib/maxFF.asm')
 include(`spells/compass.asm')
 include(`spells/heal.asm')
@@ -854,12 +856,37 @@ include(`lib/huffman/data.asm')
 seg020 ends
 
 include seg021.asm
-include seg022.asm
+
+; Segment type: Regular
+seg022 segment para public 'DATA' use16
+        assume cs:seg022
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+
+include(`data/partyBuffers.asm')
+
+seg022 ends
+
+; Segment type: Regular
+seg023 segment para public 'DATA' use16
+        assume cs:seg023
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+
 include(`seg023.asm')
+
+seg023 ends
+
 include seg024.asm
 include seg025.asm
 include seg026.asm
-include seg027.asm
+
+; Segment type: Regular
+seg027 segment para public 'DATA' use16
+        assume cs:seg027
+        assume es:nothing, ss:nothing, ds:dseg, fs:nothing, gs:nothing
+
+include(`seg027.asm')
+
+seg027 ends
 
 ; Segment type: Pure data
 dseg segment para public 'DATA' use16

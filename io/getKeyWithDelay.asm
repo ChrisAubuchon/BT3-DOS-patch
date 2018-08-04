@@ -11,7 +11,7 @@ getKeyWithDelay proc far
 	jl	l_return
 
 	mov	ax, [bp+delayTime]
-	add	ax, g_tockClicks
+	add	ax, g_clockTicks
 	mov	[bp+var_2], ax
 	CALL(mouse_draw, near)
 
@@ -74,7 +74,7 @@ l_doTimeEvents:
 	CALL(doRealtimeEvents, near)
 	CALL(party_print, near)
 	mov	ax, [bp+var_2]
-	cmp	g_tockClicks, ax
+	cmp	g_clockTicks, ax
 	jl	short loc_1550B
 	call	far ptr	gfx_disableMouseIcon
 	jmp	short l_return

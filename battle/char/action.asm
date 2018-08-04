@@ -7,7 +7,7 @@ bat_charAction proc far
 	FUNC_ENTER
 
 	mov	bx, [bp+slotNumber]
-	mov	gs:bat_charPriority[bx], 0
+	mov	gs:g_battleCharacterPriorities[bx], 0
 	CHARINDEX(ax, STACKVAR(slotNumber), bx)
 	cmp	byte ptr gs:party._name[bx], 0
 	jz	l_return

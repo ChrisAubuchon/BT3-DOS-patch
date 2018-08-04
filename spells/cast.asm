@@ -16,8 +16,8 @@ spell_cast proc	far
 	mov	g_curSpellNumber, ax
 	mov	ax, 1
 	push	ax
-	push	gs:mapDataSeg
-	push	gs:mapDataOff
+	push	word ptr gs:g_mapData+2
+	push	word ptr gs:g_mapData
 	CALL(vm_execute)
 	or	ax, ax
 	jnz	l_return

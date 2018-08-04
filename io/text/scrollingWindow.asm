@@ -1,4 +1,3 @@
-; DWORD - arg_0 & arg_2
 ; Attributes: bp-based frame
 
 text_scrollingWindow proc far
@@ -19,8 +18,7 @@ text_scrollingWindow proc far
 	var_6= word ptr	-6
 	var_4= word ptr	-4
 	var_2= word ptr	-2
-	arg_0= word ptr	 6
-	arg_2= word ptr	 8
+	arg_0= dword ptr	 6
 	arg_4= dword ptr  0Ah
 	itemCount= word ptr	 0Eh
 
@@ -41,9 +39,8 @@ loc_1597F:
 
 loc_15988:
 	call	far ptr	gfx_disableMouseIcon
-	push	[bp+arg_2]
-	push	[bp+arg_0]
-	PRINTSTRING(true)
+	PUSH_STACK_DWORD(arg_0)
+	PRINTSTRING(clear)
 
 	mov	al, gs:txt_numLines
 	sub	ah, ah

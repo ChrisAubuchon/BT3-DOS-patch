@@ -26,19 +26,16 @@ _sp_useWeapon proc far
 	mov	al, gs:party.inventory.itemNo[bx]
 	mov	[bp+itemNumber], ax
 	mov	[bp+var_10], 31
-	jmp	short loc_2259F
 loc_2259C:
-	dec	[bp+var_10]
-loc_2259F:
 	cmp	[bp+var_10], 0
 	jge	short loc_225A8
-	jmp	loc_22632
+	jmp	l_return
 loc_225A8:
 	mov	bx, [bp+var_10]
 	mov	al, g_useableWeaponList[bx]
 	sub	ah, ah
 	cmp	ax, [bp+itemNumber]
-	jnz	short loc_2262F
+	jnz	short l_next
 	cmp	bx, 23
 	jge	short loc_225C0
 	mov	ax, offset s_castsWeapon
@@ -86,9 +83,10 @@ loc_225C3:
 	pop	si
 	push	[bp+spellCaster]
 	CALL(bat_doBreathAttack, near)
-loc_2262F:
+l_next:
+	dec	[bp+var_10]
 	jmp	loc_2259C
-loc_22632:
+l_return:
 	pop	si
 	pop	di
 	FUNC_EXIT

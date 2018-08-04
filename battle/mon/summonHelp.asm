@@ -26,7 +26,7 @@ bat_monSummonHelp proc far
 	jnb	short l_noHelp
 
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	and	al, 1Fh
 	cmp	al, 1Fh
 	jz	short l_noHelp
@@ -47,14 +47,14 @@ loc_1B5B0:
 	push	word ptr [bp+stringBufferP]
 	STRCAT(stringBufferP)
 	MONINDEX(ax, STACKVAR(slotNumber), si)
-	inc	gs:monGroups.groupSize[si]
-	mov	al, gs:monGroups.hpDice[si]
+	inc	gs:g_monGroups.groupSize[si]
+	mov	al, gs:g_monGroups.hpDice[si]
 	sub	ah, ah
 	push	ax
 	CALL(randomYdX, near)
-	mov	cx, gs:monGroups.hpBase[si]
+	mov	cx, gs:g_monGroups.hpBase[si]
 	add	cx, ax
-	mov	bl, gs:monGroups.groupSize[si]
+	mov	bl, gs:g_monGroups.groupSize[si]
 	and	bx, 1Fh
 	shl	bx, 1
 	mov	ax, [bp+slotNumber]
@@ -64,7 +64,7 @@ loc_1B5B0:
 	add	bx, ax
 	mov	gs:g_monHpList[bx], dx
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	mov	bl, gs:monGroups.groupSize[bx]
+	mov	bl, gs:g_monGroups.groupSize[bx]
 	and	bx, 1Fh
 	shl	bx, 1
 	mov	ax, [bp+slotNumber]

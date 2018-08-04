@@ -9,7 +9,7 @@ bat_monDamageHp proc far
 	FUNC_ENTER(4)
 
 	MONINDEX(ax, STACKVAR(slotNumber), bx)
-	mov	al, gs:monGroups.groupSize[bx]
+	mov	al, gs:g_monGroups.groupSize[bx]
 	sub	ah, ah
 	and	ax, 1Fh
 	mov	[bp+groupSize],	ax

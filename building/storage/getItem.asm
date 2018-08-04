@@ -1,17 +1,14 @@
 ; Attributes: bp-based frame
 
-; DWORD - var_140 & var_142
-
 storage_getItem proc far
 
 	itemListP= word ptr -372h
 	itemList= word ptr -302h
-	var_142= word ptr -142h
-	var_140= word ptr -140h
+	stringBufferP= dword ptr -142h
 	itemListLength= word ptr -13Eh
 	var_13C= word ptr -13Ch
 	var_13A= word ptr -13Ah
-	var_138= word ptr -138h
+	stringBuffer= word ptr -138h
 	var_38=	word ptr -38h
 	arg_0= word ptr	 6
 
@@ -29,29 +26,21 @@ loc_14A05:
 	jz	l_empty
 
 	PUSH_OFFSET(s_would)
-	PUSH_STACK_ADDRESS(var_138)
-	STRCAT
-	mov	[bp+var_142], ax
-	mov	[bp+var_140], dx
+	PUSH_STACK_ADDRESS(stringBuffer)
+	STRCAT(stringBufferP)
 	CHARINDEX(ax, STACKVAR(arg_0), bx)
 	lea	ax, party._name[bx]
 	mov	dx, seg	seg027
 	push	dx
 	push	ax
-	push	[bp+var_140]
-	push	[bp+var_142]
-	STRCAT
-	mov	[bp+var_142], ax
-	mov	[bp+var_140], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	PUSH_OFFSET(s_likeToPickup)
-	push	dx
-	push	[bp+var_142]
-	STRCAT
-	mov	[bp+var_142], ax
-	mov	[bp+var_140], dx
+	PUSH_STACK_DWORD(stringBufferP)
+	STRCAT(stringBufferP)
 	push	[bp+itemListLength]
 	PUSH_STACK_ADDRESS(itemListP)
-	PUSH_STACK_ADDRESS(var_138)
+	PUSH_STACK_ADDRESS(stringBuffer)
 	CALL(text_scrollingWindow)
 	mov	[bp+var_13A], ax
 	or	ax, ax

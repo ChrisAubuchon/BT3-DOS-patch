@@ -20,7 +20,7 @@ chest_doTrap proc	far
 	mov	al, g_chestTrapFlags[bx]
 	sub	ah, ah
 	and	ax, 7Fh
-	mov	gs:specialAttackVal, ax
+	mov	gs:g_specialAttackValue, ax
 	mov	ax, [bp+arg_2]
 	mov	gs:g_damageAmount, ax
 	sub	ax, ax
