@@ -4752,7 +4752,7 @@ align 2
 	mov	dh, 1
 	jmp	short loc_2A9D6
 
-sub_2A9D4 proc far
+lib_getc proc far
 	mov	dh, 8
 loc_2A9D6::
 	mov	ax, word_4F900
@@ -4766,7 +4766,7 @@ loc_2A9E5:
 	mov	ah, 0
 locret_2A9EA:
 	retf
-sub_2A9D4 endp
+lib_getc endp
 
 align 2
 ; Attributes: bp-based frame

@@ -49,7 +49,7 @@ loc_262AB:
 	CALL(printf)
 	PUSH_OFFSET(s_videoQuestion)
 	CALL(printf)
-	CALL(sub_2A9D4)
+	CALL(lib_getc)
 	mov	[bp+var_4], ax
 	cmp	ax, '1'	
 	jl	short loc_2628C
@@ -99,7 +99,7 @@ loc_26359:
 	CALL(printf)
 	PUSH_OFFSET(s_soundPrompt)
 	CALL(printf)
-	CALL(sub_2A9D4)
+	CALL(lib_getc)
 	mov	[bp+var_4], ax
 	cmp	ax, '1'	
 	jl	loc_2633A

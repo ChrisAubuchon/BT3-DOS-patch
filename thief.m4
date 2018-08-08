@@ -875,7 +875,7 @@ include(`seg023.asm')
 
 seg023 ends
 
-include seg024.asm
+include(`seg024.asm')
 include seg025.asm
 include seg026.asm
 
